@@ -31,7 +31,7 @@ include '../business/zonaCuerpoBusiness.php';
 
             <tbody>
                 <tr>
-                    <form method="post" action="../action/zonaCuerpoAction.php">
+                    <form method="post" action="../action/zonaCuerpoAction.php" onsubmit="return confirm('¿Estás seguro de que deseas crear este nuevo registro?');">
                         <td style="padding: 8px;">
                             <input type="text" name="nombre" placeholder="Ej: Pecho" required style="width: 95%;">
                         </td>
@@ -70,8 +70,9 @@ include '../business/zonaCuerpoBusiness.php';
                     echo '</td>';
 
                     echo '<td style="padding: 8px;">';
-                    echo '<input type="submit" value="Actualizar" name="update"> ';
-                    echo '<input type="submit" value="Eliminar" name="delete">';
+                    // Mensajes de confirmación añadidos aquí
+                    echo '<input type="submit" value="Actualizar" name="update" onclick="return confirm(\'¿Estás seguro de que deseas actualizar este registro?\');"> ';
+                    echo '<input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.\');">';
                     echo '</td>';
 
                     echo '</form>';

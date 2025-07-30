@@ -21,6 +21,7 @@ class Data {
                 $this->db = "gimnasio_db";
                 break;
 
+
             default:
                  $this->isActive = false;
       			 $this->server = "x.x.x.x";
