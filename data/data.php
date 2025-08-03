@@ -7,6 +7,7 @@ class Data {
     public $password;
     public $db;
     public $connection;
+    public $port;
     public $isActive;
 
     public function __construct() {
@@ -24,10 +25,11 @@ class Data {
 
             default:
                  $this->isActive = false;
-      			 $this->server = "x.x.x.x";
-      			 $this->user = "xxxxxxx";
-      			 $this->password = "xxxxxxx";
-      			 $this->db = "xxxxxxxxxx";
+      			 $this->server = "trolley.proxy.rlwy.net";
+      			 $this->user = "root";
+      			 $this->password = "iWhsTZUYVbbGunlbHOURKukfYwliQNiq";
+      			 $this->db = "railway";
+      			 $this->port = 43809;
                 break;
         }
     }

@@ -5,10 +5,15 @@ include '../domain/zonaCuerpo.php';
 
 class ZonaCuerpoData extends Data {
 
+    /**
+     * Inserta una nueva zona del cuerpo en la base de datos.
+     */
     public function insertarTBZonaCuerpo($zonaCuerpo) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        // Conexión con el puerto especificado
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
+        // Obtener el siguiente ID disponible
         $queryGetLastId = "SELECT MAX(idzonacuerpo) AS idzonacuerpo FROM tbzonacuerpo";
         $resultId = mysqli_query($conn, $queryGetLastId);
         $nextId = 1;
@@ -19,6 +24,7 @@ class ZonaCuerpoData extends Data {
             }
         }
 
+        // Consulta de inserción
         $queryInsert = "INSERT INTO tbzonacuerpo VALUES (" . $nextId . ",'" .
                 $zonaCuerpo->getNombreZonaCuerpo() . "','" .
                 $zonaCuerpo->getDescripcionZonaCuerpo() . "'," .
@@ -29,10 +35,15 @@ class ZonaCuerpoData extends Data {
         return $result;
     }
 
+    /**
+     * Actualiza una zona del cuerpo existente.
+     */
     public function actualizarTBZonaCuerpo($zonaCuerpo) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        // CORRECCIÓN: Se añadió el puerto a la conexión.
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
+        // Consulta de actualización
         $queryUpdate = "UPDATE tbzonacuerpo SET nombrezonacuerpo='" . $zonaCuerpo->getNombreZonaCuerpo() .
                 "', descripcionzonacuerpo='" . $zonaCuerpo->getDescripcionZonaCuerpo() .
                 "', activozonacuerpo=" . $zonaCuerpo->getActivoZonaCuerpo() .
@@ -43,21 +54,34 @@ class ZonaCuerpoData extends Data {
         return $result;
     }
 
+    /**
+     * Elimina una zona del cuerpo por su ID.
+     */
     public function eliminarTBZonaCuerpo($idZonaCuerpo) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        // CORRECCIÓN: Se añadió el puerto a la conexión.
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
+
+        // Consulta de eliminación
         $queryDelete = "DELETE from tbzonacuerpo where idzonacuerpo=" . $idZonaCuerpo . ";";
         $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
     }
 
+    /**
+     * Obtiene todas las zonas del cuerpo de la base de datos.
+     */
     public function getAllTBZonaCuerpo() {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        // CORRECCIÓN: Se añadió el puerto a la conexión.
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
+
+        // Consulta de selección
         $querySelect = "SELECT * FROM tbzonacuerpo;";
         $result = mysqli_query($conn, $querySelect);
         mysqli_close($conn);
+
         $zonasCuerpo = [];
         while ($row = mysqli_fetch_array($result)) {
             $currentZonaCuerpo = new ZonaCuerpo($row['idzonacuerpo'], $row['nombrezonacuerpo'], $row['descripcionzonacuerpo'], $row['activozonacuerpo']);

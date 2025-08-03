@@ -2,6 +2,10 @@
 
 include '../business/zonaCuerpoBusiness.php';
 
+// Define la ruta base para la redirección.
+// Asegúrate de que '/paradigmas/' sea la carpeta raíz de tu proyecto en htdocs.
+$redirect_path = '/paradigmas/view/zonaCuerpoView.php';
+
 if (isset($_POST['update'])) {
     if (isset($_POST['idZonaCuerpo']) && isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['activo'])) {
         if (!empty($_POST['nombre']) && !empty($_POST['descripcion'])) {
@@ -9,15 +13,16 @@ if (isset($_POST['update'])) {
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $result = $zonaCuerpoBusiness->actualizarTBZonaCuerpo($zonaCuerpo);
             if ($result == 1) {
-                header("location: ../view/zonaCuerpoView.php?success=updated");
+                // CORRECCIÓN: Redirigir al archivo PHP correcto.
+                header("location: " . $redirect_path . "?success=updated");
             } else {
-                header("location: ../view/zonaCuerpoView.php?error=dbError");
+                header("location: " . $redirect_path . "?error=dbError");
             }
         } else {
-            header("location: ../view/zonaCuerpoView.php?error=emptyField");
+            header("location: " . $redirect_path . "?error=emptyField");
         }
     } else {
-        header("location: ../view/zonaCuerpoView.php?error=error");
+        header("location: " . $redirect_path . "?error=error");
     }
 }
 else if (isset($_POST['delete'])) {
@@ -25,12 +30,13 @@ else if (isset($_POST['delete'])) {
         $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
         $result = $zonaCuerpoBusiness->eliminarTBZonaCuerpo($_POST['idZonaCuerpo']);
         if ($result == 1) {
-            header("location: ../view/zonaCuerpoView.php?success=deleted");
+            // CORRECCIÓN: Redirigir al archivo PHP correcto.
+            header("location: " . $redirect_path . "?success=deleted");
         } else {
-            header("location: ../view/zonaCuerpoView.php?error=dbError");
+            header("location: " . $redirect_path . "?error=dbError");
         }
     } else {
-        header("location: ../view/zonaCuerpoView.php?error=error");
+        header("location: " . $redirect_path . "?error=error");
     }
 }
 else if (isset($_POST['create'])) {
@@ -40,15 +46,16 @@ else if (isset($_POST['create'])) {
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $result = $zonaCuerpoBusiness->insertarTBZonaCuerpo($zonaCuerpo);
             if ($result == 1) {
-                header("location: ../view/zonaCuerpoView.php?success=inserted");
+                // CORRECCIÓN: Redirigir al archivo PHP correcto.
+                header("location: " . $redirect_path . "?success=inserted");
             } else {
-                header("location: ../view/zonaCuerpoView.php?error=dbError");
+                header("location: " . $redirect_path . "?error=dbError");
             }
         } else {
-            header("location: ../view/zonaCuerpoView.php?error=emptyField");
+            header("location: " . $redirect_path . "?error=emptyField");
         }
     } else {
-        header("location: ../view/zonaCuerpoView.php?error=error");
+        header("location: " . $redirect_path . "?error=error");
     }
 }
 ?>
