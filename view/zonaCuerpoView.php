@@ -1,5 +1,5 @@
 <?php
-include 'business/zonaCuerpoBusiness.php';
+include '../business/zonaCuerpoBusiness.php';
 ?>
 <!DOCTYPE html>
 <html lang="es">
