@@ -9,15 +9,15 @@ if (isset($_POST['update'])) {
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $result = $zonaCuerpoBusiness->actualizarTBZonaCuerpo($zonaCuerpo);
             if ($result == 1) {
-                header("location: ../view/zonaCuerpoView.php?success=updated");
+                header("location: /zonas-cuerpo?success=updated");
             } else {
-                header("location: ../view/zonaCuerpoView.php?error=dbError");
+                header("location: /zonas-cuerpo?error=dbError");
             }
         } else {
-            header("location: ../view/zonaCuerpoView.php?error=emptyField");
+            header("location: /zonas-cuerpo?error=emptyField");
         }
     } else {
-        header("location: ../view/zonaCuerpoView.php?error=error");
+        header("location: /zonas-cuerpo?error=error");
     }
 }
 else if (isset($_POST['delete'])) {
@@ -25,12 +25,12 @@ else if (isset($_POST['delete'])) {
         $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
         $result = $zonaCuerpoBusiness->eliminarTBZonaCuerpo($_POST['idZonaCuerpo']);
         if ($result == 1) {
-            header("location: ../view/zonaCuerpoView.php?success=deleted");
+            header("location: /zonas-cuerpo?success=deleted");
         } else {
-            header("location: ../view/zonaCuerpoView.php?error=dbError");
+            header("location: /zonas-cuerpo?error=dbError");
         }
     } else {
-        header("location: ../view/zonaCuerpoView.php?error=error");
+        header("location: /zonas-cuerpo?error=error");
     }
 }
 else if (isset($_POST['create'])) {
@@ -40,15 +40,15 @@ else if (isset($_POST['create'])) {
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $result = $zonaCuerpoBusiness->insertarTBZonaCuerpo($zonaCuerpo);
             if ($result == 1) {
-                header("location: ../view/zonaCuerpoView.php?success=inserted");
+                header("location: /zonas-cuerpo?success=inserted");
             } else {
-                header("location: ../view/zonaCuerpoView.php?error=dbError");
+                header("location: /zonas-cuerpo?error=dbError");
             }
         } else {
-            header("location: ../view/zonaCuerpoView.php?error=emptyField");
+            header("location: /zonas-cuerpo?error=emptyField");
         }
     } else {
-        header("location: ../view/zonaCuerpoView.php?error=error");
+        header("location: /zonas-cuerpo?error=error");
     }
 }
 ?>
