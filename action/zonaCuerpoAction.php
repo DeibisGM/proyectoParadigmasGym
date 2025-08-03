@@ -4,7 +4,7 @@ include '../business/zonaCuerpoBusiness.php';
 
 // Define la ruta base para la redirección.
 // Asegúrate de que '/paradigmas/' sea la carpeta raíz de tu proyecto en htdocs.
-$redirect_path = '/paradigmas/view/zonaCuerpoView.php';
+$redirect_path = '../view/zonaCuerpoView.php';
 
 if (isset($_POST['update'])) {
     if (isset($_POST['idZonaCuerpo']) && isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['activo'])) {
