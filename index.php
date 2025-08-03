@@ -10,4 +10,8 @@
     echo "<a href='view/instructorView.php'>
                 <button>Ir a Instructores</button>
               </a>";
+
+    echo "<a href='view/clienteView.php'>
+                    <button>Ir a clientes</button>
+                  </a>";
 ?>
