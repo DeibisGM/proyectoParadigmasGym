@@ -3,8 +3,11 @@
 
     echo "</br>";
 
-    // Opción 2: Un botón que funciona como enlace
     echo "<a href='view/zonaCuerpoView.php'>
             <button>Ir a Zonas del Cuerpo</button>
           </a>";
+
+    echo "<a href='view/instructorView.php'>
+                <button>Ir a Instructores</button>
+              </a>";
 ?>
