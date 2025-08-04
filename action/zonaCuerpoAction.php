@@ -2,8 +2,6 @@
 
 include '../business/zonaCuerpoBusiness.php';
 
-// Define la ruta base para la redirección.
-// Asegúrate de que '/paradigmas/' sea la carpeta raíz de tu proyecto en htdocs.
 $redirect_path = '../view/zonaCuerpoView.php';
 
 if (isset($_POST['update'])) {
@@ -13,7 +11,7 @@ if (isset($_POST['update'])) {
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $result = $zonaCuerpoBusiness->actualizarTBZonaCuerpo($zonaCuerpo);
             if ($result == 1) {
-                // CORRECCIÓN: Redirigir al archivo PHP correcto.
+
                 header("location: " . $redirect_path . "?success=updated");
             } else {
                 header("location: " . $redirect_path . "?error=dbError");
@@ -30,7 +28,7 @@ else if (isset($_POST['delete'])) {
         $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
         $result = $zonaCuerpoBusiness->eliminarTBZonaCuerpo($_POST['idZonaCuerpo']);
         if ($result == 1) {
-            // CORRECCIÓN: Redirigir al archivo PHP correcto.
+
             header("location: " . $redirect_path . "?success=deleted");
         } else {
             header("location: " . $redirect_path . "?error=dbError");
@@ -46,7 +44,7 @@ else if (isset($_POST['create'])) {
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $result = $zonaCuerpoBusiness->insertarTBZonaCuerpo($zonaCuerpo);
             if ($result == 1) {
-                // CORRECCIÓN: Redirigir al archivo PHP correcto.
+
                 header("location: " . $redirect_path . "?success=inserted");
             } else {
                 header("location: " . $redirect_path . "?error=dbError");
