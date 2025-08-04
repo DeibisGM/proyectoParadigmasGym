@@ -14,4 +14,8 @@
     echo "<a href='view/clienteView.php'>
                     <button>Ir a clientes</button>
                   </a>";
+
+    echo "<a href='view/datosClinicosView.php'>
+              <button>Ir a datos clinicos</button>
+          </a>";
 ?>
