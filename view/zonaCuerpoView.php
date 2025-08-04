@@ -12,7 +12,7 @@ include '../business/zonaCuerpoBusiness.php';
 
     <header>
         <h2>Gym - Zonas del Cuerpo</h2>
-        <a href="/proyectoParadigmasGym/index.php">Volver al Inicio</a>
+        <a href="../index.php">Volver al Inicio</a>
     </header>
 
     <hr>
@@ -34,16 +34,13 @@ include '../business/zonaCuerpoBusiness.php';
                 <tr>
                     <form method="post" action="../action/zonaCuerpoAction.php" onsubmit="return confirm('¿Estás seguro de que deseas crear este nuevo registro?');">
                         <td style="padding: 8px;">
-                            <input type="text" name="nombre" placeholder="Ej: Pecho" required style="width: 95%;">
+                            <input type="text" name="tbzonacuerponombre" placeholder="Ej: Pecho" required style="width: 95%;">
                         </td>
                         <td style="padding: 8px;">
-                            <input type="text" name="descripcion" placeholder="Ej: Músculos pectorales" required style="width: 95%;">
+                            <input type="text" name="tbzonacuerpodescripcion" placeholder="Ej: Músculos pectorales" required style="width: 95%;">
                         </td>
                         <td style="padding: 8px;">
-                            <select name="activo">
-                                <option value="1">Sí</option>
-                                <option value="0">No</option>
-                            </select>
+                            <input type="hidden" name="tbzonacuerpoactivo" value="1">
                         </td>
                         <td style="padding: 8px;">
                             <input type="submit" value="Crear" name="create">
@@ -59,12 +56,12 @@ include '../business/zonaCuerpoBusiness.php';
                     echo '<tr>';
                     echo '<form method="post" action="../action/zonaCuerpoAction.php">';
 
-                    echo '<input type="hidden" name="idZonaCuerpo" value="' . $current->getIdZonaCuerpo() . '">';
+                    echo '<input type="hidden" name="tbzonacuerpoid" value="' . $current->getIdZonaCuerpo() . '">';
 
-                    echo '<td style="padding: 8px;"><input type="text" name="nombre" value="' . $current->getNombreZonaCuerpo() . '" style="width: 95%;"></td>';
-                    echo '<td style="padding: 8px;"><input type="text" name="descripcion" value="' . $current->getDescripcionZonaCuerpo() . '" style="width: 95%;"></td>';
+                    echo '<td style="padding: 8px;"><input type="text" name="tbzonacuerponombre" value="' . $current->getNombreZonaCuerpo() . '" style="width: 95%;"></td>';
+                    echo '<td style="padding: 8px;"><input type="text" name="tbzonacuerpodescripcion" value="' . $current->getDescripcionZonaCuerpo() . '" style="width: 95%;"></td>';
                     echo '<td style="padding: 8px;">';
-                    echo '<select name="activo">';
+                    echo '<select name="tbzonacuerpoactivo">';
                     echo '<option ' . ($current->getActivoZonaCuerpo() == 1 ? "selected" : "") . ' value="1">Sí</option>';
                     echo '<option ' . ($current->getActivoZonaCuerpo() == 0 ? "selected" : "") . ' value="0">No</option>';
                     echo '</select>';

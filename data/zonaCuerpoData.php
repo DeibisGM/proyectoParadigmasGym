@@ -14,7 +14,7 @@ class ZonaCuerpoData extends Data {
         $conn->set_charset('utf8');
 
         // Obtener el siguiente ID disponible
-        $queryGetLastId = "SELECT MAX(idzonacuerpo) AS idzonacuerpo FROM tbzonacuerpo";
+        $queryGetLastId = "SELECT MAX(tbzonacuerpoid) AS idzonacuerpo FROM tbzonacuerpo";
         $resultId = mysqli_query($conn, $queryGetLastId);
         $nextId = 1;
 
@@ -44,10 +44,10 @@ class ZonaCuerpoData extends Data {
         $conn->set_charset('utf8');
 
         // Consulta de actualización
-        $queryUpdate = "UPDATE tbzonacuerpo SET nombrezonacuerpo='" . $zonaCuerpo->getNombreZonaCuerpo() .
-                "', descripcionzonacuerpo='" . $zonaCuerpo->getDescripcionZonaCuerpo() .
-                "', activozonacuerpo=" . $zonaCuerpo->getActivoZonaCuerpo() .
-                " WHERE idzonacuerpo=" . $zonaCuerpo->getIdZonaCuerpo() . ";";
+        $queryUpdate = "UPDATE tbzonacuerpo SET tbzonacuerponombre='" . $zonaCuerpo->getNombreZonaCuerpo() .
+                "', tbzonacuerpodescripcion='" . $zonaCuerpo->getDescripcionZonaCuerpo() .
+                "', tbzonacuerpoactivo=" . $zonaCuerpo->getActivoZonaCuerpo() .
+                " WHERE tbzonacuerpoid=" . $zonaCuerpo->getIdZonaCuerpo() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
@@ -63,7 +63,7 @@ class ZonaCuerpoData extends Data {
         $conn->set_charset('utf8');
 
         // Consulta de eliminación
-        $queryDelete = "DELETE from tbzonacuerpo where idzonacuerpo=" . $idZonaCuerpo . ";";
+        $queryDelete = "DELETE from tbzonacuerpo where tbzonacuerpoid=" . $idZonaCuerpo . ";";
         $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
@@ -84,7 +84,7 @@ class ZonaCuerpoData extends Data {
 
         $zonasCuerpo = [];
         while ($row = mysqli_fetch_array($result)) {
-            $currentZonaCuerpo = new ZonaCuerpo($row['idzonacuerpo'], $row['nombrezonacuerpo'], $row['descripcionzonacuerpo'], $row['activozonacuerpo']);
+            $currentZonaCuerpo = new ZonaCuerpo($row['tbzonacuerpoid'], $row['tbzonacuerponombre'], $row['tbzonacuerpodescripcion'], $row['tbzonacuerpoactivo']);
             array_push($zonasCuerpo, $currentZonaCuerpo);
         }
         return $zonasCuerpo;

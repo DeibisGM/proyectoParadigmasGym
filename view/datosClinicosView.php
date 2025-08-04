@@ -118,7 +118,7 @@ if (!class_exists('DatosClinicosBusiness')) {
 
     <header>
         <h2>Gym - Datos Clínicos</h2>
-        <a href="/proyectoParadigmasGym/index.php">Volver al Inicio</a>
+        <a href="../index.php">Volver al Inicio</a>
     </header>
 
     <hr>

@@ -32,7 +32,7 @@ include '../business/clienteBusiness.php';
 
 <header>
     <h2>Gym - Clientes</h2>
-    <a href="/proyectoParadigmasGym/index.php">Volver al Inicio</a>
+    <a href="../index.php">Volver al Inicio</a>
 </header>
 
 <hr>
