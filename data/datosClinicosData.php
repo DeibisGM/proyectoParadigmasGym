@@ -58,8 +58,7 @@ class DatosClinicosData extends Data {
                 tbdatosclinicosdescripcionlesion='" . mysqli_real_escape_string($conn, $datosClinicos->getTbdatosclinicosdescripcionlesion()) . "',
                 tbdatosclinicosdiscapacidad=" . $datosClinicos->getTbdatosclinicosdiscapacidad() . ",
                 tbdatosclinicosdescripciondiscapacidad='" . mysqli_real_escape_string($conn, $datosClinicos->getTbdatosclinicosdescripciondiscapacidad()) . "',
-                tbdatosclinicosrestriccionmedica=" . $datosClinicos->getTbdatosclinicosrestriccionmedica() . ",
-                tbclientesid=" . $datosClinicos->getTbclientesid() . "
+                tbdatosclinicosrestriccionmedica=" . $datosClinicos->getTbdatosclinicosrestriccionmedica() . "
                 WHERE idtbdatosclinicos=" . $datosClinicos->getTbdatosclinicosid() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
@@ -88,7 +87,10 @@ class DatosClinicosData extends Data {
     public function obtenerTBDatosClinicos() {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $querySelect = "SELECT * FROM tbdatosclinicos;";
+
+        $querySelect = "SELECT dc.*, c.tbclientescarnet
+                       FROM tbdatosclinicos dc
+                       INNER JOIN tbclientes c ON dc.tbclientesid = c.tbclientesid;";
         $result = mysqli_query($conn, $querySelect);
 
         $datosClinicos = [];
@@ -99,6 +101,7 @@ class DatosClinicosData extends Data {
                 $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicosdiscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
                 $row['tbdatosclinicosrestriccionmedica'], $row['tbclientesid']
             );
+            $currentDatosClinicos->carnet = $row['tbclientescarnet'];
             array_push($datosClinicos, $currentDatosClinicos);
         }
 
@@ -146,6 +149,32 @@ class DatosClinicosData extends Data {
 
         mysqli_close($conn);
         return null;
+    }
+
+    public function obtenerTodosLosClientes() {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        $querySelect = "SELECT c.tbclientesid, c.tbclientescarnet, c.tbclientesnombre
+                       FROM tbclientes c
+                       LEFT JOIN tbdatosclinicos dc ON c.tbclientesid = dc.tbclientesid
+                       WHERE dc.tbclientesid IS NULL
+                       ORDER BY c.tbclientescarnet";
+
+        $result = mysqli_query($conn, $querySelect);
+        $clientes = [];
+
+        while ($row = mysqli_fetch_array($result)) {
+            $clientes[] = array(
+                'id' => $row['tbclientesid'],
+                'carnet' => $row['tbclientescarnet'],
+                'nombre' => $row['tbclientesnombre'],
+                'apellidos' => ''
+            );
+        }
+
+        mysqli_close($conn);
+        return $clientes;
     }
 }
 ?>

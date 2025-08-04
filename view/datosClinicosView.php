@@ -1,5 +1,5 @@
 <?php
-// CORREGIDO: Usar include_once para evitar redeclaraciones
+
 if (!class_exists('DatosClinicosBusiness')) {
     include_once '../business/datosClinicosBusiness.php';
 }
@@ -76,6 +76,11 @@ if (!class_exists('DatosClinicosBusiness')) {
         }
 
         function validarFormulario() {
+            const clienteSelect = document.getElementById('clienteSelect');
+            if (clienteSelect.value === '') {
+                alert('Debe seleccionar un cliente.');
+                return false;
+            }
             return confirm('¿Estás seguro de que deseas crear este registro de datos clínicos?');
         }
 
@@ -121,14 +126,35 @@ if (!class_exists('DatosClinicosBusiness')) {
     <main>
         <h2>Registrar Datos Clínicos</h2>
 
-        <div id="loading" class="loading">Procesando...</div>
+        <div id="loading" style="display: none;">Procesando...</div>
         <div id="message"></div>
 
         <form id="createForm" onsubmit="if(validarFormulario()) { return submitForm(this, 'create'); } else { return false; }">
             <input type="hidden" name="create" value="1">
 
-            <label>ID del Cliente:</label><br>
-            <input type="number" name="clienteId" required><br><br>
+            <label>Cliente:</label><br>
+            <select id="clienteSelect" name="clienteId" required>
+                <option value="">Seleccione un cliente</option>
+                <?php
+                try {
+                    $datosClinicosBusiness = new DatosClinicosBusiness();
+                    $clientesDisponibles = $datosClinicosBusiness->obtenerTodosLosClientes();
+
+                    if (empty($clientesDisponibles)) {
+                        echo '<option value="" disabled>No hay clientes disponibles</option>';
+                    } else {
+                        foreach ($clientesDisponibles as $cliente) {
+                            echo '<option value="' . htmlspecialchars($cliente['id']) . '">' .
+                                 htmlspecialchars($cliente['carnet']) . ' - ' .
+                                 htmlspecialchars($cliente['nombre']) .
+                                 '</option>';
+                        }
+                    }
+                } catch (Exception $e) {
+                    echo '<option value="" disabled>Error al cargar clientes</option>';
+                }
+                ?>
+            </select><br><br>
 
             <label>
                 <input type="checkbox" id="enfermedad" name="enfermedad" onchange="toggleConditionalField('enfermedad', 'otraEnfermedadDiv')">
@@ -181,7 +207,7 @@ if (!class_exists('DatosClinicosBusiness')) {
         <table border="1" style="width:100%; border-collapse: collapse;">
             <thead>
                 <tr>
-                    <th style="padding: 8px; text-align: left;">Cliente ID</th>
+                    <th style="padding: 8px; text-align: left;">Carnet Cliente</th>
                     <th style="padding: 8px; text-align: left;">Enfermedad</th>
                     <th style="padding: 8px; text-align: left;">Medicamento</th>
                     <th style="padding: 8px; text-align: left;">Lesión</th>
@@ -192,48 +218,58 @@ if (!class_exists('DatosClinicosBusiness')) {
             </thead>
             <tbody>
                 <?php
-                $datosClinicosBusiness = new DatosClinicosBusiness();
-                $allDatosClinicos = $datosClinicosBusiness->obtenerTBDatosClinicos();
+                try {
+                    $allDatosClinicos = $datosClinicosBusiness->obtenerTBDatosClinicos();
 
-                foreach ($allDatosClinicos as $current) {
-                    $id = $current->getTbdatosclinicosid();
-                    echo '<tr>';
-                    echo '<form class="table-form" onsubmit="return handleTableFormSubmit(this, event);">';
-                    echo '<input type="hidden" name="id" value="' . $id . '">';
+                    if (empty($allDatosClinicos)) {
+                        echo '<tr><td colspan="7" style="padding: 8px; text-align: center;">No hay datos clínicos registrados</td></tr>';
+                    } else {
+                        foreach ($allDatosClinicos as $current) {
+                            $id = $current->getTbdatosclinicosid();
+                            echo '<tr>';
+                            echo '<form class="table-form" onsubmit="return handleTableFormSubmit(this, event);">';
+                            echo '<input type="hidden" name="id" value="' . $id . '">';
+                            echo '<input type="hidden" name="clienteId" value="' . $current->getTbclientesid() . '">';
 
-                    echo '<td style="padding: 8px;"><input type="number" name="clienteId" value="' . $current->getTbclientesid() . '" required></td>';
+                            echo '<td style="padding: 8px;">';
+                            echo '<strong>' . htmlspecialchars(isset($current->carnet) ? $current->carnet : 'N/A') . '</strong>';
+                            echo '</td>';
 
-                    echo '<td style="padding: 8px;">';
-                    echo '<input type="checkbox" name="enfermedad" ' . ($current->getTbdatosclinicosenfermedad() ? 'checked' : '') . '> Sí<br>';
-                    echo '<textarea name="otraEnfermedad" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosotraenfermedad()) . '</textarea>';
-                    echo '</td>';
+                            echo '<td style="padding: 8px;">';
+                            echo '<input type="checkbox" name="enfermedad" ' . ($current->getTbdatosclinicosenfermedad() ? 'checked' : '') . '> Sí<br>';
+                            echo '<textarea name="otraEnfermedad" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosotraenfermedad()) . '</textarea>';
+                            echo '</td>';
 
-                    echo '<td style="padding: 8px;">';
-                    echo '<input type="checkbox" name="tomaMedicamento" ' . ($current->getTbdatosclinicostomamedicamento() ? 'checked' : '') . '> Sí<br>';
-                    echo '<textarea name="medicamento" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosmedicamento()) . '</textarea>';
-                    echo '</td>';
+                            echo '<td style="padding: 8px;">';
+                            echo '<input type="checkbox" name="tomaMedicamento" ' . ($current->getTbdatosclinicostomamedicamento() ? 'checked' : '') . '> Sí<br>';
+                            echo '<textarea name="medicamento" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosmedicamento()) . '</textarea>';
+                            echo '</td>';
 
-                    echo '<td style="padding: 8px;">';
-                    echo '<input type="checkbox" name="lesion" ' . ($current->getTbdatosclinicoslesion() ? 'checked' : '') . '> Sí<br>';
-                    echo '<textarea name="descripcionLesion" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosdescripcionlesion()) . '</textarea>';
-                    echo '</td>';
+                            echo '<td style="padding: 8px;">';
+                            echo '<input type="checkbox" name="lesion" ' . ($current->getTbdatosclinicoslesion() ? 'checked' : '') . '> Sí<br>';
+                            echo '<textarea name="descripcionLesion" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosdescripcionlesion()) . '</textarea>';
+                            echo '</td>';
 
-                    echo '<td style="padding: 8px;">';
-                    echo '<input type="checkbox" name="discapacidad" ' . ($current->getTbdatosclinicosdiscapacidad() ? 'checked' : '') . '> Sí<br>';
-                    echo '<textarea name="descripcionDiscapacidad" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosdescripciondiscapacidad()) . '</textarea>';
-                    echo '</td>';
+                            echo '<td style="padding: 8px;">';
+                            echo '<input type="checkbox" name="discapacidad" ' . ($current->getTbdatosclinicosdiscapacidad() ? 'checked' : '') . '> Sí<br>';
+                            echo '<textarea name="descripcionDiscapacidad" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosdescripciondiscapacidad()) . '</textarea>';
+                            echo '</td>';
 
-                    echo '<td style="padding: 8px;">';
-                    echo '<input type="checkbox" name="restriccionMedica" ' . ($current->getTbdatosclinicosrestriccionmedica() ? 'checked' : '') . '> Sí';
-                    echo '</td>';
+                            echo '<td style="padding: 8px;">';
+                            echo '<input type="checkbox" name="restriccionMedica" ' . ($current->getTbdatosclinicosrestriccionmedica() ? 'checked' : '') . '> Sí';
+                            echo '</td>';
 
-                    echo '<td style="padding: 8px;">';
-                    echo '<input type="submit" value="Actualizar" name="update"> ';
-                    echo '<input type="submit" value="Eliminar" name="delete">';
-                    echo '</td>';
+                            echo '<td style="padding: 8px;">';
+                            echo '<input type="submit" value="Actualizar" name="update"> ';
+                            echo '<input type="submit" value="Eliminar" name="delete">';
+                            echo '</td>';
 
-                    echo '</form>';
-                    echo '</tr>';
+                            echo '</form>';
+                            echo '</tr>';
+                        }
+                    }
+                } catch (Exception $e) {
+                    echo '<tr><td colspan="7" style="padding: 8px; text-align: center;">Error al cargar datos: ' . htmlspecialchars($e->getMessage()) . '</td></tr>';
                 }
                 ?>
             </tbody>
@@ -273,7 +309,6 @@ if (!class_exists('DatosClinicosBusiness')) {
     </footer>
 
     <script>
-        // Inicializa los campos condicionales al cargar la página
         document.addEventListener('DOMContentLoaded', function() {
             toggleConditionalField('enfermedad', 'otraEnfermedadDiv');
             toggleConditionalField('tomaMedicamento', 'medicamentoDiv');

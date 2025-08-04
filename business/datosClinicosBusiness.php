@@ -13,6 +13,10 @@ class DatosClinicosBusiness{
     }
 
     public function insertarTBDatosClinicos($datosClinicos){
+        $existeRegistro = $this->datosClinicosData->obtenerTBDatosClinicosPorCliente($datosClinicos->getTbclientesid());
+        if ($existeRegistro) {
+            return false;
+        }
         return $this->datosClinicosData->insertarTBDatosClinicos($datosClinicos);
     }
 
@@ -38,6 +42,15 @@ class DatosClinicosBusiness{
 
     public function obtenerTBDatosClinicosPorCliente($tbclientesid){
         return $this->datosClinicosData->obtenerTBDatosClinicosPorCliente($tbclientesid);
+    }
+
+    public function obtenerTodosLosClientes(){
+        return $this->datosClinicosData->obtenerTodosLosClientes();
+    }
+
+    public function existenDatosClinicosPorCliente($tbclientesid){
+        $datos = $this->datosClinicosData->obtenerTBDatosClinicosPorCliente($tbclientesid);
+        return $datos !== null;
     }
 
     public function validarDatosClinicos($enfermedad, $otraEnfermedad, $tomaMedicamento,
