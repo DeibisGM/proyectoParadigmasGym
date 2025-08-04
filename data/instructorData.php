@@ -6,10 +6,10 @@ include '../domain/instructor.php';
 class InstructorData extends Data {
 
     public function insertarTBInstructor($instructor) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryGetLastId = "SELECT MAX(instructorid) AS instructorid FROM tbinstructor";
+        $queryGetLastId = "SELECT MAX(tbinstructorid) AS tbinstructorid FROM tbinstructor";
         $resultId = mysqli_query($conn, $queryGetLastId);
         $nextId = 1;
 
@@ -32,15 +32,15 @@ class InstructorData extends Data {
     }
 
     public function actualizarTBInstructor($instructor) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbinstructor SET instructornombre='" . $instructor->getInstructorNombre() .
-                "', instructorTelefono='" . $instructor->getInstructorTelefono() .
-                "', instructorDireccion='" . $instructor->getInstructorDireccion() .
-                "', instructorCorreo='" . $instructor->getInstructorCorreo() .
-                "', instructorCuenta='" . $instructor->getInstructorCuenta() .
-                "' WHERE instructorId=" . $instructor->getInstructorId() . ";";
+        $queryUpdate = "UPDATE tbinstructor SET tbinstructornombre='" . $instructor->getInstructorNombre() .
+                "', tbinstructorTelefono='" . $instructor->getInstructorTelefono() .
+                "', tbinstructorDireccion='" . $instructor->getInstructorDireccion() .
+                "', tbinstructorCorreo='" . $instructor->getInstructorCorreo() .
+                "', tbinstructorCuenta='" . $instructor->getInstructorCuenta() .
+                "' WHERE tbinstructorId=" . $instructor->getInstructorId() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
@@ -48,17 +48,17 @@ class InstructorData extends Data {
     }
 
     public function eliminarTBInstructor($instructorId) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
         $queryDelete = "DELETE from tbinstructor
-    where instructorid=" . $instructorId . ";";
+    where tbinstructorId=" . $instructorId . ";";
         $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
     }
 
     public function getAllTBInstructor() {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db);
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
         $querySelect = "SELECT * FROM tbinstructor;";
         $result = mysqli_query($conn, $querySelect);
@@ -67,12 +67,12 @@ class InstructorData extends Data {
         $instructors = [];
         while ($row = mysqli_fetch_assoc($result)) {
             $instructors[] = new Instructor(
-                $row['instructorId'],
-                $row['instructorNombre'],
-                $row['instructorTelefono'],
-                $row['instructorDireccion'],
-                $row['instructorCorreo'],
-                $row['instructorCuenta']
+                $row['tbinstructorId'],
+                $row['tbinstructorNombre'],
+                $row['tbinstructorTelefono'],
+                $row['tbinstructorDireccion'],
+                $row['tbinstructorCorreo'],
+                $row['tbinstructorCuenta']
             );
         }
         return $instructors;

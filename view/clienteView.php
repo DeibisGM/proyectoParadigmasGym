@@ -8,6 +8,8 @@ include '../business/clienteBusiness.php';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gestión de Clientes</title>
 
+
+
     <script>
         function validarFormulario() {
             const nombre = document.forms["clienteForm"]["nombre"].value;

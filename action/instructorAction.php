@@ -2,12 +2,12 @@
 include '../business/instructorBusiness.php';
 
 if (isset($_POST['update'])) {
-    if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta'])) {
-        $nombre = trim($_POST['nombre']);
-        $telefono = trim($_POST['telefono']);
-        $direccion = trim($_POST['direccion']);
-        $correo = trim($_POST['correo']);
-        $cuenta = trim($_POST['cuenta']);
+    if (isset($_POST['tbinstructorid']) && isset($_POST['tbinstructornombre']) && isset($_POST['tbinstructortelefono']) && isset($_POST['tbinstructordireccion']) && isset($_POST['tbinstructorcorreo']) && isset($_POST['tbinstructorcuenta'])) {
+        $nombre = trim($_POST['tbinstructornombre']);
+        $telefono = trim($_POST['tbinstructortelefono']);
+        $direccion = trim($_POST['tbinstructordireccion']);
+        $correo = trim($_POST['tbinstructorcorreo']);
+        $cuenta = trim($_POST['tbinstructorcuenta']);
 
         // Validaciones
         if (empty($nombre) || empty($correo)) {
@@ -30,7 +30,7 @@ if (isset($_POST['update'])) {
             exit();
         }
 
-        $instructor = new Instructor($_POST['id'], $nombre, $telefono, $direccion, $correo, $cuenta);
+        $instructor = new Instructor($_POST['tbinstructorid'], $nombre, $telefono, $direccion, $correo, $cuenta);
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->actualizarTBInstructor($instructor);
 
@@ -44,9 +44,9 @@ if (isset($_POST['update'])) {
     }
 }
 else if (isset($_POST['delete'])) {
-    if (isset($_POST['id'])) {
+    if (isset($_POST['tbinstructorid'])) {
         $instructorBusiness = new InstructorBusiness();
-        $result = $instructorBusiness->eliminarTBInstructor($_POST['id']);
+        $result = $instructorBusiness->eliminarTBInstructor($_POST['tbinstructorid']);
         if ($result == 1) {
             header("location: ../view/instructorView.php?success=deleted");
         } else {
@@ -57,12 +57,12 @@ else if (isset($_POST['delete'])) {
     }
 }
 else if (isset($_POST['create'])) {
-    if (isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta'])) {
-        $nombre = trim($_POST['nombre']);
-        $telefono = trim($_POST['telefono']);
-        $direccion = trim($_POST['direccion']);
-        $correo = trim($_POST['correo']);
-        $cuenta = trim($_POST['cuenta']);
+    if (isset($_POST['tbinstructornombre']) && isset($_POST['tbinstructortelefono']) && isset($_POST['tbinstructordireccion']) && isset($_POST['tbinstructorcorreo']) && isset($_POST['tbinstructorcuenta'])) {
+        $nombre = trim($_POST['tbinstructornombre']);
+        $telefono = trim($_POST['tbinstructortelefono']);
+        $direccion = trim($_POST['tbinstructordireccion']);
+        $correo = trim($_POST['tbinstructorcorreo']);
+        $cuenta = trim($_POST['tbinstructorcuenta']);
 
         // Validaciones
         if (empty($nombre) || empty($correo)) {

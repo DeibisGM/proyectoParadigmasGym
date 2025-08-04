@@ -29,7 +29,9 @@
 
     <header>
         <h2>Gimnasio - Instructores</h2>
+        <a href="../index.php">Volver al Inicio</a>
     </header>
+
 
     <hr>
 
@@ -53,20 +55,20 @@
                 <tr>
                     <form method="post" action="../action/instructorAction.php" onsubmit="return validateForm()">
                         <td>
-                            <input type="text" name="nombre" placeholder="Ej: Juan Pérez" required
+                            <input type="text" name="tbinstructornombre" placeholder="Ej: Juan Pérez" required
                                    pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" title="Solo letras y espacios" style="width: 95%;">
                         </td>
                         <td>
-                            <input type="text" name="telefono" placeholder="Ej: 8888-8888" style="width: 95%;">
+                            <input type="text" name="tbinstructortelefono" placeholder="Ej: 8888-8888" style="width: 95%;">
                         </td>
                         <td>
-                            <input type="text" name="direccion" placeholder="Ej: San José, Costa Rica" style="width: 95%;">
+                            <input type="text" name="tbinstructordireccion" placeholder="Ej: San José, Costa Rica" style="width: 95%;">
                         </td>
                         <td>
-                            <input type="email" name="correo" placeholder="Ej: juan@email.com" required style="width: 95%;">
+                            <input type="email" name="tbinstructorcorreo" placeholder="Ej: juan@email.com" required style="width: 95%;">
                         </td>
                         <td>
-                            <input type="text" name="cuenta" placeholder="Ej: ESXX XXXX XXXX XX" style="width: 95%;">
+                            <input type="text" name="tbinstructorcuenta" placeholder="Ej: ESXX XXXX XXXX XX" style="width: 95%;">
                         </td>
                         <td>
                             <input type="submit" value="Crear" name="create">
@@ -88,13 +90,13 @@ if (empty($instructores)) {
     foreach ($instructores as $instructor) {
         echo '<tr>';
         echo '<form method="post" action="../action/instructorAction.php">';
-        echo '<input type="hidden" name="id" value="'.$instructor->getInstructorId().'">';
+        echo '<input type="hidden" name="tbinstructorid" value="'.$instructor->getInstructorId().'">';
 
-        echo '<td><input type="text" name="nombre" value="'.htmlspecialchars($instructor->getInstructorNombre()).'" required></td>';
-        echo '<td><input type="text" name="telefono" value="'.htmlspecialchars($instructor->getInstructorTelefono()).'"></td>';
-        echo '<td><input type="text" name="direccion" value="'.htmlspecialchars($instructor->getInstructorDireccion()).'"></td>';
-        echo '<td><input type="email" name="correo" value="'.htmlspecialchars($instructor->getInstructorCorreo()).'" required></td>';
-        echo '<td><input type="text" name="cuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta()).'"></td>';
+        echo '<td><input type="text" name="tbinstructornombre" value="'.htmlspecialchars($instructor->getInstructorNombre()).'" required></td>';
+        echo '<td><input type="text" name="tbinstructortelefono" value="'.htmlspecialchars($instructor->getInstructorTelefono()).'"></td>';
+        echo '<td><input type="text" name="tbinstructordireccion" value="'.htmlspecialchars($instructor->getInstructorDireccion()).'"></td>';
+        echo '<td><input type="email" name="tbinstructorcorreo" value="'.htmlspecialchars($instructor->getInstructorCorreo()).'" required></td>';
+        echo '<td><input type="text" name="tbinstructorcuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta()).'"></td>';
 
         echo '<td>
                 <input type="submit" value="Actualizar" name="update">
