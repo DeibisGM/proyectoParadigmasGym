@@ -11,7 +11,8 @@ include '../business/zonaCuerpoBusiness.php';
 <body>
 
     <header>
-        <h2>Gimnasio - Zonas del Cuerpo</h2>
+        <h2>Gym - Zonas del Cuerpo</h2>
+        <a href="/proyectoParadigmasGym/index.php">Volver al Inicio</a>
     </header>
 
     <hr>
@@ -70,7 +71,7 @@ include '../business/zonaCuerpoBusiness.php';
                     echo '</td>';
 
                     echo '<td style="padding: 8px;">';
-                    // Mensajes de confirmación añadidos aquí
+
                     echo '<input type="submit" value="Actualizar" name="update" onclick="return confirm(\'¿Estás seguro de que deseas actualizar este registro?\');"> ';
                     echo '<input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.\');">';
                     echo '</td>';

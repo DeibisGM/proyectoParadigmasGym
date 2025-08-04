@@ -1,82 +1,99 @@
 <?php
+
 include '../business/clienteBusiness.php';
 
-$clienteBusiness = new ClienteBusiness();
-
-if (isset($_POST['create'])) {
-    $carnet = $_POST['carnet'];
-    $nombre = $_POST['nombre'];
-    $fechaNacimiento = $_POST['fechaNacimiento'];
-    $telefono = $_POST['telefono'];
-    $correo = $_POST['correo'];
-    $direccion = $_POST['direccion'];
-    $genero = $_POST['genero'];
-    $inscripcion = $_POST['inscripcion'];
-
-    // Validar campos vacíos (correo no es requerido)
-    if (
-        empty($carnet) || empty($nombre) || empty($fechaNacimiento) ||
-        empty($telefono) || empty($direccion) || empty($genero) || empty($inscripcion)
-    ) {
-        header("Location: ../view/clienteView.php?error=emptyField");
-        exit();
-    }
-
-    // Validar si ya existe por carnet
-    if ($clienteBusiness->verificarCarnetExistente($carnet)) {
-        header("Location: ../view/clienteView.php?error=existe");
-        exit();
-    }
-
-    $nuevoCliente = new Cliente(
-        0, $carnet, $nombre, $fechaNacimiento,
-        $telefono, $correo, $direccion, $genero, $inscripcion, 1
-    );
-
-    if ($clienteBusiness->insertarTBCliente($nuevoCliente)) {
-        header("Location: ../view/clienteView.php?success=inserted");
-    } else {
-        header("Location: ../view/clienteView.php?error=dbError");
-    }
-
-} else if (isset($_POST['update'])) {
-    $id = $_POST['id'];
-    $nombre = $_POST['nombre'];
-    $fechaNacimiento = $_POST['fechaNacimiento'];
-    $telefono = $_POST['telefono'];
-    $correo = $_POST['correo'];
-    $direccion = $_POST['direccion'];
-    $genero = $_POST['genero'];
-    $inscripcion = $_POST['inscripcion'];
+if (isset($_POST['insertar'])) {
 
     if (
-        empty($nombre) || empty($fechaNacimiento) ||
-        empty($telefono) || empty($direccion) || empty($genero) || empty($inscripcion)
+        isset($_POST['carnet']) && isset($_POST['nombre']) && isset($_POST['fechaNacimiento']) &&
+        isset($_POST['telefono']) && isset($_POST['correo']) && isset($_POST['direccion']) &&
+        isset($_POST['genero']) && isset($_POST['fechaInscripcion'])
     ) {
-        header("Location: ../view/clienteView.php?error=emptyField");
+        $carnet = $_POST['carnet'];
+        $nombre = $_POST['nombre'];
+        $fechaNacimiento = $_POST['fechaNacimiento'];
+        $telefono = $_POST['telefono'];
+        $correo = $_POST['correo'];
+        $direccion = $_POST['direccion'];
+        $genero = $_POST['genero'];
+        $fechaInscripcion = $_POST['fechaInscripcion'];
+
+        // El estado se asigna automáticamente al crear
+        $cliente = new Cliente(null, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $fechaInscripcion, 1);
+        $clienteBusiness = new ClienteBusiness();
+
+         if ($clienteBusiness->existeClientePorCarnet($carnet)) {
+            header("Location: ../view/clienteView.php?error=existe");
+            exit();
+         }
+
+        $resultado = $clienteBusiness->insertarTBCliente($cliente);
+
+        if ($resultado == 1) {
+            header("Location: ../view/clienteView.php?success=insertado");
+        } else {
+            header("Location: ../view/clienteView.php?error=insertar");
+        }
+        exit();
+    } else {
+        header("Location: ../view/clienteView.php?error=datos_faltantes");
         exit();
     }
 
-    $cliente = new Cliente(
-        $id, "", $nombre, $fechaNacimiento,
-        $telefono, $correo, $direccion, $genero, $inscripcion, 1
-    );
+} else if (isset($_POST['actualizar'])) {
 
-    if ($clienteBusiness->actualizarTBCliente($cliente)) {
-        header("Location: ../view/clienteView.php?success=updated");
+    if (
+        isset($_POST['id']) && isset($_POST['carnet']) && isset($_POST['nombre']) && isset($_POST['fechaNacimiento']) &&
+        isset($_POST['telefono']) && isset($_POST['correo']) && isset($_POST['direccion']) &&
+        isset($_POST['genero']) && isset($_POST['fechaInscripcion']) && isset($_POST['estado'])
+    ) {
+        $id = $_POST['id'];
+        $carnet = $_POST['carnet'];
+        $nombre = $_POST['nombre'];
+        $fechaNacimiento = $_POST['fechaNacimiento'];
+        $telefono = $_POST['telefono'];
+        $correo = $_POST['correo'];
+        $direccion = $_POST['direccion'];
+        $genero = $_POST['genero'];
+        $fechaInscripcion = $_POST['fechaInscripcion'];
+        $estado = $_POST['estado'];
+
+        $cliente = new Cliente($id, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $fechaInscripcion, $estado);
+        $clienteBusiness = new ClienteBusiness();
+
+        $resultado = $clienteBusiness->actualizarTBCliente($cliente);
+
+        if ($resultado == 1) {
+            header("Location: ../view/clienteView.php?success=actualizado");
+        } else {
+            header("Location: ../view/clienteView.php?error=actualizar");
+        }
+        exit();
     } else {
-        header("Location: ../view/clienteView.php?error=dbError");
+        header("Location: ../view/clienteView.php?error=datos_faltantes");
+        exit();
     }
 
-} else if (isset($_POST['delete'])) {
-    $id = $_POST['id'];
+} else if (isset($_POST['eliminar'])) {
 
-    if ($clienteBusiness->eliminarTBCliente($id)) {
-        header("Location: ../view/clienteView.php?success=deleted");
+    if (isset($_POST['id'])) {
+        $id = $_POST['id'];
+
+        $clienteBusiness = new ClienteBusiness();
+        $resultado = $clienteBusiness->eliminarTBCliente($id);
+
+        if ($resultado == 1) {
+            header("Location: ../view/clienteView.php?success=eliminado");
+        } else {
+            header("Location: ../view/clienteView.php?error=eliminar");
+        }
+        exit();
     } else {
-        header("Location: ../view/clienteView.php?error=dbError");
+        header("Location: ../view/clienteView.php?error=id_faltante");
+        exit();
     }
 } else {
-    header("Location: ../view/clienteView.php?error=error");
+    header("Location: ../view/clienteView.php?error=accion_no_valida");
+    exit();
 }
 ?>

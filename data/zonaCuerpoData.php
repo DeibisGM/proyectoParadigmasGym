@@ -9,7 +9,7 @@ class ZonaCuerpoData extends Data {
      * Inserta una nueva zona del cuerpo en la base de datos.
      */
     public function insertarTBZonaCuerpo($zonaCuerpo) {
-        // Conexión con el puerto especificado
+
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -39,7 +39,7 @@ class ZonaCuerpoData extends Data {
      * Actualiza una zona del cuerpo existente.
      */
     public function actualizarTBZonaCuerpo($zonaCuerpo) {
-        // CORRECCIÓN: Se añadió el puerto a la conexión.
+
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -58,7 +58,7 @@ class ZonaCuerpoData extends Data {
      * Elimina una zona del cuerpo por su ID.
      */
     public function eliminarTBZonaCuerpo($idZonaCuerpo) {
-        // CORRECCIÓN: Se añadió el puerto a la conexión.
+
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -73,7 +73,7 @@ class ZonaCuerpoData extends Data {
      * Obtiene todas las zonas del cuerpo de la base de datos.
      */
     public function getAllTBZonaCuerpo() {
-        // CORRECCIÓN: Se añadió el puerto a la conexión.
+
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
