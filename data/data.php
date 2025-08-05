@@ -17,19 +17,17 @@ class Data {
             case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxx":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
-                $this->user = "deibisgm";
-                $this->password = "Jdgm5171";
-                $this->db = "gimnasio_db";
+                $this->user = "root";
+                $this->password = "6453";
+                $this->db = "dbgym";
                 break;
-
 
             default:
                  $this->isActive = false;
-      			 $this->server = "trolley.proxy.rlwy.net";
-      			 $this->user = "root";
-      			 $this->password = "iWhsTZUYVbbGunlbHOURKukfYwliQNiq";
-      			 $this->db = "railway";
-      			 $this->port = 43809;
+      			 $this->server = "127.0.0.1";
+      			 $this->user = "XXXXX";
+      			 $this->password = "XXXXX";
+      			 $this->db = "dbgym";
                 break;
         }
     }
