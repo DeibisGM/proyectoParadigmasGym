@@ -29,9 +29,7 @@
 
     <header>
         <h2>Gimnasio - Instructores</h2>
-        <a href="../index.php">Volver al Inicio</a>
     </header>
-
 
     <hr>
 
@@ -55,21 +53,23 @@
                 <tr>
                     <form method="post" action="../action/instructorAction.php" onsubmit="return validateForm()">
                         <td>
-                            <input type="text" name="tbinstructornombre" placeholder="Ej: Juan Pérez" required
+                            <input type="text" name="nombre" placeholder="Ej: Juan Pérez" required
                                    pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" title="Solo letras y espacios" style="width: 95%;">
                         </td>
                         <td>
-                            <input type="text" name="tbinstructortelefono" placeholder="Ej: 8888-8888" style="width: 95%;">
+                            <input type="text" name="telefono" placeholder="Ej: 8888-8888" style="width: 95%;">
                         </td>
                         <td>
-                            <input type="text" name="tbinstructordireccion" placeholder="Ej: San José, Costa Rica" style="width: 95%;">
+                            <input type="text" name="direccion" placeholder="Ej: San José, Costa Rica" style="width: 95%;">
                         </td>
                         <td>
-                            <input type="email" name="tbinstructorcorreo" placeholder="Ej: juan@email.com" required style="width: 95%;">
+                            <input type="email" name="correo" placeholder="Ej: juan@email.com" required style="width: 95%;">
                         </td>
                         <td>
-                            <input type="text" name="tbinstructorcuenta" placeholder="Ej: ESXX XXXX XXXX XX" style="width: 95%;">
-                        </td>
+                            <input type="text" name="cuenta" placeholder="Ej: CR05015202001026284066"
+                                pattern="[A-Z]{2}\d{2}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{0,20}"
+                                title="Formato IBAN: 2 letras (país) + 2 dígitos + hasta 30 caracteres alfanuméricos"
+                                style="width: 95%;">                        </td>
                         <td>
                             <input type="submit" value="Crear" name="create">
                         </td>
@@ -90,13 +90,13 @@ if (empty($instructores)) {
     foreach ($instructores as $instructor) {
         echo '<tr>';
         echo '<form method="post" action="../action/instructorAction.php">';
-        echo '<input type="hidden" name="tbinstructorid" value="'.$instructor->getInstructorId().'">';
+        echo '<input type="hidden" name="id" value="'.$instructor->getInstructorId().'">';
 
-        echo '<td><input type="text" name="tbinstructornombre" value="'.htmlspecialchars($instructor->getInstructorNombre()).'" required></td>';
-        echo '<td><input type="text" name="tbinstructortelefono" value="'.htmlspecialchars($instructor->getInstructorTelefono()).'"></td>';
-        echo '<td><input type="text" name="tbinstructordireccion" value="'.htmlspecialchars($instructor->getInstructorDireccion()).'"></td>';
-        echo '<td><input type="email" name="tbinstructorcorreo" value="'.htmlspecialchars($instructor->getInstructorCorreo()).'" required></td>';
-        echo '<td><input type="text" name="tbinstructorcuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta()).'"></td>';
+        echo '<td><input type="text" name="nombre" value="'.htmlspecialchars($instructor->getInstructorNombre()).'" required></td>';
+        echo '<td><input type="text" name="telefono" value="'.htmlspecialchars($instructor->getInstructorTelefono()).'"></td>';
+        echo '<td><input type="text" name="direccion" value="'.htmlspecialchars($instructor->getInstructorDireccion()).'"></td>';
+        echo '<td><input type="email" name="correo" value="'.htmlspecialchars($instructor->getInstructorCorreo()).'" required></td>';
+        echo '<td><input type="text" name="cuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta()).'"></td>';
 
         echo '<td>
                 <input type="submit" value="Actualizar" name="update">
@@ -128,6 +128,9 @@ if (empty($instructores)) {
                 } else if ($_GET['error'] == "error") {
                     echo 'Error: Ocurrió un error inesperado.';
                 }
+                else if ($_GET['error'] == "invalidIBAN") {
+                    echo 'Error: El número de cuenta IBAN no es válido. Debe seguir el formato estándar internacional.';
+                }
                 echo '</b></p>';
             } else if (isset($_GET['success'])) {
                 echo '<p class="success"><b>';
@@ -151,24 +154,43 @@ if (empty($instructores)) {
     </footer>
 
     <script>
-        function validateForm() {
-            const nombre = document.querySelector('input[name="nombre"]');
-            const correo = document.querySelector('input[name="correo"]');
+       function validateForm() {
+    const nombre = document.querySelector('input[name="nombre"]');
+    const correo = document.querySelector('input[name="correo"]');
+    const cuenta = document.querySelector('input[name="cuenta"]');
 
-            // Validación de nombre (solo letras)
-            if (!nombre.value.match(/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/)) {
-                alert("El nombre solo debe contener letras y espacios.");
-                return false;
-            }
+    // Validación de nombre (solo letras)
+    if (!nombre.value.match(/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/)) {
+        alert("El nombre solo debe contener letras y espacios.");
+        return false;
+    }
 
-            // Validación básica de correo
-            if (!correo.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                alert("Por favor ingrese un correo electrónico válido.");
-                return false;
-            }
+    // Validación básica de correo
+    if (!correo.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        alert("Por favor ingrese un correo electrónico válido.");
+        return false;
+    }
 
-            return true;
-        }
+    // Validación de IBAN
+    if (cuenta.value && !validateIBAN(cuenta.value)) {
+        alert("Por favor ingrese un IBAN válido (Ej: CR05015202001026284066).");
+        return false;
+    }
+
+    return true;
+}
+
+function validateIBAN(iban) {
+    iban = iban.replace(/\s+/g, '').toUpperCase();
+
+    const ibanRegex = /^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/;
+
+    if (!ibanRegex.test(iban)) {
+        return false;
+    }
+
+    return true;
+}
     </script>
 </body>
 </html>

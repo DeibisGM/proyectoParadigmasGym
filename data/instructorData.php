@@ -35,7 +35,7 @@ class InstructorData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbinstructor SET tbinstructornombre='" . $instructor->getInstructorNombre() .
+        $queryUpdate = "UPDATE tbinstructor SET tbinstructorNombre='" . $instructor->getInstructorNombre() .
                 "', tbinstructorTelefono='" . $instructor->getInstructorTelefono() .
                 "', tbinstructorDireccion='" . $instructor->getInstructorDireccion() .
                 "', tbinstructorCorreo='" . $instructor->getInstructorCorreo() .
