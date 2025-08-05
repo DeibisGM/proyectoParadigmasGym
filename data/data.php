@@ -14,7 +14,7 @@ class Data {
         $hostName = gethostname();
 
         switch ($hostName) {
-            case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxx":
+            case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxxs":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
                 $this->user = "root";
