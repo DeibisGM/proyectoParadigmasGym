@@ -44,8 +44,10 @@ else if (isset($_POST['create'])) {
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $result = $zonaCuerpoBusiness->insertarTBZonaCuerpo($zonaCuerpo);
             if ($result == 1) {
-
                 header("location: " . $redirect_path . "?success=inserted");
+            } else if ($result == -1) {
+                // Error específico para zona duplicada
+                header("location: " . $redirect_path . "?error=duplicateZone");
             } else {
                 header("location: " . $redirect_path . "?error=dbError");
             }

@@ -91,6 +91,8 @@ include '../business/zonaCuerpoBusiness.php';
                     echo '<p><b>Error: No se pudo procesar la transacción en la base de datos.</b></p>';
                 } else if ($_GET['error'] == "error") {
                     echo '<p><b>Error: Ocurrió un error inesperado.</b></p>';
+                } else if ($_GET['error'] == "duplicateZone") {
+                    echo '<p><b>Error: La zona del cuerpo ya existe. No se pueden crear zonas duplicadas.</b></p>';
                 }
             } else if (isset($_GET['success'])) {
                 if ($_GET['success'] == "inserted") {
