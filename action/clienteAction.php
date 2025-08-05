@@ -1,99 +1,111 @@
 <?php
+include '../business/instructorBusiness.php';
 
-include '../business/clienteBusiness.php';
+if (isset($_POST['update'])) {
+    if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta'])) {
+        $nombre = trim($_POST['nombre']);
+        $telefono = trim($_POST['telefono']);
+        $direccion = trim($_POST['direccion']);
+        $correo = trim($_POST['correo']);
+        $cuenta = trim($_POST['cuenta']);
 
-if (isset($_POST['insertar'])) {
-
-    if (
-        isset($_POST['carnet']) && isset($_POST['nombre']) && isset($_POST['fechaNacimiento']) &&
-        isset($_POST['telefono']) && isset($_POST['correo']) && isset($_POST['direccion']) &&
-        isset($_POST['genero']) && isset($_POST['fechaInscripcion'])
-    ) {
-        $carnet = $_POST['carnet'];
-        $nombre = $_POST['nombre'];
-        $fechaNacimiento = $_POST['fechaNacimiento'];
-        $telefono = $_POST['telefono'];
-        $correo = $_POST['correo'];
-        $direccion = $_POST['direccion'];
-        $genero = $_POST['genero'];
-        $fechaInscripcion = $_POST['fechaInscripcion'];
-
-        // El estado se asigna automáticamente al crear
-        $cliente = new Cliente(null, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $fechaInscripcion, 1);
-        $clienteBusiness = new ClienteBusiness();
-
-         if ($clienteBusiness->existeClientePorCarnet($carnet)) {
-            header("Location: ../view/clienteView.php?error=existe");
+        // Validaciones
+        if (empty($nombre) || empty($correo)) {
+            header("location: ../view/instructorView.php?error=emptyFields");
             exit();
-         }
-
-        $resultado = $clienteBusiness->insertarTBCliente($cliente);
-
-        if ($resultado == 1) {
-            header("Location: ../view/clienteView.php?success=insertado");
-        } else {
-            header("Location: ../view/clienteView.php?error=insertar");
         }
-        exit();
-    } else {
-        header("Location: ../view/clienteView.php?error=datos_faltantes");
-        exit();
-    }
 
-} else if (isset($_POST['actualizar'])) {
-
-    if (
-        isset($_POST['id']) && isset($_POST['carnet']) && isset($_POST['nombre']) && isset($_POST['fechaNacimiento']) &&
-        isset($_POST['telefono']) && isset($_POST['correo']) && isset($_POST['direccion']) &&
-        isset($_POST['genero']) && isset($_POST['fechaInscripcion']) && isset($_POST['estado'])
-    ) {
-        $id = $_POST['id'];
-        $carnet = $_POST['carnet'];
-        $nombre = $_POST['nombre'];
-        $fechaNacimiento = $_POST['fechaNacimiento'];
-        $telefono = $_POST['telefono'];
-        $correo = $_POST['correo'];
-        $direccion = $_POST['direccion'];
-        $genero = $_POST['genero'];
-        $fechaInscripcion = $_POST['fechaInscripcion'];
-        $estado = $_POST['estado'];
-
-        $cliente = new Cliente($id, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $fechaInscripcion, $estado);
-        $clienteBusiness = new ClienteBusiness();
-
-        $resultado = $clienteBusiness->actualizarTBCliente($cliente);
-
-        if ($resultado == 1) {
-            header("Location: ../view/clienteView.php?success=actualizado");
-        } else {
-            header("Location: ../view/clienteView.php?error=actualizar");
+        if (preg_match('/[0-9]/', $nombre)) {
+            header("location: ../view/instructorView.php?error=invalidName");
+            exit();
         }
-        exit();
+
+        if (strlen($nombre) > 100) {
+            header("location: ../view/instructorView.php?error=nameTooLong");
+            exit();
+        }
+
+        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            header("location: ../view/instructorView.php?error=invalidEmail");
+            exit();
+        }
+
+        if (!empty($cuenta) && !preg_match('/^[A-Z]{2}\d{2}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{0,20}$/i', $cuenta)) {
+            header("location: ../view/instructorView.php?error=invalidIBAN");
+            exit();
+        }
+
+        $instructor = new Instructor($_POST['id'], $nombre, $telefono, $direccion, $correo, $cuenta);
+        $instructorBusiness = new InstructorBusiness();
+        $result = $instructorBusiness->actualizarTBInstructor($instructor);
+
+        if ($result == 1) {
+            header("location: ../view/instructorView.php?success=updated");
+        } else {
+            header("location: ../view/instructorView.php?error=dbError");
+        }
     } else {
-        header("Location: ../view/clienteView.php?error=datos_faltantes");
-        exit();
+        header("location: ../view/instructorView.php?error=error");
     }
-
-} else if (isset($_POST['eliminar'])) {
-
+}
+else if (isset($_POST['delete'])) {
     if (isset($_POST['id'])) {
-        $id = $_POST['id'];
-
-        $clienteBusiness = new ClienteBusiness();
-        $resultado = $clienteBusiness->eliminarTBCliente($id);
-
-        if ($resultado == 1) {
-            header("Location: ../view/clienteView.php?success=eliminado");
+        $instructorBusiness = new InstructorBusiness();
+        $result = $instructorBusiness->eliminarTBInstructor($_POST['id']);
+        if ($result == 1) {
+            header("location: ../view/instructorView.php?success=deleted");
         } else {
-            header("Location: ../view/clienteView.php?error=eliminar");
+            header("location: ../view/instructorView.php?error=dbError");
         }
-        exit();
     } else {
-        header("Location: ../view/clienteView.php?error=id_faltante");
-        exit();
+        header("location: ../view/instructorView.php?error=error");
     }
-} else {
-    header("Location: ../view/clienteView.php?error=accion_no_valida");
-    exit();
+}
+else if (isset($_POST['create'])) {
+    if (isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta'])) {
+        $nombre = trim($_POST['nombre']);
+        $telefono = trim($_POST['telefono']);
+        $direccion = trim($_POST['direccion']);
+        $correo = trim($_POST['correo']);
+        $cuenta = trim($_POST['cuenta']);
+
+        // Validaciones
+        if (empty($nombre) || empty($correo)) {
+            header("location: ../view/instructorView.php?error=emptyFields");
+            exit();
+        }
+
+        if (preg_match('/[0-9]/', $nombre)) {
+            header("location: ../view/instructorView.php?error=invalidName");
+            exit();
+        }
+
+        if (strlen($nombre) > 100) {
+            header("location: ../view/instructorView.php?error=nameTooLong");
+            exit();
+        }
+
+        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            header("location: ../view/instructorView.php?error=invalidEmail");
+            exit();
+        }
+
+        if (!empty($cuenta) && !preg_match('/^[A-Z]{2}\d{2}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{0,20}$/i', $cuenta)) {
+            header("location: ../view/instructorView.php?error=invalidIBAN");
+            exit();
+        }
+
+        $instructor = new Instructor(null, $nombre, $telefono, $direccion, $correo, $cuenta);
+        $instructorBusiness = new InstructorBusiness();
+        $result = $instructorBusiness->insertarTBInstructor($instructor);
+
+        if ($result == 1) {
+            header("location: ../view/instructorView.php?success=created");
+        } else {
+            header("location: ../view/instructorView.php?error=dbError");
+        }
+    } else {
+        header("location: ../view/instructorView.php?error=error");
+    }
 }
 ?>
