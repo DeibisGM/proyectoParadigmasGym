@@ -24,7 +24,8 @@ class DatosClinicosData extends Data {
         $queryInsert = "INSERT INTO tbdatosclinicos (
             idtbdatosclinicos, tbdatosclinicosenfermedad, tbdatosclinicosotraenfermedad, tbdatosclinicostomamedicamento,
             tbdatosclinicosmedicamento, tbdatosclinicoslesion, tbdatosclinicosdescripcionlesion,
-            tbdatosclinicosdiscapacidad, tbdatosclinicosdescripciondiscapacidad, tbdatosclinicosrestriccionmedica,
+            tbdatosclinicosdiscapacidad, tbdatosclinicosdescripciondiscapacidad,
+            tbdatosclinicosrestriccionmedica, tbdatosclinicosdescripcionrestriccionmedica,
             tbclientesid
         ) VALUES (
             " . $nextId . ",
@@ -37,6 +38,7 @@ class DatosClinicosData extends Data {
             " . $datosClinicos->getTbdatosclinicosdiscapacidad() . ",
             '" . mysqli_real_escape_string($conn, $datosClinicos->getTbdatosclinicosdescripciondiscapacidad()) . "',
             " . $datosClinicos->getTbdatosclinicosrestriccionmedica() . ",
+            '" . mysqli_real_escape_string($conn, $datosClinicos->getTbdatosclinicosdescripcionrestriccionmedica()) . "',
             " . $datosClinicos->getTbclientesid() . "
         );";
 
@@ -58,7 +60,8 @@ class DatosClinicosData extends Data {
                 tbdatosclinicosdescripcionlesion='" . mysqli_real_escape_string($conn, $datosClinicos->getTbdatosclinicosdescripcionlesion()) . "',
                 tbdatosclinicosdiscapacidad=" . $datosClinicos->getTbdatosclinicosdiscapacidad() . ",
                 tbdatosclinicosdescripciondiscapacidad='" . mysqli_real_escape_string($conn, $datosClinicos->getTbdatosclinicosdescripciondiscapacidad()) . "',
-                tbdatosclinicosrestriccionmedica=" . $datosClinicos->getTbdatosclinicosrestriccionmedica() . "
+                tbdatosclinicosrestriccionmedica=" . $datosClinicos->getTbdatosclinicosrestriccionmedica() . ",
+                tbdatosclinicosdescripcionrestriccionmedica='" . mysqli_real_escape_string($conn, $datosClinicos->getTbdatosclinicosdescripcionrestriccionmedica()) . "'
                 WHERE idtbdatosclinicos=" . $datosClinicos->getTbdatosclinicosid() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
@@ -99,7 +102,7 @@ class DatosClinicosData extends Data {
                 $row['idtbdatosclinicos'], $row['tbdatosclinicosenfermedad'], $row['tbdatosclinicosotraenfermedad'],
                 $row['tbdatosclinicostomamedicamento'], $row['tbdatosclinicosmedicamento'], $row['tbdatosclinicoslesion'],
                 $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicosdiscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
-                $row['tbdatosclinicosrestriccionmedica'], $row['tbclientesid']
+                $row['tbdatosclinicosrestriccionmedica'],$row['tbdatosclinicosdescripcionrestriccionmedica'], $row['tbclientesid']
             );
             $currentDatosClinicos->carnet = $row['tbclientescarnet'];
             array_push($datosClinicos, $currentDatosClinicos);
@@ -120,7 +123,7 @@ class DatosClinicosData extends Data {
                 $row['idtbdatosclinicos'], $row['tbdatosclinicosenfermedad'], $row['tbdatosclinicosotraenfermedad'],
                 $row['tbdatosclinicostomamedicamento'], $row['tbdatosclinicosmedicamento'], $row['tbdatosclinicoslesion'],
                 $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicosdiscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
-                $row['tbdatosclinicosrestriccionmedica'], $row['tbclientesid']
+                $row['tbdatosclinicosrestriccionmedica'], $row['tbdatosclinicosdescripcionrestriccionmedica'], $row['tbclientesid']
             );
             mysqli_close($conn);
             return $datosClinicos;
@@ -141,7 +144,7 @@ class DatosClinicosData extends Data {
                 $row['idtbdatosclinicos'], $row['tbdatosclinicosenfermedad'], $row['tbdatosclinicosotraenfermedad'],
                 $row['tbdatosclinicostomamedicamento'], $row['tbdatosclinicosmedicamento'], $row['tbdatosclinicoslesion'],
                 $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicosdiscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
-                $row['tbdatosclinicosrestriccionmedica'], $row['tbclientesid']
+                $row['tbdatosclinicosrestriccionmedica'], $row['tbdatosclinicosdescripcionrestriccionmedica'], $row['tbclientesid']
             );
             mysqli_close($conn);
             return $datosClinicos;

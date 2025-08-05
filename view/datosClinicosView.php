@@ -55,6 +55,7 @@ if (!class_exists('DatosClinicosBusiness')) {
                         document.getElementById('medicamentoDiv').style.display = 'none';
                         document.getElementById('descripcionLesionDiv').style.display = 'none';
                         document.getElementById('descripcionDiscapacidadDiv').style.display = 'none';
+                        document.getElementById('descripcionrestriccionmedica').style.display = 'none';
                     }
                     setTimeout(function() {
                         location.reload();
@@ -193,9 +194,14 @@ if (!class_exists('DatosClinicosBusiness')) {
             </div><br>
 
             <label>
-                <input type="checkbox" name="restriccionMedica">
+                <input type="checkbox" id="restriccionMedica" name="restriccionMedica" onchange="toggleConditionalField('restriccionMedica', 'descripcionrestriccionmedica')">
                 ¿Posee restricción médica?
-            </label><br><br>
+            </label><br>
+
+            <div id="descripcionrestriccionmedica" style="margin-left: 30px; display: none;">
+                <label>Describa la restricción médica:</label><br>
+                <textarea name="descripcionrestriccionmedica" placeholder="Describa la restricción médica..."></textarea><br>
+            </div><br>
 
             <input type="submit" value="Registrar Datos Clínicos">
         </form>
@@ -257,6 +263,7 @@ if (!class_exists('DatosClinicosBusiness')) {
 
                             echo '<td style="padding: 8px;">';
                             echo '<input type="checkbox" name="restriccionMedica" ' . ($current->getTbdatosclinicosrestriccionmedica() ? 'checked' : '') . '> Sí';
+                            echo '<textarea name="descripcionrestriccionmedica" style="width: 95%; margin-top: 5px;" placeholder="Describa...">' . htmlspecialchars($current->getTbdatosclinicosdescripcionrestriccionmedica()) . '</textarea>';
                             echo '</td>';
 
                             echo '<td style="padding: 8px;">';
@@ -314,6 +321,7 @@ if (!class_exists('DatosClinicosBusiness')) {
             toggleConditionalField('tomaMedicamento', 'medicamentoDiv');
             toggleConditionalField('lesion', 'descripcionLesionDiv');
             toggleConditionalField('discapacidad', 'descripcionDiscapacidadDiv');
+            toggleConditionalField('restriccionMedica', 'descripcionrestriccionmedica');
         });
     </script>
 
