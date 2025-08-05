@@ -22,6 +22,14 @@ class Data {
                 $this->db = "dbgym";
                 break;
 
+            case "yei-Inspiron-3501":
+                $this->isActive = false;
+                $this->server = "127.0.0.1";
+                $this->user = "yei";
+                $this->password = "6453";
+                $this->db = "dbgym";
+                break;
+
             default:
                  $this->isActive = false;
       			 $this->server = "127.0.0.1";
