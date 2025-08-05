@@ -10,7 +10,15 @@ class ZonaCuerpoBusiness {
         $this->zonaCuerpoData = new ZonaCuerpoData();
     }
 
+    public function existeZonaCuerpoNombre($nombreZonaCuerpo) {
+        return $this->zonaCuerpoData->existeZonaCuerpoNombre($nombreZonaCuerpo);
+    }
+
     public function insertarTBZonaCuerpo($zonaCuerpo) {
+        // Verificar si ya existe una zona con el mismo nombre
+        if ($this->existeZonaCuerpoNombre($zonaCuerpo->getNombreZonaCuerpo())) {
+            return -1; // Código de error para indicar que ya existe
+        }
         return $this->zonaCuerpoData->insertarTBZonaCuerpo($zonaCuerpo);
     }
 
