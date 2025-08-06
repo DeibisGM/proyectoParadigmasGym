@@ -6,6 +6,22 @@ include '../domain/zonaCuerpo.php';
 class ZonaCuerpoData extends Data {
 
     /**
+     * Verifica si ya existe una zona del cuerpo con el nombre especificado.
+     */
+    public function existeZonaCuerpoNombre($nombreZonaCuerpo) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        // Consulta para verificar si existe una zona con el mismo nombre
+        $queryCheck = "SELECT COUNT(*) as count FROM tbzonacuerpo WHERE tbzonacuerponombre = '" . $nombreZonaCuerpo . "';";
+        $result = mysqli_query($conn, $queryCheck);
+        $row = mysqli_fetch_assoc($result);
+        
+        mysqli_close($conn);
+        return ($row['count'] > 0);
+    }
+
+    /**
      * Inserta una nueva zona del cuerpo en la base de datos.
      */
     public function insertarTBZonaCuerpo($zonaCuerpo) {
