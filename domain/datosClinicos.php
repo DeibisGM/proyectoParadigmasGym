@@ -11,15 +11,16 @@ class DatosClinicos {
     private $tbdatosclinicosdiscapacidad;
     private $tbdatosclinicosdescripciondiscapacidad;
     private $tbdatosclinicosrestriccionmedica;
+    public $tbdatosclinicosdescripcionrestriccionmedica;
     private $tbclientesid;
-
     public $carnet;
 
     public function __construct($idtbdatosclinicos, $tbdatosclinicosenfermedad, $tbdatosclinicosotraenfermedad,
                                 $tbdatosclinicostomamedicamento, $tbdatosclinicosmedicamento,
                                 $tbdatosclinicoslesion, $tbdatosclinicosdescripcionlesion,
                                 $tbdatosclinicosdiscapacidad, $tbdatosclinicosdescripciondiscapacidad,
-                                $tbdatosclinicosrestriccionmedica, $tbclientesid){
+                                $tbdatosclinicosrestriccionmedica, $tbdatosclinicosdescripcionrestriccionmedica,
+                                $tbclientesid){
 
         $this->idtbdatosclinicos = $idtbdatosclinicos;
         $this->tbdatosclinicosenfermedad = $tbdatosclinicosenfermedad;
@@ -31,6 +32,7 @@ class DatosClinicos {
         $this->tbdatosclinicosdiscapacidad = $tbdatosclinicosdiscapacidad;
         $this->tbdatosclinicosdescripciondiscapacidad = $tbdatosclinicosdescripciondiscapacidad;
         $this->tbdatosclinicosrestriccionmedica = $tbdatosclinicosrestriccionmedica;
+        $this->tbdatosclinicosdescripcionrestriccionmedica = $tbdatosclinicosdescripcionrestriccionmedica;
         $this->tbclientesid = $tbclientesid;
         $this->carnet = '';
     }
@@ -46,6 +48,7 @@ class DatosClinicos {
     public function getTbdatosclinicosdiscapacidad(){ return $this->tbdatosclinicosdiscapacidad; }
     public function getTbdatosclinicosdescripciondiscapacidad(){ return $this->tbdatosclinicosdescripciondiscapacidad; }
     public function getTbdatosclinicosrestriccionmedica(){ return $this->tbdatosclinicosrestriccionmedica; }
+    public function getTbdatosclinicosdescripcionrestriccionmedica(){return $this->tbdatosclinicosdescripcionrestriccionmedica;}
     public function getTbclientesid(){ return $this->tbclientesid; }
     public function getCarnet() { return $this->carnet; }
 
@@ -61,6 +64,7 @@ class DatosClinicos {
     public function setTbdatosclinicosdiscapacidad($tbdatosclinicosdiscapacidad){ $this->tbdatosclinicosdiscapacidad = $tbdatosclinicosdiscapacidad; }
     public function setTbdatosclinicosdescripciondiscapacidad($tbdatosclinicosdescripciondiscapacidad){ $this->tbdatosclinicosdescripciondiscapacidad = $tbdatosclinicosdescripciondiscapacidad; }
     public function setTbdatosclinicosrestriccionmedica($tbdatosclinicosrestriccionmedica){ $this->tbdatosclinicosrestriccionmedica = $tbdatosclinicosrestriccionmedica; }
+    public function setTbdatosclinicosdescripcionrestriccionmedica($tbdatosclinicosdescripcionrestriccionmedica){$this->tbdatosclinicosdescripcionrestriccionmedica = $tbdatosclinicosdescripcionrestriccionmedica;}
     public function setTbclientesid($tbclientesid){ $this->tbclientesid = $tbclientesid; }
     public function setCarnet($carnet) { $this->carnet = $carnet; }
 }

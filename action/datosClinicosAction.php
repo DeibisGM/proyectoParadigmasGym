@@ -22,6 +22,7 @@ include_once '../business/datosClinicosBusiness.php';
             $discapacidad = isset($_POST['discapacidad']) ? 1 : 0;
             $descripcionDiscapacidad = isset($_POST['descripcionDiscapacidad']) ? $_POST['descripcionDiscapacidad'] : '';
             $restriccionMedica = isset($_POST['restriccionMedica']) ? 1 : 0;
+            $descripcionrestriccionmedica = isset($_POST['descripcionrestriccionmedica']) ? $_POST['descripcionrestriccionmedica'] : '';
             $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
 
             // Valida que clienteId no esté vacío
@@ -42,7 +43,7 @@ include_once '../business/datosClinicosBusiness.php';
 
             $errores = $datosClinicosBusiness->validarDatosClinicos($enfermedad, $otraEnfermedad, $tomaMedicamento,
                                                $medicamento, $lesion, $descripcionLesion,
-                                               $discapacidad, $descripcionDiscapacidad, $restriccionMedica);
+                                               $discapacidad, $descripcionDiscapacidad, $restriccionMedica, $descripcionrestriccionmedica);
 
             if(!empty($errores)){
                 $response['success'] = false;
@@ -54,7 +55,7 @@ include_once '../business/datosClinicosBusiness.php';
             $datosClinicos = new DatosClinicos(0, $enfermedad, $otraEnfermedad, $tomaMedicamento,
                                              $medicamento, $lesion, $descripcionLesion,
                                              $discapacidad, $descripcionDiscapacidad,
-                                             $restriccionMedica, $clienteId);
+                                             $restriccionMedica, $descripcionrestriccionmedica, $clienteId);
 
             $resultado = $datosClinicosBusiness->insertarTBDatosClinicos($datosClinicos);
 
@@ -78,6 +79,8 @@ include_once '../business/datosClinicosBusiness.php';
             $discapacidad = isset($_POST['discapacidad']) ? 1 : 0;
             $descripcionDiscapacidad = isset($_POST['descripcionDiscapacidad']) ? $_POST['descripcionDiscapacidad'] : '';
             $restriccionMedica = isset($_POST['restriccionMedica']) ? 1 : 0;
+            $descripcionrestriccionmedica = isset($_POST['descripcionrestriccionmedica']) ? $_POST['descripcionrestriccionmedica'] : '';
+
             $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
 
             if(empty($id) || empty($clienteId)){
@@ -89,7 +92,7 @@ include_once '../business/datosClinicosBusiness.php';
 
             $errores = $datosClinicosBusiness->validarDatosClinicos($enfermedad, $otraEnfermedad, $tomaMedicamento,
                                                    $medicamento, $lesion, $descripcionLesion,
-                                                   $discapacidad, $descripcionDiscapacidad, $restriccionMedica);
+                                                   $discapacidad, $descripcionDiscapacidad, $restriccionMedica, $descripcionrestriccionmedica);
 
             if(!empty($errores)){
                 $response['success'] = false;
@@ -101,7 +104,7 @@ include_once '../business/datosClinicosBusiness.php';
             $datosClinicos = new DatosClinicos($id, $enfermedad, $otraEnfermedad, $tomaMedicamento,
                                              $medicamento, $lesion, $descripcionLesion,
                                              $discapacidad, $descripcionDiscapacidad,
-                                             $restriccionMedica, $clienteId);
+                                             $restriccionMedica, $descripcionrestriccionmedica, $clienteId);
 
             $resultado = $datosClinicosBusiness->actualizarTBDatosClinicos($datosClinicos);
 
