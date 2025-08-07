@@ -1,7 +1,7 @@
 <?php
 
 include '../business/zonaCuerpoBusiness.php';
-include '../utility/ImageManager.php'; // Incluir el nuevo gestor de imágenes
+include '../utility/ImageManager.php'; // el nuevo gestor de imágenes
 
 $redirect_path = '../view/zonaCuerpoView.php';
 
@@ -30,31 +30,38 @@ if (isset($_POST['update'])) {
     } else {
         header("location: " . $redirect_path . "?error=error");
     }
-}
-else if (isset($_POST['delete'])) {
+} else if (isset($_POST['desactivar'])) {
     if (isset($_POST['tbzonacuerpoid'])) {
-                $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
+        $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
         $idZonaCuerpo = $_POST['tbzonacuerpoid'];
-
-        // Primero, eliminar la imagen asociada, si existe
-        gestionarImagen('zonas_cuerpo', $idZonaCuerpo, null, true);
-
-        // Luego, eliminar el registro de la base de datos
-        $result = $zonaCuerpoBusiness->eliminarTBZonaCuerpo($idZonaCuerpo);
+        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 0); // 0 para desactivar
 
         if ($result == 1) {
-            header("location: " . $redirect_path . "?success=deleted");
+            header("location: " . $redirect_path . "?success=deactivated");
         } else {
             header("location: " . $redirect_path . "?error=dbError");
         }
     } else {
         header("location: " . $redirect_path . "?error=error");
     }
-}
-else if (isset($_POST['create'])) {
-    if (isset($_POST['tbzonacuerponombre']) && isset($_POST['tbzonacuerpodescripcion']) && isset($_POST['tbzonacuerpoactivo'])) {
+} else if (isset($_POST['activar'])) {
+    if (isset($_POST['tbzonacuerpoid'])) {
+        $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
+        $idZonaCuerpo = $_POST['tbzonacuerpoid'];
+        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 1); // 1 para activar
+
+        if ($result == 1) {
+            header("location: " . $redirect_path . "?success=activated");
+        } else {
+            header("location: " . $redirect_path . "?error=dbError");
+        }
+    } else {
+        header("location: " . $redirect_path . "?error=error");
+    }
+} else if (isset($_POST['create'])) {
+    if (isset($_POST['tbzonacuerponombre']) && isset($_POST['tbzonacuerpodescripcion'])) { // tbzonacuerpoactivo ya no se recibe del form
         if (!empty($_POST['tbzonacuerponombre']) && !empty($_POST['tbzonacuerpodescripcion'])) {
-            $zonaCuerpo = new ZonaCuerpo(0, $_POST['tbzonacuerponombre'], $_POST['tbzonacuerpodescripcion'], $_POST['tbzonacuerpoactivo']);
+            $zonaCuerpo = new ZonaCuerpo(0, $_POST['tbzonacuerponombre'], $_POST['tbzonacuerpodescripcion'], 1); // Siempre activo al crear
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $nuevoId = $zonaCuerpoBusiness->insertarTBZonaCuerpo($zonaCuerpo);
 

@@ -27,9 +27,11 @@ class ZonaCuerpoBusiness {
         return $this->zonaCuerpoData->actualizarTBZonaCuerpo($zonaCuerpo);
     }
 
-    public function eliminarTBZonaCuerpo($idZonaCuerpo) {
-        return $this->zonaCuerpoData->eliminarTBZonaCuerpo($idZonaCuerpo);
+    public function actualizarEstadoTBZonaCuerpo($idZonaCuerpo, $estado) {
+        return $this->zonaCuerpoData->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, $estado);
     }
+
+    
 
     public function getAllTBZonaCuerpo() {
         return $this->zonaCuerpoData->getAllTBZonaCuerpo();
