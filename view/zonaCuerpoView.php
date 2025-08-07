@@ -66,13 +66,31 @@ include '../business/zonaCuerpoBusiness.php';
                     echo '<td style="padding: 8px;"><input type="text" name="tbzonacuerpodescripcion" value="' . $current->getDescripcionZonaCuerpo() . '" style="width: 95%;"></td>';
                     
                     // Celda para la gestión de imágenes
-                    echo '<td style="padding: 8px;">';
-                    $rutaImagen = '../img/zonas_cuerpo/' . $current->getIdZonaCuerpo() . '.jpg';
-                    if (file_exists($rutaImagen)) {
-                        echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen actual" style="max-width: 100px; max-height: 100px; display: block; margin-bottom: 5px;">';
-                        echo '<label><input type="checkbox" name="eliminar_imagen" value="1"> Eliminar imagen</label><br>';
+                    echo '<td style="padding: 8px;" data-image-manager>';
+                    $nombreImagen = 'zonas_cuerpo_' . $current->getIdZonaCuerpo() . '.jpg';
+                    $rutaImagen = '../img/zonas_cuerpo/' . $nombreImagen;
+
+                    // Contenedor para la imagen actual y el botón de eliminar
+                    echo '<div class="imagen-actual-container"';
+                    if (!file_exists($rutaImagen)) {
+                        echo ' style="display: none;"'; // Ocultar si no hay imagen
                     }
-                    echo '<input type="file" name="imagen" accept="image/png, image/jpeg, image/webp" style="margin-top: 5px;">';
+                    echo '>';
+                    echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen actual" style="max-width: 100px; max-height: 100px; display: block; margin-bottom: 5px;">';
+                    echo '<button type="button" class="eliminar-imagen-btn" style="cursor: pointer;">X</button>';
+                    echo '</div>';
+
+                    // Contenedor para el campo de subida de archivo
+                    echo '<div class="input-imagen-container"';
+                    if (file_exists($rutaImagen)) {
+                        echo ' style="display: none;"'; // Ocultar si ya hay una imagen
+                    }
+                    echo '>';
+                    echo '<input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">';
+                    echo '</div>';
+
+                    // Campo oculto para comunicar la intención de eliminar
+                    echo '<input type="hidden" name="eliminar_imagen" value="0">';
                     echo '</td>';
 
                     echo '<td style="padding: 8px;">';
@@ -128,62 +146,64 @@ include '../business/zonaCuerpoBusiness.php';
     </footer>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Previsualización para el formulario de CREACIÓN
-        const inputImagenCrear = document.querySelector('form[action="../action/zonaCuerpoAction.php"][onsubmit*="crear"] input[type="file"][name="imagen"]');
-        if (inputImagenCrear) {
-            const previewContainerCrear = document.createElement('div');
-            previewContainerCrear.style.marginTop = '10px';
-            inputImagenCrear.parentElement.appendChild(previewContainerCrear);
+document.addEventListener('DOMContentLoaded', function() {
 
-            inputImagenCrear.addEventListener('change', function(event) {
-                const [file] = event.target.files;
-                if (file) {
-                    const preview = document.createElement('img');
-                    preview.src = URL.createObjectURL(file);
-                    preview.alt = 'Previsualización';
-                    preview.style.maxWidth = '100px';
-                    preview.style.maxHeight = '100px';
-                    previewContainerCrear.innerHTML = ''; // Limpiar previsualización anterior
-                    previewContainerCrear.appendChild(preview);
-                }
-            });
-        }
+    // Delegación de eventos para los botones 'X' y los inputs de archivo
+    const tabla = document.querySelector('table tbody');
 
-        // Previsualización para los formularios de ACTUALIZACIÓN
-        const formsActualizar = document.querySelectorAll('form[action="../action/zonaCuerpoAction.php"][enctype="multipart/form-data"]:not([onsubmit*="crear"])');
-        formsActualizar.forEach(form => {
-            const inputImagen = form.querySelector('input[type="file"][name="imagen"]');
-            const existingImage = form.querySelector('img');
-            const deleteCheckbox = form.querySelector('input[type="checkbox"][name="eliminar_imagen"]');
+    tabla.addEventListener('click', function(event) {
+        // Si se hizo clic en un botón de eliminar imagen
+        if (event.target.classList.contains('eliminar-imagen-btn')) {
+            const manager = event.target.closest('[data-image-manager]');
+            if (manager) {
+                const imagenActualContainer = manager.querySelector('.imagen-actual-container');
+                const inputContainer = manager.querySelector('.input-imagen-container');
+                const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
 
-            let previewContainer = form.querySelector('.preview-container');
-            if (!previewContainer) {
-                previewContainer = document.createElement('div');
-                previewContainer.className = 'preview-container';
-                previewContainer.style.marginTop = '10px';
-                inputImagen.parentElement.appendChild(previewContainer);
+                imagenActualContainer.style.display = 'none';
+                inputContainer.style.display = 'block';
+                hiddenEliminar.value = '1';
             }
-
-            inputImagen.addEventListener('change', function(event) {
-                const [file] = event.target.files;
-                if (file) {
-                    // Ocultar la imagen existente y el checkbox de eliminar
-                    if (existingImage) existingImage.style.display = 'none';
-                    if (deleteCheckbox) deleteCheckbox.parentElement.style.display = 'none';
-
-                    // Mostrar la nueva previsualización
-                    const preview = document.createElement('img');
-                    preview.src = URL.createObjectURL(file);
-                    preview.alt = 'Previsualización de la nueva imagen';
-                    preview.style.maxWidth = '100px';
-                    preview.style.maxHeight = '100px';
-                    previewContainer.innerHTML = ''; // Limpiar previsualización anterior
-                    previewContainer.appendChild(preview);
-                }
-            });
-        });
+        }
     });
+
+    tabla.addEventListener('change', function(event) {
+        // Si se seleccionó un archivo en un input de imagen
+        if (event.target.matches('input[type="file"][name="imagen"]')) {
+            const inputImagen = event.target;
+            const manager = inputImagen.closest('[data-image-manager]');
+            const inputContainer = inputImagen.parentElement;
+
+            const [file] = inputImagen.files;
+            if (file) {
+                // Limpiar previsualización anterior si existe
+                const oldPreview = inputContainer.querySelector('img.preview');
+                if (oldPreview) {
+                    oldPreview.remove();
+                }
+
+                // Crear y mostrar nueva previsualización
+                const preview = document.createElement('img');
+                preview.src = URL.createObjectURL(file);
+                preview.alt = 'Previsualización de nueva imagen';
+                preview.className = 'preview';
+                preview.style.maxWidth = '100px';
+                preview.style.maxHeight = '100px';
+                preview.style.marginTop = '10px';
+                inputContainer.appendChild(preview);
+
+                // Si hay un campo oculto de eliminar, anular la orden
+                if (manager) {
+                    const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
+                    if (hiddenEliminar) {
+                        hiddenEliminar.value = '0';
+                    }
+                }
+            }
+        }
+    });
+
+});
 </script>
 
 </body>

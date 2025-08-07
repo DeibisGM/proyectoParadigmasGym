@@ -3,7 +3,8 @@
 function gestionarImagen($modulo, $id, $archivo, $eliminar = false) {
     $rutaBase = __DIR__ . '/../img/';
     $directorioModulo = $rutaBase . $modulo . '/';
-    $rutaImagen = $directorioModulo . $id . '.jpg';
+    $nombreArchivo = $modulo . '_' . $id . '.jpg'; // Nuevo formato de nombre
+    $rutaImagen = $directorioModulo . $nombreArchivo;
 
     // Asegurarse de que el directorio del módulo exista
     if (!is_dir($directorioModulo)) {
