@@ -48,7 +48,12 @@ class ZonaCuerpoData extends Data {
 
         $result = mysqli_query($conn, $queryInsert);
         mysqli_close($conn);
-        return $result;
+
+        if ($result) {
+            return $nextId; // Devuelve el ID en lugar de un booleano
+        } else {
+            return false; // O un valor que indique error
+        }
     }
 
     /**

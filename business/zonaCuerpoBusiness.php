@@ -19,6 +19,7 @@ class ZonaCuerpoBusiness {
         if ($this->existeZonaCuerpoNombre($zonaCuerpo->getNombreZonaCuerpo())) {
             return -1; // Código de error para indicar que ya existe
         }
+        // Si la inserción es exitosa, la capa de datos devolverá el nuevo ID.
         return $this->zonaCuerpoData->insertarTBZonaCuerpo($zonaCuerpo);
     }
 

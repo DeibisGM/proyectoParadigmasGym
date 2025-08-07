@@ -25,6 +25,7 @@ include '../business/zonaCuerpoBusiness.php';
                 <tr>
                     <th style="padding: 8px; text-align: left;">Nombre</th>
                     <th style="padding: 8px; text-align: left;">Descripción</th>
+                    <th style="padding: 8px; text-align: left;">Imagen</th>
                     <th style="padding: 8px; text-align: left;">Activo</th>
                     <th style="padding: 8px; text-align: left;">Acción</th>
                 </tr>
@@ -32,12 +33,15 @@ include '../business/zonaCuerpoBusiness.php';
 
             <tbody>
                 <tr>
-                    <form method="post" action="../action/zonaCuerpoAction.php" onsubmit="return confirm('¿Estás seguro de que deseas crear este nuevo registro?');">
+                    <form method="post" action="../action/zonaCuerpoAction.php" enctype="multipart/form-data" onsubmit="return confirm('¿Estás seguro de que deseas crear este nuevo registro?');">
                         <td style="padding: 8px;">
                             <input type="text" name="tbzonacuerponombre" placeholder="Ej: Pecho" required style="width: 95%;">
                         </td>
                         <td style="padding: 8px;">
                             <input type="text" name="tbzonacuerpodescripcion" placeholder="Ej: Músculos pectorales" required style="width: 95%;">
+                        </td>
+                        <td style="padding: 8px;">
+                            <input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">
                         </td>
                         <td style="padding: 8px;">
                             <input type="hidden" name="tbzonacuerpoactivo" value="1">
@@ -54,12 +58,23 @@ include '../business/zonaCuerpoBusiness.php';
 
                 foreach ($allZonasCuerpo as $current) {
                     echo '<tr>';
-                    echo '<form method="post" action="../action/zonaCuerpoAction.php">';
+                    echo '<form method="post" action="../action/zonaCuerpoAction.php" enctype="multipart/form-data">';
 
                     echo '<input type="hidden" name="tbzonacuerpoid" value="' . $current->getIdZonaCuerpo() . '">';
 
                     echo '<td style="padding: 8px;"><input type="text" name="tbzonacuerponombre" value="' . $current->getNombreZonaCuerpo() . '" style="width: 95%;"></td>';
                     echo '<td style="padding: 8px;"><input type="text" name="tbzonacuerpodescripcion" value="' . $current->getDescripcionZonaCuerpo() . '" style="width: 95%;"></td>';
+                    
+                    // Celda para la gestión de imágenes
+                    echo '<td style="padding: 8px;">';
+                    $rutaImagen = '../img/zonas_cuerpo/' . $current->getIdZonaCuerpo() . '.jpg';
+                    if (file_exists($rutaImagen)) {
+                        echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen actual" style="max-width: 100px; max-height: 100px; display: block; margin-bottom: 5px;">';
+                        echo '<label><input type="checkbox" name="eliminar_imagen" value="1"> Eliminar imagen</label><br>';
+                    }
+                    echo '<input type="file" name="imagen" accept="image/png, image/jpeg, image/webp" style="margin-top: 5px;">';
+                    echo '</td>';
+
                     echo '<td style="padding: 8px;">';
                     echo '<select name="tbzonacuerpoactivo">';
                     echo '<option ' . ($current->getActivoZonaCuerpo() == 1 ? "selected" : "") . ' value="1">Sí</option>';
@@ -68,8 +83,7 @@ include '../business/zonaCuerpoBusiness.php';
                     echo '</td>';
 
                     echo '<td style="padding: 8px;">';
-
-                    echo '<input type="submit" value="Actualizar" name="update" onclick="return confirm(\'¿Estás seguro de que deseas actualizar este registro?\');"> ';
+                    echo '<input type="submit" value="Actualizar" name="update" onclick="return confirm(\'¿Estás seguro de que deseas actualizar este registro?\');"> '; 
                     echo '<input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.\');">';
                     echo '</td>';
 
@@ -112,6 +126,65 @@ include '../business/zonaCuerpoBusiness.php';
     <footer>
         <p>Fin de la página.</p>
     </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Previsualización para el formulario de CREACIÓN
+        const inputImagenCrear = document.querySelector('form[action="../action/zonaCuerpoAction.php"][onsubmit*="crear"] input[type="file"][name="imagen"]');
+        if (inputImagenCrear) {
+            const previewContainerCrear = document.createElement('div');
+            previewContainerCrear.style.marginTop = '10px';
+            inputImagenCrear.parentElement.appendChild(previewContainerCrear);
+
+            inputImagenCrear.addEventListener('change', function(event) {
+                const [file] = event.target.files;
+                if (file) {
+                    const preview = document.createElement('img');
+                    preview.src = URL.createObjectURL(file);
+                    preview.alt = 'Previsualización';
+                    preview.style.maxWidth = '100px';
+                    preview.style.maxHeight = '100px';
+                    previewContainerCrear.innerHTML = ''; // Limpiar previsualización anterior
+                    previewContainerCrear.appendChild(preview);
+                }
+            });
+        }
+
+        // Previsualización para los formularios de ACTUALIZACIÓN
+        const formsActualizar = document.querySelectorAll('form[action="../action/zonaCuerpoAction.php"][enctype="multipart/form-data"]:not([onsubmit*="crear"])');
+        formsActualizar.forEach(form => {
+            const inputImagen = form.querySelector('input[type="file"][name="imagen"]');
+            const existingImage = form.querySelector('img');
+            const deleteCheckbox = form.querySelector('input[type="checkbox"][name="eliminar_imagen"]');
+
+            let previewContainer = form.querySelector('.preview-container');
+            if (!previewContainer) {
+                previewContainer = document.createElement('div');
+                previewContainer.className = 'preview-container';
+                previewContainer.style.marginTop = '10px';
+                inputImagen.parentElement.appendChild(previewContainer);
+            }
+
+            inputImagen.addEventListener('change', function(event) {
+                const [file] = event.target.files;
+                if (file) {
+                    // Ocultar la imagen existente y el checkbox de eliminar
+                    if (existingImage) existingImage.style.display = 'none';
+                    if (deleteCheckbox) deleteCheckbox.parentElement.style.display = 'none';
+
+                    // Mostrar la nueva previsualización
+                    const preview = document.createElement('img');
+                    preview.src = URL.createObjectURL(file);
+                    preview.alt = 'Previsualización de la nueva imagen';
+                    preview.style.maxWidth = '100px';
+                    preview.style.maxHeight = '100px';
+                    previewContainer.innerHTML = ''; // Limpiar previsualización anterior
+                    previewContainer.appendChild(preview);
+                }
+            });
+        });
+    });
+</script>
 
 </body>
 </html>
