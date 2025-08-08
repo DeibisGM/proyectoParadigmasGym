@@ -48,7 +48,12 @@ class ZonaCuerpoData extends Data {
 
         $result = mysqli_query($conn, $queryInsert);
         mysqli_close($conn);
-        return $result;
+
+        if ($result) {
+            return $nextId; // Devuelve el ID en lugar de un booleano
+        } else {
+            return false; // O un valor que indique error
+        }
     }
 
     /**
@@ -71,19 +76,19 @@ class ZonaCuerpoData extends Data {
     }
 
     /**
-     * Elimina una zona del cuerpo por su ID.
+     * Actualiza el estado (activo/inactivo) de una zona del cuerpo.
      */
-    public function eliminarTBZonaCuerpo($idZonaCuerpo) {
-
+    public function actualizarEstadoTBZonaCuerpo($idZonaCuerpo, $estado) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        // Consulta de eliminación
-        $queryDelete = "DELETE from tbzonacuerpo where tbzonacuerpoid=" . $idZonaCuerpo . ";";
-        $result = mysqli_query($conn, $queryDelete);
+        $queryUpdate = "UPDATE tbzonacuerpo SET tbzonacuerpoactivo=" . $estado . " WHERE tbzonacuerpoid=" . $idZonaCuerpo . ";";
+        $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
         return $result;
     }
+
+    
 
     /**
      * Obtiene todas las zonas del cuerpo de la base de datos.
