@@ -24,7 +24,7 @@ class Data
                 $this->db = "dbgym";
                 break;
 
-            case "yei-Inspiron-3501":
+            case "yei-Inspiron-3501j":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
                 $this->user = "yei";
