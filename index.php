@@ -22,30 +22,28 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
     <title>Gym - Página Principal</title>
 </head>
 <body>
-    <div class="header">
-        <h1>Gimnasio</h1>
-        <a href="action/logoutAction.php"><button class="logout">Cerrar Sesión</button></a>
-    </div>
-    
-    <div class="welcome">
-        <p>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong></p>
-        <p>Tipo de usuario: <span class="user-type"><?php echo $tipoUsuario == 'admin' ? 'Administrador' : 'Cliente'; ?></span></p>
-    </div>
-    
-    <h2>Módulos</h2>
-    
-    <div class="button-container">
-        <?php
-        // Todos los usuarios pueden ver las zonas del cuerpo
-        echo "<a href='view/zonaCuerpoView.php'><button>Ir a Zonas del Cuerpo</button></a>";
-        
-        // Datos clínicos para todos
-        echo "<a href='view/datosClinicosView.php'><button>Ir a Datos Clínicos</button></a>";
-        
-        // Mostrar todos los módulos para todos los usuarios
-        echo "<a href='view/instructorView.php'><button>Ir a Instructores</button></a>";
-        echo "<a href='view/clienteView.php'><button>Ir a Clientes</button></a>";
-        ?>
-    </div>
+<div class="header">
+    <h1>Gimnasio</h1>
+    <a href="action/logoutAction.php">
+        <button class="logout">Cerrar Sesión</button>
+    </a>
+</div>
+
+<div class="welcome">
+    <p>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong></p>
+    <p>Tipo de usuario: <span
+                class="user-type"><?php echo $tipoUsuario == 'admin' ? 'Administrador' : 'Cliente'; ?></span></p>
+</div>
+
+<h2>Módulos</h2>
+
+<div class="button-container">
+    <?php
+    echo "<a href='view/zonaCuerpoView.php'><button>Ir a Zonas del Cuerpo</button></a>";
+    echo "<a href='view/datosClinicosView.php'><button>Ir a Datos Clínicos</button></a>";
+    echo "<a href='view/instructorView.php'><button>Ir a Instructores</button></a>";
+    echo "<a href='view/clienteView.php'><button>Ir a Clientes</button></a>";
+    ?>
+</div>
 </body>
 </html>

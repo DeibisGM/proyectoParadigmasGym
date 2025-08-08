@@ -1,5 +1,15 @@
 <?php
+session_start();
 include '../business/zonaCuerpoBusiness.php';
+
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['tipo_usuario'])) {
+    header("location: ../view/loginView.php");
+    exit();
+}
+
+// Verificar el tipo de usuario
+$esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -34,6 +44,7 @@ include '../business/zonaCuerpoBusiness.php';
 <hr>
 
 <main>
+    <?php if ($esAdmin): ?>
     <h2>Crear / Editar Zonas</h2>
 
     <table border="1" style="width:100%; border-collapse: collapse;">
@@ -68,20 +79,29 @@ include '../business/zonaCuerpoBusiness.php';
         </tr>
         </tbody>
     </table>
+    <?php endif; ?>
 
     <?php
     $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
-    $allZonasCuerpo = $zonaCuerpoBusiness->getAllTBZonaCuerpo();
+    
+    if ($esAdmin) {
+        // Los administradores pueden ver todas las zonas
+        $allZonasCuerpo = $zonaCuerpoBusiness->getAllTBZonaCuerpo();
+        
+        $zonasActivas = [];
+        $zonasInactivas = [];
 
-    $zonasActivas = [];
-    $zonasInactivas = [];
-
-    foreach ($allZonasCuerpo as $zona) {
-        if ($zona->getActivoZonaCuerpo() == 1) {
-            $zonasActivas[] = $zona;
-        } else {
-            $zonasInactivas[] = $zona;
+        foreach ($allZonasCuerpo as $zona) {
+            if ($zona->getActivoZonaCuerpo() == 1) {
+                $zonasActivas[] = $zona;
+            } else {
+                $zonasInactivas[] = $zona;
+            }
         }
+    } else {
+        // Los clientes solo pueden ver zonas activas
+        $zonasActivas = $zonaCuerpoBusiness->getActiveTBZonaCuerpo();
+        $zonasInactivas = []; // Lista vacía para clientes
     }
     ?>
 
@@ -103,6 +123,7 @@ include '../business/zonaCuerpoBusiness.php';
         <?php else: ?>
             <?php foreach ($zonasActivas as $current): ?>
                 <tr>
+                    <?php if ($esAdmin): ?>
                     <form method="post" action="../action/zonaCuerpoAction.php" enctype="multipart/form-data">
                         <input type="hidden" name="tbzonacuerpoid" value="<?= $current->getIdZonaCuerpo() ?>">
                         <td style="padding: 8px;"><input type="text" name="tbzonacuerponombre"
@@ -137,6 +158,23 @@ include '../business/zonaCuerpoBusiness.php';
                                    onclick="return confirm('¿Estás seguro de que deseas desactivar este registro?');">
                         </td>
                     </form>
+                    <?php else: ?>
+                        <!-- Vista de solo lectura para clientes -->
+                        <td style="padding: 8px;"><?= $current->getNombreZonaCuerpo() ?></td>
+                        <td style="padding: 8px;"><?= $current->getDescripcionZonaCuerpo() ?></td>
+                        <td style="padding: 8px;">
+                            <?php
+                            $nombreImagen = 'zonas_cuerpo_' . $current->getIdZonaCuerpo() . '.jpg';
+                            $rutaImagen = '../img/zonas_cuerpo/' . $nombreImagen;
+                            if (file_exists($rutaImagen)) {
+                                echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen" style="max-width: 100px; max-height: 100px;">';
+                            } else {
+                                echo 'Sin imagen';
+                            }
+                            ?>
+                        </td>
+                        <td style="padding: 8px; text-align: center;">Solo vista</td>
+                    <?php endif; ?>
                 </tr>
             <?php endforeach; ?>
         <?php endif; ?>
@@ -145,6 +183,7 @@ include '../business/zonaCuerpoBusiness.php';
 
     <br>
 
+    <?php if ($esAdmin): ?>
     <h2>Zonas Inactivas</h2>
     <table border="1" style="width:100%; border-collapse: collapse;">
         <thead>
@@ -188,6 +227,7 @@ include '../business/zonaCuerpoBusiness.php';
         <?php endif; ?>
         </tbody>
     </table>
+    <?php endif; ?>
 
     <br>
 
@@ -202,6 +242,8 @@ include '../business/zonaCuerpoBusiness.php';
                 echo '<p><b>Error: Ocurrió un error inesperado.</b></p>';
             } else if ($_GET['error'] == "duplicateZone") {
                 echo '<p><b>Error: La zona del cuerpo ya existe. No se pueden crear zonas duplicadas.</b></p>';
+            } else if ($_GET['error'] == "unauthorized") {
+                echo '<p><b>Error: No tiene permisos para realizar esta acción. Solo los administradores pueden crear, editar o cambiar el estado de las zonas del cuerpo.</b></p>';
             }
         } else if (isset($_GET['success'])) {
             if ($_GET['success'] == "inserted") {
