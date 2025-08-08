@@ -25,5 +25,13 @@ class InstructorBusiness {
     public function getAllTBInstructor() {
         return $this->instructorData->getAllTBInstructor();
     }
+    
+    public function autenticarInstructor($correo, $cuenta) {
+        return $this->instructorData->autenticarInstructor($correo, $cuenta);
+    }
+    
+    public function getInstructorPorId($id) {
+        return $this->instructorData->getInstructorPorId($id);
+    }
 }
 ?>

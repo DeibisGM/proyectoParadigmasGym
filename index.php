@@ -1,21 +1,51 @@
 <?php
-    echo "<h1>Bienvenido al Gimnasio</h1>";
+session_start();
 
-    echo "</br>";
+// Verificar si el usuario ha iniciado sesión
+if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
+    // Si no hay sesión, redirigir al login
+    header("Location: view/loginView.php");
+    exit();
+}
 
-    echo "<a href='view/zonaCuerpoView.php'>
-            <button>Ir a Zonas del Cuerpo</button>
-          </a>";
+// Obtener información del usuario
+$usuarioId = $_SESSION['usuario_id'];
+$tipoUsuario = $_SESSION['tipo_usuario'];
+$nombreUsuario = $_SESSION['usuario_nombre'];
 
-    echo "<a href='view/instructorView.php'>
-                <button>Ir a Instructores</button>
-              </a>";
-
-    echo "<a href='view/clienteView.php'>
-                    <button>Ir a clientes</button>
-                  </a>";
-
-    echo "<a href='view/datosClinicosView.php'>
-              <button>Ir a datos clinicos</button>
-          </a>";
 ?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym - Página Principal</title>
+</head>
+<body>
+    <div class="header">
+        <h1>Gimnasio</h1>
+        <a href="action/logoutAction.php"><button class="logout">Cerrar Sesión</button></a>
+    </div>
+    
+    <div class="welcome">
+        <p>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong></p>
+        <p>Tipo de usuario: <span class="user-type"><?php echo $tipoUsuario == 'admin' ? 'Administrador' : 'Cliente'; ?></span></p>
+    </div>
+    
+    <h2>Módulos</h2>
+    
+    <div class="button-container">
+        <?php
+        // Todos los usuarios pueden ver las zonas del cuerpo
+        echo "<a href='view/zonaCuerpoView.php'><button>Ir a Zonas del Cuerpo</button></a>";
+        
+        // Datos clínicos para todos
+        echo "<a href='view/datosClinicosView.php'><button>Ir a Datos Clínicos</button></a>";
+        
+        // Mostrar todos los módulos para todos los usuarios
+        echo "<a href='view/instructorView.php'><button>Ir a Instructores</button></a>";
+        echo "<a href='view/clienteView.php'><button>Ir a Clientes</button></a>";
+        ?>
+    </div>
+</body>
+</html>

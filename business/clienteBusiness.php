@@ -29,6 +29,14 @@ class ClienteBusiness {
     public function existeClientePorCarnet($carnet) {
         return $this->clienteData->existeClientePorCarnet($carnet);
     }
+    
+    public function autenticarCliente($correo, $contrasena) {
+        return $this->clienteData->autenticarCliente($correo, $contrasena);
+    }
+    
+    public function getClientePorId($id) {
+        return $this->clienteData->getClientePorId($id);
+    }
 }
 
 ?>

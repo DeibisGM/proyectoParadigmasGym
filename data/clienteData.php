@@ -18,7 +18,8 @@ class ClienteData extends Data {
             tbclientesdireccion,
             tbclientesgenero,
             tbclientesinscripcion,
-            tbclientesestado
+            tbclientesestado,
+            tbclientescontrasena
         ) VALUES (
             '" . $cliente->getCarnet() . "',
             '" . $cliente->getNombre() . "',
@@ -28,7 +29,8 @@ class ClienteData extends Data {
             '" . $cliente->getDireccion() . "',
             '" . $cliente->getGenero() . "',
             '" . $cliente->getInscripcion() . "',
-            '" . $cliente->getEstado() . "'
+            '" . $cliente->getEstado() . "',
+            '" . $cliente->getContrasena() . "'
         );";
 
         $result = mysqli_query($conn, $queryInsert);
@@ -49,7 +51,8 @@ class ClienteData extends Data {
             tbclientesdireccion='" . $cliente->getDireccion() . "',
             tbclientesgenero='" . $cliente->getGenero() . "',
             tbclientesinscripcion='" . $cliente->getInscripcion() . "',
-            tbclientesestado='" . $cliente->getEstado() . "'
+            tbclientesestado='" . $cliente->getEstado() . "',
+            tbclientescontrasena='" . $cliente->getContrasena() . "'
             WHERE tbclientesid=" . $cliente->getId() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
@@ -86,7 +89,8 @@ class ClienteData extends Data {
                 $row['tbclientesdireccion'],
                 $row['tbclientesgenero'],
                 $row['tbclientesinscripcion'],
-                $row['tbclientesestado']
+                $row['tbclientesestado'],
+                isset($row['tbclientescontrasena']) ? $row['tbclientescontrasena'] : ''
             );
         }
 
@@ -104,6 +108,67 @@ class ClienteData extends Data {
 
         mysqli_close($conn);
         return $existe;
+    }
+    
+    public function autenticarCliente($correo, $contrasena) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        
+        // Escape strings to prevent SQL injection
+        $correo = mysqli_real_escape_string($conn, $correo);
+        $contrasena = mysqli_real_escape_string($conn, $contrasena);
+        
+        $query = "SELECT * FROM tbclientes WHERE tbclientescorreo='" . $correo . "' AND tbclientescontrasena='" . $contrasena . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
+        
+        $cliente = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $cliente = new Cliente(
+                $row['tbclientesid'],
+                $row['tbclientescarnet'],
+                $row['tbclientesnombre'],
+                $row['tbclientesfechanacimiento'],
+                $row['tbclientestelefono'],
+                $row['tbclientescorreo'],
+                $row['tbclientesdireccion'],
+                $row['tbclientesgenero'],
+                $row['tbclientesinscripcion'],
+                $row['tbclientesestado'],
+                $row['tbclientescontrasena']
+            );
+        }
+        
+        mysqli_close($conn);
+        return $cliente;
+    }
+    
+    public function getClientePorId($id) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        
+        $id = mysqli_real_escape_string($conn, $id);
+        $query = "SELECT * FROM tbclientes WHERE tbclientesid='" . $id . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
+        
+        $cliente = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $cliente = new Cliente(
+                $row['tbclientesid'],
+                $row['tbclientescarnet'],
+                $row['tbclientesnombre'],
+                $row['tbclientesfechanacimiento'],
+                $row['tbclientestelefono'],
+                $row['tbclientescorreo'],
+                $row['tbclientesdireccion'],
+                $row['tbclientesgenero'],
+                $row['tbclientesinscripcion'],
+                $row['tbclientesestado'],
+                $row['tbclientescontrasena']
+            );
+        }
+        
+        mysqli_close($conn);
+        return $cliente;
     }
 }
 ?>
