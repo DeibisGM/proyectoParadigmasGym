@@ -40,11 +40,14 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
         echo "<a href='view/zonaCuerpoView.php'><button>Ir a Zonas del Cuerpo</button></a>";
         
         // Datos clínicos para todos
-        echo "<a href='view/datosClinicosView.php'><button>Ir a Datos Clínicos</button></a>";
-        
+        echo "<a href='view/datosClinicosViewAdmin.php'><button>Ir a Datos Clínicos</button></a>";
+        //Datos clínicos para usuarios
+        echo "<a href='view/datosClinicosViewUsuario.php'><button>Ir a Datos Clínicos</button></a>";
+
         // Mostrar todos los módulos para todos los usuarios
         echo "<a href='view/instructorView.php'><button>Ir a Instructores</button></a>";
         echo "<a href='view/clienteView.php'><button>Ir a Clientes</button></a>";
+
         ?>
     </div>
 </body>
