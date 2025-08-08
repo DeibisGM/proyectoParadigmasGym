@@ -55,7 +55,8 @@ class DatosClinicosBusiness{
 
     public function validarDatosClinicos($enfermedad, $otraEnfermedad, $tomaMedicamento,
                                            $medicamento, $lesion, $descripcionLesion,
-                                           $discapacidad, $descripcionDiscapacidad, $restriccionMedica){
+                                           $discapacidad, $descripcionDiscapacidad, $restriccionMedica,
+                                           $descripcionrestriccionmedica){
         $errores = array();
 
         if($enfermedad == 1 && (empty($otraEnfermedad) || trim($otraEnfermedad) == "")){
@@ -72,6 +73,10 @@ class DatosClinicosBusiness{
 
         if($discapacidad == 1 && (empty($descripcionDiscapacidad) || trim($descripcionDiscapacidad) == "")){
             $errores[] = "Debe describir la discapacidad que posee";
+        }
+
+        if($restriccionMedica ==1 && (empty($descripcionrestriccionmedica) || trim($descripcionrestriccionmedica) == "")){
+            $errores[] = "Debe describir la restricción médica";
         }
 
         return $errores;

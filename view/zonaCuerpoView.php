@@ -1,5 +1,15 @@
 <?php
+session_start();
 include '../business/zonaCuerpoBusiness.php';
+
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['tipo_usuario'])) {
+    header("location: ../view/loginView.php");
+    exit();
+}
+
+// Verificar el tipo de usuario
+$esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -7,109 +17,313 @@ include '../business/zonaCuerpoBusiness.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Zonas del Cuerpo</title>
+    <style>
+        table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        td, th {
+            overflow: hidden;
+            word-wrap: break-word;
+        }
+
+        input[type="text"] {
+            width: 95%;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body>
 
-    <header>
-        <h2>Gym - Zonas del Cuerpo</h2>
-        <a href="../index.php">Volver al Inicio</a>
-    </header>
+<header>
+    <h2>Gym - Zonas del Cuerpo</h2>
+    <a href="../index.php">Volver al Inicio</a>
+</header>
 
-    <hr>
+<hr>
 
-    <main>
-        <h2>Crear / Editar Zonas</h2>
+<main>
+    <?php if ($esAdmin): ?>
+    <h2>Crear / Editar Zonas</h2>
 
-        <table border="1" style="width:100%; border-collapse: collapse;">
-            <thead>
+    <table border="1" style="width:100%; border-collapse: collapse;">
+        <thead>
+        <tr>
+            <th style="padding: 8px; text-align: left; width: 25%;">Nombre</th>
+            <th style="padding: 8px; text-align: left; width: 35%;">Descripción</th>
+            <th style="padding: 8px; text-align: left; width: 25%;">Imagen</th>
+            <th style="padding: 8px; text-align: left; width: 15%;">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr>
+            <form method="post" action="../action/zonaCuerpoAction.php" enctype="multipart/form-data"
+                  onsubmit="return confirm('¿Estás seguro de que deseas crear este nuevo registro?');">
+                <td style="padding: 8px;">
+                    <input type="text" name="tbzonacuerponombre" placeholder="Ej: Pecho" required
+                           style="width: 100%; box-sizing: border-box;">
+                </td>
+                <td style="padding: 8px;">
+                    <input type="text" name="tbzonacuerpodescripcion" placeholder="Ej: Músculos pectorales" required
+                           style="width: 100%; box-sizing: border-box;">
+                </td>
+                <td style="padding: 8px;">
+                    <input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">
+                </td>
+                <td style="padding: 8px; text-align: center;">
+                    <input type="submit" value="Crear" name="create" style="width: 90%;">
+                </td>
+            </form>
+        </tr>
+        </tbody>
+    </table>
+    <?php endif; ?>
+
+    <?php
+    $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
+    
+    if ($esAdmin) {
+        // Los administradores pueden ver todas las zonas
+        $allZonasCuerpo = $zonaCuerpoBusiness->getAllTBZonaCuerpo();
+        
+        $zonasActivas = [];
+        $zonasInactivas = [];
+
+        foreach ($allZonasCuerpo as $zona) {
+            if ($zona->getActivoZonaCuerpo() == 1) {
+                $zonasActivas[] = $zona;
+            } else {
+                $zonasInactivas[] = $zona;
+            }
+        }
+    } else {
+        // Los clientes solo pueden ver zonas activas
+        $zonasActivas = $zonaCuerpoBusiness->getActiveTBZonaCuerpo();
+        $zonasInactivas = []; // Lista vacía para clientes
+    }
+    ?>
+
+    <h2>Zonas Activas</h2>
+    <table border="1" style="width:100%; border-collapse: collapse;">
+        <thead>
+        <tr>
+            <th style="padding: 8px; text-align: left; width: 25%;">Nombre</th>
+            <th style="padding: 8px; text-align: left; width: 35%;">Descripción</th>
+            <th style="padding: 8px; text-align: left; width: 25%;">Imagen</th>
+            <th style="padding: 8px; text-align: left; width: 15%;">Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php if (empty($zonasActivas)): ?>
+            <tr>
+                <td colspan="4" style="text-align: center;">No hay zonas activas.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($zonasActivas as $current): ?>
                 <tr>
-                    <th style="padding: 8px; text-align: left;">Nombre</th>
-                    <th style="padding: 8px; text-align: left;">Descripción</th>
-                    <th style="padding: 8px; text-align: left;">Activo</th>
-                    <th style="padding: 8px; text-align: left;">Acción</th>
+                    <?php if ($esAdmin): ?>
+                    <form method="post" action="../action/zonaCuerpoAction.php" enctype="multipart/form-data">
+                        <input type="hidden" name="tbzonacuerpoid" value="<?= $current->getIdZonaCuerpo() ?>">
+                        <td style="padding: 8px;"><input type="text" name="tbzonacuerponombre"
+                                                         value="<?= $current->getNombreZonaCuerpo() ?>"
+                                                         style="width: 100%; box-sizing: border-box;"></td>
+                        <td style="padding: 8px;"><input type="text" name="tbzonacuerpodescripcion"
+                                                         value="<?= $current->getDescripcionZonaCuerpo() ?>"
+                                                         style="width: 100%; box-sizing: border-box;"></td>
+
+                        <!-- Celda para la gestión de imágenes -->
+                        <td style="padding: 8px;" data-image-manager>
+                            <?php
+                            $nombreImagen = 'zonas_cuerpo_' . $current->getIdZonaCuerpo() . '.jpg';
+                            $rutaImagen = '../img/zonas_cuerpo/' . $nombreImagen;
+                            ?>
+                            <div class="imagen-actual-container" <?= !file_exists($rutaImagen) ? ' style="display: none;"' : '' ?>>
+                                <img src="<?= $rutaImagen ?>?t=<?= time() ?>" alt="Imagen actual"
+                                     style="max-width: 100px; max-height: 100px; display: block; margin-bottom: 5px;">
+                                <button type="button" class="eliminar-imagen-btn" style="cursor: pointer;">X</button>
+                            </div>
+                            <div class="input-imagen-container" <?= file_exists($rutaImagen) ? ' style="display: none;"' : '' ?>>
+                                <input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">
+                            </div>
+                            <input type="hidden" name="eliminar_imagen" value="0">
+                        </td>
+
+                        <td style="padding: 8px; text-align: center;">
+                            <input type="submit" value="Actualizar" name="update"
+                                   style="margin-bottom: 5px; width: 90%;"
+                                   onclick="return confirm('¿Estás seguro de que deseas actualizar este registro?');">
+                            <input type="submit" value="Desactivar" name="desactivar" style="width: 90%;"
+                                   onclick="return confirm('¿Estás seguro de que deseas desactivar este registro?');">
+                        </td>
+                    </form>
+                    <?php else: ?>
+                        <!-- Vista de solo lectura para clientes -->
+                        <td style="padding: 8px;"><?= $current->getNombreZonaCuerpo() ?></td>
+                        <td style="padding: 8px;"><?= $current->getDescripcionZonaCuerpo() ?></td>
+                        <td style="padding: 8px;">
+                            <?php
+                            $nombreImagen = 'zonas_cuerpo_' . $current->getIdZonaCuerpo() . '.jpg';
+                            $rutaImagen = '../img/zonas_cuerpo/' . $nombreImagen;
+                            if (file_exists($rutaImagen)) {
+                                echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen" style="max-width: 100px; max-height: 100px;">';
+                            } else {
+                                echo 'Sin imagen';
+                            }
+                            ?>
+                        </td>
+                        <td style="padding: 8px; text-align: center;">Solo vista</td>
+                    <?php endif; ?>
                 </tr>
-            </thead>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        </tbody>
+    </table>
 
-            <tbody>
+    <br>
+
+    <?php if ($esAdmin): ?>
+    <h2>Zonas Inactivas</h2>
+    <table border="1" style="width:100%; border-collapse: collapse;">
+        <thead>
+        <tr>
+            <th style="padding: 8px; text-align: left; width: 25%;">Nombre</th>
+            <th style="padding: 8px; text-align: left; width: 35%;">Descripción</th>
+            <th style="padding: 8px; text-align: left; width: 25%;">Imagen</th>
+            <th style="padding: 8px; text-align: left; width: 15%;">Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php if (empty($zonasInactivas)): ?>
+            <tr>
+                <td colspan="4" style="text-align: center;">No hay zonas inactivas.</td>
+            </tr>
+        <?php else: ?>
+            <?php foreach ($zonasInactivas as $current): ?>
                 <tr>
-                    <form method="post" action="../action/zonaCuerpoAction.php" onsubmit="return confirm('¿Estás seguro de que deseas crear este nuevo registro?');">
+                    <form method="post" action="../action/zonaCuerpoAction.php">
+                        <input type="hidden" name="tbzonacuerpoid" value="<?= $current->getIdZonaCuerpo() ?>">
+                        <td style="padding: 8px;"><?= $current->getNombreZonaCuerpo() ?></td>
+                        <td style="padding: 8px;"><?= $current->getDescripcionZonaCuerpo() ?></td>
                         <td style="padding: 8px;">
-                            <input type="text" name="tbzonacuerponombre" placeholder="Ej: Pecho" required style="width: 95%;">
+                            <?php
+                            $nombreImagen = 'zonas_cuerpo_' . $current->getIdZonaCuerpo() . '.jpg';
+                            $rutaImagen = '../img/zonas_cuerpo/' . $nombreImagen;
+                            if (file_exists($rutaImagen)) {
+                                echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen" style="max-width: 100px; max-height: 100px;">';
+                            } else {
+                                echo 'Sin imagen';
+                            }
+                            ?>
                         </td>
-                        <td style="padding: 8px;">
-                            <input type="text" name="tbzonacuerpodescripcion" placeholder="Ej: Músculos pectorales" required style="width: 95%;">
-                        </td>
-                        <td style="padding: 8px;">
-                            <input type="hidden" name="tbzonacuerpoactivo" value="1">
-                        </td>
-                        <td style="padding: 8px;">
-                            <input type="submit" value="Crear" name="create">
+                        <td style="padding: 8px; text-align: center;">
+                            <input type="submit" value="Activar" name="activar" style="width: 90%;"
+                                   onclick="return confirm('¿Estás seguro de que deseas activar este registro?');">
                         </td>
                     </form>
                 </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+        </tbody>
+    </table>
+    <?php endif; ?>
 
-                <?php
-                $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
-                $allZonasCuerpo = $zonaCuerpoBusiness->getAllTBZonaCuerpo();
+    <br>
 
-                foreach ($allZonasCuerpo as $current) {
-                    echo '<tr>';
-                    echo '<form method="post" action="../action/zonaCuerpoAction.php">';
+    <div>
+        <?php
+        if (isset($_GET['error'])) {
+            if ($_GET['error'] == "emptyField") {
+                echo '<p><b>Error: Hay campos vacíos.</b></p>';
+            } else if ($_GET['error'] == "dbError") {
+                echo '<p><b>Error: No se pudo procesar la transacción en la base de datos.</b></p>';
+            } else if ($_GET['error'] == "error") {
+                echo '<p><b>Error: Ocurrió un error inesperado.</b></p>';
+            } else if ($_GET['error'] == "duplicateZone") {
+                echo '<p><b>Error: La zona del cuerpo ya existe. No se pueden crear zonas duplicadas.</b></p>';
+            } else if ($_GET['error'] == "unauthorized") {
+                echo '<p><b>Error: No tiene permisos para realizar esta acción. Solo los administradores pueden crear, editar o cambiar el estado de las zonas del cuerpo.</b></p>';
+            }
+        } else if (isset($_GET['success'])) {
+            if ($_GET['success'] == "inserted") {
+                echo '<p><b>Éxito: Registro insertado correctamente.</b></p>';
+            } else if ($_GET['success'] == "updated") {
+                echo '<p><b>Éxito: Registro actualizado correctamente.</b></p>';
+            } else if ($_GET['success'] == "deactivated") {
+                echo '<p><b>Éxito: Registro desactivado correctamente.</b></p>';
+            } else if ($_GET['success'] == "activated") {
+                echo '<p><b>Éxito: Registro activado correctamente.</b></p>';
+            }
+        }
+        ?>
+    </div>
+</main>
 
-                    echo '<input type="hidden" name="tbzonacuerpoid" value="' . $current->getIdZonaCuerpo() . '">';
+<hr>
 
-                    echo '<td style="padding: 8px;"><input type="text" name="tbzonacuerponombre" value="' . $current->getNombreZonaCuerpo() . '" style="width: 95%;"></td>';
-                    echo '<td style="padding: 8px;"><input type="text" name="tbzonacuerpodescripcion" value="' . $current->getDescripcionZonaCuerpo() . '" style="width: 95%;"></td>';
-                    echo '<td style="padding: 8px;">';
-                    echo '<select name="tbzonacuerpoactivo">';
-                    echo '<option ' . ($current->getActivoZonaCuerpo() == 1 ? "selected" : "") . ' value="1">Sí</option>';
-                    echo '<option ' . ($current->getActivoZonaCuerpo() == 0 ? "selected" : "") . ' value="0">No</option>';
-                    echo '</select>';
-                    echo '</td>';
+<footer>
+    <p>Fin de la página.</p>
+</footer>
 
-                    echo '<td style="padding: 8px;">';
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-                    echo '<input type="submit" value="Actualizar" name="update" onclick="return confirm(\'¿Estás seguro de que deseas actualizar este registro?\');"> ';
-                    echo '<input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.\');">';
-                    echo '</td>';
+        // Delegación de eventos para los botones 'X' y los inputs de archivo
+        document.addEventListener('click', function (event) {
+            // Si se hizo clic en un botón de eliminar imagen
+            if (event.target.classList.contains('eliminar-imagen-btn')) {
+                const manager = event.target.closest('[data-image-manager]');
+                if (manager) {
+                    const imagenActualContainer = manager.querySelector('.imagen-actual-container');
+                    const inputContainer = manager.querySelector('.input-imagen-container');
+                    const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
 
-                    echo '</form>';
-                    echo '</tr>';
-                }
-                ?>
-            </tbody>
-        </table>
-
-        <br>
-
-        <div>
-            <?php
-            if (isset($_GET['error'])) {
-                if ($_GET['error'] == "emptyField") {
-                    echo '<p><b>Error: Hay campos vacíos.</b></p>';
-                } else if ($_GET['error'] == "dbError") {
-                    echo '<p><b>Error: No se pudo procesar la transacción en la base de datos.</b></p>';
-                } else if ($_GET['error'] == "error") {
-                    echo '<p><b>Error: Ocurrió un error inesperado.</b></p>';
-                }
-            } else if (isset($_GET['success'])) {
-                if ($_GET['success'] == "inserted") {
-                    echo '<p><b>Éxito: Registro insertado correctamente.</b></p>';
-                } else if ($_GET['success'] == "updated") {
-                    echo '<p><b>Éxito: Registro actualizado correctamente.</b></p>';
-                } else if ($_GET['success'] == "deleted") {
-                    echo '<p><b>Éxito: Registro eliminado correctamente.</b></p>';
+                    imagenActualContainer.style.display = 'none';
+                    inputContainer.style.display = 'block';
+                    hiddenEliminar.value = '1';
                 }
             }
-            ?>
-        </div>
-    </main>
+        });
 
-    <hr>
+        document.addEventListener('change', function (event) {
+            // Si se seleccionó un archivo en un input de imagen
+            if (event.target.matches('input[type="file"][name="imagen"]')) {
+                const inputImagen = event.target;
+                const manager = inputImagen.closest('[data-image-manager]');
+                const inputContainer = inputImagen.parentElement;
 
-    <footer>
-        <p>Fin de la página.</p>
-    </footer>
+                const [file] = inputImagen.files;
+                if (file) {
+                    // Limpiar previsualización anterior si existe
+                    const oldPreview = inputContainer.querySelector('img.preview');
+                    if (oldPreview) {
+                        oldPreview.remove();
+                    }
+
+                    // Crear y mostrar nueva previsualización
+                    const preview = document.createElement('img');
+                    preview.src = URL.createObjectURL(file);
+                    preview.alt = 'Previsualización de nueva imagen';
+                    preview.className = 'preview';
+                    preview.style.maxWidth = '100px';
+                    preview.style.maxHeight = '100px';
+                    preview.style.marginTop = '10px';
+                    inputContainer.appendChild(preview);
+
+                    // Si hay un campo oculto de eliminar, anular la orden
+                    if (manager) {
+                        const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
+                        if (hiddenEliminar) {
+                            hiddenEliminar.value = '0';
+                        }
+                    }
+                }
+            }
+        });
+
+    });
+</script>
 
 </body>
 </html>

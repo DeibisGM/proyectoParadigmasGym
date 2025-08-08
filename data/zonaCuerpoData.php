@@ -6,6 +6,22 @@ include '../domain/zonaCuerpo.php';
 class ZonaCuerpoData extends Data {
 
     /**
+     * Verifica si ya existe una zona del cuerpo con el nombre especificado.
+     */
+    public function existeZonaCuerpoNombre($nombreZonaCuerpo) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        // Consulta para verificar si existe una zona con el mismo nombre
+        $queryCheck = "SELECT COUNT(*) as count FROM tbzonacuerpo WHERE tbzonacuerponombre = '" . $nombreZonaCuerpo . "';";
+        $result = mysqli_query($conn, $queryCheck);
+        $row = mysqli_fetch_assoc($result);
+        
+        mysqli_close($conn);
+        return ($row['count'] > 0);
+    }
+
+    /**
      * Inserta una nueva zona del cuerpo en la base de datos.
      */
     public function insertarTBZonaCuerpo($zonaCuerpo) {
@@ -32,7 +48,12 @@ class ZonaCuerpoData extends Data {
 
         $result = mysqli_query($conn, $queryInsert);
         mysqli_close($conn);
-        return $result;
+
+        if ($result) {
+            return $nextId; // Devuelve el ID en lugar de un booleano
+        } else {
+            return false; // O un valor que indique error
+        }
     }
 
     /**
@@ -55,19 +76,19 @@ class ZonaCuerpoData extends Data {
     }
 
     /**
-     * Elimina una zona del cuerpo por su ID.
+     * Actualiza el estado (activo/inactivo) de una zona del cuerpo.
      */
-    public function eliminarTBZonaCuerpo($idZonaCuerpo) {
-
+    public function actualizarEstadoTBZonaCuerpo($idZonaCuerpo, $estado) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        // Consulta de eliminación
-        $queryDelete = "DELETE from tbzonacuerpo where tbzonacuerpoid=" . $idZonaCuerpo . ";";
-        $result = mysqli_query($conn, $queryDelete);
+        $queryUpdate = "UPDATE tbzonacuerpo SET tbzonacuerpoactivo=" . $estado . " WHERE tbzonacuerpoid=" . $idZonaCuerpo . ";";
+        $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
         return $result;
     }
+
+    
 
     /**
      * Obtiene todas las zonas del cuerpo de la base de datos.
@@ -79,6 +100,27 @@ class ZonaCuerpoData extends Data {
 
         // Consulta de selección
         $querySelect = "SELECT * FROM tbzonacuerpo;";
+        $result = mysqli_query($conn, $querySelect);
+        mysqli_close($conn);
+
+        $zonasCuerpo = [];
+        while ($row = mysqli_fetch_array($result)) {
+            $currentZonaCuerpo = new ZonaCuerpo($row['tbzonacuerpoid'], $row['tbzonacuerponombre'], $row['tbzonacuerpodescripcion'], $row['tbzonacuerpoactivo']);
+            array_push($zonasCuerpo, $currentZonaCuerpo);
+        }
+        return $zonasCuerpo;
+    }
+    
+    /**
+     * Obtiene solo las zonas del cuerpo activas de la base de datos.
+     */
+    public function getActiveTBZonaCuerpo() {
+
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        // Consulta de selección filtrando solo activos (tbzonacuerpoactivo = 1)
+        $querySelect = "SELECT * FROM tbzonacuerpo WHERE tbzonacuerpoactivo = 1;";
         $result = mysqli_query($conn, $querySelect);
         mysqli_close($conn);
 

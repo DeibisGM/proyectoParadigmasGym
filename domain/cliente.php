@@ -10,8 +10,9 @@ class Cliente {
     private $genero;
     private $inscripcion;
     private $estado;
+    private $contrasena;
 
-    public function __construct($id, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $inscripcion, $estado) {
+    public function __construct($id, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $inscripcion, $estado, $contrasena = '') {
         $this->id = $id;
         $this->carnet = $carnet;
         $this->nombre = $nombre;
@@ -22,6 +23,7 @@ class Cliente {
         $this->genero = $genero;
         $this->inscripcion = $inscripcion;
         $this->estado = $estado;
+        $this->contrasena = $contrasena;
     }
 
     public function getId() { return $this->id; }
@@ -53,5 +55,8 @@ class Cliente {
 
     public function getEstado() { return $this->estado; }
     public function setEstado($estado) { $this->estado = $estado; }
+    
+    public function getContrasena() { return $this->contrasena; }
+    public function setContrasena($contrasena) { $this->contrasena = $contrasena; }
 }
 ?>

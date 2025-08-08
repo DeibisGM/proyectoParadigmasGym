@@ -1,6 +1,7 @@
 <?php
 
-class Data {
+class Data
+{
 
     public $server;
     public $user;
@@ -10,7 +11,8 @@ class Data {
     public $port;
     public $isActive;
 
-    public function __construct() {
+    public function __construct()
+    {
         $hostName = gethostname();
 
         switch ($hostName) {
@@ -22,7 +24,7 @@ class Data {
                 $this->db = "dbgym";
                 break;
 
-            case "yei-Inspiron-3501":
+            case "yei-Inspiron-3501j":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
                 $this->user = "yei";
@@ -30,23 +32,25 @@ class Data {
                 $this->db = "dbgym";
                 break;
 
-                case "ciany-Inspiron-15-3515":
-                                $this->isActive = false;
-                                $this->server = "127.0.0.1";
-                                $this->user = "ciany";
-                                $this->password = "1223";
-                                $this->db = "dbgym";
-                                break;
+            case "ciany-Inspiron-15-3515":
+                $this->isActive = false;
+                $this->server = "127.0.0.1";
+                $this->user = "ciany";
+                $this->password = "1223";
+                $this->db = "dbgym";
+                break;
 
             default:
-                 $this->isActive = false;
-      			  $this->server = "trolley.proxy.rlwy.net";
-                       			 $this->user = "root";
-                       			 $this->password = "iWhsTZUYVbbGunlbHOURKukfYwliQNiq";
-                       			 $this->db = "railway";
-                       			 $this->port = 43809;
+                $this->isActive = false;
+                $this->server = "trolley.proxy.rlwy.net";
+                $this->user = "root";
+                $this->password = "iWhsTZUYVbbGunlbHOURKukfYwliQNiq";
+                $this->db = "railway";
+                $this->port = 43809;
+
                 break;
         }
     }
 }
+
 ?>

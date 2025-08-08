@@ -66,7 +66,7 @@ class InstructorData extends Data {
        $querySelect = "SELECT * FROM tbinstructor;";
        $result = mysqli_query($conn, $querySelect);
        mysqli_close($conn);
-
+     
        $instructors = [];
        while ($row = mysqli_fetch_assoc($result)) {
            $instructors[] = new Instructor(
@@ -81,5 +81,58 @@ class InstructorData extends Data {
        }
        return $instructors;
    }
+
+    
+    public function autenticarInstructor($correo, $cuenta) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        
+        // Escape strings to prevent SQL injection
+        $correo = mysqli_real_escape_string($conn, $correo);
+        $cuenta = mysqli_real_escape_string($conn, $cuenta);
+        
+        $query = "SELECT * FROM tbinstructor WHERE tbinstructorCorreo='" . $correo . "' AND tbinstructorContraseña='" . $cuenta . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
+        
+        $instructor = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $instructor = new Instructor(
+                $row['tbinstructorId'],
+                $row['tbinstructorNombre'],
+                $row['tbinstructorTelefono'],
+                $row['tbinstructorDireccion'],
+                $row['tbinstructorCorreo'],
+                $row['tbinstructorContraseña']
+            );
+        }
+        
+        mysqli_close($conn);
+        return $instructor;
+    }
+    
+    public function getInstructorPorId($id) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        
+        $id = mysqli_real_escape_string($conn, $id);
+        $query = "SELECT * FROM tbinstructor WHERE tbinstructorId='" . $id . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
+        
+        $instructor = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $instructor = new Instructor(
+                $row['tbinstructorId'],
+                $row['tbinstructorNombre'],
+                $row['tbinstructorTelefono'],
+                $row['tbinstructorDireccion'],
+                $row['tbinstructorCorreo'],
+                $row['tbinstructorContraseña']
+            );
+        }
+        
+        mysqli_close($conn);
+        return $instructor;
+    }
+
 }
 ?>
