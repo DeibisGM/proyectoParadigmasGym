@@ -28,16 +28,8 @@ class DatosClinicosBusiness{
         return $this->datosClinicosData->eliminarTBDatosClinicos($tbdatosclinicosid);
     }
 
-    public function eliminarTBDatosClinicosPorCliente($tbclientesid){
-        return $this->datosClinicosData->eliminarTBDatosClinicosPorCliente($tbclientesid);
-    }
-
     public function obtenerTBDatosClinicos(){
         return $this->datosClinicosData->obtenerTBDatosClinicos();
-    }
-
-    public function obtenerTBDatosClinicosPorId($tbdatosclinicosid){
-        return $this->datosClinicosData->obtenerTBDatosClinicosPorId($tbdatosclinicosid);
     }
 
     public function obtenerTBDatosClinicosPorCliente($tbclientesid){

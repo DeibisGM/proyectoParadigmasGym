@@ -78,59 +78,35 @@ class DatosClinicosData extends Data {
         return $result;
     }
 
-    public function eliminarTBDatosClinicosPorCliente($tbclientesId){
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        $conn->set_charset('utf8');
-        $queryDelete = "DELETE FROM tbdatosclinicos WHERE tbclientesid=" . $tbclientesId . ";";
-        $result = mysqli_query($conn, $queryDelete);
-        mysqli_close($conn);
-        return $result;
-    }
-
     public function obtenerTBDatosClinicos() {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $querySelect = "SELECT dc.*, c.tbclientescarnet
-                       FROM tbdatosclinicos dc
-                       INNER JOIN tbclientes c ON dc.tbclientesid = c.tbclientesid;";
+        $querySelect = "SELECT * FROM tbdatosclinicos";
         $result = mysqli_query($conn, $querySelect);
 
         $datosClinicos = [];
         while ($row = mysqli_fetch_array($result)) {
+
+            $clienteId = $row['tbclientesid'];
+            $queryCarnet = "SELECT tbclientescarnet FROM tbclientes WHERE tbclientesid = $clienteId";
+            $resultCarnet = mysqli_query($conn, $queryCarnet);
+            $carnetRow = mysqli_fetch_array($resultCarnet);
+
             $currentDatosClinicos = new DatosClinicos(
                 $row['idtbdatosclinicos'], $row['tbdatosclinicosenfermedad'], $row['tbdatosclinicosotraenfermedad'],
                 $row['tbdatosclinicostomamedicamento'], $row['tbdatosclinicosmedicamento'], $row['tbdatosclinicoslesion'],
-                $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicosdiscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
-                $row['tbdatosclinicosrestriccionmedica'],$row['tbdatosclinicosdescripcionrestriccionmedica'], $row['tbclientesid']
+                $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicoscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
+                $row['tbdatosclinicosrestriccionmedica'], $row['tbdatosclinicosdescripcionrestriccionmedica'], $row['tbclientesid']
             );
-            $currentDatosClinicos->carnet = $row['tbclientescarnet'];
+
+            $currentDatosClinicos->carnet = $carnetRow['tbclientescarnet'] ?? '';
+
             array_push($datosClinicos, $currentDatosClinicos);
         }
 
         mysqli_close($conn);
         return $datosClinicos;
-    }
-
-    public function obtenerTBDatosClinicosPorId($tbdatosclinicosId) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        $conn->set_charset('utf8');
-        $querySelect = "SELECT * FROM tbdatosclinicos WHERE idtbdatosclinicos=" . $tbdatosclinicosId . ";";
-        $result = mysqli_query($conn, $querySelect);
-
-        if ($row = mysqli_fetch_array($result)) {
-            $datosClinicos = new DatosClinicos(
-                $row['idtbdatosclinicos'], $row['tbdatosclinicosenfermedad'], $row['tbdatosclinicosotraenfermedad'],
-                $row['tbdatosclinicostomamedicamento'], $row['tbdatosclinicosmedicamento'], $row['tbdatosclinicoslesion'],
-                $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicosdiscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
-                $row['tbdatosclinicosrestriccionmedica'], $row['tbdatosclinicosdescripcionrestriccionmedica'], $row['tbclientesid']
-            );
-            mysqli_close($conn);
-            return $datosClinicos;
-        }
-
-        mysqli_close($conn);
-        return null;
     }
 
     public function obtenerTBDatosClinicosPorCliente($tbclientesId) {
@@ -158,22 +134,28 @@ class DatosClinicosData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $querySelect = "SELECT c.tbclientesid, c.tbclientescarnet, c.tbclientesnombre
-                       FROM tbclientes c
-                       LEFT JOIN tbdatosclinicos dc ON c.tbclientesid = dc.tbclientesid
-                       WHERE dc.tbclientesid IS NULL
-                       ORDER BY c.tbclientescarnet";
+        $queryClientes = "SELECT tbclientesid, tbclientescarnet, tbclientesnombre
+                          FROM tbclientes
+                          ORDER BY tbclientescarnet";
 
-        $result = mysqli_query($conn, $querySelect);
+        $result = mysqli_query($conn, $queryClientes);
         $clientes = [];
 
         while ($row = mysqli_fetch_array($result)) {
-            $clientes[] = array(
-                'id' => $row['tbclientesid'],
-                'carnet' => $row['tbclientescarnet'],
-                'nombre' => $row['tbclientesnombre'],
-                'apellidos' => ''
-            );
+
+            $clienteId = $row['tbclientesid'];
+            $queryDatos = "SELECT COUNT(*) as total FROM tbdatosclinicos WHERE tbclientesid = $clienteId";
+            $resultDatos = mysqli_query($conn, $queryDatos);
+            $datosRow = mysqli_fetch_array($resultDatos);
+
+            if ($datosRow['total'] == 0) {
+                $clientes[] = array(
+                    'id' => $row['tbclientesid'],
+                    'carnet' => $row['tbclientescarnet'],
+                    'nombre' => $row['tbclientesnombre'],
+                    'apellidos' => ''
+                );
+            }
         }
 
         mysqli_close($conn);
