@@ -1,11 +1,26 @@
 <?php
-
+session_start();
 include '../business/zonaCuerpoBusiness.php';
-include '../utility/ImageManager.php'; // el nuevo gestor de imágenes
+include '../utility/ImageManager.php';
 
 $redirect_path = '../view/zonaCuerpoView.php';
 
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['tipo_usuario'])) {
+    header("location: ../view/loginView.php");
+    exit();
+}
+
+// Solo los administradores pueden crear, editar, activar o desactivar zonas
+$esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
+
 if (isset($_POST['update'])) {
+    // Verificar si es administrador
+    if (!$esAdmin) {
+        header("location: " . $redirect_path . "?error=unauthorized");
+        exit();
+    }
+
     if (isset($_POST['tbzonacuerpoid']) && isset($_POST['tbzonacuerponombre']) && isset($_POST['tbzonacuerpodescripcion']) && isset($_POST['tbzonacuerpoactivo'])) {
         if (!empty($_POST['tbzonacuerponombre']) && !empty($_POST['tbzonacuerpodescripcion'])) {
             $zonaCuerpo = new ZonaCuerpo($_POST['tbzonacuerpoid'], $_POST['tbzonacuerponombre'], $_POST['tbzonacuerpodescripcion'], $_POST['tbzonacuerpoactivo']);
@@ -31,10 +46,16 @@ if (isset($_POST['update'])) {
         header("location: " . $redirect_path . "?error=error");
     }
 } else if (isset($_POST['desactivar'])) {
+    // Verificar si es administrador
+    if (!$esAdmin) {
+        header("location: " . $redirect_path . "?error=unauthorized");
+        exit();
+    }
+
     if (isset($_POST['tbzonacuerpoid'])) {
         $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
         $idZonaCuerpo = $_POST['tbzonacuerpoid'];
-        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 0); // 0 para desactivar
+        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 0);
 
         if ($result == 1) {
             header("location: " . $redirect_path . "?success=deactivated");
@@ -45,10 +66,16 @@ if (isset($_POST['update'])) {
         header("location: " . $redirect_path . "?error=error");
     }
 } else if (isset($_POST['activar'])) {
+    // Verificar si es administrador
+    if (!$esAdmin) {
+        header("location: " . $redirect_path . "?error=unauthorized");
+        exit();
+    }
+
     if (isset($_POST['tbzonacuerpoid'])) {
         $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
         $idZonaCuerpo = $_POST['tbzonacuerpoid'];
-        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 1); // 1 para activar
+        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 1);
 
         if ($result == 1) {
             header("location: " . $redirect_path . "?success=activated");
@@ -59,9 +86,15 @@ if (isset($_POST['update'])) {
         header("location: " . $redirect_path . "?error=error");
     }
 } else if (isset($_POST['create'])) {
-    if (isset($_POST['tbzonacuerponombre']) && isset($_POST['tbzonacuerpodescripcion'])) { // tbzonacuerpoactivo ya no se recibe del form
+    // Verificar si es administrador
+    if (!$esAdmin) {
+        header("location: " . $redirect_path . "?error=unauthorized");
+        exit();
+    }
+
+    if (isset($_POST['tbzonacuerponombre']) && isset($_POST['tbzonacuerpodescripcion'])) {
         if (!empty($_POST['tbzonacuerponombre']) && !empty($_POST['tbzonacuerpodescripcion'])) {
-            $zonaCuerpo = new ZonaCuerpo(0, $_POST['tbzonacuerponombre'], $_POST['tbzonacuerpodescripcion'], 1); // Siempre activo al crear
+            $zonaCuerpo = new ZonaCuerpo(0, $_POST['tbzonacuerponombre'], $_POST['tbzonacuerpodescripcion'], 1);
             $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
             $nuevoId = $zonaCuerpoBusiness->insertarTBZonaCuerpo($zonaCuerpo);
 

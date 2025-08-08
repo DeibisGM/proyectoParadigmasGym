@@ -2,39 +2,51 @@
 
 include '../data/zonaCuerpoData.php';
 
-class ZonaCuerpoBusiness {
+class ZonaCuerpoBusiness
+{
 
     private $zonaCuerpoData;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->zonaCuerpoData = new ZonaCuerpoData();
     }
 
-    public function existeZonaCuerpoNombre($nombreZonaCuerpo) {
+    public function existeZonaCuerpoNombre($nombreZonaCuerpo)
+    {
         return $this->zonaCuerpoData->existeZonaCuerpoNombre($nombreZonaCuerpo);
     }
 
-    public function insertarTBZonaCuerpo($zonaCuerpo) {
+    public function insertarTBZonaCuerpo($zonaCuerpo)
+    {
         // Verificar si ya existe una zona con el mismo nombre
         if ($this->existeZonaCuerpoNombre($zonaCuerpo->getNombreZonaCuerpo())) {
-            return -1; // Código de error para indicar que ya existe
+            return -1;
         }
         // Si la inserción es exitosa, la capa de datos devolverá el nuevo ID.
         return $this->zonaCuerpoData->insertarTBZonaCuerpo($zonaCuerpo);
     }
 
-    public function actualizarTBZonaCuerpo($zonaCuerpo) {
+    public function actualizarTBZonaCuerpo($zonaCuerpo)
+    {
         return $this->zonaCuerpoData->actualizarTBZonaCuerpo($zonaCuerpo);
     }
 
-    public function actualizarEstadoTBZonaCuerpo($idZonaCuerpo, $estado) {
+    public function actualizarEstadoTBZonaCuerpo($idZonaCuerpo, $estado)
+    {
         return $this->zonaCuerpoData->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, $estado);
     }
 
-    
 
-    public function getAllTBZonaCuerpo() {
+    public function getAllTBZonaCuerpo()
+    {
         return $this->zonaCuerpoData->getAllTBZonaCuerpo();
     }
+
+    public function getActiveTBZonaCuerpo()
+    {
+        return $this->zonaCuerpoData->getActiveTBZonaCuerpo();
+    }
 }
+
 ?>

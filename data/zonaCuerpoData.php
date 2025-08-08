@@ -110,5 +110,26 @@ class ZonaCuerpoData extends Data {
         }
         return $zonasCuerpo;
     }
+    
+    /**
+     * Obtiene solo las zonas del cuerpo activas de la base de datos.
+     */
+    public function getActiveTBZonaCuerpo() {
+
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        // Consulta de selección filtrando solo activos (tbzonacuerpoactivo = 1)
+        $querySelect = "SELECT * FROM tbzonacuerpo WHERE tbzonacuerpoactivo = 1;";
+        $result = mysqli_query($conn, $querySelect);
+        mysqli_close($conn);
+
+        $zonasCuerpo = [];
+        while ($row = mysqli_fetch_array($result)) {
+            $currentZonaCuerpo = new ZonaCuerpo($row['tbzonacuerpoid'], $row['tbzonacuerponombre'], $row['tbzonacuerpodescripcion'], $row['tbzonacuerpoactivo']);
+            array_push($zonasCuerpo, $currentZonaCuerpo);
+        }
+        return $zonasCuerpo;
+    }
 }
 ?>
