@@ -44,6 +44,7 @@
                     <th>Dirección</th>
                     <th>Correo*</th>
                     <th>Cuenta Bancaria</th>
+                    <th>Contraseña</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -69,18 +70,21 @@
                             <input type="text" name="cuenta" placeholder="Ej: CR05015202001026284066"
                                 pattern="[A-Z]{2}\d{2}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{4}[\s\-]?[A-Z\d]{0,20}"
                                 title="Formato IBAN: 2 letras (país) + 2 dígitos + hasta 30 caracteres alfanuméricos"
-                                style="width: 95%;">                        </td>
-                        <td>
+                                style="width: 95%;">
+                                 </td>
+
+                            <td>
+                                <input type="password" name="contraseña" placeholder="Ej: noelia123" required style="width: 95%;">
+                            </td>
+                             <td>
                             <input type="submit" value="Crear" name="create">
                         </td>
                     </form>
                 </tr>
 
                 <?php
-// Verifica que el business esté incluido correctamente
 require_once '../business/instructorBusiness.php';
 
-// Crea instancia y obtiene datos
 $business = new InstructorBusiness();
 $instructores = $business->getAllTBInstructor();
 
@@ -97,6 +101,7 @@ if (empty($instructores)) {
         echo '<td><input type="text" name="direccion" value="'.htmlspecialchars($instructor->getInstructorDireccion()).'"></td>';
         echo '<td><input type="email" name="correo" value="'.htmlspecialchars($instructor->getInstructorCorreo()).'" required></td>';
         echo '<td><input type="text" name="cuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta()).'"></td>';
+        echo '<td><input type="password" name="contraseña" value="'.htmlspecialchars($instructor->getInstructorContraseña()).'"></td>';
 
         echo '<td>
                 <input type="submit" value="Actualizar" name="update">
