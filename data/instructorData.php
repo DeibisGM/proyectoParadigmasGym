@@ -102,6 +102,7 @@ class InstructorData extends Data {
                 $row['tbinstructorTelefono'],
                 $row['tbinstructorDireccion'],
                 $row['tbinstructorCorreo'],
+                $row['tbinstructorCuenta'],
                 $row['tbinstructorContraseña']
             );
         }
@@ -126,6 +127,7 @@ class InstructorData extends Data {
                 $row['tbinstructorTelefono'],
                 $row['tbinstructorDireccion'],
                 $row['tbinstructorCorreo'],
+                $row['tbinstructorCuenta'],
                 $row['tbinstructorContraseña']
             );
         }

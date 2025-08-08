@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+if (!isset($_SESSION['tipo_usuario'])) {
+    header("Location: ../view/loginView.php");
+    exit();
+}
+
+$esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,7 +30,7 @@
         th {
             background-color: #f2f2f2;
         }
-        input[type="text"], input[type="email"] {
+        input[type="text"], input[type="email"], input[type="password"] {
             width: 95%;
         }
     </style>
@@ -29,11 +39,13 @@
 
     <header>
         <h2>Gimnasio - Instructores</h2>
+        <a href="../index.php">Volver al Inicio</a>
     </header>
 
     <hr>
 
     <main>
+        <?php if ($esAdmin): ?>
         <h2>Crear / Editar Instructores</h2>
 
         <table border="1">
@@ -81,38 +93,64 @@
                         </td>
                     </form>
                 </tr>
+            </tbody>
+        </table>
+        <?php endif; ?>
 
+        <h2>Lista de Instructores</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Correo</th>
+                    <?php if ($esAdmin): ?>
+                    <th>Cuenta Bancaria</th>
+                    <th>Contraseña</th>
+                    <th>Acciones</th>
+                    <?php endif; ?>
+                </tr>
+            </thead>
+            <tbody>
                 <?php
-require_once '../business/instructorBusiness.php';
+                require_once '../business/instructorBusiness.php';
 
-$business = new InstructorBusiness();
-$instructores = $business->getAllTBInstructor();
+                $business = new InstructorBusiness();
+                $instructores = $business->getAllTBInstructor();
 
-if (empty($instructores)) {
-    echo "<tr><td colspan='6'>No hay instructores registrados</td></tr>";
-} else {
-    foreach ($instructores as $instructor) {
-        echo '<tr>';
-        echo '<form method="post" action="../action/instructorAction.php">';
-        echo '<input type="hidden" name="id" value="'.$instructor->getInstructorId().'">';
+                if (empty($instructores)) {
+                    echo "<tr><td colspan='" . ($esAdmin ? 7 : 4) . "'>No hay instructores registrados</td></tr>";
+                } else {
+                    foreach ($instructores as $instructor) {
+                        echo '<tr>';
+                        if ($esAdmin) {
+                            echo '<form method="post" action="../action/instructorAction.php">';
+                            echo '<input type="hidden" name="id" value="'.$instructor->getInstructorId().'">';
 
-        echo '<td><input type="text" name="nombre" value="'.htmlspecialchars($instructor->getInstructorNombre()).'" required></td>';
-        echo '<td><input type="text" name="telefono" value="'.htmlspecialchars($instructor->getInstructorTelefono()).'"></td>';
-        echo '<td><input type="text" name="direccion" value="'.htmlspecialchars($instructor->getInstructorDireccion()).'"></td>';
-        echo '<td><input type="email" name="correo" value="'.htmlspecialchars($instructor->getInstructorCorreo()).'" required></td>';
-        echo '<td><input type="text" name="cuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta()).'"></td>';
-        echo '<td><input type="password" name="contraseña" value="'.htmlspecialchars($instructor->getInstructorContraseña()).'"></td>';
+                            echo '<td><input type="text" name="nombre" value="'.htmlspecialchars($instructor->getInstructorNombre() ?? '').'" required></td>';
+                            echo '<td><input type="text" name="telefono" value="'.htmlspecialchars($instructor->getInstructorTelefono() ?? '').'"></td>';
+                            echo '<td><input type="text" name="direccion" value="'.htmlspecialchars($instructor->getInstructorDireccion() ?? '').'"></td>';
+                            echo '<td><input type="email" name="correo" value="'.htmlspecialchars($instructor->getInstructorCorreo() ?? '').'" required></td>';
+                            echo '<td><input type="text" name="cuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta() ?? '').'"></td>';
+                            echo '<td><input type="password" name="contraseña" value="'.htmlspecialchars($instructor->getInstructorContraseña() ?? '').'"></td>';
 
-        echo '<td>
-                <input type="submit" value="Actualizar" name="update">
-                <input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Eliminar instructor?\')">
-              </td>';
+                            echo '<td>
+                                    <input type="submit" value="Actualizar" name="update">
+                                    <input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Eliminar instructor?\')">
+                                  </td>';
 
-        echo '</form>';
-        echo '</tr>';
-    }
-}
-?>
+                            echo '</form>';
+                        } else {
+                            echo '<td>'.htmlspecialchars($instructor->getInstructorNombre() ?? '').'</td>';
+                            echo '<td>'.htmlspecialchars($instructor->getInstructorTelefono() ?? '').'</td>';
+                            echo '<td>'.htmlspecialchars($instructor->getInstructorDireccion() ?? '').'</td>';
+                            echo '<td>'.htmlspecialchars($instructor->getInstructorCorreo() ?? '').'</td>';
+                        }
+                        echo '</tr>';
+                    }
+                }
+                ?>
             </tbody>
         </table>
 
@@ -160,42 +198,42 @@ if (empty($instructores)) {
 
     <script>
        function validateForm() {
-    const nombre = document.querySelector('input[name="nombre"]');
-    const correo = document.querySelector('input[name="correo"]');
-    const cuenta = document.querySelector('input[name="cuenta"]');
+            const nombre = document.querySelector('input[name="nombre"]');
+            const correo = document.querySelector('input[name="correo"]');
+            const cuenta = document.querySelector('input[name="cuenta"]');
 
-    // Validación de nombre (solo letras)
-    if (!nombre.value.match(/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/)) {
-        alert("El nombre solo debe contener letras y espacios.");
-        return false;
-    }
+            // Validación de nombre (solo letras)
+            if (!nombre.value.match(/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/)) {
+                alert("El nombre solo debe contener letras y espacios.");
+                return false;
+            }
 
-    // Validación básica de correo
-    if (!correo.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-        alert("Por favor ingrese un correo electrónico válido.");
-        return false;
-    }
+            // Validación básica de correo
+            if (!correo.value.match(/^[\S@]+\@[\S@]+\.[\S@]+$/)) {
+                alert("Por favor ingrese un correo electrónico válido.");
+                return false;
+            }
 
-    // Validación de IBAN
-    if (cuenta.value && !validateIBAN(cuenta.value)) {
-        alert("Por favor ingrese un IBAN válido (Ej: CR05015202001026284066).");
-        return false;
-    }
+            // Validación de IBAN
+            if (cuenta.value && !validateIBAN(cuenta.value)) {
+                alert("Por favor ingrese un IBAN válido (Ej: CR05015202001026284066).");
+                return false;
+            }
 
-    return true;
-}
+            return true;
+        }
 
-function validateIBAN(iban) {
-    iban = iban.replace(/\s+/g, '').toUpperCase();
+        function validateIBAN(iban) {
+            iban = iban.replace(/\s+/g, '').toUpperCase();
 
-    const ibanRegex = /^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/;
+            const ibanRegex = /^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/;
 
-    if (!ibanRegex.test(iban)) {
-        return false;
-    }
+            if (!ibanRegex.test(iban)) {
+                return false;
+            }
 
-    return true;
-}
+            return true;
+        }
     </script>
 </body>
 </html>
