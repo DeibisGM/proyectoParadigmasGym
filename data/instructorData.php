@@ -24,7 +24,8 @@ class InstructorData extends Data {
                 $instructor->getInstructorTelefono() . "','" .
                 $instructor->getInstructorDireccion() . "','" .
                 $instructor->getInstructorCorreo() . "','" .
-                $instructor->getInstructorCuenta() . "');";
+                $instructor->getInstructorCuenta() . "','" .
+                $instructor->getInstructorContraseña() . "');";
 
         $result = mysqli_query($conn, $queryInsert);
         mysqli_close($conn);
@@ -40,6 +41,8 @@ class InstructorData extends Data {
                 "', tbinstructorDireccion='" . $instructor->getInstructorDireccion() .
                 "', tbinstructorCorreo='" . $instructor->getInstructorCorreo() .
                 "', tbinstructorCuenta='" . $instructor->getInstructorCuenta() .
+                "', tbinstructorContraseña='" . $instructor->getInstructorContraseña() .
+
                 "' WHERE tbinstructorId=" . $instructor->getInstructorId() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
@@ -57,25 +60,26 @@ class InstructorData extends Data {
         return $result;
     }
 
-    public function getAllTBInstructor() {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        $conn->set_charset('utf8');
-        $querySelect = "SELECT * FROM tbinstructor;";
-        $result = mysqli_query($conn, $querySelect);
-        mysqli_close($conn);
+   public function getAllTBInstructor() {
+       $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+       $conn->set_charset('utf8');
+       $querySelect = "SELECT * FROM tbinstructor;";
+       $result = mysqli_query($conn, $querySelect);
+       mysqli_close($conn);
 
-        $instructors = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $instructors[] = new Instructor(
-                $row['tbinstructorId'],
-                $row['tbinstructorNombre'],
-                $row['tbinstructorTelefono'],
-                $row['tbinstructorDireccion'],
-                $row['tbinstructorCorreo'],
-                $row['tbinstructorCuenta']
-            );
-        }
-        return $instructors;
-    }
+       $instructors = [];
+       while ($row = mysqli_fetch_assoc($result)) {
+           $instructors[] = new Instructor(
+               $row['tbinstructorId'],
+               $row['tbinstructorNombre'],
+               $row['tbinstructorTelefono'],
+               $row['tbinstructorDireccion'],
+               $row['tbinstructorCorreo'],
+               $row['tbinstructorCuenta'],
+               $row['tbinstructorContraseña']
+           );
+       }
+       return $instructors;
+   }
 }
 ?>

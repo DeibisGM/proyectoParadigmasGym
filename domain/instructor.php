@@ -8,15 +8,17 @@ class Instructor {
     private $instructorDireccion;
     private $instructorCorreo;
     private $instructorCuenta;
+    private $instructorContraseña;
 
 
-    public function __construct($instructorId, $instructorNombre, $instructorTelefono, $instructorDireccion, $instructorCorreo, $instructorCuenta) {
+    public function __construct($instructorId, $instructorNombre, $instructorTelefono, $instructorDireccion, $instructorCorreo, $instructorCuenta, $instructorContraseña) {
         $this->instructorId = $instructorId;
         $this->instructorNombre = $instructorNombre;
         $this->instructorTelefono = $instructorTelefono;
         $this->instructorDireccion = $instructorDireccion;
         $this->instructorCorreo = $instructorCorreo;
         $this->instructorCuenta = $instructorCuenta;
+        $this->instructorContraseña = $instructorContraseña;
 
     }
 
@@ -40,6 +42,9 @@ class Instructor {
     public function getInstructorCuenta() {
         return $this->instructorCuenta;
     }
+    public function getInstructorContraseña() {
+        return $this->instructorContraseña;
+    }
 
 
     public function setInstructorId($instructorId) {
@@ -60,8 +65,9 @@ class Instructor {
     public function setInstructorCuenta($instructorCuenta) {
         $this->instructorCuenta = $instructorCuenta;
     }
-
-
+    public function setInstructorContraseña($instructorContraseña) {
+        $this->instructorContraseña = $instructorContraseña;
+    }
 
 }
 ?>

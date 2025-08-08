@@ -2,12 +2,14 @@
 include '../business/instructorBusiness.php';
 
 if (isset($_POST['update'])) {
-    if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta'])) {
+    if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta']) && isset($_POST['contraseña'])) {
         $nombre = trim($_POST['nombre']);
         $telefono = trim($_POST['telefono']);
         $direccion = trim($_POST['direccion']);
         $correo = trim($_POST['correo']);
         $cuenta = trim($_POST['cuenta']);
+        $contraseña = trim($_POST['contraseña']);
+
 
         // Validaciones
         if (empty($nombre) || empty($correo)) {
@@ -30,7 +32,7 @@ if (isset($_POST['update'])) {
             exit();
         }
 
-        $instructor = new Instructor($_POST['id'], $nombre, $telefono, $direccion, $correo, $cuenta);
+        $instructor = new Instructor($_POST['id'], $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña);
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->actualizarTBInstructor($instructor);
 
@@ -57,12 +59,14 @@ else if (isset($_POST['delete'])) {
     }
 }
 else if (isset($_POST['create'])) {
-    if (isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta'])) {
+    if (isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta']) && isset($_POST['contraseña'])) {
         $nombre = trim($_POST['nombre']);
         $telefono = trim($_POST['telefono']);
         $direccion = trim($_POST['direccion']);
         $correo = trim($_POST['correo']);
         $cuenta = trim($_POST['cuenta']);
+        $contraseña = trim($_POST['contraseña']);
+
 
         // Validaciones
         if (empty($nombre) || empty($correo)) {
@@ -85,7 +89,7 @@ else if (isset($_POST['create'])) {
             exit();
         }
 
-        $instructor = new Instructor(null, $nombre, $telefono, $direccion, $correo, $cuenta);
+        $instructor = new Instructor(null, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña);
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->insertarTBInstructor($instructor);
 
