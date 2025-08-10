@@ -1,6 +1,7 @@
 <?php
+    session_start();
 
-include_once '../business/datosClinicosBusiness.php';
+    include_once '../business/datosClinicosBusiness.php';
     if (!class_exists('DatosClinicos')) {
         include_once '../domain/datosClinicos.php';
     }
@@ -11,6 +12,9 @@ include_once '../business/datosClinicosBusiness.php';
     $response = array();
 
     try {
+        $esUsuarioCliente = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'cliente';
+        $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
+
         if(isset($_POST['create'])){
 
             $enfermedad = isset($_POST['enfermedad']) ? 1 : 0;
@@ -25,18 +29,37 @@ include_once '../business/datosClinicosBusiness.php';
             $descripcionrestriccionmedica = isset($_POST['descripcionrestriccionmedica']) ? $_POST['descripcionrestriccionmedica'] : '';
             $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
 
-            // Valida que clienteId no esté vacío
-            if(empty($clienteId)){
+            if ($esUsuarioCliente) {
+                if (!isset($_SESSION['usuario_id'])) {
+                    $response['success'] = false;
+                    $response['message'] = 'Error: Usuario no autenticado.';
+                    echo json_encode($response);
+                    exit();
+                }
+
+                $clienteId = $_SESSION['usuario_id'];
+
+            } else if ($esAdmin) {
+                if(empty($clienteId)){
+                    $response['success'] = false;
+                    $response['message'] = 'Error: Debe seleccionar un cliente.';
+                    echo json_encode($response);
+                    exit();
+                }
+            } else {
                 $response['success'] = false;
-                $response['message'] = 'Error: Debe seleccionar un cliente.';
+                $response['message'] = 'Error: No tiene permisos para realizar esta acción.';
                 echo json_encode($response);
                 exit();
             }
 
-            // revisa si ya existe un registro para este cliente
             if($datosClinicosBusiness->existenDatosClinicosPorCliente($clienteId)){
+                $mensaje = $esUsuarioCliente ?
+                    'Error: Ya tiene datos clínicos registrados. Puede actualizarlos desde la tabla.' :
+                    'Error: Ya existen datos clínicos registrados para este cliente.';
+
                 $response['success'] = false;
-                $response['message'] = 'Error: Ya existen datos clínicos registrados para este cliente.';
+                $response['message'] = $mensaje;
                 echo json_encode($response);
                 exit();
             }
@@ -60,8 +83,12 @@ include_once '../business/datosClinicosBusiness.php';
             $resultado = $datosClinicosBusiness->insertarTBDatosClinicos($datosClinicos);
 
             if($resultado){
+                $mensaje = $esUsuarioCliente ?
+                    'Éxito: Sus datos clínicos se registraron correctamente.' :
+                    'Éxito: Registro insertado correctamente.';
+
                 $response['success'] = true;
-                $response['message'] = 'Éxito: Registro insertado correctamente.';
+                $response['message'] = $mensaje;
             } else {
                 $response['success'] = false;
                 $response['message'] = 'Error: No se pudo procesar la transacción en la base de datos.';
@@ -80,8 +107,32 @@ include_once '../business/datosClinicosBusiness.php';
             $descripcionDiscapacidad = isset($_POST['descripcionDiscapacidad']) ? $_POST['descripcionDiscapacidad'] : '';
             $restriccionMedica = isset($_POST['restriccionMedica']) ? 1 : 0;
             $descripcionrestriccionmedica = isset($_POST['descripcionrestriccionmedica']) ? $_POST['descripcionrestriccionmedica'] : '';
-
             $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
+
+            if ($esUsuarioCliente) {
+                if (!isset($_SESSION['usuario_id'])) {
+                    $response['success'] = false;
+                    $response['message'] = 'Error: Usuario no autenticado.';
+                    echo json_encode($response);
+                    exit();
+                }
+
+                $registroExistente = $datosClinicosBusiness->obtenerTBDatosClinicosPorCliente($_SESSION['usuario_id']);
+                if(!$registroExistente || $registroExistente->getTbdatosclinicosid() != $id) {
+                    $response['success'] = false;
+                    $response['message'] = 'Error: No tiene permisos para actualizar este registro.';
+                    echo json_encode($response);
+                    exit();
+                }
+
+                $clienteId = $_SESSION['usuario_id'];
+
+            } else if (!$esAdmin) {
+                $response['success'] = false;
+                $response['message'] = 'Error: No tiene permisos para realizar esta acción.';
+                echo json_encode($response);
+                exit();
+            }
 
             if(empty($id) || empty($clienteId)){
                 $response['success'] = false;
@@ -109,14 +160,24 @@ include_once '../business/datosClinicosBusiness.php';
             $resultado = $datosClinicosBusiness->actualizarTBDatosClinicos($datosClinicos);
 
             if($resultado){
+                $mensaje = $esUsuarioCliente ?
+                    'Éxito: Sus datos clínicos se actualizaron correctamente.' :
+                    'Éxito: Registro actualizado correctamente.';
+
                 $response['success'] = true;
-                $response['message'] = 'Éxito: Registro actualizado correctamente.';
+                $response['message'] = $mensaje;
             } else {
                 $response['success'] = false;
                 $response['message'] = 'Error: No se pudo procesar la transacción en la base de datos.';
             }
 
         } else if(isset($_POST['delete'])){
+            if (!$esAdmin) {
+                $response['success'] = false;
+                $response['message'] = 'Error: No tiene permisos para eliminar registros.';
+                echo json_encode($response);
+                exit();
+            }
 
             $id = $_POST['id'];
 
@@ -140,11 +201,19 @@ include_once '../business/datosClinicosBusiness.php';
         } else {
             $response['success'] = false;
             $response['message'] = 'Error: Acción no válida.';
+            $response['debug'] = [
+                'POST_data' => $_POST,
+                'session_data' => [
+                    'usuario_id' => isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 'no_set',
+                    'tipo_usuario' => isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : 'no_set'
+                ]
+            ];
         }
 
     } catch (Exception $e) {
         $response['success'] = false;
         $response['message'] = 'Error: ' . $e->getMessage();
+        error_log('Error en datosClinicosAction.php: ' . $e->getMessage());
     }
 
     echo json_encode($response);
