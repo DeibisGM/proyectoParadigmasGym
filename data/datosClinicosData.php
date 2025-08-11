@@ -95,7 +95,7 @@
                 $currentDatosClinicos = new DatosClinicos(
                     $row['idtbdatosclinicos'], $row['tbdatosclinicosenfermedad'], $row['tbdatosclinicosotraenfermedad'],
                     $row['tbdatosclinicostomamedicamento'], $row['tbdatosclinicosmedicamento'], $row['tbdatosclinicoslesion'],
-                    $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicoscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
+                    $row['tbdatosclinicosdescripcionlesion'], $row['tbdatosclinicodiscapacidad'], $row['tbdatosclinicosdescripciondiscapacidad'],
                     $row['tbdatosclinicosrestriccionmedica'], $row['tbdatosclinicosdescripcionrestriccionmedica'], $row['tbclientesid']
                 );
 
