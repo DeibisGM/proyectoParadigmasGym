@@ -16,7 +16,7 @@ class Data
         $hostName = gethostname();
 
         switch ($hostName) {
-            case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxxs":
+            case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxx":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
                 $this->user = "root";
@@ -42,11 +42,10 @@ class Data
 
             default:
                 $this->isActive = false;
-                $this->server = "trolley.proxy.rlwy.net";
-                $this->user = "root";
-                $this->password = "iWhsTZUYVbbGunlbHOURKukfYwliQNiq";
-                $this->db = "railway";
-                $this->port = 43809;
+                $this->server = "localhost";
+                $this->user = "";
+                $this->password = "";
+                $this->db = "dbgym";
 
                 break;
         }
