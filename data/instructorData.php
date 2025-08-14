@@ -36,14 +36,14 @@ class InstructorData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbinstructor SET tbinstructorNombre='" . $instructor->getInstructorNombre() .
-                "', tbinstructorTelefono='" . $instructor->getInstructorTelefono() .
-                "', tbinstructorDireccion='" . $instructor->getInstructorDireccion() .
-                "', tbinstructorCorreo='" . $instructor->getInstructorCorreo() .
-                "', tbinstructorCuenta='" . $instructor->getInstructorCuenta() .
-                "', tbinstructorContraseña='" . $instructor->getInstructorContraseña() .
+        $queryUpdate = "UPDATE tbinstructor SET tbinstructornombre='" . $instructor->getInstructorNombre() .
+                "', tbinstructortelefono='" . $instructor->getInstructorTelefono() .
+                "', tbinstructordireccion='" . $instructor->getInstructorDireccion() .
+                "', tbinstructorcorreo='" . $instructor->getInstructorCorreo() .
+                "', tbinstructorcuenta='" . $instructor->getInstructorCuenta() .
+                "', tbinstructorcontraseña='" . $instructor->getInstructorContraseña() .
 
-                "' WHERE tbinstructorId=" . $instructor->getInstructorId() . ";";
+                "' WHERE tbinstructorid=" . $instructor->getInstructorId() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
@@ -54,7 +54,7 @@ class InstructorData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
         $queryDelete = "DELETE from tbinstructor
-    where tbinstructorId=" . $instructorId . ";";
+    where tbinstructorid=" . $instructorId . ";";
         $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
@@ -70,13 +70,13 @@ class InstructorData extends Data {
        $instructors = [];
        while ($row = mysqli_fetch_assoc($result)) {
            $instructors[] = new Instructor(
-               $row['tbinstructorId'],
-               $row['tbinstructorNombre'],
-               $row['tbinstructorTelefono'],
-               $row['tbinstructorDireccion'],
-               $row['tbinstructorCorreo'],
-               $row['tbinstructorCuenta'],
-               $row['tbinstructorContraseña']
+               $row['tbinstructorid'],
+               $row['tbinstructornombre'],
+               $row['tbinstructortelefono'],
+               $row['tbinstructordireccion'],
+               $row['tbinstructorcorreo'],
+               $row['tbinstructorcuenta'],
+               $row['tbinstructorcontraseña']
            );
        }
        return $instructors;
