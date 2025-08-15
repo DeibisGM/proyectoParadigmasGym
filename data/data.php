@@ -16,7 +16,7 @@ class Data
         $hostName = gethostname();
 
         switch ($hostName) {
-            case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxx":
+            case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxxa":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
                 $this->user = "root";
@@ -32,13 +32,13 @@ class Data
                 $this->db = "dbgym";
                 break;
 
-            case "ciany-Inspiron-15-3515":
+            /*case "ciany-Inspiron-15-3515":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
                 $this->user = "ciany";
                 $this->password = "1223";
                 $this->db = "dbgym";
-                break;
+                break;*/
 
            default:
                 $this->isActive = false;
