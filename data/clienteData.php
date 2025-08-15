@@ -9,7 +9,7 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryInsert = "INSERT INTO tbclientes (
+        $queryInsert = "INSERT INTO tbcliente (
             tbclientescarnet,
             tbclientesnombre,
             tbclientesfechanacimiento,
@@ -42,7 +42,7 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbclientes SET
+        $queryUpdate = "UPDATE tbcliente SET
             tbclientescarnet='" . $cliente->getCarnet() . "',
             tbclientesnombre='" . $cliente->getNombre() . "',
             tbclientesfechanacimiento='" . $cliente->getFechaNacimiento() . "',
@@ -53,7 +53,7 @@ class ClienteData extends Data {
             tbclientesinscripcion='" . $cliente->getInscripcion() . "',
             tbclientesestado='" . $cliente->getEstado() . "',
             tbclientescontrasena='" . $cliente->getContrasena() . "'
-            WHERE tbclientesid=" . $cliente->getId() . ";";
+            WHERE tbclienteid=" . $cliente->getId() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
@@ -64,7 +64,7 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryDelete = "DELETE FROM tbclientes WHERE tbclientesid=" . $id . ";";
+        $queryDelete = "DELETE FROM tbcliente WHERE tbclienteid=" . $id . ";";
         $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
@@ -74,13 +74,13 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $querySelect = "SELECT * FROM tbclientes;";
+        $querySelect = "SELECT * FROM tbcliente;";
         $result = mysqli_query($conn, $querySelect);
 
         $clientes = [];
         while ($row = mysqli_fetch_assoc($result)) {
             $clientes[] = new Cliente(
-                $row['tbclientesid'],
+                $row['tbclienteid'],
                 $row['tbclientescarnet'],
                 $row['tbclientesnombre'],
                 $row['tbclientesfechanacimiento'],
@@ -102,7 +102,7 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "SELECT tbclientescarnet FROM tbclientes WHERE tbclientescarnet='" . $carnet . "' LIMIT 1;";
+        $query = "SELECT tbclientescarnet FROM tbcliente WHERE tbclientescarnet='" . $carnet . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
         $existe = mysqli_num_rows($result) > 0;
 
@@ -118,13 +118,13 @@ class ClienteData extends Data {
         $correo = mysqli_real_escape_string($conn, $correo);
         $contrasena = mysqli_real_escape_string($conn, $contrasena);
         
-        $query = "SELECT * FROM tbclientes WHERE tbclientescorreo='" . $correo . "' AND tbclientescontrasena='" . $contrasena . "' LIMIT 1;";
+        $query = "SELECT * FROM tbcliente WHERE tbclientescorreo='" . $correo . "' AND tbclientescontrasena='" . $contrasena . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
         
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $cliente = new Cliente(
-                $row['tbclientesid'],
+                $row['tbclienteid'],
                 $row['tbclientescarnet'],
                 $row['tbclientesnombre'],
                 $row['tbclientesfechanacimiento'],
@@ -147,13 +147,13 @@ class ClienteData extends Data {
         $conn->set_charset('utf8');
         
         $id = mysqli_real_escape_string($conn, $id);
-        $query = "SELECT * FROM tbclientes WHERE tbclientesid='" . $id . "' LIMIT 1;";
+        $query = "SELECT * FROM tbcliente WHERE tbclienteid='" . $id . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
         
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $cliente = new Cliente(
-                $row['tbclientesid'],
+                $row['tbclienteid'],
                 $row['tbclientescarnet'],
                 $row['tbclientesnombre'],
                 $row['tbclientesfechanacimiento'],
