@@ -1,51 +1,51 @@
 <?php
 
-    if (!class_exists('DatosClinicosData')) {
-        include_once '../data/datosClinicosData.php';
+    if (!class_exists('DatoClinicoData')) {
+        include_once '../data/datoClinicoData.php';
     }
 
-    class DatosClinicosBusiness{
+    class DatoClinicoBusiness{
 
-        private $datosClinicosData;
+        private $datoClinicoData;
 
         public function __construct(){
-            $this->datosClinicosData = new DatosClinicosData();
+            $this->datoClinicoData = new DatoClinicoData();
         }
 
-        public function insertarTBDatosClinicos($datosClinicos){
-            $existeRegistro = $this->datosClinicosData->obtenerTBDatosClinicosPorCliente($datosClinicos->getTbclientesid());
+        public function insertarTBDatoClinico($datoClinico){
+            $existeRegistro = $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($datoClinico->getTbclienteid());
             if ($existeRegistro) {
                 return false;
             }
-            return $this->datosClinicosData->insertarTBDatosClinicos($datosClinicos);
+            return $this->datoClinicoData->insertarTBDatoClinico($datoClinico);
         }
 
-        public function actualizarTBDatosClinicos($datosClinicos){
-            return $this->datosClinicosData->actualizarTBDatosClinicos($datosClinicos);
+        public function actualizarTBDatoClinico($datoClinico){
+            return $this->datoClinicoData->actualizarTBDatoClinico($datoClinico);
         }
 
-        public function eliminarTBDatosClinicos($tbdatosclinicosid){
-            return $this->datosClinicosData->eliminarTBDatosClinicos($tbdatosclinicosid);
+        public function eliminarTBDatoClinico($tbdatoclinicoid){
+            return $this->datoClinicoData->eliminarTBDatoClinico($tbdatoclinicoid);
         }
 
-        public function obtenerTBDatosClinicos(){
-            return $this->datosClinicosData->obtenerTBDatosClinicos();
+        public function obtenerTBDatoClinico(){
+            return $this->datoClinicoData->obtenerTBDatoClinico();
         }
 
-        public function obtenerTBDatosClinicosPorCliente($tbclientesid){
-            return $this->datosClinicosData->obtenerTBDatosClinicosPorCliente($tbclientesid);
+        public function obtenerTBDatoClinicoPorCliente($tbclienteid){
+            return $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($tbclienteid);
         }
 
         public function obtenerTodosLosClientes(){
-            return $this->datosClinicosData->obtenerTodosLosClientes();
+            return $this->datoClinicoData->obtenerTodosLosClientes();
         }
 
-        public function existenDatosClinicosPorCliente($tbclientesid){
-            $datos = $this->datosClinicosData->obtenerTBDatosClinicosPorCliente($tbclientesid);
+        public function existenDatoClinicosPorCliente($tbclienteid){
+            $datos = $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($tbclienteid);
             return $datos !== null;
         }
 
-        public function validarDatosClinicos($enfermedad, $otraEnfermedad, $tomaMedicamento,
+        public function validarDatoClinico($enfermedad, $otraEnfermedad, $tomaMedicamento,
                                                $medicamento, $lesion, $descripcionLesion,
                                                $discapacidad, $descripcionDiscapacidad, $restriccionMedica,
                                                $descripcionrestriccionmedica){

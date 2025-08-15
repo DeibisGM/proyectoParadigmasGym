@@ -1,14 +1,14 @@
 <?php
     session_start();
 
-    include_once '../business/datosClinicosBusiness.php';
-    if (!class_exists('DatosClinicos')) {
-        include_once '../domain/datosClinicos.php';
+    include_once '../business/datoClinicoBusiness.php';
+    if (!class_exists('DatoClinico')) {
+        include_once '../domain/datoClinico.php';
     }
 
     header('Content-Type: application/json');
 
-    $datosClinicosBusiness = new DatosClinicosBusiness();
+    $datoClinicoBusiness = new DatoClinicoBusiness();
     $response = array();
 
     try {
@@ -53,7 +53,7 @@
                 exit();
             }
 
-            if($datosClinicosBusiness->existenDatosClinicosPorCliente($clienteId)){
+            if($datoClinicoBusiness->existenDatoClinicosPorCliente($clienteId)){
                 $mensaje = $esUsuarioCliente ?
                     'Error: Ya tiene datos clínicos registrados. Puede actualizarlos desde la tabla.' :
                     'Error: Ya existen datos clínicos registrados para este cliente.';
@@ -64,7 +64,7 @@
                 exit();
             }
 
-            $errores = $datosClinicosBusiness->validarDatosClinicos($enfermedad, $otraEnfermedad, $tomaMedicamento,
+            $errores = $datoClinicoBusiness->validarDatoClinico($enfermedad, $otraEnfermedad, $tomaMedicamento,
                                                $medicamento, $lesion, $descripcionLesion,
                                                $discapacidad, $descripcionDiscapacidad, $restriccionMedica, $descripcionrestriccionmedica);
 
@@ -75,12 +75,12 @@
                 exit();
             }
 
-            $datosClinicos = new DatosClinicos(0, $enfermedad, $otraEnfermedad, $tomaMedicamento,
+            $datoClinico = new DatoClinico(0, $clienteId, $enfermedad, $otraEnfermedad, $tomaMedicamento,
                                              $medicamento, $lesion, $descripcionLesion,
-                                             $discapacidad, $descripcionDiscapacidad,
-                                             $restriccionMedica, $descripcionrestriccionmedica, $clienteId);
+                                             $discapacidad,$descripcionDiscapacidad,
+                                             $restriccionMedica, $descripcionrestriccionmedica);
 
-            $resultado = $datosClinicosBusiness->insertarTBDatosClinicos($datosClinicos);
+            $resultado = $datoClinicoBusiness->insertarTBDatoClinico($datoClinico);
 
             if($resultado){
                 $mensaje = $esUsuarioCliente ?
@@ -97,6 +97,7 @@
         } else if(isset($_POST['update'])){
 
             $id = $_POST['id'];
+            $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
             $enfermedad = isset($_POST['enfermedad']) ? 1 : 0;
             $otraEnfermedad = isset($_POST['otraEnfermedad']) ? $_POST['otraEnfermedad'] : '';
             $tomaMedicamento = isset($_POST['tomaMedicamento']) ? 1 : 0;
@@ -107,7 +108,7 @@
             $descripcionDiscapacidad = isset($_POST['descripcionDiscapacidad']) ? $_POST['descripcionDiscapacidad'] : '';
             $restriccionMedica = isset($_POST['restriccionMedica']) ? 1 : 0;
             $descripcionrestriccionmedica = isset($_POST['descripcionrestriccionmedica']) ? $_POST['descripcionrestriccionmedica'] : '';
-            $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
+
 
             if ($esUsuarioCliente) {
                 if (!isset($_SESSION['usuario_id'])) {
@@ -117,8 +118,8 @@
                     exit();
                 }
 
-                $registroExistente = $datosClinicosBusiness->obtenerTBDatosClinicosPorCliente($_SESSION['usuario_id']);
-                if(!$registroExistente || $registroExistente->getTbdatosclinicosid() != $id) {
+                $registroExistente = $datoClinicoBusiness->obtenerTBDatoClinicoPorCliente($_SESSION['usuario_id']);
+                if(!$registroExistente || $registroExistente->getTbdatoclinicoid() != $id) {
                     $response['success'] = false;
                     $response['message'] = 'Error: No tiene permisos para actualizar este registro.';
                     echo json_encode($response);
@@ -141,7 +142,7 @@
                 exit();
             }
 
-            $errores = $datosClinicosBusiness->validarDatosClinicos($enfermedad, $otraEnfermedad, $tomaMedicamento,
+            $errores = $datoClinicoBusiness->validarDatoClinico($enfermedad, $otraEnfermedad, $tomaMedicamento,
                                                    $medicamento, $lesion, $descripcionLesion,
                                                    $discapacidad, $descripcionDiscapacidad, $restriccionMedica, $descripcionrestriccionmedica);
 
@@ -152,12 +153,12 @@
                 exit();
             }
 
-            $datosClinicos = new DatosClinicos($id, $enfermedad, $otraEnfermedad, $tomaMedicamento,
+            $datoClinico = new DatoClinico($id, $clienteId, $enfermedad, $otraEnfermedad, $tomaMedicamento,
                                              $medicamento, $lesion, $descripcionLesion,
-                                             $discapacidad, $descripcionDiscapacidad,
-                                             $restriccionMedica, $descripcionrestriccionmedica, $clienteId);
+                                             $discapacidad,$descripcionDiscapacidad,
+                                             $restriccionMedica, $descripcionrestriccionmedica);
 
-            $resultado = $datosClinicosBusiness->actualizarTBDatosClinicos($datosClinicos);
+            $resultado = $datoClinicoBusiness->actualizarTBDatoClinico($datoClinico);
 
             if($resultado){
                 $mensaje = $esUsuarioCliente ?
@@ -188,7 +189,7 @@
                 exit();
             }
 
-            $resultado = $datosClinicosBusiness->eliminarTBDatosClinicos($id);
+            $resultado = $datoClinicoBusiness->eliminarTBDatoClinico($id);
 
             if($resultado){
                 $response['success'] = true;
@@ -213,7 +214,7 @@
     } catch (Exception $e) {
         $response['success'] = false;
         $response['message'] = 'Error: ' . $e->getMessage();
-        error_log('Error en datosClinicosAction.php: ' . $e->getMessage());
+        error_log('Error en datoClinicoAction.php: ' . $e->getMessage());
     }
 
     echo json_encode($response);

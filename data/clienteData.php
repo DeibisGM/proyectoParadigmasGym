@@ -109,18 +109,18 @@ class ClienteData extends Data {
         mysqli_close($conn);
         return $existe;
     }
-    
+
     public function autenticarCliente($correo, $contrasena) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        
+
         // Escape strings to prevent SQL injection
         $correo = mysqli_real_escape_string($conn, $correo);
         $contrasena = mysqli_real_escape_string($conn, $contrasena);
-        
+
         $query = "SELECT * FROM tbcliente WHERE tbclientescorreo='" . $correo . "' AND tbclientescontrasena='" . $contrasena . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
-        
+
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $cliente = new Cliente(
@@ -137,19 +137,19 @@ class ClienteData extends Data {
                 $row['tbclientescontrasena']
             );
         }
-        
+
         mysqli_close($conn);
         return $cliente;
     }
-    
+
     public function getClientePorId($id) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        
+
         $id = mysqli_real_escape_string($conn, $id);
         $query = "SELECT * FROM tbcliente WHERE tbclienteid='" . $id . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
-        
+
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $cliente = new Cliente(
@@ -166,7 +166,7 @@ class ClienteData extends Data {
                 $row['tbclientescontrasena']
             );
         }
-        
+
         mysqli_close($conn);
         return $cliente;
     }
