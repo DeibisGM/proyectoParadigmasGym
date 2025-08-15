@@ -40,7 +40,7 @@ class Data
                 $this->db = "dbgym";
                 break;*/
 
-            default:
+           default:
                 $this->isActive = false;
                 $this->server = "trolley.proxy.rlwy.net";
                 $this->user = "root";

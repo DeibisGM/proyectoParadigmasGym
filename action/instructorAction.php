@@ -32,6 +32,11 @@ if (isset($_POST['update'])) {
             exit();
         }
 
+       if (strlen($contraseña) < 4 || strlen($contraseña) > 8) {
+           header("location: ../view/instructorView.php?error=passwordLengthInvalid");
+           exit();
+       }
+
         $instructor = new Instructor($_POST['id'], $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña);
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->actualizarTBInstructor($instructor);
@@ -88,6 +93,12 @@ else if (isset($_POST['create'])) {
             header("location: ../view/instructorView.php?error=invalidEmail");
             exit();
         }
+
+        if (strlen($contraseña) < 4 || strlen($contraseña) > 8) {
+               header("location: ../view/instructorView.php?error=passwordLengthInvalid");
+               exit();
+        }
+
 
         $instructor = new Instructor(null, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña);
         $instructorBusiness = new InstructorBusiness();
