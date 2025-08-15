@@ -168,6 +168,8 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                     echo 'Error: El correo electrónico no es válido.';
                 } else if ($_GET['error'] == "dbError") {
                     echo 'Error: No se pudo procesar la transacción en la base de datos.';
+                } else if ($_GET['error'] == "passwordLengthInvalid") {
+                    echo 'Error: La contraseña debe tener entre 4 y 8 caracteres.';
                 } else if ($_GET['error'] == "error") {
                     echo 'Error: Ocurrió un error inesperado.';
                 }
