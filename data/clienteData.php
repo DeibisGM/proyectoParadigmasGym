@@ -10,16 +10,16 @@ class ClienteData extends Data {
         $conn->set_charset('utf8');
 
         $queryInsert = "INSERT INTO tbcliente (
-            tbclientescarnet,
-            tbclientesnombre,
-            tbclientesfechanacimiento,
-            tbclientestelefono,
-            tbclientescorreo,
-            tbclientesdireccion,
-            tbclientesgenero,
-            tbclientesinscripcion,
-            tbclientesestado,
-            tbclientescontrasena
+            tbclientecarnet,
+            tbclientenombre,
+            tbclientefechanacimiento,
+            tbclientetelefono,
+            tbclientecorreo,
+            tbclientedireccion,
+            tbclientegenero,
+            tbclienteinscripcion,
+            tbclienteestado,
+            tbclientecontrasena
         ) VALUES (
             '" . $cliente->getCarnet() . "',
             '" . $cliente->getNombre() . "',
@@ -43,16 +43,16 @@ class ClienteData extends Data {
         $conn->set_charset('utf8');
 
         $queryUpdate = "UPDATE tbcliente SET
-            tbclientescarnet='" . $cliente->getCarnet() . "',
-            tbclientesnombre='" . $cliente->getNombre() . "',
-            tbclientesfechanacimiento='" . $cliente->getFechaNacimiento() . "',
-            tbclientestelefono='" . $cliente->getTelefono() . "',
-            tbclientescorreo='" . $cliente->getCorreo() . "',
-            tbclientesdireccion='" . $cliente->getDireccion() . "',
-            tbclientesgenero='" . $cliente->getGenero() . "',
-            tbclientesinscripcion='" . $cliente->getInscripcion() . "',
-            tbclientesestado='" . $cliente->getEstado() . "',
-            tbclientescontrasena='" . $cliente->getContrasena() . "'
+            tbclientecarnet='" . $cliente->getCarnet() . "',
+            tbclientenombre='" . $cliente->getNombre() . "',
+            tbclientefechanacimiento='" . $cliente->getFechaNacimiento() . "',
+            tbclientetelefono='" . $cliente->getTelefono() . "',
+            tbclientecorreo='" . $cliente->getCorreo() . "',
+            tbclientedireccion='" . $cliente->getDireccion() . "',
+            tbclientegenero='" . $cliente->getGenero() . "',
+            tbclienteinscripcion='" . $cliente->getInscripcion() . "',
+            tbclienteestado='" . $cliente->getEstado() . "',
+            tbclientecontrasena='" . $cliente->getContrasena() . "'
             WHERE tbclienteid=" . $cliente->getId() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
@@ -81,16 +81,16 @@ class ClienteData extends Data {
         while ($row = mysqli_fetch_assoc($result)) {
             $clientes[] = new Cliente(
                 $row['tbclienteid'],
-                $row['tbclientescarnet'],
-                $row['tbclientesnombre'],
-                $row['tbclientesfechanacimiento'],
-                $row['tbclientestelefono'],
-                $row['tbclientescorreo'],
-                $row['tbclientesdireccion'],
-                $row['tbclientesgenero'],
-                $row['tbclientesinscripcion'],
-                $row['tbclientesestado'],
-                isset($row['tbclientescontrasena']) ? $row['tbclientescontrasena'] : ''
+                $row['tbclientecarnet'],
+                $row['tbclientenombre'],
+                $row['tbclientefechanacimiento'],
+                $row['tbclientetelefono'],
+                $row['tbclientecorreo'],
+                $row['tbclientedireccion'],
+                $row['tbclientegenero'],
+                $row['tbclienteinscripcion'],
+                $row['tbclienteestado'],
+                isset($row['tbclientecontrasena']) ? $row['tbclientecontrasena'] : ''
             );
         }
 
@@ -102,7 +102,7 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "SELECT tbclientescarnet FROM tbcliente WHERE tbclientescarnet='" . $carnet . "' LIMIT 1;";
+        $query = "SELECT tbclientecarnet FROM tbcliente WHERE tbclientecarnet='" . $carnet . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
         $existe = mysqli_num_rows($result) > 0;
 
@@ -118,23 +118,23 @@ class ClienteData extends Data {
         $correo = mysqli_real_escape_string($conn, $correo);
         $contrasena = mysqli_real_escape_string($conn, $contrasena);
 
-        $query = "SELECT * FROM tbcliente WHERE tbclientescorreo='" . $correo . "' AND tbclientescontrasena='" . $contrasena . "' LIMIT 1;";
+        $query = "SELECT * FROM tbcliente WHERE tbclientecorreo='" . $correo . "' AND tbclientecontrasena='" . $contrasena . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
 
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $cliente = new Cliente(
                 $row['tbclienteid'],
-                $row['tbclientescarnet'],
-                $row['tbclientesnombre'],
-                $row['tbclientesfechanacimiento'],
-                $row['tbclientestelefono'],
-                $row['tbclientescorreo'],
-                $row['tbclientesdireccion'],
-                $row['tbclientesgenero'],
-                $row['tbclientesinscripcion'],
-                $row['tbclientesestado'],
-                $row['tbclientescontrasena']
+                $row['tbclientecarnet'],
+                $row['tbclientenombre'],
+                $row['tbclientefechanacimiento'],
+                $row['tbclientetelefono'],
+                $row['tbclientecorreo'],
+                $row['tbclientedireccion'],
+                $row['tbclientegenero'],
+                $row['tbclienteinscripcion'],
+                $row['tbclienteestado'],
+                $row['tbclientecontrasena']
             );
         }
 
@@ -154,16 +154,16 @@ class ClienteData extends Data {
         if ($row = mysqli_fetch_assoc($result)) {
             $cliente = new Cliente(
                 $row['tbclienteid'],
-                $row['tbclientescarnet'],
-                $row['tbclientesnombre'],
-                $row['tbclientesfechanacimiento'],
-                $row['tbclientestelefono'],
-                $row['tbclientescorreo'],
-                $row['tbclientesdireccion'],
-                $row['tbclientesgenero'],
-                $row['tbclientesinscripcion'],
-                $row['tbclientesestado'],
-                $row['tbclientescontrasena']
+                $row['tbclientecarnet'],
+                $row['tbclientenombre'],
+                $row['tbclientefechanacimiento'],
+                $row['tbclientetelefono'],
+                $row['tbclientecorreo'],
+                $row['tbclientedireccion'],
+                $row['tbclientegenero'],
+                $row['tbclienteinscripcion'],
+                $row['tbclienteestado'],
+                $row['tbclientecontrasena']
             );
         }
 
