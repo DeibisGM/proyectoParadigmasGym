@@ -279,7 +279,7 @@
                                     echo '<input type="hidden" name="clienteId" value="' . $current->getTbclienteid() . '">';
 
                                     echo '<td style="padding: 8px;">';
-                                    echo '<strong>' . htmlspecialchars(isset($current->getCarnet) ?? 'N/A') . '</strong>';
+                                    echo '<strong>' . htmlspecialchars($current->getCarnet() ?? 'N/A') . '</strong>';
                                     echo '</td>';
 
                                     echo '<td style="padding: 8px;">';
