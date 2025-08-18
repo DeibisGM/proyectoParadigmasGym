@@ -22,8 +22,12 @@ class InstructorBusiness {
         return $this->instructorData->eliminarTBInstructor($idInstructor);
     }
 
-    public function getAllTBInstructor() {
-        return $this->instructorData->getAllTBInstructor();
+    public function activarTBInstructor($idInstructor) {
+        return $this->instructorData->activarTBInstructor($idInstructor);
+    }
+
+    public function getAllTBInstructor($esAdmin = false) {
+        return $this->instructorData->getAllTBInstructor($esAdmin);
     }
     
     public function autenticarInstructor($correo, $cuenta) {
@@ -32,6 +36,10 @@ class InstructorBusiness {
     
     public function getInstructorPorId($id) {
         return $this->instructorData->getInstructorPorId($id);
+    }
+    
+    public function existeInstructorPorCorreo($correo) {
+        return $this->instructorData->existeInstructorPorCorreo($correo);
     }
 }
 ?>

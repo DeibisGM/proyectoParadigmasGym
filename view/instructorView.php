@@ -108,6 +108,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                     <?php if ($esAdmin): ?>
                     <th>Cuenta Bancaria</th>
                     <th>Contraseña</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                     <?php endif; ?>
                 </tr>
@@ -117,7 +118,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                 require_once '../business/instructorBusiness.php';
 
                 $business = new InstructorBusiness();
-                $instructores = $business->getAllTBInstructor();
+                $instructores = $business->getAllTBInstructor($esAdmin);
 
                 if (empty($instructores)) {
                     echo "<tr><td colspan='" . ($esAdmin ? 7 : 4) . "'>No hay instructores registrados</td></tr>";
@@ -134,11 +135,16 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                             echo '<td><input type="email" name="correo" value="'.htmlspecialchars($instructor->getInstructorCorreo() ?? '').'" required></td>';
                             echo '<td><input type="text" name="cuenta" value="'.htmlspecialchars($instructor->getInstructorCuenta() ?? '').'"></td>';
                             echo '<td><input type="password" name="contraseña" value="'.htmlspecialchars($instructor->getInstructorContraseña() ?? '').'"></td>';
+                            echo '<td>'.($instructor->getInstructorActivo() ? 'Activo' : 'Inactivo').'</td>';
 
                             echo '<td>
                                     <input type="submit" value="Actualizar" name="update">
                                     <input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Eliminar instructor?\')">
-                                  </td>';
+                                  ';
+                            if (!$instructor->getInstructorActivo()) {
+                                echo '<input type="submit" value="Activar" name="activate">';
+                            }
+                            echo '</td>';
 
                             echo '</form>';
                         } else {

@@ -5,36 +5,53 @@ include '../business/instructorBusiness.php';
 
 if (isset($_POST['login'])) {
     // Verificar que se hayan enviado los campos necesarios
-    if (isset($_POST['correo']) && isset($_POST['contrasena']) && 
+    if (isset($_POST['correo']) && isset($_POST['contrasena']) &&
         !empty($_POST['correo']) && !empty($_POST['contrasena'])) {
-        
+
         $correo = trim($_POST['correo']);
         $contrasena = trim($_POST['contrasena']);
-        
-        // Primero verificamos si es un cliente
-        $clienteBusiness = new ClienteBusiness();
-        $cliente = $clienteBusiness->autenticarCliente($correo, $contrasena);
-        
-        if ($cliente != null) {
-            // Es un cliente, guardamos la información en la sesión
-            $_SESSION['usuario_id'] = $cliente->getId();
-            $_SESSION['usuario_nombre'] = $cliente->getNombre();
-            $_SESSION['tipo_usuario'] = 'cliente';
-            
+
+        if ($correo === 'root@gmail.com' && $contrasena === 'root') {
+            // Es el administrador principal
+            $_SESSION['usuario_id'] = 0;
+            $_SESSION['usuario_nombre'] = 'Admin';
+            $_SESSION['tipo_usuario'] = 'admin';
+
             // Redirigir a la página principal
             header("Location: ../index.php");
             exit();
-        } else {
-            // Si no es un cliente, verificamos si es un instructor
-            $instructorBusiness = new InstructorBusiness();
+        }
+
+        $instructorBusiness = new InstructorBusiness();
+        $clienteBusiness = new ClienteBusiness();
+
+        // Primero verificamos si el correo existe como instructor
+        if ($instructorBusiness->existeInstructorPorCorreo($correo)) {
             $instructor = $instructorBusiness->autenticarInstructor($correo, $contrasena);
-            
             if ($instructor != null) {
-                // Es un instructor (administrador), guardamos la información en la sesión
+                // Es un instructor, guardamos la información en la sesión
                 $_SESSION['usuario_id'] = $instructor->getInstructorId();
                 $_SESSION['usuario_nombre'] = $instructor->getInstructorNombre();
-                $_SESSION['tipo_usuario'] = 'admin';
-                
+                $_SESSION['tipo_usuario'] = 'instructor';
+
+                // Redirigir a la página principal
+                header("Location: ../index.php");
+                exit();
+            } else {
+                // El correo existe como instructor pero las credenciales son incorrectas o está inactivo
+                header("Location: ../view/loginView.php?error=invalid_credentials");
+                exit();
+            }
+        } else {
+            // Si no es un instructor, verificamos si es un cliente
+            $cliente = $clienteBusiness->autenticarCliente($correo, $contrasena);
+
+            if ($cliente != null) {
+                // Es un cliente, guardamos la información en la sesión
+                $_SESSION['usuario_id'] = $cliente->getId();
+                $_SESSION['usuario_nombre'] = $cliente->getNombre();
+                $_SESSION['tipo_usuario'] = 'cliente';
+
                 // Redirigir a la página principal
                 header("Location: ../index.php");
                 exit();

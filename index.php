@@ -32,7 +32,15 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
 <div class="welcome">
     <p>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong></p>
     <p>Tipo de usuario: <span
-                class="user-type"><?php echo $tipoUsuario == 'admin' ? 'Administrador' : 'Cliente'; ?></span></p>
+                class="user-type"><?php
+                    if ($tipoUsuario == 'admin') {
+                        echo 'Administrador';
+                    } else if ($tipoUsuario == 'instructor') {
+                        echo 'Instructor';
+                    } else {
+                        echo 'Cliente';
+                    }
+                ?></span></p>
 </div>
 
 <h2>Módulos</h2>

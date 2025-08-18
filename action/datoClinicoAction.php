@@ -14,6 +14,7 @@
     try {
         $esUsuarioCliente = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'cliente';
         $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
+        $esInstructor = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
 
         if(isset($_POST['create'])){
 
@@ -39,7 +40,7 @@
 
                 $clienteId = $_SESSION['usuario_id'];
 
-            } else if ($esAdmin) {
+            } else if ($esAdmin || $esInstructor) {
                 if(empty($clienteId)){
                     $response['success'] = false;
                     $response['message'] = 'Error: Debe seleccionar un cliente.';
@@ -128,7 +129,7 @@
 
                 $clienteId = $_SESSION['usuario_id'];
 
-            } else if (!$esAdmin) {
+            } else if (!($esAdmin || $esInstructor)) {
                 $response['success'] = false;
                 $response['message'] = 'Error: No tiene permisos para realizar esta acción.';
                 echo json_encode($response);
@@ -173,7 +174,7 @@
             }
 
         } else if(isset($_POST['delete'])){
-            if (!$esAdmin) {
+            if (!($esAdmin || $esInstructor)) {
                 $response['success'] = false;
                 $response['message'] = 'Error: No tiene permisos para eliminar registros.';
                 echo json_encode($response);

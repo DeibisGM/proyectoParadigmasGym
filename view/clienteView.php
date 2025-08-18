@@ -58,8 +58,8 @@ if ($tipoUsuario == 'cliente') {
 <hr>
 
 <main>
-    <?php if ($tipoUsuario == 'admin') { ?>
-        <!-- Vista de administrador - Puede ver y gestionar todos los clientes -->
+    <?php if ($tipoUsuario == 'admin' || $tipoUsuario == 'instructor') { ?>
+        <!-- Vista de administrador / instructor - Puede ver y gestionar todos los clientes -->
         <h2>Registrar Cliente</h2>
 
         <form name="clienteForm" method="post" action="../action/clienteAction.php"

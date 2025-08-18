@@ -37,7 +37,8 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
      style="margin-top:1rem; padding:.75rem; background:#fffbe6; border:1px solid #ffe58f; border-radius:4px; font-size:.95rem;">
     <strong>Nota para ver si funciona:</strong><br>
     • Cliente: correo cliente@gmail.com — contraseña 12345678<br>
-    • Admin: correo admin@gmail.com — contraseña 12345678
+    • Instructor: correo instructor@gmail.com — contraseña 12345678<br>
+    • Admin: correo root@gmail.com — contraseña root
 </div>
 
 <?php

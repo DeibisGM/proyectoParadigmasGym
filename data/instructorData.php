@@ -19,13 +19,13 @@ class InstructorData extends Data {
             }
         }
 
-        $queryInsert = "INSERT INTO tbinstructor VALUES (" . $nextId . ",'" .
+        $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo) VALUES (" . $nextId . ",'" .
                 $instructor->getInstructorNombre() . "','" .
                 $instructor->getInstructorTelefono() . "','" .
                 $instructor->getInstructorDireccion() . "','" .
                 $instructor->getInstructorCorreo() . "','" .
                 $instructor->getInstructorCuenta() . "','" .
-                $instructor->getInstructorContraseña() . "');";
+                $instructor->getInstructorContraseña() . "', 1);";
 
         $result = mysqli_query($conn, $queryInsert);
         mysqli_close($conn);
@@ -53,17 +53,28 @@ class InstructorData extends Data {
     public function eliminarTBInstructor($instructorId) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $queryDelete = "DELETE from tbinstructor
-    where tbinstructorid=" . $instructorId . ";";
+        $queryDelete = "UPDATE tbinstructor SET tbinstructoractivo = 0 WHERE tbinstructorid=" . $instructorId . ";";
         $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
     }
 
-   public function getAllTBInstructor() {
+    public function activarTBInstructor($instructorId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $queryUpdate = "UPDATE tbinstructor SET tbinstructoractivo = 1 WHERE tbinstructorid=" . $instructorId . ";";
+        $result = mysqli_query($conn, $queryUpdate);
+        mysqli_close($conn);
+        return $result;
+    }
+
+   public function getAllTBInstructor($esAdmin = false) {
        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
        $conn->set_charset('utf8');
-       $querySelect = "SELECT * FROM tbinstructor;";
+       $querySelect = "SELECT * FROM tbinstructor";
+       if (!$esAdmin) {
+           $querySelect .= " WHERE tbinstructoractivo = 1";
+       }
        $result = mysqli_query($conn, $querySelect);
        mysqli_close($conn);
      
@@ -76,22 +87,23 @@ class InstructorData extends Data {
                $row['tbinstructordireccion'],
                $row['tbinstructorcorreo'],
                $row['tbinstructorcuenta'],
-               $row['tbinstructorcontraseña']
+               $row['tbinstructorcontraseña'],
+               $row['tbinstructoractivo']
            );
        }
        return $instructors;
    }
 
     
-    public function autenticarInstructor($correo, $cuenta) {
+    public function autenticarInstructor($correo, $contraseña) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
         
         // Escape strings to prevent SQL injection
         $correo = mysqli_real_escape_string($conn, $correo);
-        $cuenta = mysqli_real_escape_string($conn, $cuenta);
+        $contraseña = mysqli_real_escape_string($conn, $contraseña);
         
-        $query = "SELECT * FROM tbinstructor WHERE tbinstructorcorreo='" . $correo . "' AND tbinstructorcontraseña='" . $cuenta . "' LIMIT 1;";
+        $query = "SELECT * FROM tbinstructor WHERE tbinstructorcorreo='" . $correo . "' AND tbinstructorcontraseña='" . $contraseña . "' AND tbinstructoractivo = 1 LIMIT 1;";
         $result = mysqli_query($conn, $query);
         
         $instructor = null;
@@ -103,7 +115,8 @@ class InstructorData extends Data {
                 $row['tbinstructordireccion'],
                 $row['tbinstructorcorreo'],
                 $row['tbinstructorcuenta'],
-                $row['tbinstructorcontraseña']
+                $row['tbinstructorcontraseña'],
+                $row['tbinstructoractivo']
             );
         }
         
@@ -128,12 +141,26 @@ class InstructorData extends Data {
                 $row['tbinstructordireccion'],
                 $row['tbinstructorcorreo'],
                 $row['tbinstructorcuenta'],
-                $row['tbinstructorcontraseña']
+                $row['tbinstructorcontraseña'],
+                $row['tbinstructoractivo']
             );
         }
         
         mysqli_close($conn);
         return $instructor;
+    }
+
+    public function existeInstructorPorCorreo($correo) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        
+        $correo = mysqli_real_escape_string($conn, $correo);
+        $query = "SELECT tbinstructorid FROM tbinstructor WHERE tbinstructorcorreo='" . $correo . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
+        $existe = mysqli_num_rows($result) > 0;
+        
+        mysqli_close($conn);
+        return $existe;
     }
 
 }

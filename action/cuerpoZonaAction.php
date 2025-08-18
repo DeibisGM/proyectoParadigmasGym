@@ -15,8 +15,8 @@ if (!isset($_SESSION['tipo_usuario'])) {
 $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
 
 if (isset($_POST['update'])) {
-    // Verificar si es administrador
-    if (!$esAdmin) {
+    // Verificar si es administrador o instructor
+    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
         header("location: " . $redirect_path . "?error=unauthorized");
         exit();
     }
@@ -46,8 +46,8 @@ if (isset($_POST['update'])) {
         header("location: " . $redirect_path . "?error=error");
     }
 } else if (isset($_POST['desactivar'])) {
-    // Verificar si es administrador
-    if (!$esAdmin) {
+    // Verificar si es administrador o instructor
+    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
         header("location: " . $redirect_path . "?error=unauthorized");
         exit();
     }
@@ -66,8 +66,8 @@ if (isset($_POST['update'])) {
         header("location: " . $redirect_path . "?error=error");
     }
 } else if (isset($_POST['activar'])) {
-    // Verificar si es administrador
-    if (!$esAdmin) {
+    // Verificar si es administrador o instructor
+    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
         header("location: " . $redirect_path . "?error=unauthorized");
         exit();
     }
@@ -86,8 +86,8 @@ if (isset($_POST['update'])) {
         header("location: " . $redirect_path . "?error=error");
     }
 } else if (isset($_POST['create'])) {
-    // Verificar si es administrador
-    if (!$esAdmin) {
+    // Verificar si es administrador o instructor
+    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
         header("location: " . $redirect_path . "?error=unauthorized");
         exit();
     }

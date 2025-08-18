@@ -6,7 +6,7 @@
         exit();
     }
 
-    if ($_SESSION['tipo_usuario'] !== 'admin' && $_SESSION['tipo_usuario'] !== 'cliente') {
+    if ($_SESSION['tipo_usuario'] !== 'admin' && $_SESSION['tipo_usuario'] !== 'cliente' && $_SESSION['tipo_usuario'] !== 'instructor') {
         header("Location: ../index.php?error=acceso_denegado");
         exit();
     }
@@ -164,8 +164,8 @@
         <hr>
 
         <main>
-            <?php if ($tipoUsuario === 'admin'): ?>
-                <!-- VISTA ADMINISTRADOR -->
+            <?php if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor'): ?>
+                <!-- VISTA ADMINISTRADOR / INSTRUCTOR -->
                 <h2>Registrar Datos Clínicos</h2>
 
                 <div id="loading" style="display: none;">Procesando...</div>
@@ -484,7 +484,7 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                <?php if ($tipoUsuario === 'admin' || ($tipoUsuario === 'cliente' && !$tieneRegistro)): ?>
+                <?php if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor' || ($tipoUsuario === 'cliente' && !$tieneRegistro)): ?>
                 toggleConditionalField('enfermedad', 'otraEnfermedadDiv');
                 toggleConditionalField('tomaMedicamento', 'medicamentoDiv');
                 toggleConditionalField('lesion', 'descripcionLesionDiv');

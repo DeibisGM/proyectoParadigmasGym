@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../business/instructorBusiness.php';
 
 if (isset($_POST['update'])) {
@@ -37,7 +38,7 @@ if (isset($_POST['update'])) {
            exit();
        }
 
-        $instructor = new Instructor($_POST['id'], $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña);
+        $instructor = new Instructor($_POST['id'], $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1);
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->actualizarTBInstructor($instructor);
 
@@ -63,7 +64,28 @@ else if (isset($_POST['delete'])) {
         header("location: ../view/instructorView.php?error=error");
     }
 }
+else if (isset($_POST['activate'])) {
+    if (!isset($_SESSION['tipo_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
+        header("location: ../view/instructorView.php?error=permission_denied");
+        exit();
+    }
+    if (isset($_POST['id'])) {
+        $instructorBusiness = new InstructorBusiness();
+        $result = $instructorBusiness->activarTBInstructor($_POST['id']);
+        if ($result == 1) {
+            header("location: ../view/instructorView.php?success=activated");
+        } else {
+            header("location: ../view/instructorView.php?error=dbError");
+        }
+    } else {
+        header("location: ../view/instructorView.php?error=error");
+    }
+}
 else if (isset($_POST['create'])) {
+    if (!isset($_SESSION['tipo_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
+        header("location: ../view/instructorView.php?error=permission_denied");
+        exit();
+    }
     if (isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta']) && isset($_POST['contraseña'])) {
         $nombre = trim($_POST['nombre']);
         $telefono = trim($_POST['telefono']);
@@ -100,7 +122,7 @@ else if (isset($_POST['create'])) {
         }
 
 
-        $instructor = new Instructor(null, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña);
+        $instructor = new Instructor(null, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1);
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->insertarTBInstructor($instructor);
 

@@ -44,7 +44,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
 <hr>
 
 <main>
-    <?php if ($esAdmin): ?>
+    <?php if ($esAdmin || $_SESSION['tipo_usuario'] === 'instructor'): ?>
         <h2>Crear / Editar Zonas</h2>
 
         <table border="1" style="width:100%; border-collapse: collapse;">
@@ -84,8 +84,8 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
     <?php
     $cuerpoZonaBusiness = new CuerpoZonaBusiness();
 
-    if ($esAdmin) {
-        // Los administradores pueden ver todas las zonas
+    if ($esAdmin || $_SESSION['tipo_usuario'] === 'instructor') {
+        // Los administradores e instructores pueden ver todas las zonas (activas e inactivas)
         $allCuerpoZonas = $cuerpoZonaBusiness->getAllTBCuerpoZona();
 
         $zonasActivas = [];
@@ -123,7 +123,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
         <?php else: ?>
             <?php foreach ($zonasActivas as $current): ?>
                 <tr>
-                    <?php if ($esAdmin): ?>
+                    <?php if ($esAdmin || $_SESSION['tipo_usuario'] === 'instructor'): ?>
                         <form method="post" action="../action/cuerpoZonaAction.php" enctype="multipart/form-data">
                             <input type="hidden" name="tbcuerpozonaid" value="<?= $current->getIdCuerpoZona() ?>">
                             <td style="padding: 8px;"><input type="text" name="tbcuerpozonanombre"
@@ -184,7 +184,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
 
     <br>
 
-    <?php if ($esAdmin): ?>
+    <?php if ($esAdmin || $_SESSION['tipo_usuario'] === 'instructor'): ?>
         <h2>Zonas Inactivas</h2>
         <table border="1" style="width:100%; border-collapse: collapse;">
             <thead>
