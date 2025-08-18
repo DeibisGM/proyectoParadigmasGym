@@ -40,13 +40,12 @@ class Data
                 $this->db = "dbgym";
                 break;*/
 
-           default:
+            default:
                 $this->isActive = false;
-                $this->server = "trolley.proxy.rlwy.net";
-                $this->user = "root";
-                $this->password = "iWhsTZUYVbbGunlbHOURKukfYwliQNiq";
-                $this->db = "railway";
-                $this->port = 43809;
+                $this->server = "localhost";
+                $this->user = "";
+                $this->password = "";
+                $this->db = "dbgym";
 
                 break;
         }
