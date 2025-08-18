@@ -39,7 +39,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
 
 <div class="button-container">
     <?php
-    echo "<a href='view/zonaCuerpoView.php'><button>Ir a Zonas del Cuerpo</button></a>";
+    echo "<a href='view/cuerpoZonaView.php'><button>Ir a Zonas del Cuerpo</button></a>";
     echo "<a href='view/datoClinicoView.php'><button>Datos Clínicos</button></a>";
     echo "<a href='view/instructorView.php'><button>Ir a Instructores</button></a>";
     echo "<a href='view/clienteView.php'><button>Ir a Clientes</button></a>";

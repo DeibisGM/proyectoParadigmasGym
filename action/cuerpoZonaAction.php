@@ -1,9 +1,9 @@
 <?php
 session_start();
-include '../business/zonaCuerpoBusiness.php';
+include '../business/cuerpoZonaBusiness.php';
 include '../utility/ImageManager.php';
 
-$redirect_path = '../view/zonaCuerpoView.php';
+$redirect_path = '../view/cuerpoZonaView.php';
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['tipo_usuario'])) {
@@ -21,15 +21,15 @@ if (isset($_POST['update'])) {
         exit();
     }
 
-    if (isset($_POST['tbzonacuerpoid']) && isset($_POST['tbzonacuerponombre']) && isset($_POST['tbzonacuerpodescripcion']) && isset($_POST['tbzonacuerpoactivo'])) {
-        if (!empty($_POST['tbzonacuerponombre']) && !empty($_POST['tbzonacuerpodescripcion'])) {
-            $zonaCuerpo = new ZonaCuerpo($_POST['tbzonacuerpoid'], $_POST['tbzonacuerponombre'], $_POST['tbzonacuerpodescripcion'], $_POST['tbzonacuerpoactivo']);
-            $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
-            $result = $zonaCuerpoBusiness->actualizarTBZonaCuerpo($zonaCuerpo);
+    if (isset($_POST['tbcuerpozonaid']) && isset($_POST['tbcuerpozonanombre']) && isset($_POST['tbcuerpozonadescripcion']) && isset($_POST['tbcuerpozonaactivo'])) {
+        if (!empty($_POST['tbcuerpozonanombre']) && !empty($_POST['tbcuerpozonadescripcion'])) {
+            $cuerpoZona = new CuerpoZona($_POST['tbcuerpozonaid'], $_POST['tbcuerpozonanombre'], $_POST['tbcuerpozonadescripcion'], $_POST['tbcuerpozonaactivo']);
+            $cuerpoZonaBusiness = new CuerpoZonaBusiness();
+            $result = $cuerpoZonaBusiness->actualizarTBCuerpoZona($cuerpoZona);
 
             // Después de actualizar, gestionar la imagen
             if ($result == 1) {
-                $id = $_POST['tbzonacuerpoid'];
+                $id = $_POST['tbcuerpozonaid'];
                 $eliminarImagen = isset($_POST['eliminar_imagen']) && $_POST['eliminar_imagen'] == '1';
 
                 // Pasar el archivo y la solicitud de eliminación a la función
@@ -52,10 +52,10 @@ if (isset($_POST['update'])) {
         exit();
     }
 
-    if (isset($_POST['tbzonacuerpoid'])) {
-        $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
-        $idZonaCuerpo = $_POST['tbzonacuerpoid'];
-        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 0);
+    if (isset($_POST['tbcuerpozonaid'])) {
+        $cuerpoZonaBusiness = new CuerpoZonaBusiness();
+        $idCuerpoZona = $_POST['tbcuerpozonaid'];
+        $result = $cuerpoZonaBusiness->actualizarEstadoTBCuerpoZona($idCuerpoZona, 0);
 
         if ($result == 1) {
             header("location: " . $redirect_path . "?success=deactivated");
@@ -72,10 +72,10 @@ if (isset($_POST['update'])) {
         exit();
     }
 
-    if (isset($_POST['tbzonacuerpoid'])) {
-        $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
-        $idZonaCuerpo = $_POST['tbzonacuerpoid'];
-        $result = $zonaCuerpoBusiness->actualizarEstadoTBZonaCuerpo($idZonaCuerpo, 1);
+    if (isset($_POST['tbcuerpozonaid'])) {
+        $cuerpoZonaBusiness = new CuerpoZonaBusiness();
+        $idCuerpoZona = $_POST['tbcuerpozonaid'];
+        $result = $cuerpoZonaBusiness->actualizarEstadoTBCuerpoZona($idCuerpoZona, 1);
 
         if ($result == 1) {
             header("location: " . $redirect_path . "?success=activated");
@@ -92,11 +92,11 @@ if (isset($_POST['update'])) {
         exit();
     }
 
-    if (isset($_POST['tbzonacuerponombre']) && isset($_POST['tbzonacuerpodescripcion'])) {
-        if (!empty($_POST['tbzonacuerponombre']) && !empty($_POST['tbzonacuerpodescripcion'])) {
-            $zonaCuerpo = new ZonaCuerpo(0, $_POST['tbzonacuerponombre'], $_POST['tbzonacuerpodescripcion'], 1);
-            $zonaCuerpoBusiness = new ZonaCuerpoBusiness();
-            $nuevoId = $zonaCuerpoBusiness->insertarTBZonaCuerpo($zonaCuerpo);
+    if (isset($_POST['tbcuerpozonanombre']) && isset($_POST['tbcuerpozonadescripcion'])) {
+        if (!empty($_POST['tbcuerpozonanombre']) && !empty($_POST['tbcuerpozonadescripcion'])) {
+            $cuerpoZona = new CuerpoZona(0, $_POST['tbcuerpozonanombre'], $_POST['tbcuerpozonadescripcion'], 1);
+            $cuerpoZonaBusiness = new CuerpoZonaBusiness();
+            $nuevoId = $cuerpoZonaBusiness->insertarTBCuerpoZona($cuerpoZona);
 
             if ($nuevoId > 0) {
                 // Si se insertó correctamente y tenemos un ID, procesamos la imagen

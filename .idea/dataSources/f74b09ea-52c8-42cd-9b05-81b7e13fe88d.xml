@@ -1036,7 +1036,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Charset>utf8mb4</Charset>
     </collation>
     <collation id="276" parent="1" name="utf8mb4_nn_0900_ai_ci">
-      <Charset>utf8mb4</Charset>
+      <Charset>utf8mb4</CharSet>
     </collation>
     <collation id="277" parent="1" name="utf8mb4_nn_0900_as_cs">
       <Charset>utf8mb4</Charset>
@@ -1124,7 +1124,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <table id="300" parent="291" name="tbzonacuerpo">
+    <table id="300" parent="291" name="tbcuerpozona">
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
@@ -1299,28 +1299,28 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="338" parent="300" name="tbzonacuerpoid">
+    <column id="338" parent="300" name="tbcuerpozonaid">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="339" parent="300" name="tbzonacuerponombre">
+    <column id="339" parent="300" name="tbcuerpozonanombre">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="340" parent="300" name="tbzonacuerpodescripcion">
+    <column id="340" parent="300" name="tbcuerpozonadescripcion">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="341" parent="300" name="tbzonacuerpoactivo">
+    <column id="341" parent="300" name="tbcuerpozonaactivo">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
     <index id="342" parent="300" name="PRIMARY">
-      <ColNames>tbzonacuerpoid</ColNames>
+      <ColNames>tbcuerpozonaid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
