@@ -51,6 +51,8 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
     echo "<a href='view/datoClinicoView.php'><button>Datos Clínicos</button></a>";
     echo "<a href='view/instructorView.php'><button>Ir a Instructores</button></a>";
     echo "<a href='view/clienteView.php'><button>Ir a Clientes</button></a>";
+    echo "<a href='view/certificadoView.php'><button>Ir a certificados</button></a>";
+
     ?>
 </div>
 </body>
