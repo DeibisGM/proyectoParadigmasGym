@@ -40,8 +40,8 @@ if ($tipoUsuario === 'cliente') {
         <select name="clienteId" required>
             <option value="">Seleccione un cliente</option>
             <?php foreach ($clientes as $cliente): ?>
-                <option value="<?php echo $cliente->getClienteId(); ?>">
-                    <?php echo $cliente->getClienteNombre() . " - " . $cliente->getClienteCarnet(); ?>
+                <option value="<?php echo $cliente->getId(); ?>">
+                    <?php echo $cliente->getNombre() . " - " . $cliente->getCarnet(); ?>
                 </option>
             <?php endforeach; ?>
         </select><br><br>
@@ -83,8 +83,8 @@ if ($tipoUsuario === 'cliente') {
                         echo "Yo mismo";
                     } else {
                         foreach ($clientes as $cliente) {
-                            if ($cliente->getClienteId() == $numero->getClienteId()) {
-                                echo $cliente->getClienteNombre() . " - " . $cliente->getClienteCarnet();
+                            if ($cliente->getId() == $numero->getClienteId()) {
+                                echo $cliente->getNombre() . " - " . $cliente->getCarnet();
                             }
                         }
                     }
