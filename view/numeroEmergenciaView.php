@@ -1,7 +1,7 @@
 <?php
 session_start();
-include '../business/clienteBusiness.php';
-include '../business/numeroEmergenciaBusiness.php';
+include_once '../business/clienteBusiness.php';
+include_once '../business/numeroEmergenciaBusiness.php';
 
 if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
     header("Location: ../view/loginView.php");
@@ -12,7 +12,7 @@ $tipoUsuario = $_SESSION['tipo_usuario'];
 $clienteId = $_SESSION['usuario_id'];
 
 $clienteBusiness = new ClienteBusiness();
-$numeroEmergenciaBusiness = new NumeroEmergenciaBusiness();
+$numeroEmergenciaBusiness = new numeroEmergenciaBusiness();
 
 if ($tipoUsuario === 'cliente') {
     // Cliente solo ve sus números
