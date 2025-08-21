@@ -1,11 +1,8 @@
 <?php
 include_once '../business/numeroEmergenciaBusiness.php';
 
-error_log("numeroEmergenciaAction.php: Start");
-
 // Insertar un nuevo numero
 if (isset($_POST['insertar'])) {
-    error_log("numeroEmergenciaAction.php: Insert block");
     if (isset($_POST['clienteId']) && isset($_POST['nombre']) && isset($_POST['telefono']) &&
         isset($_POST['relacion'])) {
 
@@ -13,11 +10,6 @@ if (isset($_POST['insertar'])) {
         $nombre = trim($_POST['nombre']);
         $telefono = trim($_POST['telefono']);
         $relacion = trim($_POST['relacion']);
-
-        error_log("numeroEmergenciaAction.php: clienteId: " . $clienteId);
-        error_log("numeroEmergenciaAction.php: nombre: " . $nombre);
-        error_log("numeroEmergenciaAction.php: telefono: " . $telefono);
-        error_log("numeroEmergenciaAction.php: relacion: " . $relacion);
 
         // Validaciones
         if (empty($clienteId) || empty($nombre) || empty($telefono) ||
@@ -28,9 +20,7 @@ if (isset($_POST['insertar'])) {
 
         // Verificar si el numero ya existe al cliente
         $numeroEmergenciaBusiness = new numeroEmergenciaBusiness();
-        $existe = $numeroEmergenciaBusiness->existeNumeroEmergencia($clienteId, $telefono);
-        error_log("numeroEmergenciaAction.php: existeNumeroEmergencia returned: " . ($existe ? 'true' : 'false'));
-        if ($existe) {
+        if ($numeroEmergenciaBusiness->existeNumeroEmergencia($clienteId, $telefono)) {
             header("location: ../view/numeroEmergenciaView.php?error=existe");
             exit();
         }
@@ -39,7 +29,6 @@ if (isset($_POST['insertar'])) {
         $numeroEmergencia = new numeroEmergencia(null, $clienteId, $nombre, $telefono, $relacion);
 
         $result = $numeroEmergenciaBusiness->insertarTBNumeroEmergencia($numeroEmergencia);
-        error_log("numeroEmergenciaAction.php: insertarTBNumeroEmergencia returned: " . $result);
 
         if ($result == 1) {
             header("location: ../view/numeroEmergenciaView.php?success=insertado");

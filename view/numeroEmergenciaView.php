@@ -32,7 +32,7 @@ if ($tipoUsuario === 'cliente') {
 </head>
 <body>
 <h1>Gestión de Números de Emergencia</h1>
-
+<a href="../index.php">Volver al Inicio</a>
 <!-- Formulario -->
 <form method="post" action="../action/numeroEmergenciaAction.php">
     <?php if ($tipoUsuario !== 'cliente'): ?>
@@ -46,7 +46,7 @@ if ($tipoUsuario === 'cliente') {
             <?php endforeach; ?>
         </select><br><br>
     <?php else: ?>
-        <!-- Cliente ya tiene su ID oculto -->
+
         <input type="hidden" name="clienteId" value="<?php echo $clienteId; ?>">
     <?php endif; ?>
 
@@ -80,7 +80,7 @@ if ($tipoUsuario === 'cliente') {
                 <td>
                     <?php
                     if ($tipoUsuario === 'cliente') {
-                        echo "Yo mismo";
+                        echo "Cliente";
                     } else {
                         foreach ($clientes as $cliente) {
                             if ($cliente->getId() == $numero->getClienteId()) {
