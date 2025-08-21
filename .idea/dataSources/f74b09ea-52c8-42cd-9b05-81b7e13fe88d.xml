@@ -2,174 +2,8 @@
 <dataSource name="gymRailway">
   <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.53">
     <root id="1">
-      <DefaultCasing>exact</DefaultCasing>
       <DefaultEngine>InnoDB</DefaultEngine>
       <DefaultTmpEngine>InnoDB</DefaultTmpEngine>
-      <Grants>|root||root||ALLOW_NONEXISTENT_DEFINER|G
-|root||root|localhost|ALLOW_NONEXISTENT_DEFINER|G
-|root||root||ALTER|G
-|root||root|localhost|ALTER|G
-|root||root||ALTER ROUTINE|G
-|root||root|localhost|ALTER ROUTINE|G
-|root||root||APPLICATION_PASSWORD_ADMIN|G
-|root||root|localhost|APPLICATION_PASSWORD_ADMIN|G
-|root||mysql.infoschema|localhost|AUDIT_ABORT_EXEMPT|G
-|root||mysql.session|localhost|AUDIT_ABORT_EXEMPT|G
-|root||mysql.sys|localhost|AUDIT_ABORT_EXEMPT|G
-|root||root||AUDIT_ABORT_EXEMPT|G
-|root||root|localhost|AUDIT_ABORT_EXEMPT|G
-|root||root||AUDIT_ADMIN|G
-|root||root|localhost|AUDIT_ADMIN|G
-|root||mysql.session|localhost|AUTHENTICATION_POLICY_ADMIN|G
-|root||root||AUTHENTICATION_POLICY_ADMIN|G
-|root||root|localhost|AUTHENTICATION_POLICY_ADMIN|G
-|root||mysql.session|localhost|BACKUP_ADMIN|G
-|root||root||BACKUP_ADMIN|G
-|root||root|localhost|BACKUP_ADMIN|G
-|root||root||BINLOG_ADMIN|G
-|root||root|localhost|BINLOG_ADMIN|G
-|root||root||BINLOG_ENCRYPTION_ADMIN|G
-|root||root|localhost|BINLOG_ENCRYPTION_ADMIN|G
-|root||mysql.session|localhost|CLONE_ADMIN|G
-|root||root||CLONE_ADMIN|G
-|root||root|localhost|CLONE_ADMIN|G
-|root||mysql.session|localhost|CONNECTION_ADMIN|G
-|root||root||CONNECTION_ADMIN|G
-|root||root|localhost|CONNECTION_ADMIN|G
-|root||root||CREATE|G
-|root||root|localhost|CREATE|G
-|root||root||CREATE ROLE|G
-|root||root|localhost|CREATE ROLE|G
-|root||root||CREATE ROUTINE|G
-|root||root|localhost|CREATE ROUTINE|G
-|root||root||CREATE TABLESPACE|G
-|root||root|localhost|CREATE TABLESPACE|G
-|root||root||CREATE TEMPORARY TABLES|G
-|root||root|localhost|CREATE TEMPORARY TABLES|G
-|root||root||CREATE USER|G
-|root||root|localhost|CREATE USER|G
-|root||root||CREATE VIEW|G
-|root||root|localhost|CREATE VIEW|G
-|root||root||CREATE_SPATIAL_REFERENCE_SYSTEM|G
-|root||root|localhost|CREATE_SPATIAL_REFERENCE_SYSTEM|G
-|root||root||DELETE|G
-|root||root|localhost|DELETE|G
-|root||root||DROP|G
-|root||root|localhost|DROP|G
-|root||root||DROP ROLE|G
-|root||root|localhost|DROP ROLE|G
-|root||root||ENCRYPTION_KEY_ADMIN|G
-|root||root|localhost|ENCRYPTION_KEY_ADMIN|G
-|root||root||EVENT|G
-|root||root|localhost|EVENT|G
-|root||root||EXECUTE|G
-|root||root|localhost|EXECUTE|G
-|root||root||FILE|G
-|root||root|localhost|FILE|G
-|root||mysql.infoschema|localhost|FIREWALL_EXEMPT|G
-|root||mysql.session|localhost|FIREWALL_EXEMPT|G
-|root||mysql.sys|localhost|FIREWALL_EXEMPT|G
-|root||root||FIREWALL_EXEMPT|G
-|root||root|localhost|FIREWALL_EXEMPT|G
-|root||root||FLUSH_OPTIMIZER_COSTS|G
-|root||root|localhost|FLUSH_OPTIMIZER_COSTS|G
-|root||root||FLUSH_PRIVILEGES|G
-|root||root|localhost|FLUSH_PRIVILEGES|G
-|root||root||FLUSH_STATUS|G
-|root||root|localhost|FLUSH_STATUS|G
-|root||root||FLUSH_TABLES|G
-|root||root|localhost|FLUSH_TABLES|G
-|root||root||FLUSH_USER_RESOURCES|G
-|root||root|localhost|FLUSH_USER_RESOURCES|G
-|root||root||GROUP_REPLICATION_ADMIN|G
-|root||root|localhost|GROUP_REPLICATION_ADMIN|G
-|root||root||GROUP_REPLICATION_STREAM|G
-|root||root|localhost|GROUP_REPLICATION_STREAM|G
-|root||root||INDEX|G
-|root||root|localhost|INDEX|G
-|root||root||INNODB_REDO_LOG_ARCHIVE|G
-|root||root|localhost|INNODB_REDO_LOG_ARCHIVE|G
-|root||root||INNODB_REDO_LOG_ENABLE|G
-|root||root|localhost|INNODB_REDO_LOG_ENABLE|G
-|root||root||INSERT|G
-|root||root|localhost|INSERT|G
-|root||root||LOCK TABLES|G
-|root||root|localhost|LOCK TABLES|G
-|root||root||OPTIMIZE_LOCAL_TABLE|G
-|root||root|localhost|OPTIMIZE_LOCAL_TABLE|G
-|root||root||PASSWORDLESS_USER_ADMIN|G
-|root||root|localhost|PASSWORDLESS_USER_ADMIN|G
-|root||mysql.session|localhost|PERSIST_RO_VARIABLES_ADMIN|G
-|root||root||PERSIST_RO_VARIABLES_ADMIN|G
-|root||root|localhost|PERSIST_RO_VARIABLES_ADMIN|G
-|root||root||PROCESS|G
-|root||root|localhost|PROCESS|G
-|root||root||REFERENCES|G
-|root||root|localhost|REFERENCES|G
-|root||root||RELOAD|G
-|root||root|localhost|RELOAD|G
-|root||root||REPLICATION CLIENT|G
-|root||root|localhost|REPLICATION CLIENT|G
-|root||root||REPLICATION SLAVE|G
-|root||root|localhost|REPLICATION SLAVE|G
-|root||root||REPLICATION_APPLIER|G
-|root||root|localhost|REPLICATION_APPLIER|G
-|root||root||REPLICATION_SLAVE_ADMIN|G
-|root||root|localhost|REPLICATION_SLAVE_ADMIN|G
-|root||root||RESOURCE_GROUP_ADMIN|G
-|root||root|localhost|RESOURCE_GROUP_ADMIN|G
-|root||root||RESOURCE_GROUP_USER|G
-|root||root|localhost|RESOURCE_GROUP_USER|G
-|root||root||ROLE_ADMIN|G
-|root||root|localhost|ROLE_ADMIN|G
-|root||mysql.infoschema|localhost|SELECT|G
-|root||root||SELECT|G
-|root||root|localhost|SELECT|G
-|root||root||SENSITIVE_VARIABLES_OBSERVER|G
-|root||root|localhost|SENSITIVE_VARIABLES_OBSERVER|G
-|root||root||SERVICE_CONNECTION_ADMIN|G
-|root||root|localhost|SERVICE_CONNECTION_ADMIN|G
-|root||mysql.session|localhost|SESSION_VARIABLES_ADMIN|G
-|root||root||SESSION_VARIABLES_ADMIN|G
-|root||root|localhost|SESSION_VARIABLES_ADMIN|G
-|root||root||SET_ANY_DEFINER|G
-|root||root|localhost|SET_ANY_DEFINER|G
-|root||root||SHOW DATABASES|G
-|root||root|localhost|SHOW DATABASES|G
-|root||root||SHOW VIEW|G
-|root||root|localhost|SHOW VIEW|G
-|root||root||SHOW_ROUTINE|G
-|root||root|localhost|SHOW_ROUTINE|G
-|root||mysql.session|localhost|SHUTDOWN|G
-|root||root||SHUTDOWN|G
-|root||root|localhost|SHUTDOWN|G
-|root||mysql.session|localhost|SUPER|G
-|root||root||SUPER|G
-|root||root|localhost|SUPER|G
-|root||mysql.infoschema|localhost|SYSTEM_USER|G
-|root||mysql.session|localhost|SYSTEM_USER|G
-|root||mysql.sys|localhost|SYSTEM_USER|G
-|root||root||SYSTEM_USER|G
-|root||root|localhost|SYSTEM_USER|G
-|root||mysql.session|localhost|SYSTEM_VARIABLES_ADMIN|G
-|root||root||SYSTEM_VARIABLES_ADMIN|G
-|root||root|localhost|SYSTEM_VARIABLES_ADMIN|G
-|root||root||TABLE_ENCRYPTION_ADMIN|G
-|root||root|localhost|TABLE_ENCRYPTION_ADMIN|G
-|root||root||TELEMETRY_LOG_ADMIN|G
-|root||root|localhost|TELEMETRY_LOG_ADMIN|G
-|root||root||TRANSACTION_GTID_TAG|G
-|root||root|localhost|TRANSACTION_GTID_TAG|G
-|root||root||TRIGGER|G
-|root||root|localhost|TRIGGER|G
-|root||root||UPDATE|G
-|root||root|localhost|UPDATE|G
-|root||root||XA_RECOVER_ADMIN|G
-|root||root|localhost|XA_RECOVER_ADMIN|G
-|root||root||grant option|G
-|root||root|localhost|grant option|G
-performance_schema|schema||mysql.session|localhost|SELECT|G
-sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <ServerVersion>9.4.0</ServerVersion>
     </root>
     <collation id="2" parent="1" name="armscii8_general_ci">
@@ -1036,7 +870,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Charset>utf8mb4</Charset>
     </collation>
     <collation id="276" parent="1" name="utf8mb4_nn_0900_ai_ci">
-      <Charset>utf8mb4</CharSet>
+      <Charset>utf8mb4</Charset>
     </collation>
     <collation id="277" parent="1" name="utf8mb4_nn_0900_as_cs">
       <Charset>utf8mb4</Charset>
@@ -1084,7 +918,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <Current>1</Current>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2025-08-17.19:34:39</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-08-21.01:05:35</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="292" parent="1" name="root">
@@ -1109,222 +943,313 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Host>localhost</Host>
       <Plugin>caching_sha2_password</Plugin>
     </user>
-    <table id="297" parent="291" name="tbcliente">
+    <table id="297" parent="291" name="tbcertificado">
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <table id="298" parent="291" name="tbdatoclinico">
+    <table id="298" parent="291" name="tbcliente">
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <table id="299" parent="291" name="tbinstructor">
+    <table id="299" parent="291" name="tbcuerpozona">
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <table id="300" parent="291" name="tbcuerpozona">
+    <table id="300" parent="291" name="tbdatoclinico">
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <column id="301" parent="297" name="tbclienteid">
-      <AutoIncrement>8</AutoIncrement>
-      <NotNull>1</NotNull>
-      <Position>1</Position>
-      <StoredType>int|0s</StoredType>
-    </column>
-    <column id="302" parent="297" name="tbclientecarnet">
-      <NotNull>1</NotNull>
-      <Position>2</Position>
-      <StoredType>varchar(10)|0s</StoredType>
-    </column>
-    <column id="303" parent="297" name="tbclientenombre">
-      <NotNull>1</NotNull>
-      <Position>3</Position>
-      <StoredType>varchar(45)|0s</StoredType>
-    </column>
-    <column id="304" parent="297" name="tbclientefechanacimiento">
-      <NotNull>1</NotNull>
-      <Position>4</Position>
-      <StoredType>varchar(45)|0s</StoredType>
-    </column>
-    <column id="305" parent="297" name="tbclientetelefono">
-      <NotNull>1</NotNull>
-      <Position>5</Position>
-      <StoredType>int|0s</StoredType>
-    </column>
-    <column id="306" parent="297" name="tbclientecorreo">
-      <Position>6</Position>
-      <StoredType>varchar(100)|0s</StoredType>
-    </column>
-    <column id="307" parent="297" name="tbclientedireccion">
-      <NotNull>1</NotNull>
-      <Position>7</Position>
-      <StoredType>varchar(100)|0s</StoredType>
-    </column>
-    <column id="308" parent="297" name="tbclientegenero">
-      <NotNull>1</NotNull>
-      <Position>8</Position>
-      <StoredType>char(1)|0s</StoredType>
-    </column>
-    <column id="309" parent="297" name="tbclienteinscripcion">
-      <NotNull>1</NotNull>
-      <Position>9</Position>
-      <StoredType>date|0s</StoredType>
-    </column>
-    <column id="310" parent="297" name="tbclienteestado">
-      <DefaultExpression>1</DefaultExpression>
-      <NotNull>1</NotNull>
-      <Position>10</Position>
-      <StoredType>tinyint(1)|0s</StoredType>
-    </column>
-    <column id="311" parent="297" name="tbclientecontrasena">
-      <NotNull>1</NotNull>
-      <Position>11</Position>
-      <StoredType>varchar(8)|0s</StoredType>
-    </column>
-    <index id="312" parent="297" name="PRIMARY">
-      <ColNames>tbclienteid</ColNames>
-      <Type>btree</Type>
-      <Unique>1</Unique>
-    </index>
-    <key id="313" parent="297" name="PRIMARY">
-      <NameSurrogate>1</NameSurrogate>
-      <Primary>1</Primary>
-      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
-    </key>
-    <column id="314" parent="298" name="tbdatoclinicoid">
-      <AutoIncrement>6</AutoIncrement>
-      <NotNull>1</NotNull>
-      <Position>1</Position>
-      <StoredType>int|0s</StoredType>
-    </column>
-    <column id="315" parent="298" name="tbclienteid">
-      <Position>2</Position>
-      <StoredType>int|0s</StoredType>
-    </column>
-    <column id="316" parent="298" name="tbdatoclinicoenfermedad">
-      <Position>3</Position>
-      <StoredType>varchar(100)|0s</StoredType>
-    </column>
-    <column id="317" parent="298" name="tbdatoclinicoenfermedaddescripcion">
-      <Position>4</Position>
-      <StoredType>varchar(260)|0s</StoredType>
-    </column>
-    <column id="318" parent="298" name="tbdatoclinicomedicamento">
-      <Position>5</Position>
-      <StoredType>tinyint|0s</StoredType>
-    </column>
-    <column id="319" parent="298" name="tbdatoclinicomedicamentodescripcion">
-      <Position>6</Position>
-      <StoredType>varchar(260)|0s</StoredType>
-    </column>
-    <column id="320" parent="298" name="tbdatoclinicolesion">
-      <Position>7</Position>
-      <StoredType>tinyint|0s</StoredType>
-    </column>
-    <column id="321" parent="298" name="tbdatoclinicolesiondescripcion">
-      <Position>8</Position>
-      <StoredType>text|0s</StoredType>
-    </column>
-    <column id="322" parent="298" name="tbdatoclinicodiscapacidad">
-      <Position>9</Position>
-      <StoredType>tinyint|0s</StoredType>
-    </column>
-    <column id="323" parent="298" name="tbdatoclinicodiscapacidaddescripcion">
-      <Position>10</Position>
-      <StoredType>text|0s</StoredType>
-    </column>
-    <column id="324" parent="298" name="tbdatoclinicorestriccionmedica">
-      <Position>11</Position>
-      <StoredType>tinyint|0s</StoredType>
-    </column>
-    <column id="325" parent="298" name="tbdatoclinicorestriccionmedicadescripcion">
-      <Position>12</Position>
-      <StoredType>varchar(260)|0s</StoredType>
-    </column>
-    <index id="326" parent="298" name="PRIMARY">
-      <ColNames>tbdatoclinicoid</ColNames>
-      <Type>btree</Type>
-      <Unique>1</Unique>
-    </index>
-    <index id="327" parent="298" name="fktbclientesid_idx">
-      <ColNames>tbclienteid</ColNames>
-      <Type>btree</Type>
-    </index>
-    <key id="328" parent="298" name="PRIMARY">
-      <NameSurrogate>1</NameSurrogate>
-      <Primary>1</Primary>
-      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
-    </key>
-    <column id="329" parent="299" name="tbinstructorid">
+    <table id="301" parent="291" name="tbinstructor">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <table id="302" parent="291" name="tbnumeroemergencia">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <column id="303" parent="297" name="tbcertificadoid">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="330" parent="299" name="tbinstructornombre">
+    <column id="304" parent="297" name="tbcertificadonombre">
       <Position>2</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="331" parent="299" name="tbinstructortelefono">
+    <column id="305" parent="297" name="tbcertificadodescripcion">
       <Position>3</Position>
-      <StoredType>varchar(100)|0s</StoredType>
+      <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="332" parent="299" name="tbinstructordireccion">
+    <column id="306" parent="297" name="tbcertificadoentidad">
       <Position>4</Position>
-      <StoredType>varchar(500)|0s</StoredType>
+      <StoredType>varchar(200)|0s</StoredType>
     </column>
-    <column id="333" parent="299" name="tbinstructorcorreo">
+    <column id="307" parent="297" name="tbinstructorid">
       <Position>5</Position>
-      <StoredType>varchar(500)|0s</StoredType>
+      <StoredType>int|0s</StoredType>
     </column>
-    <column id="334" parent="299" name="tbinstructorcuenta">
-      <Position>6</Position>
-      <StoredType>varchar(500)|0s</StoredType>
-    </column>
-    <column id="335" parent="299" name="tbinstructorcontraseña">
-      <Position>7</Position>
-      <StoredType>varchar(100)|0s</StoredType>
-    </column>
-    <index id="336" parent="299" name="PRIMARY">
+    <index id="308" parent="297" name="PRIMARY">
+      <ColNames>tbcertificadoid</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="309" parent="297" name="tbcertificado_unique">
       <ColNames>tbinstructorid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="337" parent="299" name="PRIMARY">
+    <key id="310" parent="297" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="338" parent="300" name="tbcuerpozonaid">
+    <key id="311" parent="297" name="tbcertificado_unique">
+      <UnderlyingIndexName>tbcertificado_unique</UnderlyingIndexName>
+    </key>
+    <column id="312" parent="298" name="tbclienteid">
+      <AutoIncrement>9</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="339" parent="300" name="tbcuerpozonanombre">
+    <column id="313" parent="298" name="tbclientecarnet">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>varchar(10)|0s</StoredType>
+    </column>
+    <column id="314" parent="298" name="tbclientenombre">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(45)|0s</StoredType>
+    </column>
+    <column id="315" parent="298" name="tbclientefechanacimiento">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(45)|0s</StoredType>
+    </column>
+    <column id="316" parent="298" name="tbclientetelefono">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="317" parent="298" name="tbclientecorreo">
+      <Position>6</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="318" parent="298" name="tbclientedireccion">
+      <NotNull>1</NotNull>
+      <Position>7</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="319" parent="298" name="tbclientegenero">
+      <NotNull>1</NotNull>
+      <Position>8</Position>
+      <StoredType>char(1)|0s</StoredType>
+    </column>
+    <column id="320" parent="298" name="tbclienteinscripcion">
+      <NotNull>1</NotNull>
+      <Position>9</Position>
+      <StoredType>date|0s</StoredType>
+    </column>
+    <column id="321" parent="298" name="tbclienteestado">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>10</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <column id="322" parent="298" name="tbclientecontrasena">
+      <NotNull>1</NotNull>
+      <Position>11</Position>
+      <StoredType>varchar(8)|0s</StoredType>
+    </column>
+    <index id="323" parent="298" name="PRIMARY">
+      <ColNames>tbclienteid</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="324" parent="298" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="325" parent="299" name="tbcuerpozonaid">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="326" parent="299" name="tbcuerpozonanombre">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="340" parent="300" name="tbcuerpozonadescripcion">
+    <column id="327" parent="299" name="tbcuerpozonadescripcion">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="341" parent="300" name="tbcuerpozonaactivo">
+    <column id="328" parent="299" name="tbcuerpozonaactivo">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <index id="342" parent="300" name="PRIMARY">
+    <index id="329" parent="299" name="PRIMARY">
       <ColNames>tbcuerpozonaid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="343" parent="300" name="PRIMARY">
+    <key id="330" parent="299" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="331" parent="300" name="tbdatoclinicoid">
+      <AutoIncrement>6</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="332" parent="300" name="tbclienteid">
+      <Position>2</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="333" parent="300" name="tbdatoclinicoenfermedad">
+      <Position>3</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="334" parent="300" name="tbdatoclinicoenfermedaddescripcion">
+      <Position>4</Position>
+      <StoredType>varchar(260)|0s</StoredType>
+    </column>
+    <column id="335" parent="300" name="tbdatoclinicomedicamento">
+      <Position>5</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <column id="336" parent="300" name="tbdatoclinicomedicamentodescripcion">
+      <Position>6</Position>
+      <StoredType>varchar(260)|0s</StoredType>
+    </column>
+    <column id="337" parent="300" name="tbdatoclinicolesion">
+      <Position>7</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <column id="338" parent="300" name="tbdatoclinicolesiondescripcion">
+      <Position>8</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="339" parent="300" name="tbdatoclinicodiscapacidad">
+      <Position>9</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <column id="340" parent="300" name="tbdatoclinicodiscapacidaddescripcion">
+      <Position>10</Position>
+      <StoredType>text|0s</StoredType>
+    </column>
+    <column id="341" parent="300" name="tbdatoclinicorestriccionmedica">
+      <Position>11</Position>
+      <StoredType>tinyint|0s</StoredType>
+    </column>
+    <column id="342" parent="300" name="tbdatoclinicorestriccionmedicadescripcion">
+      <Position>12</Position>
+      <StoredType>varchar(260)|0s</StoredType>
+    </column>
+    <index id="343" parent="300" name="PRIMARY">
+      <ColNames>tbdatoclinicoid</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="344" parent="300" name="fktbclientesid_idx">
+      <ColNames>tbclienteid</ColNames>
+      <Type>btree</Type>
+    </index>
+    <key id="345" parent="300" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="346" parent="301" name="tbinstructorid">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="347" parent="301" name="tbinstructornombre">
+      <Position>2</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="348" parent="301" name="tbinstructortelefono">
+      <Position>3</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="349" parent="301" name="tbinstructordireccion">
+      <Position>4</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="350" parent="301" name="tbinstructorcorreo">
+      <Position>5</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="351" parent="301" name="tbinstructorcuenta">
+      <Position>6</Position>
+      <StoredType>varchar(500)|0s</StoredType>
+    </column>
+    <column id="352" parent="301" name="tbinstructorcontraseña">
+      <Position>7</Position>
+      <StoredType>varchar(100)|0s</StoredType>
+    </column>
+    <column id="353" parent="301" name="tbinstructoractivo">
+      <DefaultExpression>1</DefaultExpression>
+      <NotNull>1</NotNull>
+      <Position>8</Position>
+      <StoredType>tinyint(1)|0s</StoredType>
+    </column>
+    <index id="354" parent="301" name="PRIMARY">
+      <ColNames>tbinstructorid</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="355" parent="301" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="356" parent="302" name="tbnumeroemergenciaid">
+      <AutoIncrement>1</AutoIncrement>
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="357" parent="302" name="tbnumeroemergenciaclienteid">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="358" parent="302" name="tbnumeroemergencianombre">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(50)|0s</StoredType>
+    </column>
+    <column id="359" parent="302" name="tbnumeroemergenciatelefono">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>varchar(8)|0s</StoredType>
+    </column>
+    <column id="360" parent="302" name="tbnumeroemergenciarelacion">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>varchar(30)|0s</StoredType>
+    </column>
+    <index id="361" parent="302" name="PRIMARY">
+      <ColNames>tbnumeroemergenciaid</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="362" parent="302" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
