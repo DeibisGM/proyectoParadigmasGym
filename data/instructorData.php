@@ -9,17 +9,8 @@ class InstructorData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryGetLastId = "SELECT MAX(tbinstructorid) AS tbinstructorid FROM tbinstructor";
-        $resultId = mysqli_query($conn, $queryGetLastId);
-        $nextId = 1;
-
-        if ($row = mysqli_fetch_row($resultId)) {
-            if ($row[0] !== null) {
-                $nextId = (int)$row[0] + 1;
-            }
-        }
-
-        $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo) VALUES (" . $nextId . ",'" .
+        $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo) VALUES (" . 
+                $instructor->getInstructorId() . ",'" .
                 $instructor->getInstructorNombre() . "','" .
                 $instructor->getInstructorTelefono() . "','" .
                 $instructor->getInstructorDireccion() . "','" .
@@ -42,7 +33,6 @@ class InstructorData extends Data {
                 "', tbinstructorcorreo='" . $instructor->getInstructorCorreo() .
                 "', tbinstructorcuenta='" . $instructor->getInstructorCuenta() .
                 "', tbinstructorcontraseña='" . $instructor->getInstructorContraseña() .
-
                 "' WHERE tbinstructorid=" . $instructor->getInstructorId() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
