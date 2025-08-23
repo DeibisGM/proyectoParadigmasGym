@@ -126,6 +126,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                     <?php if ($esAdmin || $_SESSION['tipo_usuario'] === 'instructor'): ?>
                         <form method="post" action="../action/cuerpoZonaAction.php" enctype="multipart/form-data">
                             <input type="hidden" name="tbcuerpozonaid" value="<?= $current->getIdCuerpoZona() ?>">
+                            <input type="hidden" name="tbcuerpozonaactivo" value="1">
                             <td style="padding: 8px;"><input type="text" name="tbcuerpozonanombre"
                                                              value="<?= $current->getNombreCuerpoZona() ?>"
                                                              style="width: 100%; box-sizing: border-box;"></td>

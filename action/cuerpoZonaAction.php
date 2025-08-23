@@ -33,7 +33,7 @@ if (isset($_POST['update'])) {
                 $eliminarImagen = isset($_POST['eliminar_imagen']) && $_POST['eliminar_imagen'] == '1';
 
                 // Pasar el archivo y la solicitud de eliminación a la función
-                gestionarImagen('zonas_cuerpo', $id, $_FILES['imagen'], $eliminarImagen);
+                gestionarImagen('cuerpo_zonas', $id, $_FILES['imagen'], $eliminarImagen);
 
                 header("location: " . $redirect_path . "?success=updated");
             } else {
@@ -101,7 +101,7 @@ if (isset($_POST['update'])) {
             if ($nuevoId > 0) {
                 // Si se insertó correctamente y tenemos un ID, procesamos la imagen
                 if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-                    gestionarImagen('zonas_cuerpo', $nuevoId, $_FILES['imagen']);
+                    gestionarImagen('cuerpo_zonas', $nuevoId, $_FILES['imagen']);
                 }
                 header("location: " . $redirect_path . "?success=inserted");
             } else if ($nuevoId == -1) {
