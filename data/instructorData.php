@@ -9,7 +9,6 @@ class InstructorData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        // CORRECCIÓN: Usar directamente la cédula como ID, no necesitas auto-incremento
         $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo) VALUES (" . 
                 $instructor->getInstructorId() . ",'" .
                 $instructor->getInstructorNombre() . "','" .

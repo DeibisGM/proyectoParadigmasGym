@@ -4,6 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
 include '../business/instructorBusiness.php';
+include '../utility/ImageManager.php';
 
 if (isset($_POST['update'])) {
     if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta']) && isset($_POST['contraseña'])) {
@@ -57,6 +58,13 @@ if (isset($_POST['update'])) {
         $result = $instructorBusiness->actualizarTBInstructor($instructor);
 
         if ($result == 1) {
+            // Gestionar imagen después de actualizar
+            $eliminarImagen = isset($_POST['eliminar_imagen']) && $_POST['eliminar_imagen'] == '1';
+            $resultadoImagen = gestionarImagen('instructores', $id, $_FILES['imagen'], $eliminarImagen);
+            
+            // Opcional: puedes registrar el resultado si lo necesitas
+            // error_log("Resultado gestión imagen: " . print_r($resultadoImagen, true));
+            
             header("location: ../view/instructorView.php?success=updated");
         } else {
             header("location: ../view/instructorView.php?error=dbError");
@@ -70,6 +78,9 @@ else if (isset($_POST['delete'])) {
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->eliminarTBInstructor($_POST['id']);
         if ($result == 1) {
+            // Eliminar también la imagen asociada usando ImageManager
+            $resultadoImagen = gestionarImagen('instructores', $_POST['id'], null, true);
+            
             header("location: ../view/instructorView.php?success=deleted");
         } else {
             header("location: ../view/instructorView.php?error=dbError");
@@ -151,6 +162,10 @@ else if (isset($_POST['create'])) {
         $result = $instructorBusiness->insertarTBInstructor($instructor);
 
         if ($result == 1) {
+            // Si se insertó correctamente, procesamos la imagen
+            if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+                $resultadoImagen = gestionarImagen('instructores', $id, $_FILES['imagen']);
+            }
             header("location: ../view/instructorView.php?success=created");
         } else {
             header("location: ../view/instructorView.php?error=dbError");

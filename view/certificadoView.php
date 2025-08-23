@@ -97,19 +97,17 @@ $instructores = $instructorBusiness->getAllTBInstructor(); // Obtener todos los 
                         <input type="hidden" name="id" value="<?php echo $cert->getId(); ?>">
                         <?php echo $cert->getId(); ?>
                     </td>
-                    <td><input type="text" name="nombre" value="<?php echo htmlspecialchars($cert->getNombre()); ?>" required maxlength="100"></td>
-                    <td><input type="text" name="descripcion" value="<?php echo htmlspecialchars($cert->getDescripcion()); ?>" required></td>
-                    <td><input type="text" name="entidad" value="<?php echo htmlspecialchars($cert->getEntidad()); ?>" required></td>
+                    <td><?php echo htmlspecialchars($cert->getNombre()); ?></td>
+                    <td><?php echo htmlspecialchars($cert->getDescripcion()); ?></td>
+                    <td><?php echo htmlspecialchars($cert->getEntidad()); ?></td>
                     <td>
-                        <select name="idInstructor" required>
-                            <option value="">Seleccione un instructor</option>
-                            <?php foreach ($instructores as $instructor): ?>
-                                <option value="<?php echo $instructor->getInstructorId(); ?>" 
-                                    <?php echo ($instructor->getInstructorId() == $cert->getIdInstructor()) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($instructor->getInstructorNombre() . ' (' . $instructor->getInstructorId() . ')'); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <?php 
+                        if ($instructorCert) {
+                            echo htmlspecialchars($instructorCert->getInstructorNombre() . ' (' . $instructorCert->getInstructorId() . ')');
+                        } else {
+                            echo "Instructor no encontrado";
+                        }
+                        ?>
                     </td>
                     <td>
                         <button type="submit" name="delete" onclick="return confirm('¿Eliminar este certificado?');">Eliminar</button>

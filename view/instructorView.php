@@ -37,6 +37,20 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
             background-color: #f0f0f0;
             font-weight: bold;
         }
+        .imagen-actual-container img {
+            max-width: 100px;
+            max-height: 100px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .eliminar-imagen-btn {
+            cursor: pointer;
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 3px 6px;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -62,6 +76,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                     <th>Correo*</th>
                     <th>Cuenta Bancaria</th>
                     <th>Contraseña*</th>
+                    <th>Imagen</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -69,7 +84,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
             <tbody>
                 <!-- Formulario para crear nuevo instructor -->
                 <tr>
-                    <form method="post" action="../action/instructorAction.php" onsubmit="return validateForm()">
+                    <form method="post" action="../action/instructorAction.php" enctype="multipart/form-data" onsubmit="return validateForm()">
                         <td>
                             <input type="text" name="id" placeholder="Ej: 123456789" required 
                                    pattern="[0-9]{9,20}" title="Solo números, entre 9 y 20 dígitos" style="width: 95%;">
@@ -97,6 +112,9 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                             <input type="password" name="contraseña" placeholder="Ej: noelia123" required style="width: 95%;">
                         </td>
                         <td>
+                            <input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">
+                        </td>
+                        <td>
                             <input type="submit" value="Crear" name="create">
                         </td>
                     </form>
@@ -117,6 +135,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                     <?php if ($esAdmin): ?>
                     <th>Cuenta Bancaria</th>
                     <th>Contraseña</th>
+                    <th>Imagen</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                     <?php endif; ?>
@@ -130,7 +149,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                 $instructores = $business->getAllTBInstructor($esAdmin);
 
                 if (empty($instructores)) {
-                    $colspan = $esAdmin ? 9 : 5;
+                    $colspan = $esAdmin ? 10 : 5;
                     echo "<tr><td colspan='{$colspan}'>No hay instructores registrados</td></tr>";
                 } else {
                     foreach ($instructores as $instructor) {
@@ -139,7 +158,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                         echo '<td class="id-cell">' . htmlspecialchars($instructor->getInstructorId() ?? '') . '</td>';
                         
                         if ($esAdmin) {
-                            echo '<form method="post" action="../action/instructorAction.php">';
+                            echo '<form method="post" action="../action/instructorAction.php" enctype="multipart/form-data">';
                             echo '<input type="hidden" name="id" value="' . $instructor->getInstructorId() . '">';
 
                             echo '<td><input type="text" name="nombre" value="' . htmlspecialchars($instructor->getInstructorNombre() ?? '') . '" required></td>';
@@ -148,6 +167,30 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                             echo '<td><input type="email" name="correo" value="' . htmlspecialchars($instructor->getInstructorCorreo() ?? '') . '" required></td>';
                             echo '<td><input type="text" name="cuenta" value="' . htmlspecialchars($instructor->getInstructorCuenta() ?? '') . '"></td>';
                             echo '<td><input type="password" name="contraseña" value="' . htmlspecialchars($instructor->getInstructorContraseña() ?? '') . '" required></td>';
+                            
+echo '<td data-image-manager>';
+$nombreImagen = 'instructores_' . $instructor->getInstructorId() . '.jpg';
+$rutaImagen = '../img/instructores/' . $nombreImagen;
+
+if (file_exists($rutaImagen)) {
+    echo '<div class="imagen-actual-container">';
+    echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen actual">';
+    echo '<button type="button" class="eliminar-imagen-btn">X</button>';
+    echo '</div>';
+    echo '<div class="input-imagen-container" style="display: none;">';
+    echo '<input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">';
+    echo '</div>';
+} else {
+    echo '<div class="imagen-actual-container" style="display: none;">';
+    echo '</div>';
+    echo '<div class="input-imagen-container">';
+    echo '<input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">';
+    echo '</div>';
+}
+
+echo '<input type="hidden" name="eliminar_imagen" value="0">';
+echo '</td>';
+                            
                             echo '<td>' . ($instructor->getInstructorActivo() ? 'Activo' : 'Inactivo') . '</td>';
 
                             echo '<td>
@@ -165,6 +208,16 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                             echo '<td>' . htmlspecialchars($instructor->getInstructorTelefono() ?? '') . '</td>';
                             echo '<td>' . htmlspecialchars($instructor->getInstructorDireccion() ?? '') . '</td>';
                             echo '<td>' . htmlspecialchars($instructor->getInstructorCorreo() ?? '') . '</td>';
+                            echo '<td>';
+                            // FORMATO CORREGIDO para visualización de usuarios no admin
+                            $nombreImagen = 'instructores_' . $instructor->getInstructorId() . '.jpg'; // Cambiado a "instructores"
+                            $rutaImagen = '../img/instructores/' . $nombreImagen;
+                            if (file_exists($rutaImagen)) {
+                                echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen" style="max-width: 100px; max-height: 100px;">';
+                            } else {
+                                echo 'Sin imagen';
+                            }
+                            echo '</td>';
                         }
                         echo '</tr>';
                     }
@@ -279,6 +332,62 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
 
             return true;
         }
+
+        // Gestión de imágenes 
+        document.addEventListener('DOMContentLoaded', function () {
+            // Delegación de eventos para los botónes 'X' y los inputs de archivo
+            document.addEventListener('click', function (event) {
+                // Si se hizo clic en un botón de eliminar imagen
+                if (event.target.classList.contains('eliminar-imagen-btn')) {
+                    const manager = event.target.closest('[data-image-manager]');
+                    if (manager) {
+                        const imagenActualContainer = manager.querySelector('.imagen-actual-container');
+                        const inputContainer = manager.querySelector('.input-imagen-container');
+                        const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
+
+                        imagenActualContainer.style.display = 'none';
+                        inputContainer.style.display = 'block';
+                        hiddenEliminar.value = '1';
+                    }
+                }
+            });
+
+            document.addEventListener('change', function (event) {
+                // Si se seleccionó un archivo en un input de imagen
+                if (event.target.matches('input[type="file"][name="imagen"]')) {
+                    const inputImagen = event.target;
+                    const manager = inputImagen.closest('[data-image-manager]');
+                    const inputContainer = inputImagen.parentElement;
+
+                    const [file] = inputImagen.files;
+                    if (file) {
+                        // Limpiar previsualización anterior si existe
+                        const oldPreview = inputContainer.querySelector('img.preview');
+                        if (oldPreview) {
+                            oldPreview.remove();
+                        }
+
+                        // Crear y mostrar nueva previsualización
+                        const preview = document.createElement('img');
+                        preview.src = URL.createObjectURL(file);
+                        preview.alt = 'Previsualización de nueva imagen';
+                        preview.className = 'preview';
+                        preview.style.maxWidth = '100px';
+                        preview.style.maxHeight = '100px';
+                        preview.style.marginTop = '10px';
+                        inputContainer.appendChild(preview);
+
+                        // Si hay un campo oculto de eliminar, anular la orden
+                        if (manager) {
+                            const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
+                            if (hiddenEliminar) {
+                                hiddenEliminar.value = '0';
+                            }
+                        }
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
