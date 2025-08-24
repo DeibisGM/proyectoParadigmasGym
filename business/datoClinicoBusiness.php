@@ -4,15 +4,15 @@
         include_once '../data/datoClinicoData.php';
     }
 
-    class DatoClinicoBusiness{
+    class DatoClinicoBusiness {
 
         private $datoClinicoData;
 
-        public function __construct(){
+        public function __construct() {
             $this->datoClinicoData = new DatoClinicoData();
         }
 
-        public function insertarTBDatoClinico($datoClinico){
+        public function insertarTBDatoClinico($datoClinico) {
             $existeRegistro = $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($datoClinico->getTbclienteid());
             if ($existeRegistro) {
                 return false;
@@ -20,59 +20,52 @@
             return $this->datoClinicoData->insertarTBDatoClinico($datoClinico);
         }
 
-        public function actualizarTBDatoClinico($datoClinico){
+        public function actualizarTBDatoClinico($datoClinico) {
             return $this->datoClinicoData->actualizarTBDatoClinico($datoClinico);
         }
 
-        public function eliminarTBDatoClinico($tbdatoclinicoid){
+        public function eliminarTBDatoClinico($tbdatoclinicoid) {
             return $this->datoClinicoData->eliminarTBDatoClinico($tbdatoclinicoid);
         }
 
-        public function obtenerTBDatoClinico(){
+        public function obtenerTBDatoClinico() {
             return $this->datoClinicoData->obtenerTBDatoClinico();
         }
 
-        public function obtenerTBDatoClinicoPorCliente($tbclienteid){
+        public function obtenerTBDatoClinicoPorCliente($tbclienteid) {
             return $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($tbclienteid);
         }
 
-        public function obtenerTodosLosClientes(){
+        public function obtenerTodosLosClientes() {
             return $this->datoClinicoData->obtenerTodosLosClientes();
         }
 
-        public function existenDatoClinicosPorCliente($tbclienteid){
+        public function obtenerPadecimientos() {
+            return $this->datoClinicoData->obtenerPadecimientos();
+        }
+
+        public function existenDatoClinicosPorCliente($tbclienteid) {
             $datos = $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($tbclienteid);
             return $datos !== null;
         }
 
-        public function validarDatoClinico($enfermedad, $otraEnfermedad, $tomaMedicamento,
-                                               $medicamento, $lesion, $descripcionLesion,
-                                               $discapacidad, $descripcionDiscapacidad, $restriccionMedica,
-                                               $descripcionrestriccionmedica){
+        public function validarDatoClinico($tbclienteid, $tbpadecimientoid) {
             $errores = array();
 
-            if($enfermedad == 1 && (empty($otraEnfermedad) || trim($otraEnfermedad) == "")){
-                $errores[] = "Debe especificar la enfermedad que posee";
+            if (empty($tbclienteid) || $tbclienteid <= 0) {
+                $errores[] = "Debe seleccionar un cliente válido";
             }
 
-            if($tomaMedicamento == 1 && (empty($medicamento) || trim($medicamento) == "")){
-                $errores[] = "Debe especificar el medicamento que toma";
-            }
-
-            if($lesion == 1 && (empty($descripcionLesion) || trim($descripcionLesion) == "")){
-                $errores[] = "Debe describir la lesión que posee";
-            }
-
-            if($discapacidad == 1 && (empty($descripcionDiscapacidad) || trim($descripcionDiscapacidad) == "")){
-                $errores[] = "Debe describir la discapacidad que posee";
-            }
-
-            if($restriccionMedica ==1 && (empty($descripcionrestriccionmedica) || trim($descripcionrestriccionmedica) == "")){
-                $errores[] = "Debe describir la restricción médica";
+            if (empty($tbpadecimientoid)) {
+                $errores[] = "Debe seleccionar al menos un padecimiento";
+            } else {
+                // Validar que los padecimientos existan en la base de datos
+                if (!$this->datoClinicoData->validarPadecimientosExisten($tbpadecimientoid)) {
+                    $errores[] = "Uno o más padecimientos seleccionados no son válidos";
+                }
             }
 
             return $errores;
         }
-
     }
 ?>
