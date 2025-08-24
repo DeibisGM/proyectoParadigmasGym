@@ -33,14 +33,14 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
     <p>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong></p>
     <p>Tipo de usuario: <span
                 class="user-type"><?php
-                    if ($tipoUsuario == 'admin') {
-                        echo 'Administrador';
-                    } else if ($tipoUsuario == 'instructor') {
-                        echo 'Instructor';
-                    } else {
-                        echo 'Cliente';
-                    }
-                ?></span></p>
+            if ($tipoUsuario == 'admin') {
+                echo 'Administrador';
+            } else if ($tipoUsuario == 'instructor') {
+                echo 'Instructor';
+            } else {
+                echo 'Cliente';
+            }
+            ?></span></p>
 </div>
 
 <h2>Módulos</h2>
@@ -53,6 +53,9 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
     echo "<a href='view/clienteView.php'><button>Ir a Clientes</button></a>";
     echo "<a href='view/certificadoView.php'><button>Ir a certificados</button></a>";
     echo "<a href='view/numeroEmergenciaView.php'><button>Ir a numeros de emergencia</button></a>";
+    // --> AÑADIR ESTA LÍNEA <--
+    echo "<a href='view/reservaView.php'><button>Horarios y Reservas</button></a>";
+    
     ?>
 </div>
 </body>
