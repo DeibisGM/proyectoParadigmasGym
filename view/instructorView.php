@@ -1,3 +1,4 @@
+
 <?php
 session_start();
 
@@ -50,6 +51,18 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
             border: none;
             padding: 3px 6px;
             border-radius: 3px;
+        }
+        .btn-certificados {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -138,6 +151,8 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                     <th>Imagen</th>
                     <th>Estado</th>
                     <th>Acciones</th>
+                    <?php else: ?>
+                    <th>Certificados</th>
                     <?php endif; ?>
                 </tr>
             </thead>
@@ -149,7 +164,7 @@ $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
                 $instructores = $business->getAllTBInstructor($esAdmin);
 
                 if (empty($instructores)) {
-                    $colspan = $esAdmin ? 10 : 5;
+                    $colspan = $esAdmin ? 10 : 6;
                     echo "<tr><td colspan='{$colspan}'>No hay instructores registrados</td></tr>";
                 } else {
                     foreach ($instructores as $instructor) {
@@ -200,6 +215,7 @@ echo '</td>';
                             if (!$instructor->getInstructorActivo()) {
                                 echo '<input type="submit" value="Activar" name="activate">';
                             }
+                            echo '<a href="../view/certificadoView.php?instructor_id=' . $instructor->getInstructorId() . '" class="btn-certificados">Ver Certificados</a>';
                             echo '</td>';
 
                             echo '</form>';
@@ -217,6 +233,9 @@ echo '</td>';
                             } else {
                                 echo 'Sin imagen';
                             }
+                            echo '</td>';
+                            echo '<td>';
+                            echo '<a href="../view/certificadoView.php?instructor_id=' . $instructor->getInstructorId() . '" class="btn-certificados">Ver Certificados</a>';
                             echo '</td>';
                         }
                         echo '</tr>';
