@@ -43,16 +43,7 @@
                 exit();
             }
 
-            if($datoClinicoBusiness->existenDatoClinicosPorCliente($clienteId)) {
-                $mensaje = $esUsuarioCliente ?
-                    'Error: Ya tiene datos clínicos registrados. Puede actualizarlos desde la tabla.' :
-                    'Error: Ya existen datos clínicos registrados para este cliente.';
-
-                $response['success'] = false;
-                $response['message'] = $mensaje;
-                echo json_encode($response);
-                exit();
-            }
+            // REMOVIDA la validación que impide múltiples registros por cliente
 
             // Validar que se hayan seleccionado padecimientos
             if (empty($padecimientosIds) || !is_array($padecimientosIds)) {
@@ -102,8 +93,17 @@
                     exit();
                 }
 
-                $registroExistente = $datoClinicoBusiness->obtenerTBDatoClinicoPorCliente($_SESSION['usuario_id']);
-                if(!$registroExistente || $registroExistente->getTbdatoclinicoid() != $id) {
+                // Verificar que el registro pertenece al cliente autenticado
+                $todosLosRegistros = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
+                $esRegistroDelCliente = false;
+                foreach ($todosLosRegistros as $registro) {
+                    if ($registro->getTbdatoclinicoid() == $id) {
+                        $esRegistroDelCliente = true;
+                        break;
+                    }
+                }
+
+                if(!$esRegistroDelCliente) {
                     $response['success'] = false;
                     $response['message'] = 'Error: No tiene permisos para actualizar este registro.';
                     echo json_encode($response);
@@ -161,14 +161,38 @@
             }
 
         } else if(isset($_POST['delete'])) {
-            if (!($esAdmin || $esInstructor)) {
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+
+            if ($esUsuarioCliente) {
+                if (!isset($_SESSION['usuario_id'])) {
+                    $response['success'] = false;
+                    $response['message'] = 'Error: Usuario no autenticado.';
+                    echo json_encode($response);
+                    exit();
+                }
+
+                // Verificar que el registro pertenece al cliente autenticado
+                $todosLosRegistros = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
+                $esRegistroDelCliente = false;
+                foreach ($todosLosRegistros as $registro) {
+                    if ($registro->getTbdatoclinicoid() == $id) {
+                        $esRegistroDelCliente = true;
+                        break;
+                    }
+                }
+
+                if(!$esRegistroDelCliente) {
+                    $response['success'] = false;
+                    $response['message'] = 'Error: No tiene permisos para eliminar este registro.';
+                    echo json_encode($response);
+                    exit();
+                }
+            } else if (!($esAdmin || $esInstructor)) {
                 $response['success'] = false;
                 $response['message'] = 'Error: No tiene permisos para eliminar registros.';
                 echo json_encode($response);
                 exit();
             }
-
-            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
 
             if(empty($id) || $id <= 0) {
                 $response['success'] = false;

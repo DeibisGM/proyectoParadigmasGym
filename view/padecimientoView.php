@@ -13,7 +13,7 @@ $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'ad
 if (!$esAdmin) {
     echo "<h1>Acceso Denegado</h1>";
     echo "<p>Solo los administradores pueden gestionar padecimientos.</p>";
-    echo "<p><a href='../view/dashboard.php'>Volver al Dashboard</a></p>";
+    echo "<p><a href='../index.php'>Volver al Inicio</a></p>";
     exit();
 }
 ?>
@@ -27,10 +27,11 @@ if (!$esAdmin) {
 </head>
 <body>
     <h1>Gestión de Padecimientos - Panel de Administrador</h1>
-    <p><strong>Nota:</strong> Solo los administradores pueden registrar, actualizar y eliminar padecimientos.</p>
-<header>
-    <a href="../index.php">Volver al Inicio</a>
-</header>
+
+    <header>
+        <a href="../index.php">Volver al Inicio</a>
+    </header>
+
     <!-- Sección de registro de padecimientos -->
     <div id="registroSection">
         <h2>Registrar Nuevo Padecimiento</h2>
@@ -53,15 +54,15 @@ if (!$esAdmin) {
                 </tr>
                 <tr>
                     <td><label for="nombre">Nombre:</label></td>
-                    <td><input type="text" id="nombre" name="nombre" required maxlength="100"></td>
+                    <td><input type="text" id="nombre" name="nombre" required maxlength="100" placeholder="Nombre del padecimiento"></td>
                 </tr>
                 <tr>
                     <td><label for="descripcion">Descripción:</label></td>
-                    <td><textarea id="descripcion" name="descripcion" required maxlength="500" rows="3" cols="40"></textarea></td>
+                    <td><textarea id="descripcion" name="descripcion" required maxlength="500" rows="3" placeholder="Descripción detallada del padecimiento"></textarea></td>
                 </tr>
                 <tr>
                     <td><label for="formaDeActuar">Forma de Actuar:</label></td>
-                    <td><textarea id="formaDeActuar" name="formaDeActuar" required maxlength="1000" rows="4" cols="40"></textarea></td>
+                    <td><textarea id="formaDeActuar" name="formaDeActuar" required maxlength="1000" rows="4" placeholder="Instrucciones sobre cómo actuar ante este padecimiento"></textarea></td>
                 </tr>
                 <tr>
                     <td colspan="2">
@@ -111,6 +112,10 @@ if (!$esAdmin) {
         // Manejar envío del formulario
         document.getElementById('padecimientoForm').addEventListener('submit', function(e) {
             e.preventDefault();
+
+            if (!validarFormulario()) {
+                return;
+            }
 
             if (modoEdicion) {
                 actualizarPadecimiento();
@@ -164,7 +169,7 @@ if (!$esAdmin) {
             .then(data => {
                 mostrarMensaje(data.message, data.success);
                 if (data.success) {
-                    cancelarEdicion();
+                    cancelarEdicionFormulario();
                     cargarPadecimientos();
                 }
             })
@@ -199,7 +204,7 @@ if (!$esAdmin) {
 
             if (padecimientos.length === 0) {
                 const row = tbody.insertRow();
-                row.innerHTML = '<td colspan="5" style="text-align: center;">No hay padecimientos registrados</td>';
+                row.innerHTML = '<td colspan="5">No hay padecimientos registrados</td>';
                 return;
             }
 
@@ -225,7 +230,9 @@ if (!$esAdmin) {
                         <button onclick="habilitarEdicion(${padecimiento.id})">Editar</button>
                         <button onclick="guardarCambios(${padecimiento.id})" style="display: none;">Guardar</button>
                         <button onclick="cancelarEdicion(${padecimiento.id})" style="display: none;">Cancelar</button>
-                        <button onclick="eliminarPadecimiento(${padecimiento.id})" style="color: red;">Eliminar</button>
+                        <br>
+                        <button onclick="eliminarPadecimiento(${padecimiento.id})">Eliminar</button>
+                        <button onclick="editarEnFormulario(${padecimiento.id})">Editar en Formulario</button>
                     </td>
                 `;
             });
@@ -247,18 +254,49 @@ if (!$esAdmin) {
             descripcion.disabled = false;
             forma.disabled = false;
 
-            // Cambiar estilo para indicar modo edición
-            tipo.style.backgroundColor = '#fff3cd';
-            nombre.style.backgroundColor = '#fff3cd';
-            descripcion.style.backgroundColor = '#fff3cd';
-            forma.style.backgroundColor = '#fff3cd';
-
             // Mostrar/ocultar botones
             const botones = row.querySelectorAll('button');
             botones[0].style.display = 'none'; // Editar
             botones[1].style.display = 'inline'; // Guardar
             botones[2].style.display = 'inline'; // Cancelar
             botones[3].disabled = true; // Deshabilitar eliminar mientras edita
+            botones[4].disabled = true; // Deshabilitar "Editar en Formulario" mientras edita
+        }
+
+        // Función para editar en el formulario principal
+        function editarEnFormulario(id) {
+            const padecimiento = padecimientos.find(p => p.id == id);
+            if (!padecimiento) return;
+
+            // Llenar el formulario
+            document.getElementById('tipo').value = padecimiento.tipo;
+            document.getElementById('nombre').value = padecimiento.nombre;
+            document.getElementById('descripcion').value = padecimiento.descripcion;
+            document.getElementById('formaDeActuar').value = padecimiento.formaDeActuar;
+
+            // Cambiar a modo edición
+            modoEdicion = true;
+            idEditando = id;
+
+            // Cambiar el botón y título
+            const submitBtn = document.querySelector('#padecimientoForm button[type="submit"]');
+            submitBtn.textContent = 'Actualizar Padecimiento';
+
+            // Cambiar título
+            document.querySelector('#registroSection h2').textContent = 'Actualizar Padecimiento';
+
+            // Agregar botón cancelar
+            if (!document.getElementById('cancelBtn')) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.id = 'cancelBtn';
+                cancelBtn.textContent = 'Cancelar Edición';
+                cancelBtn.onclick = cancelarEdicionFormulario;
+                submitBtn.parentNode.appendChild(cancelBtn);
+            }
+
+            // Scroll al formulario
+            document.getElementById('registroSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         // Función para guardar cambios desde la tabla
@@ -310,8 +348,6 @@ if (!$esAdmin) {
                 mostrarMensaje(data.message, data.success);
                 if (data.success) {
                     cargarPadecimientos(); // Recargar tabla
-                } else {
-                    // Si hay error, mantener en modo edición
                 }
             })
             .catch(error => {
@@ -334,8 +370,6 @@ if (!$esAdmin) {
             // Restaurar botón
             const submitBtn = document.querySelector('#padecimientoForm button[type="submit"]');
             submitBtn.textContent = 'Registrar Padecimiento';
-            submitBtn.style.backgroundColor = '';
-            submitBtn.style.color = '';
 
             // Remover botón cancelar
             const cancelBtn = document.getElementById('cancelBtn');
@@ -352,7 +386,7 @@ if (!$esAdmin) {
             const padecimiento = padecimientos.find(p => p.id == id);
             const nombrePadecimiento = padecimiento ? padecimiento.nombre : 'este padecimiento';
 
-            if (confirm(`¿Está seguro de que desea eliminar "${nombrePadecimiento}"?\n\nEsta acción no se puede deshacer.`)) {
+            if (confirm(`¿Está seguro de que desea eliminar "${nombrePadecimiento}"?\n\nEsta acción no se puede deshacer y puede afectar a los datos clínicos que referencien este padecimiento.`)) {
                 const formData = new FormData();
                 formData.append('delete', '1');
                 formData.append('id', id);
@@ -391,19 +425,11 @@ if (!$esAdmin) {
         // Función para mostrar mensajes
         function mostrarMensaje(mensaje, esExito) {
             const mensajeDiv = document.getElementById('mensaje');
-            mensajeDiv.innerHTML = `<p><strong>${mensaje}</strong></p>`;
-            mensajeDiv.style.color = esExito ? 'green' : 'red';
-            mensajeDiv.style.fontWeight = 'bold';
-            mensajeDiv.style.margin = '10px 0';
-            mensajeDiv.style.padding = '10px';
-            mensajeDiv.style.border = '1px solid ' + (esExito ? 'green' : 'red');
-            mensajeDiv.style.backgroundColor = esExito ? '#d4edda' : '#f8d7da';
+            mensajeDiv.innerHTML = `<div>${mensaje}</div>`;
 
             // Ocultar mensaje después de 5 segundos
             setTimeout(() => {
                 mensajeDiv.innerHTML = '';
-                mensajeDiv.style.border = 'none';
-                mensajeDiv.style.backgroundColor = 'transparent';
             }, 5000);
         }
 

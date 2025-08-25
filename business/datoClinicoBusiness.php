@@ -13,10 +13,7 @@
         }
 
         public function insertarTBDatoClinico($datoClinico) {
-            $existeRegistro = $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($datoClinico->getTbclienteid());
-            if ($existeRegistro) {
-                return false;
-            }
+            // REMOVIDA la validación de registro único por cliente
             return $this->datoClinicoData->insertarTBDatoClinico($datoClinico);
         }
 
@@ -34,6 +31,11 @@
 
         public function obtenerTBDatoClinicoPorCliente($tbclienteid) {
             return $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($tbclienteid);
+        }
+
+        // Nueva función para obtener TODOS los datos clínicos de un cliente
+        public function obtenerTodosTBDatoClinicoPorCliente($tbclienteid) {
+            return $this->datoClinicoData->obtenerTodosTBDatoClinicoPorCliente($tbclienteid);
         }
 
         public function obtenerTodosLosClientes() {

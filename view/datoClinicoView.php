@@ -34,11 +34,8 @@ foreach ($padecimientosObj as $padecimiento) {
 }
 
 if ($esUsuarioCliente) {
-    $datosClinicos = array();
-    $datoExistente = $datoClinicoBusiness->obtenerTBDatoClinicoPorCliente($_SESSION['usuario_id']);
-    if ($datoExistente) {
-        $datosClinicos = array($datoExistente);
-    }
+    // CAMBIO: Obtener TODOS los registros del cliente, no solo uno
+    $datosClinicos = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
 } else {
     $datosClinicos = $datoClinicoBusiness->obtenerTBDatoClinico();
     $clientes = $datoClinicoBusiness->obtenerTodosLosClientes();
@@ -98,7 +95,7 @@ if ($esUsuarioCliente) {
     <!-- Formulario para registrar/actualizar datos clínicos -->
     <div id="formularioContainer">
         <h3 id="tituloFormulario">
-            <?php echo $esUsuarioCliente ? 'Registrar mis datos clínicos' : 'Registrar datos clínicos'; ?>
+            <?php echo $esUsuarioCliente ? 'Registrar nuevos datos clínicos' : 'Registrar datos clínicos'; ?>
         </h3>
 
         <form id="formDatoClinico">
@@ -184,7 +181,7 @@ if ($esUsuarioCliente) {
                     </td>
                     <td>
                         <button onclick="editarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)">Editar</button>
-                        <?php if ($esAdmin): ?>
+                        <?php if ($esAdmin || $esUsuarioCliente): ?>
                         <button onclick="eliminarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)">Eliminar</button>
                         <?php endif; ?>
                         <button onclick="cancelarEdicion(<?php echo $dato->getTbdatoclinicoid(); ?>)" style="display: none;" class="btn-cancelar-edicion">Cancelar</button>
@@ -196,7 +193,7 @@ if ($esUsuarioCliente) {
         </table>
 
         <?php if (empty($datosClinicos)): ?>
-        <p>No hay datos clínicos registrados.</p>
+        <p><?php echo $esUsuarioCliente ? 'No tiene datos clínicos registrados.' : 'No hay datos clínicos registrados.'; ?></p>
         <?php endif; ?>
     </div>
 
@@ -279,7 +276,7 @@ if ($esUsuarioCliente) {
             document.getElementById('formDatoClinico').reset();
             document.getElementById('accion').value = 'create';
             document.getElementById('datoClinicoId').value = '';
-            document.getElementById('tituloFormulario').textContent = esUsuarioCliente ? 'Registrar mis datos clínicos' : 'Registrar datos clínicos';
+            document.getElementById('tituloFormulario').textContent = esUsuarioCliente ? 'Registrar nuevos datos clínicos' : 'Registrar datos clínicos';
             document.getElementById('btnSubmit').textContent = 'Registrar';
             document.getElementById('btnCancelar').style.display = 'none';
 

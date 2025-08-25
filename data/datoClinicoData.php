@@ -92,7 +92,7 @@
             }
             $conn->set_charset('utf8');
 
-            $querySelect = "SELECT * FROM tbdatoclinico";
+            $querySelect = "SELECT * FROM tbdatoclinico ORDER BY tbclienteid, tbdatoclinicoid";
             $result = mysqli_query($conn, $querySelect);
 
             if (!$result) {
@@ -142,7 +142,7 @@
             }
             $conn->set_charset('utf8');
 
-            $querySelect = "SELECT * FROM tbdatoclinico WHERE tbclienteid=?";
+            $querySelect = "SELECT * FROM tbdatoclinico WHERE tbclienteid=? ORDER BY tbdatoclinicoid LIMIT 1";
             $stmt = mysqli_prepare($conn, $querySelect);
 
             if ($stmt) {
@@ -173,6 +173,46 @@
             return null;
         }
 
+        // Nueva función para obtener TODOS los datos clínicos de un cliente específico
+        public function obtenerTodosTBDatoClinicoPorCliente($tbclienteid) {
+            $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+            if (!$conn) {
+                return array();
+            }
+            $conn->set_charset('utf8');
+
+            $querySelect = "SELECT * FROM tbdatoclinico WHERE tbclienteid=? ORDER BY tbdatoclinicoid";
+            $stmt = mysqli_prepare($conn, $querySelect);
+
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "i", $tbclienteid);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+
+                $datosClinicos = array();
+                while ($row = mysqli_fetch_array($result)) {
+                    $datoClinico = new DatoClinico(
+                        $row['tbdatoclinicoid'],
+                        $row['tbclienteid'],
+                        $row['tbpadecimientoid']
+                    );
+
+                    // Obtener nombres de padecimientos
+                    $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
+                    $datoClinico->setPadecimientosNombres($padecimientosNombres);
+
+                    array_push($datosClinicos, $datoClinico);
+                }
+
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return $datosClinicos;
+            }
+
+            mysqli_close($conn);
+            return array();
+        }
+
         public function obtenerTodosLosClientes() {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
@@ -180,6 +220,7 @@
             }
             $conn->set_charset('utf8');
 
+            // REMOVIDA la validación que excluía clientes con datos clínicos existentes
             $queryClientes = "SELECT tbclienteid, tbclientecarnet, tbclientenombre
                               FROM tbcliente
                               ORDER BY tbclientecarnet";
@@ -191,28 +232,13 @@
             }
 
             $clientes = array();
-
             while ($row = mysqli_fetch_array($result)) {
-                $clienteId = $row['tbclienteid'];
-                $queryDatos = "SELECT COUNT(*) as total FROM tbdatoclinico WHERE tbclienteid = ?";
-                $stmt = mysqli_prepare($conn, $queryDatos);
-
-                if ($stmt) {
-                    mysqli_stmt_bind_param($stmt, "i", $clienteId);
-                    mysqli_stmt_execute($stmt);
-                    $resultDatos = mysqli_stmt_get_result($stmt);
-                    $datosRow = mysqli_fetch_array($resultDatos);
-                    mysqli_stmt_close($stmt);
-
-                    if ($datosRow['total'] == 0) {
-                        $clientes[] = array(
-                            'id' => $row['tbclienteid'],
-                            'carnet' => $row['tbclientecarnet'],
-                            'nombre' => $row['tbclientenombre'],
-                            'apellidos' => ''
-                        );
-                    }
-                }
+                $clientes[] = array(
+                    'id' => $row['tbclienteid'],
+                    'carnet' => $row['tbclientecarnet'],
+                    'nombre' => $row['tbclientenombre'],
+                    'apellidos' => ''
+                );
             }
 
             mysqli_close($conn);
