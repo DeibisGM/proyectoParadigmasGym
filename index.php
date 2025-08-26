@@ -55,6 +55,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
     echo "<a href='view/numeroEmergenciaView.php'><button>Ir a numeros de emergencia</button></a>";
     // --> AÑADIR ESTA LÍNEA <--
     echo "<a href='view/reservaView.php'><button>Horarios y Reservas</button></a>";
+    echo "<a href='view/padecimientoView.php'><button>Padecimientos</button></a>";
     
     ?>
 </div>

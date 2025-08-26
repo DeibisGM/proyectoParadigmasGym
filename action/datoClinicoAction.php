@@ -16,19 +16,9 @@
         $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
         $esInstructor = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
 
-        if(isset($_POST['create'])){
-
-            $enfermedad = isset($_POST['enfermedad']) ? 1 : 0;
-            $otraEnfermedad = isset($_POST['otraEnfermedad']) ? $_POST['otraEnfermedad'] : '';
-            $tomaMedicamento = isset($_POST['tomaMedicamento']) ? 1 : 0;
-            $medicamento = isset($_POST['medicamento']) ? $_POST['medicamento'] : '';
-            $lesion = isset($_POST['lesion']) ? 1 : 0;
-            $descripcionLesion = isset($_POST['descripcionLesion']) ? $_POST['descripcionLesion'] : '';
-            $discapacidad = isset($_POST['discapacidad']) ? 1 : 0;
-            $descripcionDiscapacidad = isset($_POST['descripcionDiscapacidad']) ? $_POST['descripcionDiscapacidad'] : '';
-            $restriccionMedica = isset($_POST['restriccionMedica']) ? 1 : 0;
-            $descripcionrestriccionmedica = isset($_POST['descripcionrestriccionmedica']) ? $_POST['descripcionrestriccionmedica'] : '';
-            $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
+        if(isset($_POST['create'])) {
+            $clienteId = isset($_POST['clienteId']) ? (int)$_POST['clienteId'] : 0;
+            $padecimientosIds = isset($_POST['padecimientosIds']) ? $_POST['padecimientosIds'] : array();
 
             if ($esUsuarioCliente) {
                 if (!isset($_SESSION['usuario_id'])) {
@@ -37,13 +27,12 @@
                     echo json_encode($response);
                     exit();
                 }
-
-                $clienteId = $_SESSION['usuario_id'];
+                $clienteId = (int)$_SESSION['usuario_id'];
 
             } else if ($esAdmin || $esInstructor) {
-                if(empty($clienteId)){
+                if(empty($clienteId) || $clienteId <= 0) {
                     $response['success'] = false;
-                    $response['message'] = 'Error: Debe seleccionar un cliente.';
+                    $response['message'] = 'Error: Debe seleccionar un cliente válido.';
                     echo json_encode($response);
                     exit();
                 }
@@ -54,36 +43,28 @@
                 exit();
             }
 
-            if($datoClinicoBusiness->existenDatoClinicosPorCliente($clienteId)){
-                $mensaje = $esUsuarioCliente ?
-                    'Error: Ya tiene datos clínicos registrados. Puede actualizarlos desde la tabla.' :
-                    'Error: Ya existen datos clínicos registrados para este cliente.';
-
+            if (empty($padecimientosIds) || !is_array($padecimientosIds)) {
                 $response['success'] = false;
-                $response['message'] = $mensaje;
+                $response['message'] = 'Error: Debe seleccionar al menos un padecimiento.';
                 echo json_encode($response);
                 exit();
             }
 
-            $errores = $datoClinicoBusiness->validarDatoClinico($enfermedad, $otraEnfermedad, $tomaMedicamento,
-                                               $medicamento, $lesion, $descripcionLesion,
-                                               $discapacidad, $descripcionDiscapacidad, $restriccionMedica, $descripcionrestriccionmedica);
+            $padecimientosString = DatoClinico::convertirIdsAString($padecimientosIds);
 
-            if(!empty($errores)){
+            $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
+
+            if(!empty($errores)) {
                 $response['success'] = false;
                 $response['message'] = 'Error de validación: ' . implode(', ', $errores);
                 echo json_encode($response);
                 exit();
             }
 
-            $datoClinico = new DatoClinico(0, $clienteId, $enfermedad, $otraEnfermedad, $tomaMedicamento,
-                                             $medicamento, $lesion, $descripcionLesion,
-                                             $discapacidad,$descripcionDiscapacidad,
-                                             $restriccionMedica, $descripcionrestriccionmedica);
-
+            $datoClinico = new DatoClinico(0, $clienteId, $padecimientosString);
             $resultado = $datoClinicoBusiness->insertarTBDatoClinico($datoClinico);
 
-            if($resultado){
+            if($resultado) {
                 $mensaje = $esUsuarioCliente ?
                     'Éxito: Sus datos clínicos se registraron correctamente.' :
                     'Éxito: Registro insertado correctamente.';
@@ -94,22 +75,10 @@
                 $response['success'] = false;
                 $response['message'] = 'Error: No se pudo procesar la transacción en la base de datos.';
             }
-
-        } else if(isset($_POST['update'])){
-
-            $id = $_POST['id'];
-            $clienteId = isset($_POST['clienteId']) ? $_POST['clienteId'] : '';
-            $enfermedad = isset($_POST['enfermedad']) ? 1 : 0;
-            $otraEnfermedad = isset($_POST['otraEnfermedad']) ? $_POST['otraEnfermedad'] : '';
-            $tomaMedicamento = isset($_POST['tomaMedicamento']) ? 1 : 0;
-            $medicamento = isset($_POST['medicamento']) ? $_POST['medicamento'] : '';
-            $lesion = isset($_POST['lesion']) ? 1 : 0;
-            $descripcionLesion = isset($_POST['descripcionLesion']) ? $_POST['descripcionLesion'] : '';
-            $discapacidad = isset($_POST['discapacidad']) ? 1 : 0;
-            $descripcionDiscapacidad = isset($_POST['descripcionDiscapacidad']) ? $_POST['descripcionDiscapacidad'] : '';
-            $restriccionMedica = isset($_POST['restriccionMedica']) ? 1 : 0;
-            $descripcionrestriccionmedica = isset($_POST['descripcionrestriccionmedica']) ? $_POST['descripcionrestriccionmedica'] : '';
-
+        } else if(isset($_POST['update'])) {
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+            $clienteId = isset($_POST['clienteId']) ? (int)$_POST['clienteId'] : 0;
+            $padecimientosIds = isset($_POST['padecimientosIds']) ? $_POST['padecimientosIds'] : array();
 
             if ($esUsuarioCliente) {
                 if (!isset($_SESSION['usuario_id'])) {
@@ -119,15 +88,22 @@
                     exit();
                 }
 
-                $registroExistente = $datoClinicoBusiness->obtenerTBDatoClinicoPorCliente($_SESSION['usuario_id']);
-                if(!$registroExistente || $registroExistente->getTbdatoclinicoid() != $id) {
+                $todosLosRegistros = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
+                $esRegistroDelCliente = false;
+                foreach ($todosLosRegistros as $registro) {
+                    if ($registro->getTbdatoclinicoid() == $id) {
+                        $esRegistroDelCliente = true;
+                        break;
+                    }
+                }
+
+                if(!$esRegistroDelCliente) {
                     $response['success'] = false;
                     $response['message'] = 'Error: No tiene permisos para actualizar este registro.';
                     echo json_encode($response);
                     exit();
                 }
-
-                $clienteId = $_SESSION['usuario_id'];
+                $clienteId = (int)$_SESSION['usuario_id'];
 
             } else if (!($esAdmin || $esInstructor)) {
                 $response['success'] = false;
@@ -136,32 +112,35 @@
                 exit();
             }
 
-            if(empty($id) || empty($clienteId)){
+            if(empty($id) || $id <= 0 || empty($clienteId) || $clienteId <= 0) {
                 $response['success'] = false;
-                $response['message'] = 'Error: Hay campos vacíos.';
+                $response['message'] = 'Error: Datos inválidos.';
                 echo json_encode($response);
                 exit();
             }
 
-            $errores = $datoClinicoBusiness->validarDatoClinico($enfermedad, $otraEnfermedad, $tomaMedicamento,
-                                                   $medicamento, $lesion, $descripcionLesion,
-                                                   $discapacidad, $descripcionDiscapacidad, $restriccionMedica, $descripcionrestriccionmedica);
+            if (empty($padecimientosIds) || !is_array($padecimientosIds)) {
+                $response['success'] = false;
+                $response['message'] = 'Error: Debe seleccionar al menos un padecimiento.';
+                echo json_encode($response);
+                exit();
+            }
 
-            if(!empty($errores)){
+            $padecimientosString = DatoClinico::convertirIdsAString($padecimientosIds);
+
+            $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
+
+            if(!empty($errores)) {
                 $response['success'] = false;
                 $response['message'] = 'Error de validación: ' . implode(', ', $errores);
                 echo json_encode($response);
                 exit();
             }
 
-            $datoClinico = new DatoClinico($id, $clienteId, $enfermedad, $otraEnfermedad, $tomaMedicamento,
-                                             $medicamento, $lesion, $descripcionLesion,
-                                             $discapacidad,$descripcionDiscapacidad,
-                                             $restriccionMedica, $descripcionrestriccionmedica);
-
+            $datoClinico = new DatoClinico($id, $clienteId, $padecimientosString);
             $resultado = $datoClinicoBusiness->actualizarTBDatoClinico($datoClinico);
 
-            if($resultado){
+            if($resultado) {
                 $mensaje = $esUsuarioCliente ?
                     'Éxito: Sus datos clínicos se actualizaron correctamente.' :
                     'Éxito: Registro actualizado correctamente.';
@@ -173,26 +152,49 @@
                 $response['message'] = 'Error: No se pudo procesar la transacción en la base de datos.';
             }
 
-        } else if(isset($_POST['delete'])){
-            if (!($esAdmin || $esInstructor)) {
+        } else if(isset($_POST['delete'])) {
+            $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+
+            if ($esUsuarioCliente) {
+                if (!isset($_SESSION['usuario_id'])) {
+                    $response['success'] = false;
+                    $response['message'] = 'Error: Usuario no autenticado.';
+                    echo json_encode($response);
+                    exit();
+                }
+
+                $todosLosRegistros = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
+                $esRegistroDelCliente = false;
+                foreach ($todosLosRegistros as $registro) {
+                    if ($registro->getTbdatoclinicoid() == $id) {
+                        $esRegistroDelCliente = true;
+                        break;
+                    }
+                }
+
+                if(!$esRegistroDelCliente) {
+                    $response['success'] = false;
+                    $response['message'] = 'Error: No tiene permisos para eliminar este registro.';
+                    echo json_encode($response);
+                    exit();
+                }
+            } else if (!($esAdmin || $esInstructor)) {
                 $response['success'] = false;
                 $response['message'] = 'Error: No tiene permisos para eliminar registros.';
                 echo json_encode($response);
                 exit();
             }
 
-            $id = $_POST['id'];
-
-            if(empty($id)){
+            if(empty($id) || $id <= 0) {
                 $response['success'] = false;
-                $response['message'] = 'Error: Hay campos vacíos.';
+                $response['message'] = 'Error: ID inválido.';
                 echo json_encode($response);
                 exit();
             }
 
             $resultado = $datoClinicoBusiness->eliminarTBDatoClinico($id);
 
-            if($resultado){
+            if($resultado) {
                 $response['success'] = true;
                 $response['message'] = 'Éxito: Registro eliminado correctamente.';
             } else {
@@ -203,18 +205,11 @@
         } else {
             $response['success'] = false;
             $response['message'] = 'Error: Acción no válida.';
-            $response['debug'] = [
-                'POST_data' => $_POST,
-                'session_data' => [
-                    'usuario_id' => isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 'no_set',
-                    'tipo_usuario' => isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : 'no_set'
-                ]
-            ];
         }
 
     } catch (Exception $e) {
         $response['success'] = false;
-        $response['message'] = 'Error: ' . $e->getMessage();
+        $response['message'] = 'Error interno del servidor.';
         error_log('Error en datoClinicoAction.php: ' . $e->getMessage());
     }
 
