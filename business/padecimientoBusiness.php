@@ -10,20 +10,18 @@ class PadecimientoBusiness {
     }
 
     public function insertarTbpadecimiento($padecimiento) {
-        // Verificar si el nombre ya existe
         if ($this->padecimientoData->verificarNombreExistente($padecimiento->getTbpadecimientonombre())) {
-            return false; // Nombre duplicado
+            return false;
         }
         return $this->padecimientoData->insertarTbpadecimiento($padecimiento);
     }
 
     public function actualizarTbpadecimiento($padecimiento) {
-        // Verificar si el nombre ya existe (excluyendo el registro actual)
         if ($this->padecimientoData->verificarNombreExistente(
             $padecimiento->getTbpadecimientonombre(),
             $padecimiento->getTbpadecimientoid()
         )) {
-            return false; // Nombre duplicado
+            return false;
         }
         return $this->padecimientoData->actualizarTbpadecimiento($padecimiento);
     }
@@ -47,12 +45,10 @@ class PadecimientoBusiness {
     public function validarPadecimiento($tipo, $nombre, $descripcion, $formaDeActuar) {
         $errores = array();
 
-        // Validar tipo
         if (empty($tipo) || trim($tipo) === '') {
             $errores[] = "El tipo de padecimiento es obligatorio";
         }
 
-        // Validar nombre
         if (empty($nombre) || trim($nombre) === '') {
             $errores[] = "El nombre del padecimiento es obligatorio";
         } else if (strlen(trim($nombre)) < 3) {
@@ -61,7 +57,6 @@ class PadecimientoBusiness {
             $errores[] = "El nombre no puede exceder 100 caracteres";
         }
 
-        // Validar descripción
         if (empty($descripcion) || trim($descripcion) === '') {
             $errores[] = "La descripción del padecimiento es obligatoria";
         } else if (strlen(trim($descripcion)) < 10) {
@@ -70,7 +65,6 @@ class PadecimientoBusiness {
             $errores[] = "La descripción no puede exceder 500 caracteres";
         }
 
-        // Validar forma de actuar
         if (empty($formaDeActuar) || trim($formaDeActuar) === '') {
             $errores[] = "La forma de actuar es obligatoria";
         } else if (strlen(trim($formaDeActuar)) < 10) {
@@ -83,12 +77,10 @@ class PadecimientoBusiness {
     }
 
     public function obtenerTiposPadecimiento() {
-        // Retorna los tipos de padecimiento disponibles
         return array(
             'Enfermedad',
             'Lesión',
             'Discapacidad',
-            'Condición médica',
             'Trastorno',
             'Síndrome',
             'Otro'

@@ -2,9 +2,9 @@
 class DatoClinico {
     private $tbdatoclinicoid;
     private $tbclienteid;
-    private $tbpadecimientoid; // Formato: "1$2$3" para múltiples padecimientos
+    private $tbpadecimientoid;
     private $carnet;
-    private $padecimientosNombres; // Array con los nombres de los padecimientos
+    private $padecimientosNombres;
 
     public function __construct($tbdatoclinicoid, $tbclienteid, $tbpadecimientoid) {
         $this->tbdatoclinicoid = $tbdatoclinicoid;
@@ -14,7 +14,6 @@ class DatoClinico {
         $this->padecimientosNombres = array();
     }
 
-    // Getters
     public function getTbdatoclinicoid() {
         return $this->tbdatoclinicoid;
     }
@@ -39,7 +38,6 @@ class DatoClinico {
         return implode(', ', $this->padecimientosNombres);
     }
 
-    // Obtiene los IDs de padecimientos como array
     public function getPadecimientosIds() {
         if (empty($this->tbpadecimientoid)) {
             return array();
@@ -47,7 +45,6 @@ class DatoClinico {
         return explode('$', $this->tbpadecimientoid);
     }
 
-    // Setters
     public function setTbdatoclinicoid($tbdatoclinicoid) {
         $this->tbdatoclinicoid = $tbdatoclinicoid;
     }
@@ -68,12 +65,10 @@ class DatoClinico {
         $this->padecimientosNombres = $nombres;
     }
 
-    // Convierte un array de IDs en string con formato 1$2$3
     public static function convertirIdsAString($idsArray) {
         if (empty($idsArray)) {
             return '';
         }
-        // Filtrar valores vacíos y convertir a enteros
         $idsLimpios = array_filter(array_map('intval', $idsArray), function($id) {
             return $id > 0;
         });

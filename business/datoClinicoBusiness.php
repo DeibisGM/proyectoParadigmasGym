@@ -13,7 +13,6 @@
         }
 
         public function insertarTBDatoClinico($datoClinico) {
-            // REMOVIDA la validación de registro único por cliente
             return $this->datoClinicoData->insertarTBDatoClinico($datoClinico);
         }
 
@@ -33,7 +32,6 @@
             return $this->datoClinicoData->obtenerTBDatoClinicoPorCliente($tbclienteid);
         }
 
-        // Nueva función para obtener TODOS los datos clínicos de un cliente
         public function obtenerTodosTBDatoClinicoPorCliente($tbclienteid) {
             return $this->datoClinicoData->obtenerTodosTBDatoClinicoPorCliente($tbclienteid);
         }
@@ -61,13 +59,144 @@
             if (empty($tbpadecimientoid)) {
                 $errores[] = "Debe seleccionar al menos un padecimiento";
             } else {
-                // Validar que los padecimientos existan en la base de datos
                 if (!$this->datoClinicoData->validarPadecimientosExisten($tbpadecimientoid)) {
                     $errores[] = "Uno o más padecimientos seleccionados no son válidos";
                 }
             }
 
             return $errores;
+        }
+
+        public function limpiarPadecimientosEliminados() {
+
+            $todosDatosClinicos = $this->datoClinicoData->obtenerTBDatoClinico();
+            $actualizacionesRealizadas = 0;
+
+            foreach ($todosDatosClinicos as $datoClinico) {
+                $padecimientosOriginales = $datoClinico->getPadecimientosIds();
+                $padecimientosValidos = array();
+
+                foreach ($padecimientosOriginales as $padecimientoId) {
+                    if (!empty($padecimientoId) && is_numeric($padecimientoId)) {
+                        if ($this->datoClinicoData->validarPadecimientosExisten($padecimientoId)) {
+                            $padecimientosValidos[] = $padecimientoId;
+                        }
+                    }
+                }
+
+                if (count($padecimientosValidos) !== count($padecimientosOriginales)) {
+                    if (empty($padecimientosValidos)) {
+                        $this->datoClinicoData->eliminarTBDatoClinico($datoClinico->getTbdatoclinicoid());
+                    } else {
+                        $nuevosIds = implode('$', $padecimientosValidos);
+                        $datoClinicoActualizado = new DatoClinico(
+                            $datoClinico->getTbdatoclinicoid(),
+                            $datoClinico->getTbclienteid(),
+                            $nuevosIds
+                        );
+                        $this->datoClinicoData->actualizarTBDatoClinico($datoClinicoActualizado);
+                    }
+                    $actualizacionesRealizadas++;
+                }
+            }
+
+            return $actualizacionesRealizadas;
+        }
+
+        public function modificarPadecimientoEnRegistros($padecimientoIdAntiguo, $padecimientoIdNuevo) {
+
+            $todosDatosClinicos = $this->datoClinicoData->obtenerTBDatoClinico();
+            $actualizacionesRealizadas = 0;
+
+            foreach ($todosDatosClinicos as $datoClinico) {
+                $padecimientosIds = $datoClinico->getPadecimientosIds();
+                $seModifico = false;
+                $nuevosIds = array();
+
+                foreach ($padecimientosIds as $id) {
+                    if ($id == $padecimientoIdAntiguo) {
+                        $seModifico = true;
+                    } else {
+                        $nuevosIds[] = $id;
+                    }
+                }
+
+                if ($seModifico) {
+                    $nuevosIds[] = $padecimientoIdNuevo;
+
+                    $nuevosIdsString = implode('$', $nuevosIds);
+                    $datoClinicoActualizado = new DatoClinico(
+                        $datoClinico->getTbdatoclinicoid(),
+                        $datoClinico->getTbclienteid(),
+                        $nuevosIdsString
+                    );
+
+                    $this->datoClinicoData->actualizarTBDatoClinico($datoClinicoActualizado);
+                    $actualizacionesRealizadas++;
+                }
+            }
+
+            return $actualizacionesRealizadas;
+        }
+
+        public function padecimientoEnUso($padecimientoId) {
+            $todosDatosClinicos = $this->datoClinicoData->obtenerTBDatoClinico();
+            $clientesAfectados = array();
+
+            foreach ($todosDatosClinicos as $datoClinico) {
+                $padecimientosIds = $datoClinico->getPadecimientosIds();
+
+                if (in_array($padecimientoId, $padecimientosIds)) {
+                    $clientesAfectados[] = array(
+                        'clienteId' => $datoClinico->getTbclienteid(),
+                        'carnet' => $datoClinico->getCarnet(),
+                        'registroId' => $datoClinico->getTbdatoclinicoid()
+                    );
+                }
+            }
+
+            return $clientesAfectados;
+        }
+
+        public function eliminarPadecimientoDeRegistros($padecimientoId) {
+            $todosDatosClinicos = $this->datoClinicoData->obtenerTBDatoClinico();
+            $actualizacionesRealizadas = 0;
+            $registrosEliminados = 0;
+
+            foreach ($todosDatosClinicos as $datoClinico) {
+                $padecimientosIds = $datoClinico->getPadecimientosIds();
+                $nuevosIds = array();
+                $seElimino = false;
+
+                foreach ($padecimientosIds as $id) {
+                    if ($id != $padecimientoId) {
+                        $nuevosIds[] = $id;
+                    } else {
+                        $seElimino = true;
+                    }
+                }
+
+                if ($seElimino) {
+                    if (empty($nuevosIds)) {
+                        $this->datoClinicoData->eliminarTBDatoClinico($datoClinico->getTbdatoclinicoid());
+                        $registrosEliminados++;
+                    } else {
+                        $nuevosIdsString = implode('$', $nuevosIds);
+                        $datoClinicoActualizado = new DatoClinico(
+                            $datoClinico->getTbdatoclinicoid(),
+                            $datoClinico->getTbclienteid(),
+                            $nuevosIdsString
+                        );
+                        $this->datoClinicoData->actualizarTBDatoClinico($datoClinicoActualizado);
+                        $actualizacionesRealizadas++;
+                    }
+                }
+            }
+
+            return array(
+                'registrosActualizados' => $actualizacionesRealizadas,
+                'registrosEliminados' => $registrosEliminados
+            );
         }
     }
 ?>

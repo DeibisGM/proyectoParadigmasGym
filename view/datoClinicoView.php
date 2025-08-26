@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Verificar que el usuario esté logueado
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: ../view/loginView.php");
     exit();
@@ -17,11 +16,9 @@ $esUsuarioCliente = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'
 $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
 $esInstructor = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
 
-// Obtener datos necesarios
 $padecimientosObj = $padecimientoBusiness->obtenerTbpadecimiento();
 $tiposPadecimiento = $padecimientoBusiness->obtenerTiposPadecimiento();
 
-// Convertir objetos Padecimiento a array para JavaScript
 $padecimientos = array();
 foreach ($padecimientosObj as $padecimiento) {
     $padecimientos[] = array(
@@ -34,7 +31,6 @@ foreach ($padecimientosObj as $padecimiento) {
 }
 
 if ($esUsuarioCliente) {
-    // CAMBIO: Obtener TODOS los registros del cliente, no solo uno
     $datosClinicos = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
 } else {
     $datosClinicos = $datoClinicoBusiness->obtenerTBDatoClinico();
@@ -55,11 +51,11 @@ if ($esUsuarioCliente) {
 <header>
     <a href="../index.php">Volver al Inicio</a>
 </header>
-    <!-- Mensajes de respuesta -->
+
     <div id="mensaje" style="display: none; padding: 10px; margin: 10px 0; border: 1px solid; border-radius: 5px;"></div>
 
     <?php if (!$esUsuarioCliente): ?>
-    <!-- Filtros para Admin e Instructor -->
+
     <div>
         <h3>Filtros de búsqueda</h3>
         <label>Buscar por:</label>
@@ -92,10 +88,9 @@ if ($esUsuarioCliente) {
     <hr>
     <?php endif; ?>
 
-    <!-- Formulario para registrar/actualizar datos clínicos -->
     <div id="formularioContainer">
         <h3 id="tituloFormulario">
-            <?php echo $esUsuarioCliente ? 'Registrar nuevos datos clínicos' : 'Registrar datos clínicos'; ?>
+            <?php echo $esUsuarioCliente ? 'Registrar nuevo dato clínico' : 'Registrar dato clínico'; ?>
         </h3>
 
         <form id="formDatoClinico">
@@ -129,17 +124,10 @@ if ($esUsuarioCliente) {
             </div>
 
             <div>
-                <label>Padecimientos:</label>
-                <select id="padecimiento" onchange="agregarPadecimiento()" disabled>
+                <label>Padecimiento:</label>
+                <select id="padecimiento" name="padecimientoId" disabled required>
                     <option value="">Primero seleccione un tipo</option>
                 </select>
-            </div>
-
-            <!-- Lista de padecimientos seleccionados -->
-            <div id="padecimientosSeleccionados">
-                <h4>Padecimientos seleccionados:</h4>
-                <ul id="listaPadecimientos"></ul>
-                <input type="hidden" id="padecimientosIds" name="padecimientosIds">
             </div>
 
             <div>
@@ -151,7 +139,6 @@ if ($esUsuarioCliente) {
 
     <hr>
 
-    <!-- Tabla de datos clínicos -->
     <div>
         <h3><?php echo $esUsuarioCliente ? 'Mis datos clínicos' : 'Datos clínicos de todos los clientes'; ?></h3>
 
@@ -161,7 +148,7 @@ if ($esUsuarioCliente) {
                     <?php if (!$esUsuarioCliente): ?>
                         <th>Carnet</th>
                     <?php endif; ?>
-                    <th>Padecimientos</th>
+                    <th>Padecimiento</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -171,21 +158,20 @@ if ($esUsuarioCliente) {
                     <?php if (!$esUsuarioCliente): ?>
                         <td><?php echo htmlspecialchars($dato->getCarnet()); ?></td>
                     <?php endif; ?>
-                    <td class="padecimientos-cell">
-                        <div class="padecimientos-display">
+                    <td class="padecimiento-cell">
+                        <div class="padecimiento-display">
                             <?php echo htmlspecialchars($dato->getPadecimientosNombresString()); ?>
                         </div>
-                        <div class="padecimientos-edit" style="display: none;">
-                            <!-- Aquí se cargará dinámicamente el formulario de edición -->
+                        <div class="padecimiento-edit" style="display: none;">
                         </div>
                     </td>
                     <td>
                         <button onclick="editarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)">Editar</button>
-                        <?php if ($esAdmin || $esUsuarioCliente): ?>
-                        <button onclick="eliminarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)">Eliminar</button>
-                        <?php endif; ?>
                         <button onclick="cancelarEdicion(<?php echo $dato->getTbdatoclinicoid(); ?>)" style="display: none;" class="btn-cancelar-edicion">Cancelar</button>
                         <button onclick="guardarEdicion(<?php echo $dato->getTbdatoclinicoid(); ?>)" style="display: none;" class="btn-guardar-edicion">Guardar</button>
+                        <?php if ($esAdmin): ?>
+                        <button onclick="eliminarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)" class="btn-eliminar">Eliminar</button>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -199,10 +185,8 @@ if ($esUsuarioCliente) {
 
     <script>
         let padecimientosData = <?php echo json_encode($padecimientos); ?>;
-        let padecimientosSeleccionados = [];
         let esUsuarioCliente = <?php echo $esUsuarioCliente ? 'true' : 'false'; ?>;
 
-        // Función para cargar padecimientos por tipo
         function cargarPadecimientosPorTipo() {
             const tipoSeleccionado = document.getElementById('tipoPadecimiento').value;
             const selectPadecimiento = document.getElementById('padecimiento');
@@ -210,11 +194,9 @@ if ($esUsuarioCliente) {
             console.log('Tipo seleccionado:', tipoSeleccionado);
             console.log('Padecimientos disponibles:', padecimientosData);
 
-            // Limpiar opciones
             selectPadecimiento.innerHTML = '<option value="">Seleccione un padecimiento</option>';
 
             if (tipoSeleccionado) {
-                // Filtrar padecimientos por tipo
                 const padecimientosFiltrados = padecimientosData.filter(p =>
                     p.tbpadecimientotipo === tipoSeleccionado
                 );
@@ -234,75 +216,33 @@ if ($esUsuarioCliente) {
             }
         }
 
-        // Función para agregar padecimiento a la lista
-        function agregarPadecimiento() {
-            const selectPadecimiento = document.getElementById('padecimiento');
-            const padecimientoId = selectPadecimiento.value;
-
-            if (padecimientoId && !padecimientosSeleccionados.includes(padecimientoId)) {
-                const nombrePadecimiento = selectPadecimiento.options[selectPadecimiento.selectedIndex].text;
-
-                padecimientosSeleccionados.push(padecimientoId);
-
-                // Agregar a la lista visual
-                const lista = document.getElementById('listaPadecimientos');
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    ${nombrePadecimiento}
-                    <button type="button" onclick="removerPadecimiento('${padecimientoId}', this)">Quitar</button>
-                `;
-                lista.appendChild(li);
-
-                // Actualizar input hidden
-                document.getElementById('padecimientosIds').value = padecimientosSeleccionados.join(',');
-
-                // Resetear select
-                selectPadecimiento.value = '';
-            }
-        }
-
-        // Función para remover padecimiento de la lista
-        function removerPadecimiento(padecimientoId, button) {
-            const index = padecimientosSeleccionados.indexOf(padecimientoId);
-            if (index > -1) {
-                padecimientosSeleccionados.splice(index, 1);
-                button.parentElement.remove();
-                document.getElementById('padecimientosIds').value = padecimientosSeleccionados.join(',');
-            }
-        }
-
-        // Función para limpiar el formulario
         function limpiarFormulario() {
             document.getElementById('formDatoClinico').reset();
             document.getElementById('accion').value = 'create';
             document.getElementById('datoClinicoId').value = '';
-            document.getElementById('tituloFormulario').textContent = esUsuarioCliente ? 'Registrar nuevos datos clínicos' : 'Registrar datos clínicos';
+            document.getElementById('tituloFormulario').textContent = esUsuarioCliente ? 'Registrar nuevo dato clínico' : 'Registrar dato clínico';
             document.getElementById('btnSubmit').textContent = 'Registrar';
             document.getElementById('btnCancelar').style.display = 'none';
 
-            padecimientosSeleccionados = [];
-            document.getElementById('listaPadecimientos').innerHTML = '';
-            document.getElementById('padecimientosIds').value = '';
             document.getElementById('padecimiento').disabled = true;
         }
 
-        // Manejar envío del formulario
         document.getElementById('formDatoClinico').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            if (padecimientosSeleccionados.length === 0) {
-                mostrarMensaje('Error: Debe seleccionar al menos un padecimiento.', 'error');
+            const padecimientoSeleccionado = document.getElementById('padecimiento').value;
+
+            if (!padecimientoSeleccionado) {
+                mostrarMensaje('Error: Debe seleccionar un padecimiento.', 'error');
                 return;
             }
 
             const formData = new FormData(this);
             const accion = document.getElementById('accion').value;
 
-            // Agregar los padecimientos como array
-            formData.delete('padecimientosIds');
-            padecimientosSeleccionados.forEach(id => {
-                formData.append('padecimientosIds[]', id);
-            });
+            // Agregar el padecimiento como array para compatibilidad con el backend
+            formData.delete('padecimientoId');
+            formData.append('padecimientosIds[]', padecimientoSeleccionado);
 
             formData.append(accion, '1');
 
@@ -326,7 +266,6 @@ if ($esUsuarioCliente) {
             });
         });
 
-        // Función para mostrar mensajes
         function mostrarMensaje(mensaje, tipo) {
             const divMensaje = document.getElementById('mensaje');
             divMensaje.textContent = mensaje;
@@ -347,32 +286,26 @@ if ($esUsuarioCliente) {
             }, 5000);
         }
 
-        // Variables para manejar edición
-        let padecimientosSeleccionadosEdicion = {};
+        let padecimientoSeleccionadoEdicion = {};
 
-        // Función para editar registro desde la tabla
         function editarRegistro(id) {
             const fila = document.querySelector(`tr[data-id="${id}"]`);
-            const padecimientosDisplay = fila.querySelector('.padecimientos-display');
-            const padecimientosEdit = fila.querySelector('.padecimientos-edit');
+            const padecimientoDisplay = fila.querySelector('.padecimiento-display');
+            const padecimientoEdit = fila.querySelector('.padecimiento-edit');
 
-            // Ocultar botón editar, mostrar botones guardar y cancelar
             const btnEditar = fila.querySelector('button[onclick*="editarRegistro"]');
             const btnCancelar = fila.querySelector('.btn-cancelar-edicion');
             const btnGuardar = fila.querySelector('.btn-guardar-edicion');
+            const btnEliminar = fila.querySelector('.btn-eliminar');
 
             btnEditar.style.display = 'none';
             btnCancelar.style.display = 'inline';
             btnGuardar.style.display = 'inline';
+            if (btnEliminar) btnEliminar.style.display = 'none';
 
-            // Cambiar a modo edición
-            padecimientosDisplay.style.display = 'none';
+            padecimientoDisplay.style.display = 'none';
 
-            // Inicializar array de padecimientos para este registro
-            padecimientosSeleccionadosEdicion[id] = [];
-
-            // Crear formulario de edición
-            padecimientosEdit.innerHTML = `
+            padecimientoEdit.innerHTML = `
                 <div>
                     <label>Tipo:</label>
                     <select id="tipo-edit-${id}" onchange="cargarPadecimientosPorTipoEdicion(${id})">
@@ -386,31 +319,24 @@ if ($esUsuarioCliente) {
                 </div>
                 <div>
                     <label>Padecimiento:</label>
-                    <select id="padecimiento-edit-${id}" onchange="agregarPadecimientoEdicion(${id})" disabled>
+                    <select id="padecimiento-edit-${id}" disabled>
                         <option value="">Primero seleccione un tipo</option>
                     </select>
                 </div>
-                <div>
-                    <h5>Padecimientos seleccionados:</h5>
-                    <ul id="lista-padecimientos-edit-${id}"></ul>
-                </div>
             `;
 
-            padecimientosEdit.style.display = 'block';
+            padecimientoEdit.style.display = 'block';
         }
 
-        // Función para cargar padecimientos por tipo en edición
         function cargarPadecimientosPorTipoEdicion(id) {
             const tipoSeleccionado = document.getElementById(`tipo-edit-${id}`).value;
             const selectPadecimiento = document.getElementById(`padecimiento-edit-${id}`);
 
             console.log('Cargando padecimientos para edición, tipo:', tipoSeleccionado);
 
-            // Limpiar opciones
             selectPadecimiento.innerHTML = '<option value="">Seleccione un padecimiento</option>';
 
             if (tipoSeleccionado) {
-                // Filtrar padecimientos por tipo
                 const padecimientosFiltrados = padecimientosData.filter(p =>
                     p.tbpadecimientotipo === tipoSeleccionado
                 );
@@ -430,43 +356,11 @@ if ($esUsuarioCliente) {
             }
         }
 
-        // Función para agregar padecimiento en edición
-        function agregarPadecimientoEdicion(id) {
-            const selectPadecimiento = document.getElementById(`padecimiento-edit-${id}`);
-            const padecimientoId = selectPadecimiento.value;
-
-            if (padecimientoId && !padecimientosSeleccionadosEdicion[id].includes(padecimientoId)) {
-                const nombrePadecimiento = selectPadecimiento.options[selectPadecimiento.selectedIndex].text;
-
-                padecimientosSeleccionadosEdicion[id].push(padecimientoId);
-
-                // Agregar a la lista visual
-                const lista = document.getElementById(`lista-padecimientos-edit-${id}`);
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    ${nombrePadecimiento}
-                    <button type="button" onclick="removerPadecimientoEdicion(${id}, '${padecimientoId}', this)">Quitar</button>
-                `;
-                lista.appendChild(li);
-
-                // Resetear select
-                selectPadecimiento.value = '';
-            }
-        }
-
-        // Función para remover padecimiento en edición
-        function removerPadecimientoEdicion(id, padecimientoId, button) {
-            const index = padecimientosSeleccionadosEdicion[id].indexOf(padecimientoId);
-            if (index > -1) {
-                padecimientosSeleccionadosEdicion[id].splice(index, 1);
-                button.parentElement.remove();
-            }
-        }
-
-        // Función para guardar edición
         function guardarEdicion(id) {
-            if (!padecimientosSeleccionadosEdicion[id] || padecimientosSeleccionadosEdicion[id].length === 0) {
-                mostrarMensaje('Error: Debe seleccionar al menos un padecimiento.', 'error');
+            const padecimientoSeleccionado = document.getElementById(`padecimiento-edit-${id}`).value;
+
+            if (!padecimientoSeleccionado) {
+                mostrarMensaje('Error: Debe seleccionar un padecimiento.', 'error');
                 return;
             }
 
@@ -474,19 +368,13 @@ if ($esUsuarioCliente) {
             formData.append('update', '1');
             formData.append('id', id);
 
-            // Si es cliente, obtener su ID de la sesión
             if (esUsuarioCliente) {
                 formData.append('clienteId', '<?php echo isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 0; ?>');
             } else {
-                // Para admin/instructor, necesitaríamos obtener el clienteId del registro actual
-                // Por ahora asumimos que se mantiene el mismo cliente
                 formData.append('clienteId', obtenerClienteIdDelRegistro(id));
             }
 
-            // Agregar padecimientos como array
-            padecimientosSeleccionadosEdicion[id].forEach(padecimientoId => {
-                formData.append('padecimientosIds[]', padecimientoId);
-            });
+            formData.append('padecimientosIds[]', padecimientoSeleccionado);
 
             fetch('../action/datoClinicoAction.php', {
                 method: 'POST',
@@ -507,66 +395,59 @@ if ($esUsuarioCliente) {
             });
         }
 
-        // Función auxiliar para obtener el ID del cliente de un registro (para admin/instructor)
         function obtenerClienteIdDelRegistro(id) {
             const fila = document.querySelector(`tr[data-id="${id}"]`);
             return fila.getAttribute('data-cliente-id');
         }
 
-        // Función para cancelar edición
         function cancelarEdicion(id) {
             const fila = document.querySelector(`tr[data-id="${id}"]`);
-            const padecimientosDisplay = fila.querySelector('.padecimientos-display');
-            const padecimientosEdit = fila.querySelector('.padecimientos-edit');
+            const padecimientoDisplay = fila.querySelector('.padecimiento-display');
+            const padecimientoEdit = fila.querySelector('.padecimiento-edit');
 
-            // Mostrar botón editar, ocultar botones guardar y cancelar
             const btnEditar = fila.querySelector('button[onclick*="editarRegistro"]');
             const btnCancelar = fila.querySelector('.btn-cancelar-edicion');
             const btnGuardar = fila.querySelector('.btn-guardar-edicion');
+            const btnEliminar = fila.querySelector('.btn-eliminar');
 
             btnEditar.style.display = 'inline';
             btnCancelar.style.display = 'none';
             btnGuardar.style.display = 'none';
+            if (btnEliminar) btnEliminar.style.display = 'inline';
 
-            // Restaurar vista normal
-            padecimientosDisplay.style.display = 'block';
-            padecimientosEdit.style.display = 'none';
-            padecimientosEdit.innerHTML = '';
-
-            // Limpiar array de padecimientos de edición
-            if (padecimientosSeleccionadosEdicion[id]) {
-                delete padecimientosSeleccionadosEdicion[id];
-            }
+            padecimientoDisplay.style.display = 'block';
+            padecimientoEdit.style.display = 'none';
+            padecimientoEdit.innerHTML = '';
         }
 
-        // Función para eliminar registro
         function eliminarRegistro(id) {
-            if (confirm('¿Está seguro de que desea eliminar este registro?')) {
-                const formData = new FormData();
-                formData.append('delete', '1');
-                formData.append('id', id);
-
-                fetch('../action/datoClinicoAction.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        mostrarMensaje(data.message, 'success');
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        mostrarMensaje(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarMensaje('Error de conexión.', 'error');
-                });
+            if (!confirm('¿Está seguro de que desea eliminar este registro? Esta acción no se puede deshacer.')) {
+                return;
             }
+
+            const formData = new FormData();
+            formData.append('delete', '1');
+            formData.append('id', id);
+
+            fetch('../action/datoClinicoAction.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarMensaje(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                mostrarMensaje('Error de conexión.', 'error');
+            });
         }
 
-        // Funciones para filtros (solo para admin e instructor)
         <?php if (!$esUsuarioCliente): ?>
         document.getElementById('tipoBusqueda').addEventListener('change', function() {
             const tipo = this.value;

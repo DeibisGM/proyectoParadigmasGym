@@ -43,9 +43,6 @@
                 exit();
             }
 
-            // REMOVIDA la validación que impide múltiples registros por cliente
-
-            // Validar que se hayan seleccionado padecimientos
             if (empty($padecimientosIds) || !is_array($padecimientosIds)) {
                 $response['success'] = false;
                 $response['message'] = 'Error: Debe seleccionar al menos un padecimiento.';
@@ -53,7 +50,6 @@
                 exit();
             }
 
-            // Convertir array de IDs a string con formato 1$2$3
             $padecimientosString = DatoClinico::convertirIdsAString($padecimientosIds);
 
             $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
@@ -79,7 +75,6 @@
                 $response['success'] = false;
                 $response['message'] = 'Error: No se pudo procesar la transacción en la base de datos.';
             }
-
         } else if(isset($_POST['update'])) {
             $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
             $clienteId = isset($_POST['clienteId']) ? (int)$_POST['clienteId'] : 0;
@@ -93,7 +88,6 @@
                     exit();
                 }
 
-                // Verificar que el registro pertenece al cliente autenticado
                 $todosLosRegistros = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
                 $esRegistroDelCliente = false;
                 foreach ($todosLosRegistros as $registro) {
@@ -125,7 +119,6 @@
                 exit();
             }
 
-            // Validar que se hayan seleccionado padecimientos
             if (empty($padecimientosIds) || !is_array($padecimientosIds)) {
                 $response['success'] = false;
                 $response['message'] = 'Error: Debe seleccionar al menos un padecimiento.';
@@ -133,7 +126,6 @@
                 exit();
             }
 
-            // Convertir array de IDs a string con formato 1$2$3
             $padecimientosString = DatoClinico::convertirIdsAString($padecimientosIds);
 
             $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
@@ -171,7 +163,6 @@
                     exit();
                 }
 
-                // Verificar que el registro pertenece al cliente autenticado
                 $todosLosRegistros = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
                 $esRegistroDelCliente = false;
                 foreach ($todosLosRegistros as $registro) {

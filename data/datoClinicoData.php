@@ -23,7 +23,6 @@
                 }
             }
 
-            // Usar prepared statements para evitar inyección SQL
             $queryInsert = "INSERT INTO tbdatoclinico (tbdatoclinicoid, tbclienteid, tbpadecimientoid) VALUES (?, ?, ?)";
             $stmt = mysqli_prepare($conn, $queryInsert);
 
@@ -46,7 +45,6 @@
             }
             $conn->set_charset('utf8');
 
-            // Usar prepared statements
             $queryUpdate = "UPDATE tbdatoclinico SET tbclienteid=?, tbpadecimientoid=? WHERE tbdatoclinicoid=?";
             $stmt = mysqli_prepare($conn, $queryUpdate);
 
@@ -69,7 +67,6 @@
             }
             $conn->set_charset('utf8');
 
-            // Usar prepared statements
             $queryDelete = "DELETE FROM tbdatoclinico WHERE tbdatoclinicoid=?";
             $stmt = mysqli_prepare($conn, $queryDelete);
 
@@ -124,7 +121,6 @@
 
                 $currentDatoClinico->setCarnet($carnetRow['tbclientecarnet'] ?? '');
 
-                // Obtener nombres de padecimientos
                 $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
                 $currentDatoClinico->setPadecimientosNombres($padecimientosNombres);
 
@@ -157,7 +153,6 @@
                         $row['tbpadecimientoid']
                     );
 
-                    // Obtener nombres de padecimientos
                     $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
                     $datoClinico->setPadecimientosNombres($padecimientosNombres);
 
@@ -173,7 +168,6 @@
             return null;
         }
 
-        // Nueva función para obtener TODOS los datos clínicos de un cliente específico
         public function obtenerTodosTBDatoClinicoPorCliente($tbclienteid) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
@@ -197,7 +191,6 @@
                         $row['tbpadecimientoid']
                     );
 
-                    // Obtener nombres de padecimientos
                     $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
                     $datoClinico->setPadecimientosNombres($padecimientosNombres);
 
@@ -220,7 +213,6 @@
             }
             $conn->set_charset('utf8');
 
-            // REMOVIDA la validación que excluía clientes con datos clínicos existentes
             $queryClientes = "SELECT tbclienteid, tbclientecarnet, tbclientenombre
                               FROM tbcliente
                               ORDER BY tbclientecarnet";
@@ -272,7 +264,6 @@
             return $padecimientos;
         }
 
-        // Método para obtener los nombres de padecimientos a partir de los IDs
         private function obtenerNombresPadecimientos($padecimientosIds) {
             if (empty($padecimientosIds)) {
                 return array();
@@ -284,7 +275,6 @@
             }
             $conn->set_charset('utf8');
 
-            // Dividir los IDs por el separador $ (corregido)
             $idsArray = explode('$', $padecimientosIds);
             $nombres = array();
 
@@ -311,7 +301,6 @@
             return $nombres;
         }
 
-        // Método para validar que los padecimientos existan
         public function validarPadecimientosExisten($padecimientosIds) {
             if (empty($padecimientosIds)) {
                 return false;
@@ -323,7 +312,6 @@
             }
             $conn->set_charset('utf8');
 
-            // Corregir el separador (era ', $' ahora es '$')
             $idsArray = explode('$', $padecimientosIds);
             $idsValidos = 0;
 

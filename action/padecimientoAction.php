@@ -1,21 +1,20 @@
 <?php
 session_start();
 
-// Incluir las clases necesarias - ajusta estas rutas según tu estructura de carpetas
 include_once '../business/padecimientoBusiness.php';
+include_once '../business/datoClinicoBusiness.php';
 if (!class_exists('Padecimiento')) {
     include_once '../domain/padecimiento.php';
 }
 
-// Configurar header para JSON
 header('Content-Type: application/json');
 
-// Crear instancia del business
 $padecimientoBusiness = new PadecimientoBusiness();
+$datoClinicoBusiness = new DatoClinicoBusiness();
 $response = array();
 
 try {
-    // Verificar que el usuario esté logueado
+
     if (!isset($_SESSION['usuario_id'])) {
         $response['success'] = false;
         $response['message'] = 'Error: Debe iniciar sesión para acceder a esta funcionalidad.';
@@ -23,7 +22,6 @@ try {
         exit();
     }
 
-    // Verificar permisos - Solo administradores pueden gestionar padecimientos
     $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
 
     if (!$esAdmin) {
@@ -33,14 +31,12 @@ try {
         exit();
     }
 
-    // =============== CREAR PADECIMIENTO ===============
     if (isset($_POST['create'])) {
         $tipo = isset($_POST['tipo']) ? trim($_POST['tipo']) : '';
         $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
         $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
         $formaDeActuar = isset($_POST['formaDeActuar']) ? trim($_POST['formaDeActuar']) : '';
 
-        // Validar datos
         $errores = $padecimientoBusiness->validarPadecimiento($tipo, $nombre, $descripcion, $formaDeActuar);
 
         if (!empty($errores)) {
@@ -60,7 +56,6 @@ try {
         }
     }
 
-    // =============== ACTUALIZAR PADECIMIENTO ===============
     else if (isset($_POST['update'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         $tipo = isset($_POST['tipo']) ? trim($_POST['tipo']) : '';
@@ -72,19 +67,30 @@ try {
             $response['success'] = false;
             $response['message'] = 'Error: ID de padecimiento inválido.';
         } else {
-            // Validar datos
+
             $errores = $padecimientoBusiness->validarPadecimiento($tipo, $nombre, $descripcion, $formaDeActuar);
 
             if (!empty($errores)) {
                 $response['success'] = false;
                 $response['message'] = 'Error de validación: ' . implode(', ', $errores);
             } else {
+                $clientesAfectados = $datoClinicoBusiness->padecimientoEnUso($id);
+
                 $padecimiento = new Padecimiento($id, $tipo, $nombre, $descripcion, $formaDeActuar);
                 $resultado = $padecimientoBusiness->actualizarTbpadecimiento($padecimiento);
 
                 if ($resultado) {
+                    $mensaje = 'Éxito: Padecimiento actualizado correctamente.';
+
+                    if (!empty($clientesAfectados)) {
+                        $registrosAfectados = $datoClinicoBusiness->modificarPadecimientoEnRegistros($id, $id);
+                        if ($registrosAfectados > 0) {
+                            $mensaje .= " Se reordenaron $registrosAfectados registros de datos clínicos (el padecimiento modificado se movió al final de las listas).";
+                        }
+                    }
+
                     $response['success'] = true;
-                    $response['message'] = 'Éxito: Padecimiento actualizado correctamente.';
+                    $response['message'] = $mensaje;
                 } else {
                     $response['success'] = false;
                     $response['message'] = 'Error: El nombre del padecimiento ya existe o no se pudo procesar la transacción.';
@@ -93,7 +99,6 @@ try {
         }
     }
 
-    // =============== ELIMINAR PADECIMIENTO ===============
     else if (isset($_POST['delete'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
@@ -101,6 +106,28 @@ try {
             $response['success'] = false;
             $response['message'] = 'Error: ID de padecimiento inválido.';
         } else {
+
+            $clientesAfectados = $datoClinicoBusiness->padecimientoEnUso($id);
+
+            if (!empty($clientesAfectados)) {
+
+                $carnets = array();
+                foreach ($clientesAfectados as $cliente) {
+                    $carnets[] = $cliente['carnet'];
+                }
+
+                $mensaje = "ADVERTENCIA: Este padecimiento está siendo usado por " . count($clientesAfectados) . " registro(s) de datos clínicos. ";
+                $mensaje .= "Clientes con carnet: " . implode(', ', array_unique($carnets)) . ". ";
+                $mensaje .= "\n\n¿Desea continuar? Si elimina el padecimiento, se eliminará de todos los registros de datos clínicos donde aparezca.";
+
+                $response['success'] = false;
+                $response['message'] = $mensaje;
+                $response['requiereConfirmacion'] = true;
+                $response['clientesAfectados'] = count($clientesAfectados);
+                echo json_encode($response);
+                exit();
+            }
+
             $resultado = $padecimientoBusiness->eliminarTbpadecimiento($id);
 
             if ($resultado) {
@@ -108,19 +135,58 @@ try {
                 $response['message'] = 'Éxito: Padecimiento eliminado correctamente.';
             } else {
                 $response['success'] = false;
-                $response['message'] = 'Error: No se pudo eliminar el padecimiento. Puede estar siendo utilizado por otros registros.';
+                $response['message'] = 'Error: No se pudo eliminar el padecimiento.';
             }
         }
     }
 
-    // =============== OBTENER TIPOS DE PADECIMIENTO ===============
+    else if (isset($_POST['confirmDelete'])) {
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+
+        if ($id <= 0) {
+            $response['success'] = false;
+            $response['message'] = 'Error: ID de padecimiento inválido.';
+        } else {
+
+            $resultadosLimpieza = $datoClinicoBusiness->eliminarPadecimientoDeRegistros($id);
+
+            $resultado = $padecimientoBusiness->eliminarTbpadecimiento($id);
+
+            if ($resultado) {
+                $mensaje = 'Éxito: Padecimiento eliminado correctamente.';
+
+                if ($resultadosLimpieza['registrosActualizados'] > 0 || $resultadosLimpieza['registrosEliminados'] > 0) {
+                    $mensaje .= " Se procesaron los datos clínicos: ";
+
+                    if ($resultadosLimpieza['registrosActualizados'] > 0) {
+                        $mensaje .= "{$resultadosLimpieza['registrosActualizados']} registros actualizados";
+                    }
+
+                    if ($resultadosLimpieza['registrosEliminados'] > 0) {
+                        if ($resultadosLimpieza['registrosActualizados'] > 0) {
+                            $mensaje .= " y ";
+                        }
+                        $mensaje .= "{$resultadosLimpieza['registrosEliminados']} registros eliminados por quedar sin padecimientos";
+                    }
+
+                    $mensaje .= ".";
+                }
+
+                $response['success'] = true;
+                $response['message'] = $mensaje;
+            } else {
+                $response['success'] = false;
+                $response['message'] = 'Error: No se pudo eliminar el padecimiento de la base de datos.';
+            }
+        }
+    }
+
     else if (isset($_GET['getTipos'])) {
         $tipos = $padecimientoBusiness->obtenerTiposPadecimiento();
         $response['success'] = true;
         $response['data'] = $tipos;
     }
 
-    // =============== OBTENER TODOS LOS PADECIMIENTOS ===============
     else if (isset($_GET['getPadecimientos'])) {
         $padecimientos = $padecimientoBusiness->obtenerTbpadecimiento();
         $response['success'] = true;
@@ -137,7 +203,6 @@ try {
         }
     }
 
-    // =============== OBTENER PADECIMIENTO POR ID ===============
     else if (isset($_GET['getPadecimiento']) && isset($_GET['id'])) {
         $id = intval($_GET['id']);
         $padecimiento = $padecimientoBusiness->obtenerTbpadecimientoPorId($id);
@@ -157,7 +222,6 @@ try {
         }
     }
 
-    // =============== OBTENER PADECIMIENTOS POR TIPO ===============
     else if (isset($_GET['getPadecimientosPorTipo']) && isset($_GET['tipo'])) {
         $tipo = trim($_GET['tipo']);
         $padecimientos = $padecimientoBusiness->obtenerTbpadecimientoPorTipo($tipo);
@@ -175,7 +239,6 @@ try {
         }
     }
 
-    // =============== ACCIÓN NO VÁLIDA ===============
     else {
         $response['success'] = false;
         $response['message'] = 'Error: Acción no válida.';
@@ -195,6 +258,5 @@ try {
     error_log('Error en padecimientoAction.php: ' . $e->getMessage());
 }
 
-// Enviar respuesta JSON
 echo json_encode($response);
 ?>

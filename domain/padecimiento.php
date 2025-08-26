@@ -16,7 +16,6 @@ class Padecimiento {
         $this->tbpadecimientoformadeactuar = $tbpadecimientoformadeactuar;
     }
 
-    // Getters
     public function getTbpadecimientoid() {
         return $this->tbpadecimientoid;
     }
@@ -37,7 +36,6 @@ class Padecimiento {
         return $this->tbpadecimientoformadeactuar;
     }
 
-    // Setters
     public function setTbpadecimientoid($tbpadecimientoid) {
         $this->tbpadecimientoid = $tbpadecimientoid;
     }
