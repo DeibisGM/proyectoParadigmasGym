@@ -15,6 +15,7 @@ if (isset($_POST['login'])) {
             // Es el administrador principal
             $_SESSION['usuario_id'] = 0;
             $_SESSION['usuario_nombre'] = 'Admin';
+            $_SESSION['usuario_correo'] = 'root@gmail.com';
             $_SESSION['tipo_usuario'] = 'admin';
 
             // Redirigir a la página principal
@@ -32,6 +33,7 @@ if (isset($_POST['login'])) {
                 // Es un instructor, guardamos la información en la sesión
                 $_SESSION['usuario_id'] = $instructor->getInstructorId();
                 $_SESSION['usuario_nombre'] = $instructor->getInstructorNombre();
+                $_SESSION['usuario_correo'] = $instructor->getInstructorCorreo();
                 $_SESSION['tipo_usuario'] = 'instructor';
 
                 // Redirigir a la página principal
@@ -50,6 +52,7 @@ if (isset($_POST['login'])) {
                 // Es un cliente, guardamos la información en la sesión
                 $_SESSION['usuario_id'] = $cliente->getId();
                 $_SESSION['usuario_nombre'] = $cliente->getNombre();
+                $_SESSION['usuario_correo'] = $cliente->getCorreo();
                 $_SESSION['tipo_usuario'] = 'cliente';
 
                 // Redirigir a la página principal
