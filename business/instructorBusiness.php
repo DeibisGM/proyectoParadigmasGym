@@ -41,5 +41,9 @@ class InstructorBusiness {
     public function existeInstructorPorCorreo($correo) {
         return $this->instructorData->existeInstructorPorCorreo($correo);
     }
+    public function actualizarCertificadosInstructor($idInstructor, $certificadosStr) {
+    return $this->instructorData->actualizarCertificadosInstructor($idInstructor, $certificadosStr);
+    }
+
 }
 ?>

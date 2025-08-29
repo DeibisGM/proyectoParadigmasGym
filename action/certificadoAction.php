@@ -41,6 +41,7 @@ if (isset($_POST['create'])) {
         $result = $certificadoBusiness->addCertificado($certificado);
 
         if ($result) {
+
             header("location: ../view/certificadoView.php?success=created");
         } else {
             header("location: ../view/certificadoView.php?error=dbError");
@@ -48,7 +49,9 @@ if (isset($_POST['create'])) {
     } else {
         header("location: ../view/certificadoView.php?error=error");
     }
+
 }
+
 
 if (isset($_POST['update'])) {
     if (
