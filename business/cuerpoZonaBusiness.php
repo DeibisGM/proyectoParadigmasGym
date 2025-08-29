@@ -1,15 +1,22 @@
 <?php
 
-include '../data/cuerpoZonaData.php';
+include_once '../data/cuerpoZonaData.php';
+include_once '../utility/ImageManager.php';
 
 class CuerpoZonaBusiness
 {
-
     private $cuerpoZonaData;
+    private $imageManager;
 
     public function __construct()
     {
         $this->cuerpoZonaData = new CuerpoZonaData();
+        $this->imageManager = new ImageManager();
+    }
+
+    public function getCuerpoZonaById($id)
+    {
+        return $this->cuerpoZonaData->getCuerpoZonaById($id);
     }
 
     public function existeCuerpoZonaNombre($nombreCuerpoZona)
@@ -19,11 +26,9 @@ class CuerpoZonaBusiness
 
     public function insertarTBCuerpoZona($cuerpoZona)
     {
-        // Verificar si ya existe una zona con el mismo nombre
         if ($this->existeCuerpoZonaNombre($cuerpoZona->getNombreCuerpoZona())) {
             return -1;
         }
-        // Si la inserción es exitosa, la capa de datos devolverá el nuevo ID.
         return $this->cuerpoZonaData->insertarTBCuerpoZona($cuerpoZona);
     }
 
@@ -37,6 +42,15 @@ class CuerpoZonaBusiness
         return $this->cuerpoZonaData->actualizarEstadoTBCuerpoZona($idCuerpoZona, $estado);
     }
 
+    public function eliminarTBCuerpoZona($id)
+    {
+        $zona = $this->cuerpoZonaData->getCuerpoZonaById($id);
+        if ($zona) {
+            $this->imageManager->deleteImagesFromString($zona->getImagenesIds());
+            return $this->cuerpoZonaData->eliminarTBCuerpoZona($id);
+        }
+        return false;
+    }
 
     public function getAllTBCuerpoZona()
     {
