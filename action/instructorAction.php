@@ -22,14 +22,9 @@ if (isset($_POST['update'])) {
             exit();
         }
 
-        // Validar que la cédula solo contenga números y tenga longitud adecuada
-        if (!preg_match('/^[0-9]+$/', $id)) {
+        // Validar que la cédula tenga exactamente 3 dígitos
+        if (!preg_match('/^[0-9]{3}$/', $id)) {
             header("location: ../view/instructorView.php?error=invalidId");
-            exit();
-        }
-
-        if (strlen($id) < 9 || strlen($id) > 20) {
-            header("location: ../view/instructorView.php?error=idLengthInvalid");
             exit();
         }
 
@@ -42,29 +37,48 @@ if (isset($_POST['update'])) {
             header("location: ../view/instructorView.php?error=nameTooLong");
             exit();
         }
+        // Validación de teléfono (solo números)
+        if (!empty($telefono) && !preg_match('/^[0-9]+$/', $telefono)) {
+        header("location: ../view/instructorView.php?error=invalidPhone");
+        exit();
+        }
+
+        // Validación de longitud de teléfono (8-15 dígitos)
+        if (!empty($telefono) && (strlen($telefono) < 8 || strlen($telefono) > 15)) {
+        header("location: ../view/instructorView.php?error=phoneLengthInvalid");
+        exit();
+        }
 
         if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
             header("location: ../view/instructorView.php?error=invalidEmail");
             exit();
         }
 
-       if (strlen($contraseña) < 4 || strlen($contraseña) > 8) {
-           header("location: ../view/instructorView.php?error=passwordLengthInvalid");
-           exit();
-       }
+        if (strlen($contraseña) < 4 || strlen($contraseña) > 8) {
+            header("location: ../view/instructorView.php?error=passwordLengthInvalid");
+            exit();
+        }
+
+        $instructorBusiness = new InstructorBusiness();
+
+        // Validar que el correo sea único (excepto para el instructor actual)
+        $correoExistente = $instructorBusiness->existeInstructorPorCorreo($correo);
+        if ($correoExistente) {
+            $instructorActual = $instructorBusiness->getInstructorPorId($id);
+            if ($instructorActual && $instructorActual->getInstructorCorreo() !== $correo) {
+                header("location: ../view/instructorView.php?error=emailExists");
+                exit();
+            }
+        }
 
         $instructor = new Instructor($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1);
-        $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->actualizarTBInstructor($instructor);
 
         if ($result == 1) {
             // Gestionar imagen después de actualizar
             $eliminarImagen = isset($_POST['eliminar_imagen']) && $_POST['eliminar_imagen'] == '1';
             $resultadoImagen = gestionarImagen('instructores', $id, $_FILES['imagen'], $eliminarImagen);
-            
-            // Opcional: puedes registrar el resultado si lo necesitas
-            // error_log("Resultado gestión imagen: " . print_r($resultadoImagen, true));
-            
+
             header("location: ../view/instructorView.php?success=updated");
         } else {
             header("location: ../view/instructorView.php?error=dbError");
@@ -78,9 +92,7 @@ else if (isset($_POST['delete'])) {
         $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->eliminarTBInstructor($_POST['id']);
         if ($result == 1) {
-            // Eliminar también la imagen asociada usando ImageManager
             $resultadoImagen = gestionarImagen('instructores', $_POST['id'], null, true);
-            
             header("location: ../view/instructorView.php?success=deleted");
         } else {
             header("location: ../view/instructorView.php?error=dbError");
@@ -126,14 +138,9 @@ else if (isset($_POST['create'])) {
             exit();
         }
 
-        // Validar que la cédula solo contenga números y tenga longitud adecuada
-        if (!preg_match('/^[0-9]+$/', $id)) {
+        // Validar que la cédula tenga exactamente 3 dígitos
+        if (!preg_match('/^[0-9]{3}$/', $id)) {
             header("location: ../view/instructorView.php?error=invalidId");
-            exit();
-        }
-
-        if (strlen($id) < 9 || strlen($id) > 20) {
-            header("location: ../view/instructorView.php?error=idLengthInvalid");
             exit();
         }
 
@@ -146,6 +153,17 @@ else if (isset($_POST['create'])) {
             header("location: ../view/instructorView.php?error=nameTooLong");
             exit();
         }
+        // Validación de teléfono (solo números)
+        if (!empty($telefono) && !preg_match('/^[0-9]+$/', $telefono)) {
+        header("location: ../view/instructorView.php?error=invalidPhone");
+        exit();
+        }
+
+        // Validación de longitud de teléfono (8-15 dígitos)
+        if (!empty($telefono) && (strlen($telefono) < 8 || strlen($telefono) > 15)) {
+        header("location: ../view/instructorView.php?error=phoneLengthInvalid");
+        exit();
+        }
 
         if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
             header("location: ../view/instructorView.php?error=invalidEmail");
@@ -153,16 +171,29 @@ else if (isset($_POST['create'])) {
         }
 
         if (strlen($contraseña) < 4 || strlen($contraseña) > 8) {
-               header("location: ../view/instructorView.php?error=passwordLengthInvalid");
-               exit();
+            header("location: ../view/instructorView.php?error=passwordLengthInvalid");
+            exit();
+        }
+
+        // Validar que el ID no exista ya
+        $instructorBusiness = new InstructorBusiness();
+        $instructorExistente = $instructorBusiness->getInstructorPorId($id);
+        if ($instructorExistente) {
+            header("location: ../view/instructorView.php?error=idExists");
+            exit();
+        }
+
+        // Validar que el correo sea único
+        $correoExistente = $instructorBusiness->existeInstructorPorCorreo($correo);
+        if ($correoExistente) {
+            header("location: ../view/instructorView.php?error=emailExists");
+            exit();
         }
 
         $instructor = new Instructor($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1);
-        $instructorBusiness = new InstructorBusiness();
         $result = $instructorBusiness->insertarTBInstructor($instructor);
 
         if ($result == 1) {
-            // Si se insertó correctamente, procesamos la imagen
             if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
                 $resultadoImagen = gestionarImagen('instructores', $id, $_FILES['imagen']);
             }
