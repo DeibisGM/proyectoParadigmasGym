@@ -1,111 +1,62 @@
 <?php
 session_start();
-include '../business/cuerpoZonaBusiness.php';
-include '../utility/ImageManager.php';
+include_once '../business/cuerpoZonaBusiness.php';
+include_once '../utility/ImageManager.php';
 
 $redirect_path = '../view/cuerpoZonaView.php';
 
-// Verificar si el usuario está autenticado
 if (!isset($_SESSION['tipo_usuario'])) {
     header("location: ../view/loginView.php");
     exit();
 }
 
-// Solo los administradores pueden crear, editar, activar o desactivar zonas
-$esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
+$esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor');
 
-if (isset($_POST['update'])) {
-    // Verificar si es administrador o instructor
-    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
-        header("location: " . $redirect_path . "?error=unauthorized");
-        exit();
-    }
+if (!$esAdminOInstructor) {
+    header("location: " . $redirect_path . "?error=unauthorized");
+    exit();
+}
 
-    if (isset($_POST['tbcuerpozonaid']) && isset($_POST['tbcuerpozonanombre']) && isset($_POST['tbcuerpozonadescripcion']) && isset($_POST['tbcuerpozonaactivo'])) {
-        if (!empty($_POST['tbcuerpozonanombre']) && !empty($_POST['tbcuerpozonadescripcion'])) {
-            $cuerpoZona = new CuerpoZona($_POST['tbcuerpozonaid'], $_POST['tbcuerpozonanombre'], $_POST['tbcuerpozonadescripcion'], $_POST['tbcuerpozonaactivo']);
-            $cuerpoZonaBusiness = new CuerpoZonaBusiness();
-            $result = $cuerpoZonaBusiness->actualizarTBCuerpoZona($cuerpoZona);
+$cuerpoZonaBusiness = new CuerpoZonaBusiness();
+$imageManager = new ImageManager();
 
-            // Después de actualizar, gestionar la imagen
-            if ($result == 1) {
-                $id = $_POST['tbcuerpozonaid'];
-                $eliminarImagen = isset($_POST['eliminar_imagen']) && $_POST['eliminar_imagen'] == '1';
-
-                // Pasar el archivo y la solicitud de eliminación a la función
-                gestionarImagen('cuerpo_zonas', $id, $_FILES['imagen'], $eliminarImagen);
-
-                header("location: " . $redirect_path . "?success=updated");
-            } else {
-                header("location: " . $redirect_path . "?error=dbError");
-            }
-        } else {
-            header("location: " . $redirect_path . "?error=emptyField");
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=error");
-    }
-} else if (isset($_POST['desactivar'])) {
-    // Verificar si es administrador o instructor
-    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
-        header("location: " . $redirect_path . "?error=unauthorized");
-        exit();
-    }
-
+if (isset($_POST['delete_image'])) {
     if (isset($_POST['tbcuerpozonaid'])) {
-        $cuerpoZonaBusiness = new CuerpoZonaBusiness();
-        $idCuerpoZona = $_POST['tbcuerpozonaid'];
-        $result = $cuerpoZonaBusiness->actualizarEstadoTBCuerpoZona($idCuerpoZona, 0);
+        $zonaId = $_POST['tbcuerpozonaid'];
+        $imagenId = $_POST['delete_image'];
 
-        if ($result == 1) {
-            header("location: " . $redirect_path . "?success=deactivated");
+        $zona = $cuerpoZonaBusiness->getCuerpoZonaById($zonaId);
+        if ($zona) {
+            $imageManager->deleteImage($imagenId);
+            $currentIds = $zona->getImagenesIds();
+            $newIds = ImageManager::removeIdFromString($imagenId, $currentIds);
+            $zona->setImagenesIds($newIds);
+            $cuerpoZonaBusiness->actualizarTBCuerpoZona($zona);
+            header("location: " . $redirect_path . "?success=image_deleted");
         } else {
-            header("location: " . $redirect_path . "?error=dbError");
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=error");
-    }
-} else if (isset($_POST['activar'])) {
-    // Verificar si es administrador o instructor
-    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
-        header("location: " . $redirect_path . "?error=unauthorized");
-        exit();
-    }
-
-    if (isset($_POST['tbcuerpozonaid'])) {
-        $cuerpoZonaBusiness = new CuerpoZonaBusiness();
-        $idCuerpoZona = $_POST['tbcuerpozonaid'];
-        $result = $cuerpoZonaBusiness->actualizarEstadoTBCuerpoZona($idCuerpoZona, 1);
-
-        if ($result == 1) {
-            header("location: " . $redirect_path . "?success=activated");
-        } else {
-            header("location: " . $redirect_path . "?error=dbError");
+            header("location: " . $redirect_path . "?error=notFound");
         }
     } else {
         header("location: " . $redirect_path . "?error=error");
     }
 } else if (isset($_POST['create'])) {
-    // Verificar si es administrador o instructor
-    if (!($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor')) {
-        header("location: " . $redirect_path . "?error=unauthorized");
-        exit();
-    }
-
     if (isset($_POST['tbcuerpozonanombre']) && isset($_POST['tbcuerpozonadescripcion'])) {
         if (!empty($_POST['tbcuerpozonanombre']) && !empty($_POST['tbcuerpozonadescripcion'])) {
             $cuerpoZona = new CuerpoZona(0, $_POST['tbcuerpozonanombre'], $_POST['tbcuerpozonadescripcion'], 1);
-            $cuerpoZonaBusiness = new CuerpoZonaBusiness();
             $nuevoId = $cuerpoZonaBusiness->insertarTBCuerpoZona($cuerpoZona);
 
             if ($nuevoId > 0) {
-                // Si se insertó correctamente y tenemos un ID, procesamos la imagen
-                if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
-                    gestionarImagen('cuerpo_zonas', $nuevoId, $_FILES['imagen']);
+                if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
+                    $newImageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'cue');
+                    if (!empty($newImageIds)) {
+                        $zonaCreada = $cuerpoZonaBusiness->getCuerpoZonaById($nuevoId);
+                        $idString = ImageManager::addIdsToString($newImageIds, '');
+                        $zonaCreada->setImagenesIds($idString);
+                        $cuerpoZonaBusiness->actualizarTBCuerpoZona($zonaCreada);
+                    }
                 }
                 header("location: " . $redirect_path . "?success=inserted");
             } else if ($nuevoId == -1) {
-                // Error específico para zona duplicada
                 header("location: " . $redirect_path . "?error=duplicateZone");
             } else {
                 header("location: " . $redirect_path . "?error=dbError");
@@ -116,5 +67,52 @@ if (isset($_POST['update'])) {
     } else {
         header("location: " . $redirect_path . "?error=error");
     }
+} else if (isset($_POST['update'])) {
+    if (isset($_POST['tbcuerpozonaid']) && isset($_POST['tbcuerpozonanombre']) && isset($_POST['tbcuerpozonadescripcion']) && isset($_POST['tbcuerpozonaactivo'])) {
+        $id = $_POST['tbcuerpozonaid'];
+        $zonaActual = $cuerpoZonaBusiness->getCuerpoZonaById($id);
+        if ($zonaActual) {
+            $zonaActual->setNombreCuerpoZona($_POST['tbcuerpozonanombre']);
+            $zonaActual->setDescripcionCuerpoZona($_POST['tbcuerpozonadescripcion']);
+            $zonaActual->setActivoCuerpoZona($_POST['tbcuerpozonaactivo']);
+
+            if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
+                $newImageIds = $imageManager->addImages($_FILES['imagenes'], $id, 'cue');
+                $currentIdString = $zonaActual->getImagenesIds();
+                $newIdString = ImageManager::addIdsToString($newImageIds, $currentIdString);
+                $zonaActual->setImagenesIds($newIdString);
+            }
+
+            if ($cuerpoZonaBusiness->actualizarTBCuerpoZona($zonaActual)) {
+                header("location: " . $redirect_path . "?success=updated");
+            } else {
+                header("location: " . $redirect_path . "?error=dbError");
+            }
+        } else {
+            header("location: " . $redirect_path . "?error=notFound");
+        }
+    } else {
+        header("location: " . $redirect_path . "?error=error");
+    }
+} else if (isset($_POST['desactivar'])) {
+    if (isset($_POST['tbcuerpozonaid'])) {
+        $cuerpoZonaBusiness->actualizarEstadoTBCuerpoZona($_POST['tbcuerpozonaid'], 0);
+        header("location: " . $redirect_path . "?success=deactivated");
+    }
+} else if (isset($_POST['activar'])) {
+    if (isset($_POST['tbcuerpozonaid'])) {
+        $cuerpoZonaBusiness->actualizarEstadoTBCuerpoZona($_POST['tbcuerpozonaid'], 1);
+        header("location: " . $redirect_path . "?success=activated");
+    }
+} else if (isset($_POST['delete'])) {
+    if (isset($_POST['tbcuerpozonaid'])) {
+        if ($cuerpoZonaBusiness->eliminarTBCuerpoZona($_POST['tbcuerpozonaid'])) {
+            header("location: " . $redirect_path . "?success=deleted");
+        } else {
+            header("location: " . $redirect_path . "?error=dbError");
+        }
+    }
+} else {
+    header("location: " . $redirect_path . "?error=invalid_action");
 }
 ?>
