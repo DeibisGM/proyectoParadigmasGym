@@ -68,7 +68,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/horarioView.php'>
                 <button>Gestionar Horario del Gimnasio</button>
             </a>
-            <a href='view/gestionReservasEventosView.php'>
+            <a href='view/reservaView.php'>
                 <button>Gestionar Eventos y Reservas</button>
             </a>
             <a href='view/padecimientoView.php'>
@@ -90,7 +90,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/clienteView.php'>
                 <button>Clientes</button>
             </a>
-            <a href='view/gestionReservasEventosView.php'>
+            <a href='view/reservaView.php'>
                 <button>Mis Horarios y Eventos</button>
             </a>
             <a href='view/certificadoView.php'>
@@ -130,7 +130,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
         </section>
         <section>
             <h3>Actividad en el Gimnasio</h3>
-            <a href='view/gestionReservasEventosView.php'>
+            <a href='view/reservaView.php'>
                 <button>Mis Horarios y Reservas</button>
             </a>
             <a href='view/instructorView.php'>

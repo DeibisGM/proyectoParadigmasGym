@@ -27,6 +27,7 @@ class Reserva
         $this->eventoNombre = 'Uso Libre';
     }
 
+    // Getters
     public function getId()
     {
         return $this->id;
@@ -72,6 +73,7 @@ class Reserva
         return $this->eventoNombre;
     }
 
+    // Setters
     public function setClienteNombre($nombre)
     {
         $this->clienteNombre = $nombre;

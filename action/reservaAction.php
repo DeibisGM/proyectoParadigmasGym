@@ -1,7 +1,8 @@
 <?php
 session_start();
-header('Content-Type: application/json');
+header('Content-Type: application/json'); // Esencial para que JavaScript entienda la respuesta
 
+// 1. Verificación de seguridad: el usuario debe haber iniciado sesión
 if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
     echo json_encode(['success' => false, 'message' => 'Error de autenticación: No ha iniciado sesión.']);
     exit();
@@ -13,6 +14,7 @@ $response = ['success' => false, 'message' => 'Acción no reconocida o datos inc
 $usuarioId = $_SESSION['usuario_id'];
 $tipoUsuario = $_SESSION['tipo_usuario'];
 
+// 2. Procesar la acción solicitada (crear o cancelar)
 if (isset($_POST['action'])) {
     $reservaBusiness = new ReservaBusiness();
 
@@ -40,7 +42,8 @@ if (isset($_POST['action'])) {
                 $response['message'] = 'Faltan datos para procesar la reserva (fecha u hora).';
             }
         }
-    } elseif ($_POST['action'] === 'cancel') {
+    } // Acción para CANCELAR una reserva existente
+    elseif ($_POST['action'] === 'cancel') {
         $reservaId = $_POST['reservaId'] ?? null;
         if ($reservaId) {
             $resultado = $reservaBusiness->cancelarReserva($reservaId, $usuarioId, $tipoUsuario);
@@ -58,5 +61,6 @@ if (isset($_POST['action'])) {
     }
 }
 
+// 3. Devolver la respuesta final en formato JSON
 echo json_encode($response);
 ?>

@@ -10,7 +10,7 @@ if (!isset($_SESSION['tipo_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') 
 }
 
 $eventoBusiness = new EventoBusiness();
-$redirect = "location: ../view/gestionReservasEventosView.php";
+$redirect = "location: ../view/reservaView.php";
 
 if (isset($_POST['crear_evento'])) {
     $nombre = $_POST['nombre'];
