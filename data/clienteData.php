@@ -9,53 +9,58 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryInsert = "INSERT INTO tbcliente (
-            tbclientecarnet,
-            tbclientenombre,
-            tbclientefechanacimiento,
-            tbclientetelefono,
-            tbclientecorreo,
-            tbclientedireccion,
-            tbclientegenero,
-            tbclienteinscripcion,
-            tbclienteestado,
-            tbclientecontrasena
-        ) VALUES (
-            '" . $cliente->getCarnet() . "',
-            '" . $cliente->getNombre() . "',
-            '" . $cliente->getFechaNacimiento() . "',
-            '" . $cliente->getTelefono() . "',
-            '" . $cliente->getCorreo() . "',
-            '" . $cliente->getDireccion() . "',
-            '" . $cliente->getGenero() . "',
-            '" . $cliente->getInscripcion() . "',
-            '" . $cliente->getEstado() . "',
-            '" . $cliente->getContrasena() . "'
-        );";
+        $queryInsert = "INSERT INTO tbcliente (tbclientecarnet, tbclientenombre, tbclientefechanacimiento, tbclientetelefono, tbclientecorreo, tbclientedireccion, tbclientegenero, tbclienteinscripcion, tbclienteestado, tbclientecontrasena, tbclienteimagenid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+";
+        
+        $stmt = mysqli_prepare($conn, $queryInsert);
+        $carnet = $cliente->getCarnet();
+        $nombre = $cliente->getNombre();
+        $fechaNacimiento = $cliente->getFechaNacimiento();
+        $telefono = $cliente->getTelefono();
+        $correo = $cliente->getCorreo();
+        $direccion = $cliente->getDireccion();
+        $genero = $cliente->getGenero();
+        $inscripcion = $cliente->getInscripcion();
+        $estado = $cliente->getEstado();
+        $contrasena = $cliente->getContrasena();
+        $imagenid = $cliente->getTbclienteImagenId();
 
-        $result = mysqli_query($conn, $queryInsert);
+        mysqli_stmt_bind_param($stmt, 'sssssssssis', $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $inscripcion, $estado, $contrasena, $imagenid);
+
+        $result = mysqli_stmt_execute($stmt);
+        $id = mysqli_insert_id($conn);
         mysqli_close($conn);
-        return $result;
+        
+        if($result){
+            return $id;
+        }else{
+            return false;
+        }
     }
 
     public function actualizarTBCliente($cliente) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbcliente SET
-            tbclientecarnet='" . $cliente->getCarnet() . "',
-            tbclientenombre='" . $cliente->getNombre() . "',
-            tbclientefechanacimiento='" . $cliente->getFechaNacimiento() . "',
-            tbclientetelefono='" . $cliente->getTelefono() . "',
-            tbclientecorreo='" . $cliente->getCorreo() . "',
-            tbclientedireccion='" . $cliente->getDireccion() . "',
-            tbclientegenero='" . $cliente->getGenero() . "',
-            tbclienteinscripcion='" . $cliente->getInscripcion() . "',
-            tbclienteestado='" . $cliente->getEstado() . "',
-            tbclientecontrasena='" . $cliente->getContrasena() . "'
-            WHERE tbclienteid=" . $cliente->getId() . ";";
+        $queryUpdate = "UPDATE tbcliente SET tbclientecarnet=?, tbclientenombre=?, tbclientefechanacimiento=?, tbclientetelefono=?, tbclientecorreo=?, tbclientedireccion=?, tbclientegenero=?, tbclienteinscripcion=?, tbclienteestado=?, tbclientecontrasena=?, tbclienteimagenid=? WHERE tbclienteid=?;";
 
-        $result = mysqli_query($conn, $queryUpdate);
+        $stmt = mysqli_prepare($conn, $queryUpdate);
+        $carnet = $cliente->getCarnet();
+        $nombre = $cliente->getNombre();
+        $fechaNacimiento = $cliente->getFechaNacimiento();
+        $telefono = $cliente->getTelefono();
+        $correo = $cliente->getCorreo();
+        $direccion = $cliente->getDireccion();
+        $genero = $cliente->getGenero();
+        $inscripcion = $cliente->getInscripcion();
+        $estado = $cliente->getEstado();
+        $contrasena = $cliente->getContrasena();
+        $imagenid = $cliente->getTbclienteImagenId();
+        $id = $cliente->getId();
+
+        mysqli_stmt_bind_param($stmt, 'sssssssssisi', $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $inscripcion, $estado, $contrasena, $imagenid, $id);
+
+        $result = mysqli_stmt_execute($stmt);
         mysqli_close($conn);
         return $result;
     }
@@ -64,8 +69,10 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryDelete = "DELETE FROM tbcliente WHERE tbclienteid=" . $id . ";";
-        $result = mysqli_query($conn, $queryDelete);
+        $queryDelete = "DELETE FROM tbcliente WHERE tbclienteid=?;";
+        $stmt = mysqli_prepare($conn, $queryDelete);
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        $result = mysqli_stmt_execute($stmt);
         mysqli_close($conn);
         return $result;
     }
@@ -90,7 +97,8 @@ class ClienteData extends Data {
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
                 $row['tbclienteestado'],
-                isset($row['tbclientecontrasena']) ? $row['tbclientecontrasena'] : ''
+                isset($row['tbclientecontrasena']) ? $row['tbclientecontrasena'] : '',
+                isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
         }
 
@@ -102,8 +110,11 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "SELECT tbclientecarnet FROM tbcliente WHERE tbclientecarnet='" . $carnet . "' LIMIT 1;";
-        $result = mysqli_query($conn, $query);
+        $query = "SELECT tbclientecarnet FROM tbcliente WHERE tbclientecarnet=? LIMIT 1;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, 's', $carnet);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
         $existe = mysqli_num_rows($result) > 0;
 
         mysqli_close($conn);
@@ -114,12 +125,11 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        // Escape strings to prevent SQL injection
-        $correo = mysqli_real_escape_string($conn, $correo);
-        $contrasena = mysqli_real_escape_string($conn, $contrasena);
-
-        $query = "SELECT * FROM tbcliente WHERE tbclientecorreo='" . $correo . "' AND tbclientecontrasena='" . $contrasena . "' LIMIT 1;";
-        $result = mysqli_query($conn, $query);
+        $query = "SELECT * FROM tbcliente WHERE tbclientecorreo=? AND tbclientecontrasena=? LIMIT 1;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, 'ss', $correo, $contrasena);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
@@ -134,7 +144,8 @@ class ClienteData extends Data {
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
                 $row['tbclienteestado'],
-                $row['tbclientecontrasena']
+                $row['tbclientecontrasena'],
+                isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
         }
 
@@ -146,9 +157,11 @@ class ClienteData extends Data {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $id = mysqli_real_escape_string($conn, $id);
-        $query = "SELECT * FROM tbcliente WHERE tbclienteid='" . $id . "' LIMIT 1;";
-        $result = mysqli_query($conn, $query);
+        $query = "SELECT * FROM tbcliente WHERE tbclienteid=? LIMIT 1;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
@@ -163,7 +176,8 @@ class ClienteData extends Data {
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
                 $row['tbclienteestado'],
-                $row['tbclientecontrasena']
+                $row['tbclientecontrasena'],
+                isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
         }
 

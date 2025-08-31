@@ -47,19 +47,15 @@ class ImageManager extends Data
 
         for ($i = 0; $i < $fileCount; $i++) {
             if ($files['error'][$i] === UPLOAD_ERR_OK) {
-                // 1. OBTENER EL PRÓXIMO ID ÚNICO PARA LA IMAGEN
                 $nextImageId = $this->getNextImageId();
 
-                // 2. CONSTRUIR EL NOMBRE DEL ARCHIVO BASADO EN IDS
                 $entityIdPadded = str_pad($entityId, 4, '0', STR_PAD_LEFT);
                 $imageIdPadded = str_pad($nextImageId, 4, '0', STR_PAD_LEFT);
 
-                // Formato: cue0003_0005.jpg (módulo + id_entidad + id_imagen)
                 $nombreArchivo = $modulePrefix . $entityIdPadded . $imageIdPadded . '.jpg';
                 $rutaDestino = $rutaBase . $nombreArchivo;
                 $rutaDB = '/img/' . $nombreArchivo;
 
-                // 3. PROCESAR Y GUARDAR
                 if ($this->processAndSaveImage($files['tmp_name'][$i], $rutaDestino)) {
                     $queryInsert = "INSERT INTO tbimagen (tbimagenid, tbimagenruta, tbimagenactivo) VALUES (?, ?, 1)";
                     $stmt = mysqli_prepare($conn, $queryInsert);
@@ -121,7 +117,7 @@ class ImageManager extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         if (!$conn) return [];
         $conn->set_charset('utf8');
-        $ids = array_filter(explode('$', $idString), 'is_numeric');
+        $ids = array_map('intval', array_filter(explode('$', $idString), 'is_numeric'));
         if (empty($ids)) {
             mysqli_close($conn);
             return [];

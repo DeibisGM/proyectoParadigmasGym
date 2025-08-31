@@ -47,6 +47,10 @@ $imageManager = new ImageManager();
             line-height: 1;
             padding: 2px 5px;
         }
+        .clear-btn {
+            display: none;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +68,7 @@ $imageManager = new ImageManager();
             <input type="text" name="tbcuerpozonadescripcion" placeholder="Descripción" required>
             <br><label>Imágenes (puede seleccionar varias):</label><br>
             <input type="file" name="imagenes[]" accept="image/png, image/jpeg, image/webp" multiple>
+            <button type="button" class="clear-btn" onclick="clearFileInput(this)">Limpiar</button>
             <br><br>
             <input type="submit" value="Crear" name="create">
         </form>
@@ -115,6 +120,7 @@ $imageManager = new ImageManager();
                             <br>
                             <label>Añadir más imágenes:</label><br>
                             <input type="file" name="imagenes[]" multiple>
+                            <button type="button" class="clear-btn" onclick="clearFileInput(this)">Limpiar</button>
                         </td>
                         <td>
                             <button type="submit" name="update">Actualizar</button>
@@ -152,6 +158,32 @@ $imageManager = new ImageManager();
     </table>
 </main>
 <hr>
+<script>
+    function clearFileInput(button) {
+        const input = button.previousElementSibling;
+        if (input && input.type === 'file') {
+            input.value = '';
+            button.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const clearButton = this.nextElementSibling;
+                if (this.files.length > 0) {
+                    if (clearButton && clearButton.type === 'button') {
+                        clearButton.style.display = 'inline-block';
+                    }
+                } else {
+                    if (clearButton && clearButton.type === 'button') {
+                        clearButton.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
+</script>
 <footer><p>Fin de la página.</p></footer>
 </body>
 </html>
