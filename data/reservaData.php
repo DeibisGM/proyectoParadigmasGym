@@ -132,6 +132,45 @@ class ReservaData extends Data
         mysqli_close($conn);
         return $reserva;
     }
+
+    public function getAllReservas()
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $querySelect = "SELECT * FROM tbreserva ORDER BY tbreservafecha DESC, tbreservahorainicio DESC;";
+        $result = mysqli_query($conn, $querySelect);
+        mysqli_close($conn);
+
+        $reservas = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $reservas[] = new Reserva(
+                $row['tbreservaid'], $row['tbclienteid'], $row['tbeventoid'], $row['tbreservafecha'],
+                $row['tbreservahorainicio'], $row['tbreservahorafin'], $row['tbreservaestado']
+            );
+        }
+        return $reservas;
+    }
+
+    public function getReservasPorEvento($eventoId)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $querySelect = "SELECT * FROM tbreserva WHERE tbeventoid = ? AND tbreservaestado = 'activa';";
+        $stmt = mysqli_prepare($conn, $querySelect);
+        mysqli_stmt_bind_param($stmt, "i", $eventoId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        mysqli_close($conn);
+
+        $reservas = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $reservas[] = new Reserva(
+                $row['tbreservaid'], $row['tbclienteid'], $row['tbeventoid'], $row['tbreservafecha'],
+                $row['tbreservahorainicio'], $row['tbreservahorafin'], $row['tbreservaestado']
+            );
+        }
+        return $reservas;
+    }
 }
 
 ?>
