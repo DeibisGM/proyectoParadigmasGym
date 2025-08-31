@@ -1,23 +1,20 @@
 <?php
 include '../business/clienteBusiness.php';
+include_once '../utility/ImageManager.php';
 session_start();
 
-// Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
-    // Si no hay sesión, redirigir al login
     header("Location: loginView.php");
     exit();
 }
 
-// Obtener información del usuario
 $usuarioId = $_SESSION['usuario_id'];
 $tipoUsuario = $_SESSION['tipo_usuario'];
 $nombreUsuario = $_SESSION['usuario_nombre'];
 
-// Inicializar el objeto de negocio
 $clienteBusiness = new ClienteBusiness();
+$imageManager = new ImageManager();
 
-// Si es cliente, obtener solo sus datos
 if ($tipoUsuario == 'cliente') {
     $cliente = $clienteBusiness->getClientePorId($usuarioId);
 }
@@ -28,25 +25,38 @@ if ($tipoUsuario == 'cliente') {
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Clientes</title>
-
-    <script>
-        function validarFormulario() {
-            const nombre = document.forms["clienteForm"]["nombre"].value;
-            const telefono = document.forms["clienteForm"]["telefono"].value;
-            const regexNombre = /^[a-zA-Z\s]+$/;
-            const regexTelefono = /^\d{1,8}$/;
-
-            if (!regexNombre.test(nombre)) {
-                alert("El nombre solo puede contener letras.");
-                return false;
-            }
-            if (!regexTelefono.test(telefono)) {
-                alert("El teléfono debe tener solo números (máximo 8 dígitos).");
-                return false;
-            }
-            return confirm('¿Estás seguro de que deseas realizar esta acción?');
+    <style>
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
         }
-    </script>
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .image-container img {
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #ddd;
+        }
+
+        .delete-image-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+            padding: 2px 5px;
+        }
+    </style>
 </head>
 <body>
 
@@ -59,11 +69,10 @@ if ($tipoUsuario == 'cliente') {
 
 <main>
     <?php if ($tipoUsuario == 'admin' || $tipoUsuario == 'instructor') { ?>
-        <!-- Vista de administrador / instructor - Puede ver y gestionar todos los clientes -->
         <h2>Registrar Cliente</h2>
 
         <form name="clienteForm" method="post" action="../action/clienteAction.php"
-              onsubmit="return validarFormulario();">
+              enctype="multipart/form-data">
             <label>Carnet:</label><br/>
             <input type="text" name="carnet" required/><br/>
 
@@ -95,6 +104,9 @@ if ($tipoUsuario == 'cliente') {
             <label>Fecha de inscripción:</label><br/>
             <input type="date" name="fechaInscripcion" required/><br/><br/>
 
+            <label>Imagen:</label><br/>
+            <input type="file" name="tbclienteimagenid[]" accept="image/png, image/jpeg, image/webp"><br/><br/>
+
             <input type="submit" value="Registrar Cliente" name="insertar"/>
         </form>
 
@@ -115,6 +127,7 @@ if ($tipoUsuario == 'cliente') {
                 <th>Género</th>
                 <th>Inscripción</th>
                 <th>Estado</th>
+                <th>Imagen</th>
                 <th>Acción</th>
             </tr>
             </thead>
@@ -123,7 +136,7 @@ if ($tipoUsuario == 'cliente') {
             $clientes = $clienteBusiness->getAllTBCliente();
             foreach ($clientes as $cliente) {
                 echo '<tr>';
-                echo '<form method="post" action="../action/clienteAction.php">';
+                echo '<form method="post" action="../action/clienteAction.php" enctype="multipart/form-data">';
                 echo '<input type="hidden" name="id" value="' . $cliente->getId() . '">';
                 echo '<input type="hidden" name="carnet" value="' . htmlspecialchars($cliente->getCarnet()) . '">';
                 echo '<td><input type="text" name="nombre" value="' . htmlspecialchars($cliente->getNombre()) . '" required></td>';
@@ -148,6 +161,18 @@ if ($tipoUsuario == 'cliente') {
                 echo '</td>';
 
                 echo '<td>';
+                $imagen = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
+                if (!empty($imagen)) {
+                    echo '<div class="image-container">';
+                    echo '<img src="..' . htmlspecialchars($imagen[0]['tbimagenruta']) . '?t=' . time() . '" alt="Imagen">';
+                    echo '<button type="submit" name="delete_image" value="' . $cliente->getTbclienteImagenId() . '" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button>';
+                    echo '</div>';
+                } else {
+                    echo '<input type="file" name="tbclienteimagenid[]">';
+                }
+                echo '</td>';
+
+                echo '<td>';
                 echo '<input type="submit" value="Actualizar" name="actualizar" onclick="return confirm(\'¿Estás seguro de actualizar este cliente?\');">';
                 echo '<input type="submit" value="Eliminar" name="eliminar" onclick="return confirm(\'¿Estás seguro de eliminar este cliente?\');">';
                 echo '</td>';
@@ -159,11 +184,10 @@ if ($tipoUsuario == 'cliente') {
             </tbody>
         </table>
     <?php } else { ?>
-        <!-- Vista de cliente - Solo puede ver y editar su propia información -->
         <h2>Mi Información</h2>
 
         <?php if ($cliente) { ?>
-            <form method="post" action="../action/clienteAction.php" onsubmit="return validarFormulario();">
+            <form method="post" action="../action/clienteAction.php" enctype="multipart/form-data">
                 <input type="hidden" name="id" value="<?php echo $cliente->getId(); ?>">
                 <input type="hidden" name="carnet" value="<?php echo htmlspecialchars($cliente->getCarnet()); ?>">
 
@@ -206,6 +230,19 @@ if ($tipoUsuario == 'cliente') {
                        required><br>
 
                 <input type="hidden" name="estado" value="<?php echo $cliente->getEstado(); ?>">
+
+                <label>Imagen:</label><br/>
+                <?php
+                $imagen = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
+                if (!empty($imagen)) {
+                    echo '<div class="image-container">';
+                    echo '<img src="..' . htmlspecialchars($imagen[0]['tbimagenruta']) . '?t=' . time() . '" alt="Imagen">';
+                    echo '<button type="submit" name="delete_image" value="' . $cliente->getTbclienteImagenId() . '" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button>';
+                    echo '</div>';
+                } else {
+                    echo '<input type="file" name="tbclienteimagenid[]">';
+                }
+                ?>
 
                 <br>
                 <input type="submit" value="Actualizar Mis Datos" name="actualizar">

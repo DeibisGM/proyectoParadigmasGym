@@ -65,8 +65,11 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/cuerpoZonaView.php'>
                 <button>Gestionar Zonas del Cuerpo</button>
             </a>
+            <a href='view/horarioView.php'>
+                <button>Gestionar Horario del Gimnasio</button>
+            </a>
             <a href='view/reservaView.php'>
-                <button>Gestionar Horarios y Reservas</button>
+                <button>Gestionar Eventos y Reservas</button>
             </a>
             <a href='view/padecimientoView.php'>
                 <button>Ver Padecimientos (General)</button>

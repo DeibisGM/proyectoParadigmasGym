@@ -77,7 +77,7 @@ if ($tipoUsuario === 'admin') {
                     foreach ($eventosFuturos as $evento) {
                         $fechaFormateada = date('d/m/Y', strtotime($evento->getFecha()));
                         echo "<div><strong>" . htmlspecialchars($evento->getNombre()) . "</strong> - " . $fechaFormateada .
-                            " a las " . date('h:i A', strtotime($evento->getHoraInicio())) . "</div>";
+                                " a las " . date('h:i A', strtotime($evento->getHoraInicio())) . "</div>";
                     }
                 }
                 ?>
