@@ -13,27 +13,56 @@
             }
             $conn->set_charset('utf8');
 
-            $queryGetLastId = "SELECT MAX(tbdatoclinicoid) AS tbdatoclinicoid FROM tbdatoclinico";
-            $resultId = mysqli_query($conn, $queryGetLastId);
-            $nextId = 1;
+            // Verificar si ya existe un registro para este cliente
+            $queryExiste = "SELECT * FROM tbdatoclinico WHERE tbclienteid = ?";
+            $stmtExiste = mysqli_prepare($conn, $queryExiste);
+            mysqli_stmt_bind_param($stmtExiste, "i", $datoClinico->getTbclienteid());
+            mysqli_stmt_execute($stmtExiste);
+            $resultExiste = mysqli_stmt_get_result($stmtExiste);
 
-            if ($row = mysqli_fetch_row($resultId)) {
-                if ($row[0] !== null) {
-                    $nextId = (int)$row[0] + 1;
+            if ($rowExiste = mysqli_fetch_assoc($resultExiste)) {
+                // YA EXISTE: Concatenar padecimientos
+                $padecimientosActuales = $rowExiste['tbpadecimientoid'];
+                $nuevosPadecimientos = $datoClinico->getTbpadecimientoid();
+
+                // Convertir a arrays, unir y eliminar duplicados
+                $actualesArray = empty($padecimientosActuales) ? array() : explode('$', $padecimientosActuales);
+                $nuevosArray = empty($nuevosPadecimientos) ? array() : explode('$', $nuevosPadecimientos);
+                $todosLosPadecimientos = array_unique(array_merge($actualesArray, $nuevosArray));
+                $padecimientosConcatenados = implode('$', array_filter($todosLosPadecimientos));
+
+                // Actualizar registro existente
+                $queryUpdate = "UPDATE tbdatoclinico SET tbpadecimientoid = ? WHERE tbclienteid = ?";
+                $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+                mysqli_stmt_bind_param($stmtUpdate, "si", $padecimientosConcatenados, $datoClinico->getTbclienteid());
+                $result = mysqli_stmt_execute($stmtUpdate);
+                mysqli_stmt_close($stmtUpdate);
+
+            } else {
+                // NO EXISTE: Crear nuevo registro
+                $queryGetLastId = "SELECT MAX(tbdatoclinicoid) AS tbdatoclinicoid FROM tbdatoclinico";
+                $resultId = mysqli_query($conn, $queryGetLastId);
+                $nextId = 1;
+
+                if ($row = mysqli_fetch_row($resultId)) {
+                    if ($row[0] !== null) {
+                        $nextId = (int)$row[0] + 1;
+                    }
+                }
+
+                $queryInsert = "INSERT INTO tbdatoclinico (tbdatoclinicoid, tbclienteid, tbpadecimientoid) VALUES (?, ?, ?)";
+                $stmt = mysqli_prepare($conn, $queryInsert);
+
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "iis", $nextId, $datoClinico->getTbclienteid(), $datoClinico->getTbpadecimientoid());
+                    $result = mysqli_stmt_execute($stmt);
+                    mysqli_stmt_close($stmt);
+                } else {
+                    $result = false;
                 }
             }
 
-            $queryInsert = "INSERT INTO tbdatoclinico (tbdatoclinicoid, tbclienteid, tbpadecimientoid) VALUES (?, ?, ?)";
-            $stmt = mysqli_prepare($conn, $queryInsert);
-
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "iis", $nextId, $datoClinico->getTbclienteid(), $datoClinico->getTbpadecimientoid());
-                $result = mysqli_stmt_execute($stmt);
-                mysqli_stmt_close($stmt);
-            } else {
-                $result = false;
-            }
-
+            mysqli_stmt_close($stmtExiste);
             mysqli_close($conn);
             return $result;
         }

@@ -115,6 +115,7 @@
 
                 foreach ($padecimientosIds as $id) {
                     if ($id == $padecimientoIdAntiguo) {
+                        $nuevosIds[] = $padecimientoIdNuevo;
                         $seModifico = true;
                     } else {
                         $nuevosIds[] = $id;
@@ -122,8 +123,6 @@
                 }
 
                 if ($seModifico) {
-                    $nuevosIds[] = $padecimientoIdNuevo;
-
                     $nuevosIdsString = implode('$', $nuevosIds);
                     $datoClinicoActualizado = new DatoClinico(
                         $datoClinico->getTbdatoclinicoid(),
