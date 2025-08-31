@@ -80,6 +80,9 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/numeroEmergenciaView.php'>
                 <button>Ver Números Emergencia</button>
             </a>
+            <a href='view/salaView.php'>
+                <button>Ver las salas</button>
+            </a>
         </section>
     <?php elseif ($tipoUsuario == 'instructor'): ?>
         <section>
@@ -95,6 +98,9 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             </a>
             <a href='view/instructorView.php'>
                 <button>Ver Instructores</button>
+            </a>
+             <a href='view/salaView.php'>
+                <button>Ver las salas</button>
             </a>
         </section>
         <section>
@@ -135,6 +141,9 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             </a>
             <a href='view/cuerpoZonaView.php'>
                 <button>Zonas del Cuerpo</button>
+            </a>
+            <a href='view/salaView.php'>
+                <button>Ver las salas</button>
             </a>
         </section>
     <?php endif; ?>
