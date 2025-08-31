@@ -1,19 +1,13 @@
 <?php
 session_start();
 
-// Verificar si el usuario ha iniciado sesión
 if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
-    // Si no hay sesión, redirigir al login
     header("Location: view/loginView.php");
     exit();
 }
 
-// Obtener información del usuario
-$usuarioId = $_SESSION['usuario_id'];
 $tipoUsuario = $_SESSION['tipo_usuario'];
-$correoUsuario = $_SESSION['usuario_correo'];
 $nombreUsuario = $_SESSION['usuario_nombre'];
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -21,134 +15,119 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym - Página Principal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
-<header>
-    <h1>Gimnasio</h1>
-    <p>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong></p>
-    <p>Tipo de usuario:
-        <strong>
-            <?php
-            if ($tipoUsuario == 'admin') {
-                echo 'Administrador';
-            } else if ($tipoUsuario == 'instructor') {
-                echo 'Instructor';
-            } else {
-                echo 'Cliente';
-            }
-            ?>
-        </strong>
-    </p>
-    <p>Correo electronico:
-        <?php echo htmlspecialchars($correoUsuario);
-        echo '<br><br>'
-        ?>
+<div class="container">
+    <header>
+        <h2><i class="ph ph-house"></i>Gimnasio</h2>
+        <p><i class="ph ph-user-circle"></i>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong>
+            (<?php echo htmlspecialchars(ucfirst($tipoUsuario)); ?>)</p>
         <a href="action/logoutAction.php">
-            <button>Cerrar Sesión</button>
+            <button><i class="ph ph-sign-out"></i>Cerrar Sesión</button>
         </a>
-</header>
+    </header>
 
-<hr>
 
-<main>
-    <h2>Menú Principal</h2>
+    <main>
 
-    <?php if ($tipoUsuario == 'admin'): ?>
-        <section>
-            <h3>Gestión General</h3>
-            <a href='view/instructorView.php'>
-                <button>Gestionar Instructores</button>
-            </a>
-            <a href='view/clienteView.php'>
-                <button>Gestionar Clientes</button>
-            </a>
-            <a href='view/cuerpoZonaView.php'>
-                <button>Gestionar Zonas del Cuerpo</button>
-            </a>
-            <a href='view/horarioView.php'>
-                <button>Gestionar Horario del Gimnasio</button>
-            </a>
-            <a href='view/reservaView.php'>
-                <button>Gestionar Eventos y Reservas</button>
-            </a>
-            <a href='view/padecimientoView.php'>
-                <button>Ver Padecimientos (General)</button>
-            </a>
-            <a href='view/certificadoView.php'>
-                <button>Ver Certificados</button>
-            </a>
-            <a href='view/datoClinicoView.php'>
-                <button>Ver Datos Clínicos</button>
-            </a>
-            <a href='view/numeroEmergenciaView.php'>
-                <button>Ver Números Emergencia</button>
-            </a>
-        </section>
-    <?php elseif ($tipoUsuario == 'instructor'): ?>
-        <section>
-            <h3>Panel de Instructor</h3>
-            <a href='view/clienteView.php'>
-                <button>Clientes</button>
-            </a>
-            <a href='view/reservaView.php'>
-                <button>Mis Horarios y Eventos</button>
-            </a>
-            <a href='view/certificadoView.php'>
-                <button>Mis Certificados</button>
-            </a>
-            <a href='view/instructorView.php'>
-                <button>Ver Instructores</button>
-            </a>
-        </section>
-        <section>
-            <h3>Recursos y Salud de Clientes</h3>
-            <a href='view/cuerpoZonaView.php'>
-                <button>Zonas del Cuerpo</button>
-            </a>
-            <a href='view/padecimientoView.php'>
-                <button>Padecimientos de Clientes</button>
-            </a>
-            <a href='view/datoClinicoView.php'>
-                <button>Datos Clínicos de Clientes</button>
-            </a>
-            <a href='view/numeroEmergenciaView.php'>
-                <button>Emergencias de Clientes</button>
-            </a>
-        </section>
-    <?php elseif ($tipoUsuario == 'cliente'): ?>
-        <section>
-            <h3>Mi Perfil</h3>
-            <a href='view/clienteView.php'>
-                <button>Ver mi Perfil</button>
-            </a>
-            <a href='view/datoClinicoView.php'>
-                <button>Mis Datos Clínicos</button>
-            </a>
-            <a href='view/numeroEmergenciaView.php'>
-                <button>Mis Números de Emergencia</button>
-            </a>
-        </section>
-        <section>
-            <h3>Actividad en el Gimnasio</h3>
-            <a href='view/reservaView.php'>
-                <button>Mis Horarios y Reservas</button>
-            </a>
-            <a href='view/instructorView.php'>
-                <button>Ver Instructores</button>
-            </a>
-            <a href='view/cuerpoZonaView.php'>
-                <button>Zonas del Cuerpo</button>
-            </a>
-        </section>
-    <?php endif; ?>
+        <br>
 
-</main>
+        <?php if ($tipoUsuario == 'admin'): ?>
+            <section>
+                <h3><i class="ph ph-wrench"></i>Gestión General</h3>
+                <div class="menu-grid">
+                    <a href='view/instructorView.php'>
+                        <button><i class="ph ph-users-three"></i>Instructores</button>
+                    </a>
+                    <a href='view/clienteView.php'>
+                        <button><i class="ph ph-users"></i>Clientes</button>
+                    </a>
+                    <a href='view/cuerpoZonaView.php'>
+                        <button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button>
+                    </a>
+                    <a href='view/horarioView.php'>
+                        <button><i class="ph ph-clock-clockwise"></i>Horario</button>
+                    </a>
+                    <a href='view/reservaView.php'>
+                        <button><i class="ph ph-calendar-check"></i>Eventos y Reservas</button>
+                    </a>
+                    <a href='view/padecimientoView.php'>
+                        <button><i class="ph ph-bandaids"></i>Padecimientos</button>
+                    </a>
+                    <a href='view/certificadoView.php'>
+                        <button><i class="ph ph-certificate"></i>Certificados</button>
+                    </a>
+                    <a href='view/datoClinicoView.php'>
+                        <button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button>
+                    </a>
+                    <a href='view/numeroEmergenciaView.php'>
+                        <button><i class="ph ph-phone-plus"></i>Números Emergencia</button>
+                    </a>
+                </div>
+            </section>
+        <?php elseif ($tipoUsuario == 'instructor'): ?>
+            <section>
+                <h3><i class="ph ph-chalkboard-teacher"></i>Panel de Instructor</h3>
+                <div class="menu-grid">
+                    <a href='view/clienteView.php'>
+                        <button><i class="ph ph-users"></i>Clientes</button>
+                    </a>
+                    <a href='view/reservaView.php'>
+                        <button><i class="ph ph-calendar-blank"></i>Mis Eventos</button>
+                    </a>
+                    <a href='view/certificadoView.php'>
+                        <button><i class="ph ph-seal-check"></i>Mis Certificados</button>
+                    </a>
+                    <a href='view/instructorView.php'>
+                        <button><i class="ph ph-user-rectangle"></i>Mi Perfil</button>
+                    </a>
+                </div>
+            </section>
+            <section>
+                <h3><i class="ph ph-heartbeat"></i>Salud de Clientes</h3>
+                <div class="menu-grid">
+                    <a href='view/datoClinicoView.php'>
+                        <button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button>
+                    </a>
+                    <a href='view/numeroEmergenciaView.php'>
+                        <button><i class="ph ph-phone-plus"></i>Contactos Emergencia</button>
+                    </a>
+                </div>
+            </section>
+        <?php elseif ($tipoUsuario == 'cliente'): ?>
+            <section>
+                <h3><i class="ph ph-user-focus"></i>Mi Perfil</h3>
+                <div class="menu-grid">
+                    <a href='view/clienteView.php'>
+                        <button><i class="ph ph-user-rectangle"></i>Ver mi Perfil</button>
+                    </a>
+                    <a href='view/datoClinicoView.php'>
+                        <button><i class="ph ph-clipboard-text"></i>Mis Datos Clínicos</button>
+                    </a>
+                    <a href='view/numeroEmergenciaView.php'>
+                        <button><i class="ph ph-phone-call"></i>Mis Números de Emergencia</button>
+                    </a>
+                </div>
+            </section>
+            <section>
+                <h3><i class="ph ph-barbell"></i>Actividad en el Gimnasio</h3>
+                <div class="menu-grid">
+                    <a href='view/reservaView.php'>
+                        <button><i class="ph ph-calendar-check"></i>Reservar</button>
+                    </a>
+                    <a href='view/instructorClienteView.php'>
+                        <button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button>
+                    </a>
+                </div>
+            </section>
+        <?php endif; ?>
+    </main>
 
-<hr>
-
-<footer>
-    <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados por Disney.</p>
-</footer>
-
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
+    </footer>
+</div>
 </body>
 </html>
