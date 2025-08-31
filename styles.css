@@ -1,0 +1,212 @@
+/* --- Global Reset & Body --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8f9fa;
+    color: #212529;
+    margin: 0;
+    padding: 2rem;
+    line-height: 1.6;
+}
+
+/* --- Layout Container --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+/* --- Phosphor Icons Consistency --- */
+i.ph {
+    font-size: 1.2em;
+    vertical-align: -0.25em;
+    margin-right: 0.5em;
+}
+
+/* --- Typography & Links --- */
+h1, h2, h3, h4 {
+    margin-top: 0;
+    font-weight: 600;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+a:hover {
+    text-decoration: none;
+}
+
+/* --- Form Elements --- */
+form {
+    margin-bottom: 2rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* --- Buttons --- */
+button,
+input[type="submit"] {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+button i.ph {
+    margin-right: 0.5em;
+}
+
+button i.ph:only-child {
+    margin-right: 0.5em;
+}
+
+/* --- Main Menu Grid Layout --- */
+.menu-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+main section {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+main section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* --- Tables --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+/* --- Specific Form Layouts (cuerpoZonaView) --- */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* --- Table Specifics (cuerpoZonaView) --- */
+.actions-cell {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.actions-cell button {
+    padding: 0.6rem;
+}
+
+td .image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.image-container img {
+    border-radius: 4px;
+    object-fit: cover;
+    width: 60px;
+    height: 60px;
+}
+
+.delete-image-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    padding: 0 !important;
+}
+
+td textarea, td input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+/* --- Login Page --- */
+.login-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    padding: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #fff;
+}
