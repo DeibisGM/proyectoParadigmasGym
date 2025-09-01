@@ -9,9 +9,7 @@ if (!isset($_SESSION['usuario_id'])) {
 $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
 
 if (!$esAdmin) {
-    echo "<h1>Acceso Denegado</h1>";
-    echo "<p>Solo los administradores pueden gestionar padecimientos.</p>";
-    echo "<p><a href='../index.php'>Volver al Inicio</a></p>";
+    header("Location: ../index.php?error=unauthorized");
     exit();
 }
 ?>
@@ -23,24 +21,24 @@ if (!$esAdmin) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Padecimientos</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
-    <h1>Gestión de Padecimientos</h1>
-
+<div class="container">
     <header>
-        <a href="../index.php">Volver al Inicio</a>
+        <h2><i class="ph ph-bandaids"></i>Gestión de Padecimientos</h2>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
     </header>
 
-    <div id="mensaje" style="display: none; padding: 10px; margin: 10px 0; border: 1px solid; border-radius: 5px;"></div>
+    <main>
+        <div id="mensaje" class="" style="display: none;"></div>
+        <section>
+            <h3 id="tituloFormulario"><i class="ph ph-plus-circle"></i>Registrar nuevo padecimiento</h3>
+            <form id="formPadecimiento">
+                <input type="hidden" id="accion" name="accion" value="create">
+                <input type="hidden" id="padecimientoId" name="id" value="">
 
-    <div id="formularioContainer">
-        <h3 id="tituloFormulario">Registrar nuevo padecimiento</h3>
-
-        <form id="formPadecimiento">
-            <input type="hidden" id="accion" name="accion" value="create">
-            <input type="hidden" id="padecimientoId" name="id" value="">
-
-            <div>
                 <label>Tipo de Padecimiento:</label>
                 <select id="tipo" name="tipo" required>
                     <option value="">Seleccione un tipo</option>
@@ -51,73 +49,57 @@ if (!$esAdmin) {
                     <option value="Síndrome">Síndrome</option>
                     <option value="Otro">Otro</option>
                 </select>
-            </div>
 
-            <div>
                 <label>Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required maxlength="100" placeholder="Nombre del padecimiento">
-            </div>
-
-            <div>
+                <input type="text" id="nombre" name="nombre" required maxlength="100"
+                       placeholder="Nombre del padecimiento">
                 <label>Descripción:</label>
-                <textarea id="descripcion" name="descripcion" required maxlength="500" rows="3" placeholder="Descripción detallada del padecimiento"></textarea>
-            </div>
-
-            <div>
+                <textarea id="descripcion" name="descripcion" required maxlength="500"
+                          placeholder="Descripción detallada"></textarea>
                 <label>Forma de Actuar:</label>
-                <textarea id="formaDeActuar" name="formaDeActuar" required maxlength="1000" rows="4" placeholder="Instrucciones sobre cómo actuar ante este padecimiento"></textarea>
+                <textarea id="formaDeActuar" name="formaDeActuar" required maxlength="1000"
+                          placeholder="Instrucciones sobre cómo actuar"></textarea>
+
+                <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
+                <button type="button" onclick="limpiarFormulario()" id="btnCancelar" style="display: none;"><i
+                            class="ph ph-x-circle"></i>Cancelar
+                </button>
+            </form>
+        </section>
+
+        <section>
+            <h3><i class="ph ph-list-bullets"></i>Padecimientos registrados</h3>
+            <div style="overflow-x:auto;">
+                <table id="tablaPadecimientos">
+                    <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Forma de Actuar</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="padecimientos-tbody"></tbody>
+                </table>
             </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
+    </footer>
+</div>
+<script>
+    let padecimientos = [];
+    document.addEventListener('DOMContentLoaded', () => cargarPadecimientos());
 
-            <div>
-                <button type="submit" id="btnSubmit">Registrar</button>
-                <button type="button" onclick="limpiarFormulario()" id="btnCancelar" style="display: none;">Cancelar</button>
-            </div>
-        </form>
-    </div>
-
-    <hr>
-
-    <div>
-        <h3>Padecimientos registrados</h3>
-
-        <table border="1" id="tablaPadecimientos">
-            <thead>
-                <tr>
-                    <th>Tipo</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Forma de Actuar</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="padecimientos-tbody">
-            </tbody>
-        </table>
-    </div>
-
-    <script>
-        let padecimientos = [];
-
-        document.addEventListener('DOMContentLoaded', function() {
-            cargarPadecimientos();
-        });
-
-        document.getElementById('formPadecimiento').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (!validarFormulario()) {
-                return;
-            }
-
-            const formData = new FormData(this);
-            const accion = document.getElementById('accion').value;
-
-            formData.append(accion, '1');
-
-            fetch('../action/padecimientoAction.php', {
-                method: 'POST',
-                body: formData
-            })
+    document.getElementById('formPadecimiento').addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (!validarFormulario()) return;
+        const formData = new FormData(this);
+        const accion = document.getElementById('accion').value;
+        formData.append(accion, '1');
+        fetch('../action/padecimientoAction.php', {method: 'POST', body: formData})
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -127,175 +109,87 @@ if (!$esAdmin) {
                 } else {
                     mostrarMensaje(data.message, 'error');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                mostrarMensaje('Error de conexión.', 'error');
-            });
-        });
+            }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
+    });
 
-        function cargarPadecimientos() {
-            fetch('../action/padecimientoAction.php?getPadecimientos=1')
+    function cargarPadecimientos() {
+        fetch('../action/padecimientoAction.php?getPadecimientos=1')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     padecimientos = data.data;
                     mostrarPadecimientos();
                 } else {
-                    mostrarMensaje('Error al cargar padecimientos: ' + data.message, 'error');
+                    mostrarMensaje('Error al cargar: ' + data.message, 'error');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                mostrarMensaje('Error al cargar padecimientos', 'error');
-            });
+            }).catch(error => mostrarMensaje('Error al cargar padecimientos', 'error'));
+    }
+
+    function mostrarPadecimientos() {
+        const tbody = document.getElementById('padecimientos-tbody');
+        tbody.innerHTML = '';
+        if (padecimientos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">No hay padecimientos registrados.</td></tr>';
+            return;
+        }
+        padecimientos.forEach(p => {
+            const row = tbody.insertRow();
+            row.dataset.id = p.id;
+            row.innerHTML = `
+                <td><div class="display">${p.tipo}</div><div class="edit" style="display: none;"><select><option value="Enfermedad">Enfermedad</option><option value="Lesión">Lesión</option><option value="Discapacidad">Discapacidad</option><option value="Trastorno">Trastorno</option><option value="Síndrome">Síndrome</option><option value="Otro">Otro</option></select></div></td>
+                <td><div class="display">${p.nombre}</div><div class="edit" style="display: none;"><input type="text" value="${p.nombre}" placeholder="Nombre" maxlength="100"></div></td>
+                <td><div class="display">${p.descripcion}</div><div class="edit" style="display: none;"><textarea placeholder="Descripción" maxlength="500">${p.descripcion}</textarea></div></td>
+                <td><div class="display">${p.formaDeActuar}</div><div class="edit" style="display: none;"><textarea placeholder="Forma de Actuar" maxlength="1000">${p.formaDeActuar}</textarea></div></td>
+                <td class="actions-cell">
+                    <button class="btn-edit" onclick="editarRegistro(${p.id})"><i class="ph ph-pencil-simple"></i> Editar</button>
+                    <button class="btn-delete" onclick="eliminarRegistro(${p.id})"><i class="ph ph-trash"></i> Eliminar</button>
+                    <button class="btn-cancel" style="display: none;" onclick="cancelarEdicion(${p.id})"><i class="ph ph-x-circle"></i> Cancelar</button>
+                    <button class="btn-save" style="display: none;" onclick="guardarEdicion(${p.id})"><i class="ph ph-floppy-disk"></i> Guardar</button>
+                </td>`;
+            row.querySelector('select').value = p.tipo; // Set correct dropdown value
+        });
+    }
+
+    function toggleEdit(id, isEditing) {
+        const row = document.querySelector(`tr[data-id='${id}']`);
+        row.querySelectorAll('.display').forEach(el => el.style.display = isEditing ? 'none' : 'block');
+        row.querySelectorAll('.edit').forEach(el => el.style.display = isEditing ? 'block' : 'none');
+        row.querySelector('.btn-edit').style.display = isEditing ? 'none' : 'inline-flex';
+        row.querySelector('.btn-delete').style.display = isEditing ? 'none' : 'inline-flex';
+        row.querySelector('.btn-cancel').style.display = isEditing ? 'inline-flex' : 'none';
+        row.querySelector('.btn-save').style.display = isEditing ? 'inline-flex' : 'none';
+    }
+
+    function editarRegistro(id) {
+        toggleEdit(id, true);
+    }
+
+    function cancelarEdicion(id) {
+        toggleEdit(id, false);
+        cargarPadecimientos();
+    }
+
+    function guardarEdicion(id) {
+        const row = document.querySelector(`tr[data-id='${id}']`);
+        const tipo = row.cells[0].querySelector('select').value;
+        const nombre = row.cells[1].querySelector('input').value.trim();
+        const descripcion = row.cells[2].querySelector('textarea').value.trim();
+        const formaDeActuar = row.cells[3].querySelector('textarea').value.trim();
+
+        if (!tipo || !nombre || !descripcion || !formaDeActuar || nombre.length < 3 || descripcion.length < 10 || formaDeActuar.length < 10) {
+            mostrarMensaje('Datos inválidos. Verifique la información.', 'error');
+            return;
         }
 
-        function mostrarPadecimientos() {
-            const tbody = document.getElementById('padecimientos-tbody');
-            tbody.innerHTML = '';
+        const formData = new FormData();
+        formData.append('update', '1');
+        formData.append('id', id);
+        formData.append('tipo', tipo);
+        formData.append('nombre', nombre);
+        formData.append('descripcion', descripcion);
+        formData.append('formaDeActuar', formaDeActuar);
 
-            if (padecimientos.length === 0) {
-                const row = tbody.insertRow();
-                row.innerHTML = '<td colspan="5">No hay padecimientos registrados.</td>';
-                return;
-            }
-
-            padecimientos.forEach(padecimiento => {
-                const row = tbody.insertRow();
-                row.setAttribute('data-id', padecimiento.id);
-                row.innerHTML = `
-                    <td class="tipo-cell">
-                        <div class="tipo-display">
-                            ${padecimiento.tipo}
-                        </div>
-                        <div class="tipo-edit" style="display: none;">
-                            <select class="edit-tipo">
-                                <option value="Enfermedad" ${padecimiento.tipo === 'Enfermedad' ? 'selected' : ''}>Enfermedad</option>
-                                <option value="Lesión" ${padecimiento.tipo === 'Lesión' ? 'selected' : ''}>Lesión</option>
-                                <option value="Discapacidad" ${padecimiento.tipo === 'Discapacidad' ? 'selected' : ''}>Discapacidad</option>
-                                <option value="Trastorno" ${padecimiento.tipo === 'Trastorno' ? 'selected' : ''}>Trastorno</option>
-                                <option value="Síndrome" ${padecimiento.tipo === 'Síndrome' ? 'selected' : ''}>Síndrome</option>
-                                <option value="Otro" ${padecimiento.tipo === 'Otro' ? 'selected' : ''}>Otro</option>
-                            </select>
-                        </div>
-                    </td>
-                    <td class="nombre-cell">
-                        <div class="nombre-display">
-                            ${padecimiento.nombre}
-                        </div>
-                        <div class="nombre-edit" style="display: none;">
-                            <input type="text" class="edit-nombre" value="${padecimiento.nombre}" maxlength="100">
-                        </div>
-                    </td>
-                    <td class="descripcion-cell">
-                        <div class="descripcion-display">
-                            ${padecimiento.descripcion}
-                        </div>
-                        <div class="descripcion-edit" style="display: none;">
-                            <textarea class="edit-descripcion" maxlength="500" rows="2">${padecimiento.descripcion}</textarea>
-                        </div>
-                    </td>
-                    <td class="forma-cell">
-                        <div class="forma-display">
-                            ${padecimiento.formaDeActuar}
-                        </div>
-                        <div class="forma-edit" style="display: none;">
-                            <textarea class="edit-forma" maxlength="1000" rows="2">${padecimiento.formaDeActuar}</textarea>
-                        </div>
-                    </td>
-                    <td>
-                        <button onclick="editarRegistro(${padecimiento.id})">Editar</button>
-                        <button onclick="eliminarRegistro(${padecimiento.id})">Eliminar</button>
-                        <button onclick="cancelarEdicion(${padecimiento.id})" style="display: none;" class="btn-cancelar-edicion">Cancelar</button>
-                        <button onclick="guardarEdicion(${padecimiento.id})" style="display: none;" class="btn-guardar-edicion">Actualizar</button>
-                    </td>
-                `;
-            });
-        }
-
-        function editarRegistro(id) {
-            const fila = document.querySelector(`tr[data-id="${id}"]`);
-
-            const displays = fila.querySelectorAll('.tipo-display, .nombre-display, .descripcion-display, .forma-display');
-            const edits = fila.querySelectorAll('.tipo-edit, .nombre-edit, .descripcion-edit, .forma-edit');
-
-            displays.forEach(display => display.style.display = 'none');
-            edits.forEach(edit => edit.style.display = 'block');
-
-            const btnEditar = fila.querySelector('button[onclick*="editarRegistro"]');
-            const btnEliminar = fila.querySelector('button[onclick*="eliminarRegistro"]');
-            const btnCancelar = fila.querySelector('.btn-cancelar-edicion');
-            const btnGuardar = fila.querySelector('.btn-guardar-edicion');
-
-            btnEditar.style.display = 'none';
-            btnEliminar.style.display = 'none';
-            btnCancelar.style.display = 'inline';
-            btnGuardar.style.display = 'inline';
-        }
-
-        function cancelarEdicion(id) {
-            const fila = document.querySelector(`tr[data-id="${id}"]`);
-
-            const displays = fila.querySelectorAll('.tipo-display, .nombre-display, .descripcion-display, .forma-display');
-            const edits = fila.querySelectorAll('.tipo-edit, .nombre-edit, .descripcion-edit, .forma-edit');
-
-            displays.forEach(display => display.style.display = 'block');
-            edits.forEach(edit => edit.style.display = 'none');
-
-            const btnEditar = fila.querySelector('button[onclick*="editarRegistro"]');
-            const btnEliminar = fila.querySelector('button[onclick*="eliminarRegistro"]');
-            const btnCancelar = fila.querySelector('.btn-cancelar-edicion');
-            const btnGuardar = fila.querySelector('.btn-guardar-edicion');
-
-            btnEditar.style.display = 'inline';
-            btnEliminar.style.display = 'inline';
-            btnCancelar.style.display = 'none';
-            btnGuardar.style.display = 'none';
-
-            cargarPadecimientos();
-        }
-
-        function guardarEdicion(id) {
-            const fila = document.querySelector(`tr[data-id="${id}"]`);
-
-            const tipo = fila.querySelector('.edit-tipo').value;
-            const nombre = fila.querySelector('.edit-nombre').value.trim();
-            const descripcion = fila.querySelector('.edit-descripcion').value.trim();
-            const formaDeActuar = fila.querySelector('.edit-forma').value.trim();
-
-            if (!tipo || !nombre || !descripcion || !formaDeActuar) {
-                mostrarMensaje('Todos los campos son obligatorios', 'error');
-                return;
-            }
-
-            if (nombre.length < 3) {
-                mostrarMensaje('El nombre debe tener al menos 3 caracteres', 'error');
-                return;
-            }
-
-            if (descripcion.length < 10) {
-                mostrarMensaje('La descripción debe tener al menos 10 caracteres', 'error');
-                return;
-            }
-
-            if (formaDeActuar.length < 10) {
-                mostrarMensaje('La forma de actuar debe tener al menos 10 caracteres', 'error');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('update', '1');
-            formData.append('id', id);
-            formData.append('tipo', tipo);
-            formData.append('nombre', nombre);
-            formData.append('descripcion', descripcion);
-            formData.append('formaDeActuar', formaDeActuar);
-
-            fetch('../action/padecimientoAction.php', {
-                method: 'POST',
-                body: formData
-            })
+        fetch('../action/padecimientoAction.php', {method: 'POST', body: formData})
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -304,125 +198,75 @@ if (!$esAdmin) {
                 } else {
                     mostrarMensaje(data.message, 'error');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                mostrarMensaje('Error de conexión.', 'error');
-            });
-        }
+            }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
+    }
 
-        function eliminarRegistro(id) {
-            const padecimiento = padecimientos.find(p => p.id == id);
-            const nombrePadecimiento = padecimiento ? padecimiento.nombre : 'este padecimiento';
+    function eliminarRegistro(id) {
+        const nombre = padecimientos.find(p => p.id == id)?.nombre || 'este padecimiento';
+        if (!confirm(`¿Eliminar "${nombre}"?`)) return;
 
-            if (confirm(`¿Está seguro de que desea eliminar "${nombrePadecimiento}"?`)) {
-                const formData = new FormData();
-                formData.append('delete', '1');
-                formData.append('id', id);
-
-                fetch('../action/padecimientoAction.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.requiereConfirmacion) {
-                        if (confirm(data.message)) {
-                            const confirmFormData = new FormData();
-                            confirmFormData.append('confirmDelete', '1');
-                            confirmFormData.append('id', id);
-
-                            fetch('../action/padecimientoAction.php', {
-                                method: 'POST',
-                                body: confirmFormData
-                            })
-                            .then(response => response.json())
-                            .then(confirmData => {
-                                if (confirmData.success) {
-                                    mostrarMensaje(confirmData.message, 'success');
-                                    setTimeout(() => cargarPadecimientos(), 1500);
-                                } else {
-                                    mostrarMensaje(confirmData.message, 'error');
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                mostrarMensaje('Error de conexión.', 'error');
-                            });
-                        }
-                    } else {
-                        if (data.success) {
-                            mostrarMensaje(data.message, 'success');
-                            setTimeout(() => cargarPadecimientos(), 1500);
-                        } else {
-                            mostrarMensaje(data.message, 'error');
-                        }
+        const formData = new FormData();
+        formData.append('delete', '1');
+        formData.append('id', id);
+        fetch('../action/padecimientoAction.php', {method: 'POST', body: formData})
+            .then(response => response.json())
+            .then(data => {
+                if (data.requiereConfirmacion) {
+                    if (confirm(data.message)) {
+                        const confirmFormData = new FormData();
+                        confirmFormData.append('confirmDelete', '1');
+                        confirmFormData.append('id', id);
+                        fetch('../action/padecimientoAction.php', {method: 'POST', body: confirmFormData})
+                            .then(res => res.json()).then(confirmData => {
+                            mostrarMensaje(confirmData.message, confirmData.success);
+                            if (confirmData.success) setTimeout(() => cargarPadecimientos(), 1500);
+                        });
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    mostrarMensaje('Error de conexión.', 'error');
-                });
-            }
+                } else {
+                    mostrarMensaje(data.message, data.success);
+                    if (data.success) setTimeout(() => cargarPadecimientos(), 1500);
+                }
+            }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
+    }
+
+    function limpiarFormulario() {
+        document.getElementById('formPadecimiento').reset();
+        document.getElementById('accion').value = 'create';
+        document.getElementById('padecimientoId').value = '';
+        document.getElementById('tituloFormulario').innerHTML = '<i class="ph ph-plus-circle"></i>Registrar nuevo padecimiento';
+        document.getElementById('btnSubmit').innerHTML = '<i class="ph ph-plus"></i>Registrar';
+        document.getElementById('btnCancelar').style.display = 'none';
+    }
+
+    function mostrarMensaje(mensaje, tipo) {
+        const div = document.getElementById('mensaje');
+        div.textContent = mensaje;
+        div.style.display = 'block';
+        div.className = tipo === 'success' ? 'success' : 'error';
+        setTimeout(() => {
+            div.style.display = 'none';
+        }, 5000);
+    }
+
+    function validarFormulario() {
+        if (!document.getElementById('tipo').value.trim()) {
+            mostrarMensaje('Seleccione un tipo', 'error');
+            return false;
         }
-
-        function limpiarFormulario() {
-            document.getElementById('formPadecimiento').reset();
-            document.getElementById('accion').value = 'create';
-            document.getElementById('padecimientoId').value = '';
-            document.getElementById('tituloFormulario').textContent = 'Registrar nuevo padecimiento';
-            document.getElementById('btnSubmit').textContent = 'Registrar';
-            document.getElementById('btnCancelar').style.display = 'none';
+        if (document.getElementById('nombre').value.trim().length < 3) {
+            mostrarMensaje('El nombre debe tener al menos 3 caracteres', 'error');
+            return false;
         }
-
-        function mostrarMensaje(mensaje, tipo) {
-            const divMensaje = document.getElementById('mensaje');
-            divMensaje.textContent = mensaje;
-            divMensaje.style.display = 'block';
-
-            if (tipo === 'success') {
-                divMensaje.style.backgroundColor = '#d4edda';
-                divMensaje.style.color = '#155724';
-                divMensaje.style.borderColor = '#c3e6cb';
-            } else {
-                divMensaje.style.backgroundColor = '#f8d7da';
-                divMensaje.style.color = '#721c24';
-                divMensaje.style.borderColor = '#f5c6cb';
-            }
-
-            setTimeout(() => {
-                divMensaje.style.display = 'none';
-            }, 5000);
+        if (document.getElementById('descripcion').value.trim().length < 10) {
+            mostrarMensaje('La descripción debe tener al menos 10 caracteres', 'error');
+            return false;
         }
-
-        function validarFormulario() {
-            const tipo = document.getElementById('tipo').value.trim();
-            const nombre = document.getElementById('nombre').value.trim();
-            const descripcion = document.getElementById('descripcion').value.trim();
-            const formaDeActuar = document.getElementById('formaDeActuar').value.trim();
-
-            if (!tipo) {
-                mostrarMensaje('Por favor seleccione un tipo de padecimiento', 'error');
-                return false;
-            }
-
-            if (nombre.length < 3) {
-                mostrarMensaje('El nombre debe tener al menos 3 caracteres', 'error');
-                return false;
-            }
-
-            if (descripcion.length < 10) {
-                mostrarMensaje('La descripción debe tener al menos 10 caracteres', 'error');
-                return false;
-            }
-
-            if (formaDeActuar.length < 10) {
-                mostrarMensaje('La forma de actuar debe tener al menos 10 caracteres', 'error');
-                return false;
-            }
-
-            return true;
+        if (document.getElementById('formaDeActuar').value.trim().length < 10) {
+            mostrarMensaje('La forma de actuar debe tener al menos 10 caracteres', 'error');
+            return false;
         }
-    </script>
+        return true;
+    }
+</script>
 </body>
 </html>

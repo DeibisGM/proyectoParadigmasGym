@@ -12,7 +12,7 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Iniciar Sesión - Gym</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
@@ -33,16 +33,15 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
     </form>
 
 
-    <div class="nota-credenciales"
-         style="margin-top:1.5rem; padding:1rem; background:#f8f9fa; border:1px solid #dee2e6; border-radius:4px; font-size:0.9rem; line-height:1.5;">
+    <div class="nota-credenciales">
         <strong><i class="ph ph-info"></i>Credenciales de Prueba:</strong><br>
         • <strong>Cliente:</strong> cliente@gmail.com / 12345678<br>
         • <strong>Instructor:</strong> instructor@gmail.com / 12345678<br>
         • <strong>Admin:</strong> root@gmail.com / root
     </div>
 
-    <?php if (isset($_GET['error'])): ?>
-        <div class="error-message" style="color:red; margin-top:1rem;">
+    <?php if (isset($_GET['error'])) : ?>
+        <div class="error-message">
             Error: Credenciales incorrectas o campos vacíos.
         </div>
     <?php endif; ?>
