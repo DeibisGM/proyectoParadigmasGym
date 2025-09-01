@@ -27,7 +27,7 @@ if ($tipoUsuario === 'cliente') {
 <head>
     <meta charset="UTF-8">
     <title>Números de Emergencia</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>

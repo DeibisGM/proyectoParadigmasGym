@@ -21,7 +21,7 @@ if (!$esAdmin) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Padecimientos</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
@@ -32,8 +32,7 @@ if (!$esAdmin) {
     </header>
 
     <main>
-        <div id="mensaje"
-             style="display: none; padding: 10px; margin: 10px 0; border: 1px solid; border-radius: 5px;"></div>
+        <div id="mensaje" class="" style="display: none;"></div>
         <section>
             <h3 id="tituloFormulario"><i class="ph ph-plus-circle"></i>Registrar nuevo padecimiento</h3>
             <form id="formPadecimiento">
@@ -243,9 +242,7 @@ if (!$esAdmin) {
         const div = document.getElementById('mensaje');
         div.textContent = mensaje;
         div.style.display = 'block';
-        div.style.backgroundColor = tipo === 'success' ? '#d4edda' : '#f8d7da';
-        div.style.color = tipo === 'success' ? '#155724' : '#721c24';
-        div.style.borderColor = tipo === 'success' ? '#c3e6cb' : '#f5c6cb';
+        div.className = tipo === 'success' ? 'success' : 'error';
         setTimeout(() => {
             div.style.display = 'none';
         }, 5000);

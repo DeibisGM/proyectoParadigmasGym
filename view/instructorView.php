@@ -26,40 +26,9 @@ $instructores = $business->getAllTBInstructor($esAdmin);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Instructores</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        .image-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .image-container {
-            position: relative;
-            display: inline-block;
-        }
-
-        .image-container img {
-            max-width: 100px;
-            max-height: 100px;
-            border: 1px solid #ddd;
-        }
-
-        .delete-image-btn {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            line-height: 1;
-            padding: 2px 5px;
-        }
-    </style>
+    
 </head>
 <body>
 <div class="container">

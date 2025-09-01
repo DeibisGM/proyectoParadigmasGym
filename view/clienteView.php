@@ -25,40 +25,9 @@ if ($tipoUsuario == 'cliente') {
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Gestión de Clientes</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        .image-gallery {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .image-container {
-            position: relative;
-            display: inline-block;
-        }
-
-        .image-container img {
-            max-width: 100px;
-            max-height: 100px;
-            border: 1px solid #ddd;
-        }
-
-        .delete-image-btn {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 12px;
-            line-height: 1;
-            padding: 2px 5px;
-        }
-    </style>
+    
 </head>
 <body>
 <div class="container">
@@ -71,7 +40,7 @@ if ($tipoUsuario == 'cliente') {
         <?php
         if (isset($_GET['error']) && !empty($_GET['error'])) {
             $error = $_GET['error'];
-            echo '<p style="color:red;"><b>Error: ';
+            echo '<p class="error-message"><b>Error: ';
             if ($error == "existe") echo 'Este carnet ya está registrado.';
             else if ($error == "datos_faltantes") echo 'Datos incompletos.';
             else if ($error == "insertar") echo 'No se pudo insertar el cliente.';
@@ -81,7 +50,7 @@ if ($tipoUsuario == 'cliente') {
             echo '</b></p>';
         } else if (isset($_GET['success']) && !empty($_GET['success'])) {
             $success = $_GET['success'];
-            echo '<p style="color:green;"><b>Éxito: ';
+            echo '<p class="success-message"><b>Éxito: ';
             if ($success == "insertado") echo 'Cliente insertado correctamente.';
             else if ($success == "actualizado") echo 'Cliente actualizado correctamente.';
             else if ($success == "eliminado") echo 'Cliente eliminado correctamente.';

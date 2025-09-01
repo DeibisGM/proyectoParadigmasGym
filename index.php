@@ -15,7 +15,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gym - Página Principal</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="view/styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>

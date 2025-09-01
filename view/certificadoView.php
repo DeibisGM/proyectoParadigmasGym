@@ -34,7 +34,7 @@ if (isset($_GET['instructor_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Certificados</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
@@ -74,7 +74,7 @@ if (isset($_GET['instructor_id'])) {
         <section>
             <h3><i class="ph ph-list-bullets"></i>Lista de Certificados</h3>
             <?php if (isset($_GET['success'])): ?>
-                <p style="color:green;">
+                <p class="success-message">
                     <?php
                     if ($_GET['success'] == 'created') echo 'Certificado creado correctamente.';
                     elseif ($_GET['success'] == 'updated') echo 'Certificado actualizado correctamente.';
@@ -82,7 +82,7 @@ if (isset($_GET['instructor_id'])) {
                     ?>
                 </p>
             <?php elseif (isset($_GET['error'])): ?>
-                <p style="color:red;">
+                <p class="error-message">
                     <?php
                     if ($_GET['error'] == 'emptyFields') echo 'Error: Todos los campos son obligatorios.';
                     elseif ($_GET['error'] == 'nameTooLong') echo 'Error: El nombre es demasiado largo (máximo 100 caracteres).';

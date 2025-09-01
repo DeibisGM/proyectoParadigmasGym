@@ -16,37 +16,9 @@ $horarios = $horarioBusiness->getAllHorarios();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Horario del Gimnasio</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        .day-container {
-            border: 1px solid #dee2e6;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            border-radius: 8px;
-        }
-
-        .day-header {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-
-        .time-inputs {
-            margin-left: 20px;
-        }
-
-        .bloqueo-item {
-            margin-bottom: 10px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .bloqueos-container h4 {
-            margin-top: 1.5rem;
-        }
-    </style>
+    
 </head>
 <body>
 <div class="container">

@@ -34,56 +34,9 @@ if ($tipoUsuario === 'admin') {
 <head>
     <meta charset="UTF-8">
     <title>Horarios y Reservas</title>
-    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        .error {
-            color: #721c24;
-            background-color: #f8d7da;
-            border: 1px solid #f5c6cb;
-            padding: 1rem;
-            margin-top: 1rem;
-            border-radius: 4px;
-        }
-
-        .success {
-            color: #155724;
-            background-color: #d4edda;
-            border: 1px solid #c3e6cb;
-            padding: 1rem;
-            margin-top: 1rem;
-            border-radius: 4px;
-        }
-
-        .page-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-        }
-
-        @media (max-width: 900px) {
-            .page-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .disponibilidad-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
-        }
-
-        .slot {
-            border: 1px solid #dee2e6;
-            padding: 1rem;
-            border-radius: 4px;
-        }
-
-        .slot.lleno {
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
-    </style>
+    
 </head>
 <body>
 <div class="container">
