@@ -108,9 +108,6 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/cuerpoZonaView.php'>
                 <button>Zonas del Cuerpo</button>
             </a>
-            <a href='view/padecimientoView.php'>
-                <button>Padecimientos de Clientes</button>
-            </a>
             <a href='view/datoClinicoView.php'>
                 <button>Datos Clínicos de Clientes</button>
             </a>

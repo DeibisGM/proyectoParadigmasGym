@@ -2,6 +2,7 @@
 
 include_once 'data.php';
 include '../domain/cliente.php';
+include_once 'datoClinicoData.php'; 
 
 class ClienteData extends Data {
 
@@ -62,10 +63,45 @@ class ClienteData extends Data {
 
     public function eliminarTBCliente($id) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return false;
+        }
         $conn->set_charset('utf8');
 
-        $queryDelete = "DELETE FROM tbcliente WHERE tbclienteid=" . $id . ";";
-        $result = mysqli_query($conn, $queryDelete);
+        // Iniciar transacción
+        mysqli_autocommit($conn, false);
+
+        try {
+            // 1. Primero eliminar datos clínicos del cliente
+            $datoClinicoData = new DatoClinicoData();
+            $resultDatoClinico = $datoClinicoData->eliminarTBDatoClinicoPorCliente($id);
+
+            // 2. Luego eliminar el cliente
+            $queryDelete = "DELETE FROM tbcliente WHERE tbclienteid=?";
+            $stmt = mysqli_prepare($conn, $queryDelete);
+
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "i", $id);
+                $resultCliente = mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+            } else {
+                throw new Exception("Error preparando consulta de cliente");
+            }
+
+            // Si ambas operaciones fueron exitosas, confirmar
+            if ($resultDatoClinico && $resultCliente) {
+                mysqli_commit($conn);
+                $result = true;
+            } else {
+                mysqli_rollback($conn);
+                $result = false;
+            }
+
+        } catch (Exception $e) {
+            mysqli_rollback($conn);
+            $result = false;
+        }
+
         mysqli_close($conn);
         return $result;
     }

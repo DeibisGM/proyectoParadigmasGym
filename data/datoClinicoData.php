@@ -110,6 +110,27 @@
             mysqli_close($conn);
             return $result;
         }
+        public function eliminarTBDatoClinicoPorCliente($tbclienteid) {
+            $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+            if (!$conn) {
+                return false;
+            }
+            $conn->set_charset('utf8');
+
+            $queryDelete = "DELETE FROM tbdatoclinico WHERE tbclienteid=?";
+            $stmt = mysqli_prepare($conn, $queryDelete);
+
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "i", $tbclienteid);
+                $result = mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+            } else {
+                $result = false;
+            }
+
+            mysqli_close($conn);
+            return $result;
+        }
 
         public function obtenerTBDatoClinico() {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
