@@ -142,6 +142,54 @@ try {
         }
     }
 
+    // ACTUALIZAR PADECIMIENTO INDIVIDUAL
+    else if (isset($_POST['updateIndividual'])) {
+        $registroId = isset($_POST['registroId']) ? intval($_POST['registroId']) : 0;
+        $padecimientoIdAntiguo = isset($_POST['padecimientoIdAntiguo']) ? intval($_POST['padecimientoIdAntiguo']) : 0;
+        $padecimientoIdNuevo = isset($_POST['padecimientoIdNuevo']) ? intval($_POST['padecimientoIdNuevo']) : 0;
+
+        if ($registroId <= 0 || $padecimientoIdAntiguo <= 0 || $padecimientoIdNuevo <= 0) {
+            $response['success'] = false;
+            $response['message'] = 'Error: Datos de registro inválidos.';
+        } else {
+            $resultado = $datoClinicoBusiness->actualizarPadecimientoIndividual($registroId, $padecimientoIdAntiguo, $padecimientoIdNuevo);
+
+            if ($resultado) {
+                $response['success'] = true;
+                $response['message'] = 'Éxito: Padecimiento actualizado correctamente.';
+            } else {
+                $response['success'] = false;
+                $response['message'] = 'Error: No se pudo actualizar el padecimiento.';
+            }
+        }
+    }
+
+    // ELIMINAR PADECIMIENTO INDIVIDUAL
+    else if (isset($_POST['deleteIndividual'])) {
+        if (!$esAdmin) {
+            $response['success'] = false;
+            $response['message'] = 'Error: Solo los administradores pueden eliminar padecimientos.';
+        } else {
+            $registroId = isset($_POST['registroId']) ? intval($_POST['registroId']) : 0;
+            $padecimientoId = isset($_POST['padecimientoId']) ? intval($_POST['padecimientoId']) : 0;
+
+            if ($registroId <= 0 || $padecimientoId <= 0) {
+                $response['success'] = false;
+                $response['message'] = 'Error: Datos de registro inválidos.';
+            } else {
+                $resultado = $datoClinicoBusiness->eliminarPadecimientoIndividual($registroId, $padecimientoId);
+
+                if ($resultado['success']) {
+                    $response['success'] = true;
+                    $response['message'] = $resultado['message'];
+                } else {
+                    $response['success'] = false;
+                    $response['message'] = $resultado['message'];
+                }
+            }
+        }
+    }
+
     else {
         $response['success'] = false;
         $response['message'] = 'Error: Acción no válida.';
