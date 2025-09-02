@@ -10,10 +10,10 @@ class Instructor
     private $instructorCuenta;
     private $instructorContraseña;
     private $instructorActivo;
-    private $instructorCertificado;
+    private $instructorCertificado = []; // Initialize as an empty array
     private $tbinstructorimagenid;
 
-    public function __construct($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, $activo, $certificado = '', $imagenid = '')
+    public function __construct($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, $activo, array $certificado = [], $imagenid = '') // Type hint as array
     {
         $this->instructorId = $id;
         $this->instructorNombre = $nombre;
@@ -117,7 +117,7 @@ class Instructor
         $this->instructorActivo = $activo;
     }
 
-    public function setInstructorCertificado($certificado)
+    public function setInstructorCertificado(array $certificado) // Type hint as array
     {
         $this->instructorCertificado = $certificado;
     }

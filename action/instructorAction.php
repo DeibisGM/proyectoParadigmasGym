@@ -46,7 +46,8 @@ if (isset($_POST['create'])) {
 
         $instructor = new Instructor($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1, '', '');
 
-        if ($instructorBusiness->insertarTBInstructor($instructor)) {
+        $result = $instructorBusiness->insertarTBInstructor($instructor);
+        if ($result === true) { // Check for boolean true for success
             if (isset($_FILES['tbinstructorimagenid']) && !empty($_FILES['tbinstructorimagenid']['name'][0])) {
                 $newImageIds = $imageManager->addImages($_FILES['tbinstructorimagenid'], $id, 'ins');
                 if (!empty($newImageIds)) {
@@ -56,7 +57,9 @@ if (isset($_POST['create'])) {
                 }
             }
             header("location: " . $redirect_path . "?success=created");
-        } else {
+        } else if (is_string($result)) { // Check if it's a string (error message)
+            header("location: " . $redirect_path . "?error=" . urlencode($result));
+        } else { // Generic database error
             header("location: " . $redirect_path . "?error=dbError");
         }
     } else {
@@ -89,9 +92,12 @@ if (isset($_POST['update'])) {
                 }
             }
 
-            if ($instructorBusiness->actualizarTBInstructor($instructorActual)) {
+            $result = $instructorBusiness->actualizarTBInstructor($instructorActual);
+            if ($result === true) { // Check for boolean true for success
                 header("location: " . $redirect_path . "?success=updated");
-            } else {
+            } else if (is_string($result)) { // Check if it's a string (error message)
+                header("location: " . $redirect_path . "?error=" . urlencode($result));
+            } else { // Generic database error
                 header("location: " . $redirect_path . "?error=dbError");
             }
         } else {

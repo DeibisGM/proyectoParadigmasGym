@@ -26,7 +26,9 @@ if ($tipoUsuario === 'admin') {
     $eventos = $eventoBusiness->getAllEventos();
 } else if ($tipoUsuario === 'instructor') {
     $eventos = $eventoBusiness->getAllEventos();
-    $eventosInstructor = array_filter($eventos, fn($evento) => $evento->getInstructorId() == $usuarioId);
+    $eventosInstructor = array_filter($eventos, function ($evento) use ($usuarioId) {
+        return $evento->getInstructorId() == $usuarioId;
+    });
 }
 ?>
 <!DOCTYPE html>
@@ -51,7 +53,9 @@ if ($tipoUsuario === 'admin') {
             <section>
                 <h3><i class="ph ph-sparkle"></i>Próximos Eventos</h3>
                 <?php
-                $eventosFuturos = array_filter($eventos, fn($e) => $e->getEstado() == 1 && new DateTime($e->getFecha()) >= new DateTime(date('Y-m-d')));
+                $eventosFuturos = array_filter($eventos, function ($e) {
+                    return $e->getEstado() == 1 && new DateTime($e->getFecha()) >= new DateTime(date('Y-m-d'));
+                });
                 if (empty($eventosFuturos)) {
                     echo "<p>No hay eventos especiales programados próximamente.</p>";
                 } else {

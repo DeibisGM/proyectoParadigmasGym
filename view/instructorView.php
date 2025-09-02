@@ -44,6 +44,55 @@ $instructores = $instructorBusiness->getAllTBInstructor($esAdmin);
     </header>
 
     <main>
+        <?php
+        if (isset($_GET['success'])) {
+            $message = '';
+            switch ($_GET['success']) {
+                case 'created':
+                    $message = 'Instructor creado exitosamente.';
+                    break;
+                case 'updated':
+                    $message = 'Instructor actualizado exitosamente.';
+                    break;
+                case 'deleted':
+                    $message = 'Instructor desactivado exitosamente.';
+                    break;
+                case 'activated':
+                    $message = 'Instructor activado exitosamente.';
+                    break;
+                case 'image_deleted':
+                    $message = 'Imagen eliminada exitosamente.';
+                    break;
+                default:
+                    $message = 'Operación exitosa.';
+                    break;
+            }
+            echo '<div class="success-message">' . htmlspecialchars($message) . '</div>';
+        }
+
+        if (isset($_GET['error'])) {
+            $message = '';
+            switch ($_GET['error']) {
+                case 'dbError':
+                    $message = 'Error en la base de datos. Intente de nuevo.';
+                    break;
+                case 'notFound':
+                    $message = 'Instructor no encontrado.';
+                    break;
+                case 'error':
+                    $message = 'Ocurrió un error inesperado.';
+                    break;
+                case 'invalidRequest':
+                    $message = 'Solicitud inválida.';
+                    break;
+                default:
+                    // For custom validation messages from business layer
+                    $message = urldecode(htmlspecialchars($_GET['error']));
+                    break;
+            }
+            echo '<div class="error-message">' . htmlspecialchars($message) . '</div>';
+        }
+        ?>
         <?php if ($esAdmin): ?>
             <section>
                 <h3><i class="ph ph-user-plus"></i>Crear Nuevo Instructor</h3>
@@ -151,8 +200,12 @@ $instructores = $instructorBusiness->getAllTBInstructor($esAdmin);
                             </td>
                             <td>
                                 <?php
-                                $certificados = $certificadoBusiness->getCertificadosPorInstructor($instructor->getInstructorId());
-                                echo !empty($certificados) ? implode('<br>', array_map('htmlspecialchars', array_column($certificados, 'nombre'))) : "N/A";
+                                $certificados = $instructor->getInstructorCertificado(); // Get certificates directly from the Instructor object
+                                $nombresCertificados = [];
+                                foreach ($certificados as $certificado) {
+                                    $nombresCertificados[] = $certificado->getNombre();
+                                }
+                                echo !empty($nombresCertificados) ? implode('<br>', array_map('htmlspecialchars', $nombresCertificados)) : "N/A";
                                 ?>
                                 <br><a href="certificadoView.php?instructor_id=<?php echo $instructor->getInstructorId(); ?>">Ver/Editar</a>
                             </td>

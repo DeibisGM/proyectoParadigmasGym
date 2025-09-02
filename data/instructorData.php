@@ -1,6 +1,7 @@
 <?php
 include_once 'data.php';
 include_once '../domain/instructor.php';
+include_once '../domain/certificado.php';
 
 class InstructorData extends Data
 {
@@ -101,7 +102,7 @@ class InstructorData extends Data
                 $row['tbinstructorcuenta'],
                 $row['tbinstructorcontraseña'],
                 $row['tbinstructoractivo'],
-                isset($row['tbinstructorcertificado']) ? $row['tbinstructorcertificado'] : '',
+                [], // Initialize with empty array, certificates will be set later
                 isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
             );
         }
@@ -124,7 +125,7 @@ class InstructorData extends Data
                 $row['tbinstructorid'], $row['tbinstructornombre'], $row['tbinstructortelefono'],
                 $row['tbinstructordireccion'], $row['tbinstructorcorreo'], $row['tbinstructorcuenta'],
                 $row['tbinstructorcontraseña'], $row['tbinstructoractivo'],
-                isset($row['tbinstructorcertificado']) ? $row['tbinstructorcertificado'] : '',
+                [], // Initialize with empty array, certificates will be set later
                 isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
             );
         }
@@ -148,7 +149,7 @@ class InstructorData extends Data
                 $row['tbinstructorid'], $row['tbinstructornombre'], $row['tbinstructortelefono'],
                 $row['tbinstructordireccion'], $row['tbinstructorcorreo'], $row['tbinstructorcuenta'],
                 $row['tbinstructorcontraseña'], $row['tbinstructoractivo'],
-                isset($row['tbinstructorcertificado']) ? $row['tbinstructorcertificado'] : '',
+                [], // Initialize with empty array, certificates will be set later
                 isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
             );
         }
