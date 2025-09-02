@@ -2,11 +2,13 @@
 
 include_once 'data.php';
 include '../domain/cliente.php';
-include_once 'datoClinicoData.php'; 
+include_once 'datoClinicoData.php';
 
-class ClienteData extends Data {
+class ClienteData extends Data
+{
 
-    public function insertarTBCliente($cliente) {
+    public function insertarTBCliente($cliente)
+    {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -39,7 +41,8 @@ class ClienteData extends Data {
         return $result;
     }
 
-    public function actualizarTBCliente($cliente) {
+    public function actualizarTBCliente($cliente)
+    {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -61,7 +64,8 @@ class ClienteData extends Data {
         return $result;
     }
 
-    public function eliminarTBCliente($id) {
+    public function eliminarTBCliente($id)
+    {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         if (!$conn) {
             return false;
@@ -106,7 +110,8 @@ class ClienteData extends Data {
         return $result;
     }
 
-    public function getAllTBCliente() {
+    public function getAllTBCliente()
+    {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -126,7 +131,8 @@ class ClienteData extends Data {
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
                 $row['tbclienteestado'],
-                isset($row['tbclientecontrasena']) ? $row['tbclientecontrasena'] : ''
+                isset($row['tbclientecontrasena']) ? $row['tbclientecontrasena'] : '',
+                isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
         }
 
@@ -134,7 +140,8 @@ class ClienteData extends Data {
         return $clientes;
     }
 
-    public function existeClientePorCarnet($carnet) {
+    public function existeClientePorCarnet($carnet)
+    {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -146,11 +153,11 @@ class ClienteData extends Data {
         return $existe;
     }
 
-    public function autenticarCliente($correo, $contrasena) {
+    public function autenticarCliente($correo, $contrasena)
+    {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        // Escape strings to prevent SQL injection
         $correo = mysqli_real_escape_string($conn, $correo);
         $contrasena = mysqli_real_escape_string($conn, $contrasena);
 
@@ -170,7 +177,8 @@ class ClienteData extends Data {
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
                 $row['tbclienteestado'],
-                $row['tbclientecontrasena']
+                $row['tbclientecontrasena'],
+                isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
         }
 
@@ -178,7 +186,8 @@ class ClienteData extends Data {
         return $cliente;
     }
 
-    public function getClientePorId($id) {
+    public function getClientePorId($id)
+    {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
@@ -199,7 +208,8 @@ class ClienteData extends Data {
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
                 $row['tbclienteestado'],
-                $row['tbclientecontrasena']
+                $row['tbclientecontrasena'],
+                isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
         }
 
@@ -207,4 +217,5 @@ class ClienteData extends Data {
         return $cliente;
     }
 }
+
 ?>

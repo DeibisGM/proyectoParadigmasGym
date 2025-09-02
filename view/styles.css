@@ -70,15 +70,27 @@ input[type="submit"] {
     background-color: #f8f9fa;
     border: 1px solid #ced4da;
     border-radius: 4px;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem 0.75rem;
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 500;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.5em;
     margin: 0;
     transition: background-color 0.2s, border-color 0.2s;
+}
+
+.button-icon-only {
+    padding: 0.5rem;
+    width: 2.5em;
+    height: 2.5em;
+    flex-shrink: 0;
+}
+
+.button-icon-only i.ph {
+    margin-right: 0;
 }
 
 button:hover,
@@ -87,13 +99,6 @@ input[type="submit"]:hover {
     border-color: #adb5bd;
 }
 
-button i.ph {
-    margin-right: 0.5em;
-}
-
-button i.ph:only-child {
-    margin-right: 0.5em;
-}
 
 .menu-grid {
     display: flex;

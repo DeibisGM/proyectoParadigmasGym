@@ -92,60 +92,73 @@ if (isset($_GET['instructor_id'])) {
                     ?>
                 </p>
             <?php endif; ?>
-            <table>
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Entidad</th>
-                    <th>Instructor</th>
-                    <?php if ($puedeCrearCertificados): ?>
-                        <th>Acciones</th>
-                    <?php endif; ?>
-                </tr>
-                </thead>
-                <tbody>
-                <?php foreach ($certificados as $cert):
-                    $instructorCert = null;
-                    foreach ($instructores as $instructor) {
-                        if ($instructor->getInstructorId() == $cert->getIdInstructor()) {
-                            $instructorCert = $instructor;
-                            break;
-                        }
-                    }
-                    ?>
+            <div style="overflow-x:auto; width: 100%;">
+                <table style="table-layout: fixed; width: 100%;">
+                    <thead>
                     <tr>
-                        <form method="post" action="../action/certificadoAction.php">
-                            <td>
-                                <input type="hidden" name="id" value="<?php echo $cert->getId(); ?>">
-                                <?php echo str_pad($cert->getId(), 3, '0', STR_PAD_LEFT); ?>
-                            </td>
-                            <td><?php echo htmlspecialchars($cert->getNombre()); ?></td>
-                            <td><?php echo htmlspecialchars($cert->getDescripcion()); ?></td>
-                            <td><?php echo htmlspecialchars($cert->getEntidad()); ?></td>
-                            <td>
-                                <?php
-                                if ($instructorCert) {
-                                    echo htmlspecialchars($instructorCert->getInstructorNombre() . ' (' . str_pad($instructorCert->getInstructorId(), 3, '0', STR_PAD_LEFT) . ')');
-                                } else {
-                                    echo "Instructor no encontrado";
-                                }
-                                ?>
-                            </td>
-                            <?php if ($puedeCrearCertificados): ?>
-                                <td>
-                                    <button type="submit" name="delete"
-                                            onclick="return confirm('¿Eliminar este certificado?');"><i
-                                                class="ph ph-trash"></i>Eliminar
-                                    </button>
-                                </td>
-                            <?php endif; ?>
-                        </form>
+                        <th style="width: 5%;">ID</th>
+                        <th style="width: 20%;">Nombre</th>
+                        <th style="width: 30%;">Descripción</th>
+                        <th style="width: 20%;">Entidad</th>
+                        <th style="width: 20%;">Instructor</th>
+                        <?php if ($puedeCrearCertificados): ?>
+                            <th style="width: 15%;">Acciones</th>
+                        <?php endif; ?>
                     </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($certificados as $cert):
+                        $instructorCert = null;
+                        foreach ($instructores as $instructor) {
+                            if ($instructor->getInstructorId() == $cert->getIdInstructor()) {
+                                $instructorCert = $instructor;
+                                break;
+                            }
+                        }
+                        ?>
+                        <tr>
+                            <form method="post" action="../action/certificadoAction.php">
+                                <td>
+                                    <input type="hidden" name="id" value="<?php echo $cert->getId(); ?>">
+                                    <?php echo str_pad($cert->getId(), 3, '0', STR_PAD_LEFT); ?>
+                                </td>
+                                <td><input type="text" name="nombre"
+                                           value="<?php echo htmlspecialchars($cert->getNombre()); ?>" required
+                                           maxlength="100"></td>
+                                <td><input type="text" name="descripcion"
+                                           value="<?php echo htmlspecialchars($cert->getDescripcion()); ?>" required>
+                                </td>
+                                <td><input type="text" name="entidad"
+                                           value="<?php echo htmlspecialchars($cert->getEntidad()); ?>" required></td>
+                                <td>
+                                    <select name="idInstructor" required>
+                                        <option value=""
+                                                disabled <?php echo ($instructorCert === null) ? 'selected' : ''; ?>>
+                                            Instructor no existe
+                                        </option>
+                                        <?php foreach ($instructores as $inst): ?>
+                                            <option value="<?php echo $inst->getInstructorId(); ?>"
+                                                    <?php echo ($instructorCert && $inst->getInstructorId() == $cert->getIdInstructor()) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($inst->getInstructorNombre() . ' (' . str_pad($inst->getInstructorId(), 3, '0', STR_PAD_LEFT) . ')'); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
+                                <?php if ($puedeCrearCertificados): ?>
+                                    <td>
+                                        <button type="submit" name="update" title="Actualizar" class="button-icon-only">
+                                            <i class="ph ph-floppy-disk"></i></button>
+                                        <button type="submit" name="delete"
+                                                onclick="return confirm('¿Eliminar este certificado?');"
+                                                class="button-icon-only"><i
+                                                    class="ph ph-trash"></i></button>
+                                    </td>
+                                <?php endif; ?>
+                            </form>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
         </section>
     </main>
 

@@ -136,9 +136,12 @@ if ($tipoUsuario == 'cliente') {
                             echo '<td><input type="date" name="fechaInscripcion" value="' . $cliente->getInscripcion() . '" required></td>';
                             echo '<td><select name="estado" required><option value="1" ' . ($cliente->getEstado() == 1 ? 'selected' : '') . '>Activo</option><option value="0" ' . ($cliente->getEstado() == 0 ? 'selected' : '') . '>Inactivo</option></select></td>';
                             echo '<td>';
-                            $imagen = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
+                            $imageId = $cliente->getTbclienteImagenId();
+                            $imagen = $imageManager->getImagesByIds($imageId);
                             if (!empty($imagen)) {
-                                echo '<div class="image-container"><img src="..' . htmlspecialchars($imagen[0]['tbimagenruta']) . '?t=' . time() . '" alt="Imagen"><button type="submit" name="delete_image" value="' . $cliente->getTbclienteImagenId() . '" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button></div>';
+                                $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
+                                $finalSrc = $imagePath . '?t=' . time();
+                                echo '<div class="image-container"><img src="' . $finalSrc . '" alt="Imagen"><button type="submit" name="delete_image" value="' . $imageId . '" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button></div>';
                             } else {
                                 echo '<input type="file" name="tbclienteimagenid[]">';
                             }
@@ -195,9 +198,12 @@ if ($tipoUsuario == 'cliente') {
                         <input type="hidden" name="estado" value="<?php echo $cliente->getEstado(); ?>">
                         <label>Foto de perfil:</label><br><br>
                         <?php
-                        $imagen = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
+                        $imageId = $cliente->getTbclienteImagenId();
+                        $imagen = $imageManager->getImagesByIds($imageId);
                         if (!empty($imagen)) {
-                            echo '<div class="image-container"><img src="..' . htmlspecialchars($imagen[0]['tbimagenruta']) . '?t=' . time() . '" alt="Imagen"><button type="submit" name="delete_image" value="' . $cliente->getTbclienteImagenId() . '" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button></div>';
+                            $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
+                            $finalSrc = $imagePath . '?t=' . time();
+                            echo '<div class="image-container"><img src="' . $finalSrc . '" alt="Imagen"><button type="submit" name="delete_image" value="' . $imageId . '" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button></div>';
                         } else {
                             echo '<input type="file" name="tbclienteimagenid[]">';
                         }
