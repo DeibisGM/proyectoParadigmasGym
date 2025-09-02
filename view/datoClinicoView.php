@@ -37,7 +37,6 @@ if ($esUsuarioCliente) {
     $clientes = $datoClinicoBusiness->obtenerTodosLosClientes();
 }
 
-// CONVERSIÓN CORRECTA DE OBJETOS A ARRAYS - AQUÍ ESTABA EL PROBLEMA
 $datosClinicos = array();
 foreach ($datosClinicosObj as $datoObj) {
     $datosClinicos[] = array(
@@ -165,7 +164,7 @@ foreach ($datosClinicosObj as $datoObj) {
                 </tr>
             </thead>
             <tbody id="tablaBody">
-                <!-- Los datos se cargarán aquí mediante JavaScript -->
+
             </tbody>
         </table>
 
@@ -183,7 +182,6 @@ foreach ($datosClinicosObj as $datoObj) {
         console.log('Datos clínicos recibidos de PHP:', datosClinicos);
         console.log('Padecimientos recibidos:', padecimientosData);
 
-        // Convertir datos PHP a formato JavaScript
         let datosCli = [];
         datosClinicos.forEach(dato => {
             let padecimientosString = dato.tbpadecimientoid || '';

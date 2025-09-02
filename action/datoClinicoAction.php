@@ -12,7 +12,7 @@ $datoClinicoBusiness = new DatoClinicoBusiness();
 $response = array();
 
 try {
-    // Verificar sesión
+
     if (!isset($_SESSION['usuario_id'])) {
         $response['success'] = false;
         $response['message'] = 'Error: Debe iniciar sesión para acceder a esta funcionalidad.';
@@ -24,16 +24,14 @@ try {
     $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
     $esInstructor = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
 
-    // CREAR NUEVO REGISTRO
     if (isset($_POST['create'])) {
-        // Obtener cliente ID
+
         if ($esUsuarioCliente) {
             $clienteId = $_SESSION['usuario_id'];
         } else {
             $clienteId = isset($_POST['clienteId']) ? intval($_POST['clienteId']) : 0;
         }
 
-        // Obtener padecimientos seleccionados
         $padecimientosIds = array();
         if (isset($_POST['padecimientosIds']) && is_array($_POST['padecimientosIds'])) {
             foreach ($_POST['padecimientosIds'] as $id) {
@@ -44,10 +42,8 @@ try {
             }
         }
 
-        // Convertir array a string con separador $
         $padecimientosString = empty($padecimientosIds) ? '' : implode('$', $padecimientosIds);
 
-        // Validar datos
         $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
 
         if (!empty($errores)) {
@@ -67,18 +63,15 @@ try {
         }
     }
 
-    // ACTUALIZAR REGISTRO
     else if (isset($_POST['update'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
-        // Obtener cliente ID
         if ($esUsuarioCliente) {
             $clienteId = $_SESSION['usuario_id'];
         } else {
             $clienteId = isset($_POST['clienteId']) ? intval($_POST['clienteId']) : 0;
         }
 
-        // Obtener padecimientos seleccionados
         $padecimientosIds = array();
         if (isset($_POST['padecimientosIds']) && is_array($_POST['padecimientosIds'])) {
             foreach ($_POST['padecimientosIds'] as $padId) {
@@ -89,14 +82,13 @@ try {
             }
         }
 
-        // Convertir array a string con separador $
         $padecimientosString = empty($padecimientosIds) ? '' : implode('$', $padecimientosIds);
 
         if ($id <= 0) {
             $response['success'] = false;
             $response['message'] = 'Error: ID de registro inválido.';
         } else {
-            // Validar datos
+
             $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
 
             if (!empty($errores)) {
@@ -117,7 +109,6 @@ try {
         }
     }
 
-    // ELIMINAR REGISTRO
     else if (isset($_POST['delete'])) {
         if (!$esAdmin) {
             $response['success'] = false;
@@ -142,7 +133,6 @@ try {
         }
     }
 
-    // ACTUALIZAR PADECIMIENTO INDIVIDUAL
     else if (isset($_POST['updateIndividual'])) {
         $registroId = isset($_POST['registroId']) ? intval($_POST['registroId']) : 0;
         $padecimientoIdAntiguo = isset($_POST['padecimientoIdAntiguo']) ? intval($_POST['padecimientoIdAntiguo']) : 0;
@@ -164,7 +154,6 @@ try {
         }
     }
 
-    // ELIMINAR PADECIMIENTO INDIVIDUAL
     else if (isset($_POST['deleteIndividual'])) {
         if (!$esAdmin) {
             $response['success'] = false;

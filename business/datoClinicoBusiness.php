@@ -67,24 +67,20 @@
             return $errores;
         }
 
-        // NUEVO: Obtener un dato clínico por ID específico
         public function obtenerTBDatoClinicoPorId($registroId) {
             return $this->datoClinicoData->obtenerTBDatoClinicoPorId($registroId);
         }
 
-        // NUEVO: Actualizar un padecimiento individual en un registro
         public function actualizarPadecimientoIndividual($registroId, $padecimientoIdAntiguo, $padecimientoIdNuevo) {
-            // Obtener el registro actual
+
             $registroActual = $this->obtenerTBDatoClinicoPorId($registroId);
             if (!$registroActual) {
                 return false;
             }
 
-            // Obtener los IDs de padecimientos actuales
             $padecimientosIds = $registroActual->getPadecimientosIds();
             $nuevosIds = array();
 
-            // Reemplazar el ID antiguo por el nuevo
             $seEncontro = false;
             foreach ($padecimientosIds as $id) {
                 if ($id == $padecimientoIdAntiguo) {
@@ -96,37 +92,31 @@
             }
 
             if (!$seEncontro) {
-                return false; // El padecimiento antiguo no se encontró
+                return false;
             }
 
-            // Eliminar duplicados y crear string
             $nuevosIds = array_unique($nuevosIds);
             $nuevosIdsString = implode('$', $nuevosIds);
 
-            // Crear objeto actualizado
             $datoClinicoActualizado = new DatoClinico(
                 $registroActual->getTbdatoclinicoid(),
                 $registroActual->getTbclienteid(),
                 $nuevosIdsString
             );
 
-            // Actualizar en la base de datos
             return $this->datoClinicoData->actualizarTBDatoClinico($datoClinicoActualizado);
         }
 
-        // NUEVO: Eliminar un padecimiento individual de un registro
         public function eliminarPadecimientoIndividual($registroId, $padecimientoId) {
-            // Obtener el registro actual
+
             $registroActual = $this->obtenerTBDatoClinicoPorId($registroId);
             if (!$registroActual) {
                 return array('success' => false, 'message' => 'Error: Registro no encontrado.');
             }
 
-            // Obtener los IDs de padecimientos actuales
             $padecimientosIds = $registroActual->getPadecimientosIds();
             $nuevosIds = array();
 
-            // Filtrar el padecimiento a eliminar
             $seEncontro = false;
             foreach ($padecimientosIds as $id) {
                 if ($id != $padecimientoId) {
@@ -140,7 +130,6 @@
                 return array('success' => false, 'message' => 'Error: El padecimiento no se encontró en el registro.');
             }
 
-            // Si no quedan padecimientos, eliminar el registro completo
             if (empty($nuevosIds)) {
                 $resultado = $this->datoClinicoData->eliminarTBDatoClinico($registroId);
                 if ($resultado) {
@@ -150,7 +139,6 @@
                 }
             }
 
-            // Si quedan padecimientos, actualizar el registro
             $nuevosIdsString = implode('$', $nuevosIds);
 
             $datoClinicoActualizado = new DatoClinico(
@@ -166,8 +154,6 @@
                 return array('success' => false, 'message' => 'Error: No se pudo actualizar el registro.');
             }
         }
-
-        // MÉTODOS ADICIONALES DEL DOCUMENTO 3 - MANTENIDOS POR COMPATIBILIDAD
 
         public function limpiarPadecimientosEliminados() {
             $todosDatosClinicos = $this->datoClinicoData->obtenerTBDatoClinico();
