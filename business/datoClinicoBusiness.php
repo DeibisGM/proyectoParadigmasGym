@@ -67,8 +67,95 @@
             return $errores;
         }
 
-        public function limpiarPadecimientosEliminados() {
+        public function obtenerTBDatoClinicoPorId($registroId) {
+            return $this->datoClinicoData->obtenerTBDatoClinicoPorId($registroId);
+        }
 
+        public function actualizarPadecimientoIndividual($registroId, $padecimientoIdAntiguo, $padecimientoIdNuevo) {
+
+            $registroActual = $this->obtenerTBDatoClinicoPorId($registroId);
+            if (!$registroActual) {
+                return false;
+            }
+
+            $padecimientosIds = $registroActual->getPadecimientosIds();
+            $nuevosIds = array();
+
+            $seEncontro = false;
+            foreach ($padecimientosIds as $id) {
+                if ($id == $padecimientoIdAntiguo) {
+                    $nuevosIds[] = $padecimientoIdNuevo;
+                    $seEncontro = true;
+                } else {
+                    $nuevosIds[] = $id;
+                }
+            }
+
+            if (!$seEncontro) {
+                return false;
+            }
+
+            $nuevosIds = array_unique($nuevosIds);
+            $nuevosIdsString = implode('$', $nuevosIds);
+
+            $datoClinicoActualizado = new DatoClinico(
+                $registroActual->getTbdatoclinicoid(),
+                $registroActual->getTbclienteid(),
+                $nuevosIdsString
+            );
+
+            return $this->datoClinicoData->actualizarTBDatoClinico($datoClinicoActualizado);
+        }
+
+        public function eliminarPadecimientoIndividual($registroId, $padecimientoId) {
+
+            $registroActual = $this->obtenerTBDatoClinicoPorId($registroId);
+            if (!$registroActual) {
+                return array('success' => false, 'message' => 'Error: Registro no encontrado.');
+            }
+
+            $padecimientosIds = $registroActual->getPadecimientosIds();
+            $nuevosIds = array();
+
+            $seEncontro = false;
+            foreach ($padecimientosIds as $id) {
+                if ($id != $padecimientoId) {
+                    $nuevosIds[] = $id;
+                } else {
+                    $seEncontro = true;
+                }
+            }
+
+            if (!$seEncontro) {
+                return array('success' => false, 'message' => 'Error: El padecimiento no se encontró en el registro.');
+            }
+
+            if (empty($nuevosIds)) {
+                $resultado = $this->datoClinicoData->eliminarTBDatoClinico($registroId);
+                if ($resultado) {
+                    return array('success' => true, 'message' => 'Éxito: Padecimiento eliminado. Como era el único padecimiento, se eliminó todo el registro.');
+                } else {
+                    return array('success' => false, 'message' => 'Error: No se pudo eliminar el registro.');
+                }
+            }
+
+            $nuevosIdsString = implode('$', $nuevosIds);
+
+            $datoClinicoActualizado = new DatoClinico(
+                $registroActual->getTbdatoclinicoid(),
+                $registroActual->getTbclienteid(),
+                $nuevosIdsString
+            );
+
+            $resultado = $this->datoClinicoData->actualizarTBDatoClinico($datoClinicoActualizado);
+            if ($resultado) {
+                return array('success' => true, 'message' => 'Éxito: Padecimiento eliminado correctamente.');
+            } else {
+                return array('success' => false, 'message' => 'Error: No se pudo actualizar el registro.');
+            }
+        }
+
+        public function limpiarPadecimientosEliminados() {
             $todosDatosClinicos = $this->datoClinicoData->obtenerTBDatoClinico();
             $actualizacionesRealizadas = 0;
 
@@ -104,7 +191,6 @@
         }
 
         public function modificarPadecimientoEnRegistros($padecimientoIdAntiguo, $padecimientoIdNuevo) {
-
             $todosDatosClinicos = $this->datoClinicoData->obtenerTBDatoClinico();
             $actualizacionesRealizadas = 0;
 
@@ -115,6 +201,7 @@
 
                 foreach ($padecimientosIds as $id) {
                     if ($id == $padecimientoIdAntiguo) {
+                        $nuevosIds[] = $padecimientoIdNuevo;
                         $seModifico = true;
                     } else {
                         $nuevosIds[] = $id;
@@ -122,8 +209,6 @@
                 }
 
                 if ($seModifico) {
-                    $nuevosIds[] = $padecimientoIdNuevo;
-
                     $nuevosIdsString = implode('$', $nuevosIds);
                     $datoClinicoActualizado = new DatoClinico(
                         $datoClinico->getTbdatoclinicoid(),

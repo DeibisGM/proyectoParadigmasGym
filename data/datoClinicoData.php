@@ -13,27 +13,56 @@
             }
             $conn->set_charset('utf8');
 
-            $queryGetLastId = "SELECT MAX(tbdatoclinicoid) AS tbdatoclinicoid FROM tbdatoclinico";
-            $resultId = mysqli_query($conn, $queryGetLastId);
-            $nextId = 1;
+            // Verificar si ya existe un registro para este cliente
+            $queryExiste = "SELECT * FROM tbdatoclinico WHERE tbclienteid = ?";
+            $stmtExiste = mysqli_prepare($conn, $queryExiste);
+            mysqli_stmt_bind_param($stmtExiste, "i", $datoClinico->getTbclienteid());
+            mysqli_stmt_execute($stmtExiste);
+            $resultExiste = mysqli_stmt_get_result($stmtExiste);
 
-            if ($row = mysqli_fetch_row($resultId)) {
-                if ($row[0] !== null) {
-                    $nextId = (int)$row[0] + 1;
+            if ($rowExiste = mysqli_fetch_assoc($resultExiste)) {
+                // YA EXISTE: Concatenar padecimientos
+                $padecimientosActuales = $rowExiste['tbpadecimientoid'];
+                $nuevosPadecimientos = $datoClinico->getTbpadecimientoid();
+
+                // Convertir a arrays, unir y eliminar duplicados
+                $actualesArray = empty($padecimientosActuales) ? array() : explode('$', $padecimientosActuales);
+                $nuevosArray = empty($nuevosPadecimientos) ? array() : explode('$', $nuevosPadecimientos);
+                $todosLosPadecimientos = array_unique(array_merge($actualesArray, $nuevosArray));
+                $padecimientosConcatenados = implode('$', array_filter($todosLosPadecimientos));
+
+                // Actualizar registro existente
+                $queryUpdate = "UPDATE tbdatoclinico SET tbpadecimientoid = ? WHERE tbclienteid = ?";
+                $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+                mysqli_stmt_bind_param($stmtUpdate, "si", $padecimientosConcatenados, $datoClinico->getTbclienteid());
+                $result = mysqli_stmt_execute($stmtUpdate);
+                mysqli_stmt_close($stmtUpdate);
+
+            } else {
+                // NO EXISTE: Crear nuevo registro
+                $queryGetLastId = "SELECT MAX(tbdatoclinicoid) AS tbdatoclinicoid FROM tbdatoclinico";
+                $resultId = mysqli_query($conn, $queryGetLastId);
+                $nextId = 1;
+
+                if ($row = mysqli_fetch_row($resultId)) {
+                    if ($row[0] !== null) {
+                        $nextId = (int)$row[0] + 1;
+                    }
+                }
+
+                $queryInsert = "INSERT INTO tbdatoclinico (tbdatoclinicoid, tbclienteid, tbpadecimientoid) VALUES (?, ?, ?)";
+                $stmt = mysqli_prepare($conn, $queryInsert);
+
+                if ($stmt) {
+                    mysqli_stmt_bind_param($stmt, "iis", $nextId, $datoClinico->getTbclienteid(), $datoClinico->getTbpadecimientoid());
+                    $result = mysqli_stmt_execute($stmt);
+                    mysqli_stmt_close($stmt);
+                } else {
+                    $result = false;
                 }
             }
 
-            $queryInsert = "INSERT INTO tbdatoclinico (tbdatoclinicoid, tbclienteid, tbpadecimientoid) VALUES (?, ?, ?)";
-            $stmt = mysqli_prepare($conn, $queryInsert);
-
-            if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "iis", $nextId, $datoClinico->getTbclienteid(), $datoClinico->getTbpadecimientoid());
-                $result = mysqli_stmt_execute($stmt);
-                mysqli_stmt_close($stmt);
-            } else {
-                $result = false;
-            }
-
+            mysqli_stmt_close($stmtExiste);
             mysqli_close($conn);
             return $result;
         }
@@ -81,6 +110,27 @@
             mysqli_close($conn);
             return $result;
         }
+        public function eliminarTBDatoClinicoPorCliente($tbclienteid) {
+            $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+            if (!$conn) {
+                return false;
+            }
+            $conn->set_charset('utf8');
+
+            $queryDelete = "DELETE FROM tbdatoclinico WHERE tbclienteid=?";
+            $stmt = mysqli_prepare($conn, $queryDelete);
+
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "i", $tbclienteid);
+                $result = mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+            } else {
+                $result = false;
+            }
+
+            mysqli_close($conn);
+            return $result;
+        }
 
         public function obtenerTBDatoClinico() {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
@@ -89,7 +139,9 @@
             }
             $conn->set_charset('utf8');
 
-            $querySelect = "SELECT * FROM tbdatoclinico ORDER BY tbclienteid, tbdatoclinicoid";
+            $querySelect = "SELECT dc.*, c.tbclientecarnet FROM tbdatoclinico dc
+                            LEFT JOIN tbcliente c ON dc.tbclienteid = c.tbclienteid
+                            ORDER BY dc.tbclienteid, dc.tbdatoclinicoid";
             $result = mysqli_query($conn, $querySelect);
 
             if (!$result) {
@@ -99,28 +151,16 @@
 
             $datosClinicos = array();
             while ($row = mysqli_fetch_array($result)) {
-                $clienteId = $row['tbclienteid'];
-                $queryCarnet = "SELECT tbclientecarnet FROM tbcliente WHERE tbclienteid = ?";
-                $stmt = mysqli_prepare($conn, $queryCarnet);
-
-                if ($stmt) {
-                    mysqli_stmt_bind_param($stmt, "i", $clienteId);
-                    mysqli_stmt_execute($stmt);
-                    $resultCarnet = mysqli_stmt_get_result($stmt);
-                    $carnetRow = mysqli_fetch_array($resultCarnet);
-                    mysqli_stmt_close($stmt);
-                } else {
-                    $carnetRow = array('tbclientecarnet' => '');
-                }
-
                 $currentDatoClinico = new DatoClinico(
                     $row['tbdatoclinicoid'],
                     $row['tbclienteid'],
                     $row['tbpadecimientoid']
                 );
 
-                $currentDatoClinico->setCarnet($carnetRow['tbclientecarnet'] ?? '');
+                // Establecer el carnet
+                $currentDatoClinico->setCarnet($row['tbclientecarnet'] ?? '');
 
+                // Obtener nombres de padecimientos
                 $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
                 $currentDatoClinico->setPadecimientosNombres($padecimientosNombres);
 
@@ -175,7 +215,9 @@
             }
             $conn->set_charset('utf8');
 
-            $querySelect = "SELECT * FROM tbdatoclinico WHERE tbclienteid=? ORDER BY tbdatoclinicoid";
+            $querySelect = "SELECT dc.*, c.tbclientecarnet FROM tbdatoclinico dc
+                            LEFT JOIN tbcliente c ON dc.tbclienteid = c.tbclienteid
+                            WHERE dc.tbclienteid=? ORDER BY dc.tbdatoclinicoid";
             $stmt = mysqli_prepare($conn, $querySelect);
 
             if ($stmt) {
@@ -191,6 +233,10 @@
                         $row['tbpadecimientoid']
                     );
 
+                    // Establecer el carnet
+                    $datoClinico->setCarnet($row['tbclientecarnet'] ?? '');
+
+                    // Obtener nombres de padecimientos
                     $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
                     $datoClinico->setPadecimientosNombres($padecimientosNombres);
 
@@ -236,6 +282,43 @@
             mysqli_close($conn);
             return $clientes;
         }
+
+    public function obtenerTBDatoClinicoPorId($registroId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return null;
+        }
+        $conn->set_charset('utf8');
+
+        $querySelect = "SELECT * FROM tbdatoclinico WHERE tbdatoclinicoid=?";
+        $stmt = mysqli_prepare($conn, $querySelect);
+
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "i", $registroId);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+
+            if ($row = mysqli_fetch_array($result)) {
+                $datoClinico = new DatoClinico(
+                    $row['tbdatoclinicoid'],
+                    $row['tbclienteid'],
+                    $row['tbpadecimientoid']
+                );
+
+                $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
+                $datoClinico->setPadecimientosNombres($padecimientosNombres);
+
+                mysqli_stmt_close($stmt);
+                mysqli_close($conn);
+                return $datoClinico;
+            }
+
+            mysqli_stmt_close($stmt);
+        }
+
+        mysqli_close($conn);
+        return null;
+    }
 
         public function obtenerPadecimientos() {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
