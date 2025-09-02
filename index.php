@@ -80,9 +80,9 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/numeroEmergenciaView.php'>
                 <button>Ver Números Emergencia</button>
             </a>
-            <a href='view/salaView.php'>
-                <button>Ver las salas</button>
-            </a>
+        <a href='view/salaView.php'>
+                        <button>Ver las salas</button>
+                    </a>
         </section>
     <?php elseif ($tipoUsuario == 'instructor'): ?>
         <section>
@@ -99,14 +99,17 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/instructorView.php'>
                 <button>Ver Instructores</button>
             </a>
-             <a href='view/salaView.php'>
-                <button>Ver las salas</button>
-            </a>
+            <a href='view/salaView.php'>
+                        <button>Ver las salas</button>
+                    </a>
         </section>
         <section>
             <h3>Recursos y Salud de Clientes</h3>
             <a href='view/cuerpoZonaView.php'>
                 <button>Zonas del Cuerpo</button>
+            </a>
+            <a href='view/padecimientoView.php'>
+                <button>Padecimientos de Clientes</button>
             </a>
             <a href='view/datoClinicoView.php'>
                 <button>Datos Clínicos de Clientes</button>
@@ -139,9 +142,10 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <a href='view/cuerpoZonaView.php'>
                 <button>Zonas del Cuerpo</button>
             </a>
-            <a href='view/salaView.php'>
-                <button>Ver las salas</button>
             </a>
+                    <a href='view/salaView.php'>
+                        <button>Ver las salas</button>
+                    </a>
         </section>
     <?php endif; ?>
 
