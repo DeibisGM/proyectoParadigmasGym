@@ -25,8 +25,9 @@ $salas = $salaBusiness->obtenerTbsala();
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Salas</title>
-
+    <title>Gestión de Salas</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script>
         function validarFormulario() {
             const nombre = document.forms["salaForm"]["nombre"].value;
@@ -48,187 +49,112 @@ $salas = $salaBusiness->obtenerTbsala();
 </head>
 <body>
 
-<header>
-    <h2>Gym - Salas</h2>
-    <a href="../index.php">Volver al Inicio</a>
-</header>
+<div class="container">
+    <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
+        <h2><i class="ph ph-door"></i>Gestión de Salas</h2>
 
-<hr>
+    </header>
 
-<main>
-    <?php if ($tipoUsuario == 'admin') { ?>
-        <!-- Vista de administrador - Puede ver, registrar, actualizar y eliminar salas -->
-        <h2>Registrar Sala</h2>
-
-        <form name="salaForm" method="post" action="../action/salaAction.php"
-              onsubmit="return validarFormulario();">
-            <label>Nombre de la Sala:</label><br/>
-            <input type="text" name="nombre" required/><br/>
-
-            <label>Capacidad:</label><br/>
-            <input type="number" name="capacidad" min="1" required/><br/><br/>
-
-            <input type="submit" value="Registrar Sala" name="insertar"/>
-        </form>
-
-        <br/><br/>
-
-        <h2>Salas Registradas</h2>
-
-        <table border="1">
-            <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Capacidad</th>
-                <th>Estado</th>
-                <th>Acción</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ($salas as $sala) {
-                echo '<tr>';
-                echo '<form method="post" action="../action/salaAction.php">';
-                echo '<input type="hidden" name="id" value="' . $sala->getTbsalaid() . '">';
-                echo '<td><input type="text" name="nombre" value="' . htmlspecialchars($sala->getTbsalanombre()) . '" required></td>';
-                echo '<td><input type="number" name="capacidad" value="' . $sala->getTbsalacapacidad() . '" min="1" required></td>';
-
-                echo '<td>';
-                echo '<select name="estado" required>';
-                echo '<option value="1" ' . ($sala->getTbsalaestado() == 1 ? 'selected' : '') . '>Activa</option>';
-                echo '<option value="0" ' . ($sala->getTbsalaestado() == 0 ? 'selected' : '') . '>Inactiva</option>';
-                echo '</select>';
-                echo '</td>';
-
-                echo '<td>';
-                echo '<input type="submit" value="Actualizar" name="actualizar" onclick="return confirm(\'¿Estás seguro de actualizar esta sala?\');">';
-                echo '<input type="submit" value="Eliminar" name="eliminar" onclick="return confirm(\'¿Estás seguro de eliminar esta sala?\');">';
-                echo '</td>';
-
-                echo '</form>';
-                echo '</tr>';
-            }
-            ?>
-            </tbody>
-        </table>
-
-    <?php } else if ($tipoUsuario == 'instructor') { ?>
-        <!-- Vista de instructor - Puede agregar, ver y actualizar salas -->
-        <h2>Registrar Sala</h2>
-
-        <form name="salaForm" method="post" action="../action/salaAction.php"
-              onsubmit="return validarFormulario();">
-            <label>Nombre de la Sala:</label><br/>
-            <input type="text" name="nombre" required/><br/>
-
-            <label>Capacidad:</label><br/>
-            <input type="number" name="capacidad" min="1" required/><br/><br/>
-
-            <input type="submit" value="Registrar Sala" name="insertar"/>
-        </form>
-
-        <br/><br/>
-
-        <h2>Salas Registradas</h2>
-
-        <table border="1">
-            <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Capacidad</th>
-                <th>Estado</th>
-                <th>Acción</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ($salas as $sala) {
-                echo '<tr>';
-                echo '<form method="post" action="../action/salaAction.php">';
-                echo '<input type="hidden" name="id" value="' . $sala->getTbsalaid() . '">';
-                echo '<td><input type="text" name="nombre" value="' . htmlspecialchars($sala->getTbsalanombre()) . '" required></td>';
-                echo '<td><input type="number" name="capacidad" value="' . $sala->getTbsalacapacidad() . '" min="1" required></td>';
-
-                echo '<td>';
-                echo '<select name="estado" required>';
-                echo '<option value="1" ' . ($sala->getTbsalaestado() == 1 ? 'selected' : '') . '>Activa</option>';
-                echo '<option value="0" ' . ($sala->getTbsalaestado() == 0 ? 'selected' : '') . '>Inactiva</option>';
-                echo '</select>';
-                echo '</td>';
-
-                echo '<td>';
-                echo '<input type="submit" value="Actualizar" name="actualizar" onclick="return confirm(\'¿Estás seguro de actualizar esta sala?\');">';
-                echo '</td>';
-
-                echo '</form>';
-                echo '</tr>';
-            }
-            ?>
-            </tbody>
-        </table>
-
-    <?php } else { ?>
-        <!-- Vista de cliente - Solo puede ver la lista de salas -->
-        <h2>Salas Disponibles</h2>
-
-        <table border="1">
-            <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Capacidad</th>
-                <th>Estado</th>
-            </tr>
-            </thead>
-            <tbody>
-            <?php
-            foreach ($salas as $sala) {
-                echo '<tr>';
-
-                echo '<td>' . htmlspecialchars($sala->getTbsalanombre()) . '</td>';
-                echo '<td>' . $sala->getTbsalacapacidad() . '</td>';
-                echo '<td>' . ($sala->getTbsalaestado() == 1 ? 'Activa' : 'Inactiva') . '</td>';
-                echo '</tr>';
-            }
-            ?>
-            </tbody>
-        </table>
-    <?php } ?>
-
-    <?php
-    if (isset($_GET['error']) && !empty($_GET['error'])) {
-        $error = $_GET['error'];
-        if ($error == "datos_faltantes") {
-            echo '<p><b>Error: Datos incompletos.</b></p>';
-        } else if ($error == "insertar") {
-            echo '<p><b>Error: No se pudo insertar la sala.</b></p>';
-        } else if ($error == "actualizar") {
-            echo '<p><b>Error: No se pudo actualizar la sala.</b></p>';
-        } else if ($error == "eliminar") {
-            echo '<p><b>Error: No se pudo eliminar la sala.</b></p>';
-        } else if ($error == "id_faltante") {
-            echo '<p><b>Error: ID faltante para eliminar.</b></p>';
-        } else if ($error == "accion_no_valida") {
-            echo '<p><b>Error: Acción no válida.</b></p>';
+    <main>
+        <?php
+        if (isset($_GET['error']) && !empty($_GET['error'])) {
+            $error = $_GET['error'];
+            echo '<p class="error-message"><b>Error: ';
+            if ($error == "datos_faltantes") echo 'Datos incompletos.';
+            else if ($error == "insertar") echo 'No se pudo insertar la sala.';
+            else if ($error == "actualizar") echo 'No se pudo actualizar la sala.';
+            else if ($error == "eliminar") echo 'No se pudo eliminar la sala.';
+            else echo 'Acción no válida.';
+            echo '</b></p>';
+        } else if (isset($_GET['success']) && !empty($_GET['success'])) {
+            $success = $_GET['success'];
+            echo '<p class="success-message"><b>Éxito: ';
+            if ($success == "insertado") echo 'Sala insertada correctamente.';
+            else if ($success == "actualizado") echo 'Sala actualizada correctamente.';
+            else if ($success == "eliminado") echo 'Sala eliminada correctamente.';
+            echo '</b></p>';
         }
-    } else if (isset($_GET['success']) && !empty($_GET['success'])) {
-        $success = $_GET['success'];
-        if ($success == "insertado") {
-            echo '<p><b>Éxito: Sala insertada correctamente.</b></p>';
-        } else if ($success == "actualizado") {
-            echo '<p><b>Éxito: Sala actualizada correctamente.</b></p>';
-        } else if ($success == "eliminado") {
-            echo '<p><b>Éxito: Sala eliminada correctamente.</b></p>';
-        }
-    }
-    ?>
+        ?>
 
-</main>
+        <?php if ($tipoUsuario == 'admin' || $tipoUsuario == 'instructor') { ?>
+            <section>
+                <h3><i class="ph ph-plus-circle"></i>Registrar Sala</h3>
+                <form name="salaForm" method="post" action="../action/salaAction.php"
+                      onsubmit="return validarFormulario();">
+                    <label>Nombre de la Sala:</label>
+                    <input type="text" name="nombre" placeholder="Ej: Sala de Yoga" required/>
+                    <label>Capacidad:</label>
+                    <input type="number" name="capacidad" min="1" placeholder="Ej: 15" required/>
+                    <button type="submit" name="insertar"><i class="ph ph-plus"></i>Registrar Sala</button>
+                </form>
+            </section>
+        <?php } ?>
 
-<hr>
 
-<footer>
-    <p>Fin de la página.</p>
-</footer>
+        <section>
+            <h3><i class="ph ph-list-bullets"></i>Salas Registradas</h3>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Capacidad</th>
+                        <th>Estado</th>
+                        <?php if ($tipoUsuario == 'admin' || $tipoUsuario == 'instructor') echo '<th>Acción</th>'; ?>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($salas as $sala): ?>
+                        <tr>
+                            <?php if ($tipoUsuario == 'admin' || $tipoUsuario == 'instructor'): ?>
+                                <form method="post" action="../action/salaAction.php">
+                                    <input type="hidden" name="id" value="<?php echo $sala->getTbsalaid(); ?>">
+                                    <td><input type="text" name="nombre"
+                                               value="<?php echo htmlspecialchars($sala->getTbsalanombre()); ?>"
+                                               required></td>
+                                    <td><input type="number" name="capacidad"
+                                               value="<?php echo $sala->getTbsalacapacidad(); ?>" min="1" required>
+                                    </td>
+                                    <td>
+                                        <select name="estado" required>
+                                            <option value="1" <?php echo($sala->getTbsalaestado() == 1 ? 'selected' : ''); ?>>
+                                                Activa
+                                            </option>
+                                            <option value="0" <?php echo($sala->getTbsalaestado() == 0 ? 'selected' : ''); ?>>
+                                                Inactiva
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <button type="submit" name="actualizar" title="Actualizar"
+                                                onclick="return confirm('¿Estás seguro de actualizar esta sala?');"><i
+                                                    class="ph ph-pencil-simple"></i> Actualizar
+                                        </button>
+                                        <?php if ($tipoUsuario == 'admin'): ?>
+                                            <button type="submit" name="eliminar" title="Eliminar"
+                                                    onclick="return confirm('¿Estás seguro de eliminar esta sala?');"><i
+                                                        class="ph ph-trash"></i> Eliminar
+                                            </button>
+                                        <?php endif; ?>
+                                    </td>
+                                </form>
+                            <?php else: // Vista Cliente ?>
+                                <td><?php echo htmlspecialchars($sala->getTbsalanombre()); ?></td>
+                                <td><?php echo $sala->getTbsalacapacidad(); ?></td>
+                                <td><?php echo($sala->getTbsalaestado() == 1 ? 'Activa' : 'Inactiva'); ?></td>
+                            <?php endif; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 
+    <footer>
+        <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
+    </footer>
+</div>
 </body>
 </html>
