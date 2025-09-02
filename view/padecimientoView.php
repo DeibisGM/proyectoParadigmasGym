@@ -221,12 +221,12 @@ if (!$esAdmin && !$esInstruct) {
                         confirmFormData.append('id', id);
                         fetch('../action/padecimientoAction.php', {method: 'POST', body: confirmFormData})
                             .then(res => res.json()).then(confirmData => {
-                            mostrarMensaje(confirmData.message, confirmData.success);
+                            mostrarMensaje(confirmData.message, confirmData.success ? 'success' : 'error');
                             if (confirmData.success) setTimeout(() => cargarPadecimientos(), 1500);
                         });
                     }
                 } else {
-                    mostrarMensaje(data.message, data.success);
+                    mostrarMensaje(data.message, data.success ? 'success' : 'error');
                     if (data.success) setTimeout(() => cargarPadecimientos(), 1500);
                 }
             }).catch(error => mostrarMensaje('Error de conexión.', 'error'));

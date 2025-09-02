@@ -82,7 +82,7 @@ foreach ($datosClinicosObj as $datoObj) {
 
                 <div id="filtroCliente" style="display: none;">
                     <label for="buscarCliente">Cliente:</label>
-                    <input type="text" id="buscarCliente" placeholder="Escriba el nombre o carnet del cliente">
+                    <input type="text" id="buscarCliente" placeholder="Escriba el carnet del cliente">
                 </div>
 
                 <div id="filtroPadecimiento" style="display: none;">

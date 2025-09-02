@@ -86,7 +86,7 @@ $instructores = $instructorBusiness->getAllTBInstructor($esAdmin);
                     $message = 'Solicitud inválida.';
                     break;
                 default:
-                    // For custom validation messages from business layer
+
                     $message = urldecode(htmlspecialchars($_GET['error']));
                     break;
             }
@@ -200,14 +200,17 @@ $instructores = $instructorBusiness->getAllTBInstructor($esAdmin);
                             </td>
                             <td>
                                 <?php
-                                $certificados = $instructor->getInstructorCertificado(); // Get certificates directly from the Instructor object
+                                $certificados = $instructor->getInstructorCertificado();
                                 $nombresCertificados = [];
                                 foreach ($certificados as $certificado) {
                                     $nombresCertificados[] = $certificado->getNombre();
                                 }
-                                echo !empty($nombresCertificados) ? implode('<br>', array_map('htmlspecialchars', $nombresCertificados)) : "N/A";
+                                echo !empty($nombresCertificados) ? implode('<br>', array_map('htmlspecialchars', $nombresCertificados)) : "No hay registrados.";
                                 ?>
-                                <br><a href="certificadoView.php?instructor_id=<?php echo $instructor->getInstructorId(); ?>">Ver/Editar</a>
+                                <?php if ($esInstructor && $instructor->getInstructorId() == $usuarioIdSesion): ?>
+                                    <br>
+                                    <a href="certificadoView.php?instructor_id=<?php echo $instructor->getInstructorId(); ?>">Ver/Editar</a>
+                                <?php endif; ?>
                             </td>
                             <td class="actions-cell">
                                 <!-- La celda de acciones siempre contiene un formulario, garantizando la consistencia estructural -->
@@ -221,7 +224,7 @@ $instructores = $instructorBusiness->getAllTBInstructor($esAdmin);
                                     <input type="hidden" name="direccion"
                                            value="<?php echo htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?>">
 
-                                    <?php // Los botones se renderizan condicionalmente DENTRO del formulario
+                                    <?php
                                     ?>
                                     <?php if ($puedeEditar): ?>
                                         <button type="submit" name="update" title="Actualizar"><i
