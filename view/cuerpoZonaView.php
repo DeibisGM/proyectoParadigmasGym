@@ -19,14 +19,15 @@ $imageManager = new ImageManager();
     <title>Gestión de Zonas del Cuerpo</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
 </head>
 <body>
 
 <div class="container">
     <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+
     </header>
     <hr>
     <main>
@@ -36,8 +37,9 @@ $imageManager = new ImageManager();
                 <form method="post" action="../action/cuerpoZonaAction.php" enctype="multipart/form-data">
                     <input type="text" name="tbcuerpozonanombre" placeholder="Nombre (Ej: Pecho)" required>
                     <input type="text" name="tbcuerpozonadescripcion" placeholder="Descripción" required>
-                    <label>Imágenes (puede seleccionar varias):</label>
+                    <label>Imágenes (puede seleccionar varias):</label><br><br>
                     <input type="file" name="imagenes[]" accept="image/png, image/jpeg, image/webp" multiple>
+                    <br><br>
                     <button type="submit" name="create"><i class="ph ph-plus"></i>Crear Zona</button>
                 </form>
             </section>
@@ -72,10 +74,12 @@ $imageManager = new ImageManager();
                                     <input type="hidden" name="tbcuerpozonaid"
                                            value="<?= $current->getIdCuerpoZona() ?>">
                                     <td><input type="text" name="tbcuerpozonanombre"
-                                               value="<?= htmlspecialchars($current->getNombreCuerpoZona() ?? '') ?>" placeholder="Nombre">
+                                               value="<?= htmlspecialchars($current->getNombreCuerpoZona() ?? '') ?>"
+                                               placeholder="Nombre">
                                     </td>
                                     <td><input type="text" name="tbcuerpozonadescripcion"
-                                               value="<?= htmlspecialchars($current->getDescripcionCuerpoZona() ?? '') ?>" placeholder="Descripción">
+                                               value="<?= htmlspecialchars($current->getDescripcionCuerpoZona() ?? '') ?>"
+                                               placeholder="Descripción">
                                     </td>
                                     <td>
                                         <div class="image-gallery">
@@ -92,14 +96,21 @@ $imageManager = new ImageManager();
                                     <td class="actions-cell">
                                         <input type="hidden" name="tbcuerpozonaactivo"
                                                value="<?= $current->getActivoCuerpoZona() ?>">
-                                        <button type="submit" name="update" title="Actualizar"><i class="ph ph-floppy-disk"></i> Actualizar</button>
-                                        <button type="submit" name="delete" onclick="return confirm('¿Eliminar esta zona y todas sus imágenes?');" title="Eliminar Zona"><i class="ph ph-trash"></i> Eliminar</button>
+                                        <button type="submit" name="update" title="Actualizar"><i
+                                                    class="ph ph-floppy-disk"></i> Actualizar
+                                        </button>
+                                        <button type="submit" name="delete"
+                                                onclick="return confirm('¿Eliminar esta zona y todas sus imágenes?');"
+                                                title="Eliminar Zona"><i class="ph ph-trash"></i> Eliminar
+                                        </button>
                                         <?php if ($current->getActivoCuerpoZona()): ?>
                                             <button type="submit" name="desactivar" title="Desactivar"><i
-                                                        class="ph ph-toggle-right"></i> Desactivar</button>
+                                                        class="ph ph-toggle-right"></i> Desactivar
+                                            </button>
                                         <?php else: ?>
                                             <button type="submit" name="activar" title="Activar"><i
-                                                        class="ph ph-toggle-left"></i> Activar</button>
+                                                        class="ph ph-toggle-left"></i> Activar
+                                            </button>
                                         <?php endif; ?>
                                     </td>
                                 </form>

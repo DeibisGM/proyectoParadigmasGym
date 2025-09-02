@@ -40,12 +40,13 @@ if (isset($_GET['instructor_id'])) {
 <body>
 <div class="container">
     <header>
-        <h2><i class="ph ph-certificate"></i>Gestión de Certificados</h2>
         <?php if (isset($_GET['instructor_id'])): ?>
-            <a href="instructorView.php"><i class="ph ph-arrow-left"></i>Volver a Instructores</a>
+            <a href="instructorView.php"><i class="ph ph-arrow-left"></i>Volver a Instructores</a><br><br>
         <?php else: ?>
-            <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+            <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <?php endif; ?>
+        <h2><i class="ph ph-certificate"></i>Gestión de Certificados</h2>
+
     </header>
 
     <main>

@@ -18,13 +18,14 @@ $horarios = $horarioBusiness->getAllHorarios();
     <title>Gestión de Horario del Gimnasio</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
 </head>
 <body>
 <div class="container">
     <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-clock-clockwise"></i>Gestión de Horario del Gimnasio</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+
     </header>
 
     <main>
@@ -64,7 +65,9 @@ $horarios = $horarioBusiness->getAllHorarios();
                                                               value="<?= $bloqueo['inicio'] ?>"></label>
                                         <label>Fin: <input type="time" name="bloqueo_fin[<?= $horario->getId() ?>][]"
                                                            value="<?= $bloqueo['fin'] ?>"></label>
-                                        <button type="button" onclick="removeBloqueo(this)" title="Eliminar bloqueo"><i class="ph ph-trash"></i> Eliminar</button>
+                                        <button type="button" onclick="removeBloqueo(this)" title="Eliminar bloqueo"><i
+                                                    class="ph ph-trash"></i> Eliminar
+                                        </button>
                                     </div>
                                 <?php endforeach; ?>
                             </div>

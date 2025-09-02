@@ -1,24 +1,29 @@
 <?php
 session_start();
 
+// Redirige si el usuario no ha iniciado sesión
 if (!isset($_SESSION['tipo_usuario'])) {
     header("Location: ../view/loginView.php");
     exit();
 }
 
+// Determinar roles y permisos
 $esAdmin = ($_SESSION['tipo_usuario'] === 'admin');
 $esInstructor = ($_SESSION['tipo_usuario'] === 'instructor');
-$instructorIdSesion = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null;
+$usuarioIdSesion = $_SESSION['usuario_id'] ?? null;
 
+// Incluir las clases necesarias
 include_once '../business/certificadoBusiness.php';
 include_once '../business/instructorBusiness.php';
 include_once '../utility/ImageManager.php';
 
+// Inicializar las clases de negocio
 $certificadoBusiness = new CertificadoBusiness();
-$business = new InstructorBusiness();
+$instructorBusiness = new InstructorBusiness();
 $imageManager = new ImageManager();
 
-$instructores = $business->getAllTBInstructor($esAdmin);
+// Obtener la lista de instructores
+$instructores = $instructorBusiness->getAllTBInstructor($esAdmin);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -28,13 +33,14 @@ $instructores = $business->getAllTBInstructor($esAdmin);
     <title>Gestión de Instructores</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
 </head>
 <body>
 <div class="container">
     <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-users-three"></i>Gestión de Instructores</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+
     </header>
 
     <main>
@@ -94,69 +100,95 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                     </thead>
                     <tbody>
                     <?php foreach ($instructores as $instructor):
-                        $esPropietario = $esInstructor && $instructor->getInstructorId() == $instructorIdSesion;
+                        // Lógica para determinar si el usuario actual puede editar esta fila
+                        $esPropietario = $esInstructor && $instructor->getInstructorId() == $usuarioIdSesion;
                         $puedeEditar = $esAdmin || $esPropietario;
+                        $formId = "form-instructor-" . htmlspecialchars($instructor->getInstructorId());
                         ?>
                         <tr>
-                            <form method="post" action="../action/instructorAction.php" enctype="multipart/form-data">
-                                <input type="hidden" name="id" value="<?php echo $instructor->getInstructorId(); ?>">
-                                <input type="hidden" name="cuenta"
-                                       value="<?php echo htmlspecialchars($instructor->getInstructorCuenta() ?? ''); ?>">
-                                <input type="hidden" name="direccion"
-                                       value="<?php echo htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?>">
-                                <td><?php echo str_pad($instructor->getInstructorId(), 3, '0', STR_PAD_LEFT); ?></td>
-                                <td><input type="text" name="nombre"
-                                           value="<?php echo htmlspecialchars($instructor->getInstructorNombre()); ?>" placeholder="Nombre" <?php if (!$puedeEditar) echo 'readonly'; ?>> 
-                                </td>
-                                <td><input type="text" name="telefono"
-                                           value="<?php echo htmlspecialchars($instructor->getInstructorTelefono()); ?>" placeholder="Teléfono" <?php if (!$puedeEditar) echo 'readonly'; ?>> 
-                                </td>
-                                <td><input type="email" name="correo"
-                                           value="<?php echo htmlspecialchars($instructor->getInstructorCorreo()); ?>" placeholder="Correo" <?php if (!$puedeEditar) echo 'readonly'; ?>> 
-                                </td>
-                                <td><input type="password" name="contraseña"
-                                           value="<?php echo htmlspecialchars($instructor->getInstructorContraseña()); ?>" placeholder="Contraseña" <?php if (!$puedeEditar) echo 'readonly'; ?>> 
-                                </td>
-                                <td>
-                                    <?php
-                                    $imagen = $imageManager->getImagesByIds($instructor->getTbinstructorImagenId());
-                                    if (!empty($imagen)) {
-                                        echo '<div class="image-container"><img src="..' . htmlspecialchars($imagen[0]['tbimagenruta']) . '?t=' . time() . '" alt="Imagen">';
-                                        if ($puedeEditar) echo '<button type="submit" name="delete_image" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button>';
-                                        echo '</div>';
-                                    } else {
-                                        if ($puedeEditar) echo '<input type="file" name="tbinstructorimagenid[]">';
-                                        else echo 'Sin imagen';
+                            <!-- Célula de Cédula (solo visualización) -->
+                            <td><?php echo htmlspecialchars($instructor->getInstructorId()); ?></td>
+
+                            <!-- Campos de entrada asociados al formulario de la fila mediante el atributo 'form' -->
+                            <td>
+                                <input form="<?php echo $formId; ?>" type="text" name="nombre"
+                                       value="<?php echo htmlspecialchars($instructor->getInstructorNombre()); ?>"
+                                       placeholder="Nombre" <?php if (!$puedeEditar) echo 'readonly'; ?>>
+                            </td>
+                            <td>
+                                <input form="<?php echo $formId; ?>" type="text" name="telefono"
+                                       value="<?php echo htmlspecialchars($instructor->getInstructorTelefono()); ?>"
+                                       placeholder="Teléfono" <?php if (!$puedeEditar) echo 'readonly'; ?>>
+                            </td>
+                            <td>
+                                <input form="<?php echo $formId; ?>" type="email" name="correo"
+                                       value="<?php echo htmlspecialchars($instructor->getInstructorCorreo()); ?>"
+                                       placeholder="Correo" <?php if (!$puedeEditar) echo 'readonly'; ?>>
+                            </td>
+                            <td>
+                                <input form="<?php echo $formId; ?>" type="password" name="contraseña"
+                                       value="<?php echo htmlspecialchars($instructor->getInstructorContraseña()); ?>"
+                                       placeholder="Contraseña" <?php if (!$puedeEditar) echo 'readonly'; ?>>
+                            </td>
+                            <td>
+                                <?php
+                                $imagen = $imageManager->getImagesByIds($instructor->getTbinstructorImagenId());
+                                if (!empty($imagen)) {
+                                    echo '<div class="image-container"><img src="..' . htmlspecialchars($imagen[0]['tbimagenruta']) . '?t=' . time() . '" alt="Imagen">';
+                                    if ($puedeEditar) {
+                                        // El botón para borrar la imagen también debe estar asociado al formulario
+                                        echo '<button form="' . $formId . '" type="submit" name="delete_image" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button>';
                                     }
-                                    ?>
-                                </td>
-                                <td>
-                                    <?php
-                                    $certificados = $certificadoBusiness->getCertificadosPorInstructor($instructor->getInstructorId());
-                                    if (!empty($certificados)) {
-                                        foreach ($certificados as $cert) echo htmlspecialchars($cert->getNombre()) . "<br>";
+                                    echo '</div>';
+                                } else {
+                                    if ($puedeEditar) {
+                                        echo '<input form="' . $formId . '" type="file" name="tbinstructorimagenid[]">';
                                     } else {
-                                        echo "N/A";
+                                        echo 'Sin imagen';
                                     }
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <?php
+                                $certificados = $certificadoBusiness->getCertificadosPorInstructor($instructor->getInstructorId());
+                                echo !empty($certificados) ? implode('<br>', array_map('htmlspecialchars', array_column($certificados, 'nombre'))) : "N/A";
+                                ?>
+                                <br><a href="certificadoView.php?instructor_id=<?php echo $instructor->getInstructorId(); ?>">Ver/Editar</a>
+                            </td>
+                            <td class="actions-cell">
+                                <!-- La celda de acciones siempre contiene un formulario, garantizando la consistencia estructural -->
+                                <form id="<?php echo $formId; ?>" method="post" action="../action/instructorAction.php"
+                                      enctype="multipart/form-data"
+                                      style="display: flex; gap: 0.5rem; min-height: 40px; align-items: center;">
+                                    <input type="hidden" name="id"
+                                           value="<?php echo $instructor->getInstructorId(); ?>">
+                                    <input type="hidden" name="cuenta"
+                                           value="<?php echo htmlspecialchars($instructor->getInstructorCuenta() ?? ''); ?>">
+                                    <input type="hidden" name="direccion"
+                                           value="<?php echo htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?>">
+
+                                    <?php // Los botones se renderizan condicionalmente DENTRO del formulario
                                     ?>
-                                    <a href="certificadoView.php?instructor_id=<?php echo $instructor->getInstructorId(); ?>">Ver/Editar</a>
-                                </td>
-                                <td class="actions-cell">
                                     <?php if ($puedeEditar): ?>
-                                        <button type="submit" name="update" title="Actualizar"><i class="ph ph-floppy-disk"></i> Actualizar</button>
+                                        <button type="submit" name="update" title="Actualizar"><i
+                                                    class="ph ph-floppy-disk"></i> Actualizar
+                                        </button>
                                     <?php endif; ?>
                                     <?php if ($esAdmin): ?>
                                         <?php if ($instructor->getInstructorActivo()): ?>
                                             <button type="submit" name="delete"
                                                     onclick="return confirm('¿Desactivar este instructor?');"
-                                                    title="Desactivar"><i class="ph ph-toggle-right"></i> Desactivar</button>
+                                                    title="Desactivar"><i class="ph ph-toggle-right"></i> Desactivar
+                                            </button>
                                         <?php else: ?>
                                             <button type="submit" name="activate" title="Activar"><i
-                                                        class="ph ph-toggle-left"></i> Activar</button>
+                                                        class="ph ph-toggle-left"></i> Activar
+                                            </button>
                                         <?php endif; ?>
                                     <?php endif; ?>
-                                </td>
-                            </form>
+                                </form>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>

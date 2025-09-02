@@ -7,8 +7,10 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
+$esInstruct = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
 
-if (!$esAdmin) {
+
+if (!$esAdmin && !$esInstruct) {
     header("Location: ../index.php?error=unauthorized");
     exit();
 }
@@ -27,8 +29,9 @@ if (!$esAdmin) {
 <body>
 <div class="container">
     <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-bandaids"></i>Gestión de Padecimientos</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+
     </header>
 
     <main>
@@ -146,7 +149,7 @@ if (!$esAdmin) {
                     <button class="btn-cancel" style="display: none;" onclick="cancelarEdicion(${p.id})"><i class="ph ph-x-circle"></i> Cancelar</button>
                     <button class="btn-save" style="display: none;" onclick="guardarEdicion(${p.id})"><i class="ph ph-floppy-disk"></i> Guardar</button>
                 </td>`;
-            row.querySelector('select').value = p.tipo; // Set correct dropdown value
+            row.querySelector('select').value = p.tipo;
         });
     }
 

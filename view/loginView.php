@@ -17,7 +17,7 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
 </head>
 <body>
 <div class="login-container">
-    <h1><i class="ph ph-sign-in"></i>Iniciar Sesión</h1>
+    <h1>Iniciar Sesión</h1>
     <form action="../action/loginAction.php" method="post">
         <div class="form-group">
             <label for="correo"><i class="ph ph-envelope"></i>Correo electrónico:</label>
@@ -34,7 +34,7 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
 
 
     <div class="nota-credenciales">
-        <strong><i class="ph ph-info"></i>Credenciales de Prueba:</strong><br>
+        <strong><i class="ph ph-info"></i>Credenciales de Prueba:</strong><br><br>
         • <strong>Cliente:</strong> cliente@gmail.com / 12345678<br>
         • <strong>Instructor:</strong> instructor@gmail.com / 12345678<br>
         • <strong>Admin:</strong> root@gmail.com / root

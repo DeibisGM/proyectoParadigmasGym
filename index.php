@@ -21,7 +21,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
 <body>
 <div class="container">
     <header>
-        <h2><i class="ph ph-house"></i>Gimnasio</h2>
+        <h2>Gimnasio</h2>
         <p><i class="ph ph-user-circle"></i>Bienvenido, <strong><?php echo htmlspecialchars($nombreUsuario); ?></strong>
             (<?php echo htmlspecialchars(ucfirst($tipoUsuario)); ?>)</p>
         <a href="action/logoutAction.php">
@@ -50,9 +50,6 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/horarioView.php'>
                         <button><i class="ph ph-clock-clockwise"></i>Horario</button>
                     </a>
-                    <a href='view/reservaView.php'>
-                        <button><i class="ph ph-calendar-check"></i>Eventos y Reservas</button>
-                    </a>
                     <a href='view/padecimientoView.php'>
                         <button><i class="ph ph-bandaids"></i>Padecimientos</button>
                     </a>
@@ -71,23 +68,24 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <section>
                 <h3><i class="ph ph-chalkboard-teacher"></i>Panel de Instructor</h3>
                 <div class="menu-grid">
+                    <a href='view/instructorView.php'>
+                        <button><i class="ph ph-user-rectangle"></i>Instructores</button>
+                    </a>
                     <a href='view/clienteView.php'>
                         <button><i class="ph ph-users"></i>Clientes</button>
                     </a>
-                    <a href='view/reservaView.php'>
-                        <button><i class="ph ph-calendar-blank"></i>Mis Eventos</button>
+                    <a href='view/cuerpoZonaView.php'>
+                        <button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button>
                     </a>
-                    <a href='view/certificadoView.php'>
-                        <button><i class="ph ph-seal-check"></i>Mis Certificados</button>
-                    </a>
-                    <a href='view/instructorView.php'>
-                        <button><i class="ph ph-user-rectangle"></i>Mi Perfil</button>
-                    </a>
+
                 </div>
             </section>
             <section>
                 <h3><i class="ph ph-heartbeat"></i>Salud de Clientes</h3>
                 <div class="menu-grid">
+                    <a href='view/padecimientoView.php'>
+                        <button><i class="ph ph-bandaids"></i>Padecimientos</button>
+                    </a>
                     <a href='view/datoClinicoView.php'>
                         <button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button>
                     </a>
@@ -98,7 +96,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             </section>
         <?php elseif ($tipoUsuario == 'cliente'): ?>
             <section>
-                <h3><i class="ph ph-user-focus"></i>Mi Perfil</h3>
+                <h3><i class="ph ph-user-focus"></i>Mi Perfil y Salud</h3>
                 <div class="menu-grid">
                     <a href='view/clienteView.php'>
                         <button><i class="ph ph-user-rectangle"></i>Ver mi Perfil</button>
@@ -114,11 +112,12 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <section>
                 <h3><i class="ph ph-barbell"></i>Actividad en el Gimnasio</h3>
                 <div class="menu-grid">
-                    <a href='view/reservaView.php'>
-                        <button><i class="ph ph-calendar-check"></i>Reservar</button>
-                    </a>
+
                     <a href='view/instructorClienteView.php'>
                         <button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button>
+                    </a>
+                    <a href='view/cuerpoZonaView.php'>
+                        <button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button>
                     </a>
                 </div>
             </section>

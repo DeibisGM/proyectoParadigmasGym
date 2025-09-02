@@ -27,13 +27,14 @@ if ($tipoUsuario == 'cliente') {
     <title>Gestión de Clientes</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
 </head>
 <body>
 <div class="container">
     <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-users"></i>Clientes</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+
     </header>
 
     <main>
@@ -85,8 +86,9 @@ if ($tipoUsuario == 'cliente') {
                     </select>
                     <label>Fecha de inscripción:</label>
                     <input type="date" name="fechaInscripcion" required/>
-                    <label>Imagen:</label>
+                    <label>Foto de cliente:</label><br><br>
                     <input type="file" name="tbclienteimagenid[]" accept="image/png, image/jpeg, image/webp">
+                    <br><br>
                     <button type="submit" name="insertar"><i class="ph ph-plus"></i>Registrar Cliente</button>
                 </form>
             </section>
@@ -191,7 +193,7 @@ if ($tipoUsuario == 'cliente') {
                                                                    value="<?php echo $cliente->getInscripcion(); ?>"
                                                                    required>
                         <input type="hidden" name="estado" value="<?php echo $cliente->getEstado(); ?>">
-                        <label>Imagen:</label>
+                        <label>Foto de perfil:</label><br><br>
                         <?php
                         $imagen = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
                         if (!empty($imagen)) {
@@ -200,6 +202,7 @@ if ($tipoUsuario == 'cliente') {
                             echo '<input type="file" name="tbclienteimagenid[]">';
                         }
                         ?>
+                        <br><br>
                         <button type="submit" name="actualizar"><i class="ph ph-floppy-disk"></i>Actualizar Mis Datos
                         </button>
                     </form>

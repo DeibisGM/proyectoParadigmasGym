@@ -23,8 +23,9 @@ try {
     }
 
     $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
+    $esInstructor = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
 
-    if (!$esAdmin) {
+    if (!$esAdmin && !$esInstructor) {
         $response['success'] = false;
         $response['message'] = 'Error: Solo los administradores pueden gestionar padecimientos.';
         echo json_encode($response);
@@ -54,9 +55,7 @@ try {
                 $response['message'] = 'Error: El nombre del padecimiento ya existe o no se pudo procesar la transacción.';
             }
         }
-    }
-
-    else if (isset($_POST['update'])) {
+    } else if (isset($_POST['update'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
         $tipo = isset($_POST['tipo']) ? trim($_POST['tipo']) : '';
         $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
@@ -97,9 +96,7 @@ try {
                 }
             }
         }
-    }
-
-    else if (isset($_POST['delete'])) {
+    } else if (isset($_POST['delete'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
         if ($id <= 0) {
@@ -138,9 +135,7 @@ try {
                 $response['message'] = 'Error: No se pudo eliminar el padecimiento.';
             }
         }
-    }
-
-    else if (isset($_POST['confirmDelete'])) {
+    } else if (isset($_POST['confirmDelete'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
         if ($id <= 0) {
@@ -179,15 +174,11 @@ try {
                 $response['message'] = 'Error: No se pudo eliminar el padecimiento de la base de datos.';
             }
         }
-    }
-
-    else if (isset($_GET['getTipos'])) {
+    } else if (isset($_GET['getTipos'])) {
         $tipos = $padecimientoBusiness->obtenerTiposPadecimiento();
         $response['success'] = true;
         $response['data'] = $tipos;
-    }
-
-    else if (isset($_GET['getPadecimientos'])) {
+    } else if (isset($_GET['getPadecimientos'])) {
         $padecimientos = $padecimientoBusiness->obtenerTbpadecimiento();
         $response['success'] = true;
         $response['data'] = array();
@@ -201,9 +192,7 @@ try {
                 'formaDeActuar' => $padecimiento->getTbpadecimientoformadeactuar()
             );
         }
-    }
-
-    else if (isset($_GET['getPadecimiento']) && isset($_GET['id'])) {
+    } else if (isset($_GET['getPadecimiento']) && isset($_GET['id'])) {
         $id = intval($_GET['id']);
         $padecimiento = $padecimientoBusiness->obtenerTbpadecimientoPorId($id);
 
@@ -220,9 +209,7 @@ try {
             $response['success'] = false;
             $response['message'] = 'Error: Padecimiento no encontrado.';
         }
-    }
-
-    else if (isset($_GET['getPadecimientosPorTipo']) && isset($_GET['tipo'])) {
+    } else if (isset($_GET['getPadecimientosPorTipo']) && isset($_GET['tipo'])) {
         $tipo = trim($_GET['tipo']);
         $padecimientos = $padecimientoBusiness->obtenerTbpadecimientoPorTipo($tipo);
         $response['success'] = true;
@@ -237,9 +224,7 @@ try {
                 'formaDeActuar' => $padecimiento->getTbpadecimientoformadeactuar()
             );
         }
-    }
-
-    else {
+    } else {
         $response['success'] = false;
         $response['message'] = 'Error: Acción no válida.';
         $response['debug'] = [

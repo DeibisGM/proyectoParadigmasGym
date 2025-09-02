@@ -49,8 +49,9 @@ if ($esUsuarioCliente) {
 <body>
 <div class="container">
     <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-first-aid-kit"></i>Gestión de Datos Clínicos</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+
     </header>
 
     <main>
@@ -159,16 +160,21 @@ if ($esUsuarioCliente) {
                                 <div class="padecimiento-edit" style="display: none;"></div>
                             </td>
                             <td>
-                                <button onclick="editarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)"                                        title="Editar"><i class="ph ph-pencil-simple"></i> Editar</button>
-                                <button onclick="cancelarEdicion(<?php echo $dato->getTbdatoclinicoid(); ?>)" 
-                                        style="display: none;" class="btn-cancelar-edicion" title="Cancelar"><i 
-                                            class="ph ph-x-circle"></i> Cancelar</button>
-                                <button onclick="guardarEdicion(<?php echo $dato->getTbdatoclinicoid(); ?>)" 
-                                        style="display: none;" class="btn-guardar-edicion" title="Guardar"><i 
-                                            class="ph ph-floppy-disk"></i> Guardar</button>
+                                <button onclick="editarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)"
+                                        title="Editar"><i class="ph ph-pencil-simple"></i> Editar
+                                </button>
+                                <button onclick="cancelarEdicion(<?php echo $dato->getTbdatoclinicoid(); ?>)"
+                                        style="display: none;" class="btn-cancelar-edicion" title="Cancelar"><i
+                                            class="ph ph-x-circle"></i> Cancelar
+                                </button>
+                                <button onclick="guardarEdicion(<?php echo $dato->getTbdatoclinicoid(); ?>)"
+                                        style="display: none;" class="btn-guardar-edicion" title="Guardar"><i
+                                            class="ph ph-floppy-disk"></i> Guardar
+                                </button>
                                 <?php if ($esAdmin): ?>
                                     <button onclick="eliminarRegistro(<?php echo $dato->getTbdatoclinicoid(); ?>)"
-                                            class="btn-eliminar" title="Eliminar"><i class="ph ph-trash"></i> Eliminar</button>
+                                            class="btn-eliminar" title="Eliminar"><i class="ph ph-trash"></i> Eliminar
+                                    </button>
                                 <?php endif; ?>
                             </td>
                         </tr>

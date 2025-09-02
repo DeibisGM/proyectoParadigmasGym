@@ -33,8 +33,9 @@ if ($tipoUsuario === 'cliente') {
 <body>
 <div class="container">
     <header>
+        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-phone-plus"></i>Gestión de Números de Emergencia</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
+
     </header>
 
     <main>
@@ -96,18 +97,26 @@ if ($tipoUsuario === 'cliente') {
                                     }
                                     ?>
                                 </td>
-                                <td><input type="text" name="nombre" value="<?php echo htmlspecialchars($numero->getNombre()); ?>" placeholder="Nombre del Contacto" maxlength="50" required></td>
-                                <td><input type="text" name="telefono" value="<?php echo htmlspecialchars($numero->getTelefono()); ?>" placeholder="Teléfono" maxlength="8" required></td>
-                                <td><input type="text" name="relacion" value="<?php echo htmlspecialchars($numero->getRelacion()); ?>" placeholder="Relación" maxlength="30" required></td>
+                                <td><input type="text" name="nombre"
+                                           value="<?php echo htmlspecialchars($numero->getNombre()); ?>"
+                                           placeholder="Nombre del Contacto" maxlength="50" required></td>
+                                <td><input type="text" name="telefono"
+                                           value="<?php echo htmlspecialchars($numero->getTelefono()); ?>"
+                                           placeholder="Teléfono" maxlength="8" required></td>
+                                <td><input type="text" name="relacion"
+                                           value="<?php echo htmlspecialchars($numero->getRelacion()); ?>"
+                                           placeholder="Relación" maxlength="30" required></td>
                                 <td class="actions-cell">
                                     <input type="hidden" name="id" value="<?php echo $numero->getId(); ?>">
                                     <input type="hidden" name="clienteId"
                                            value="<?php echo $numero->getClienteId(); ?>">
                                     <button type="submit" name="actualizar" title="Actualizar"><i
-                                                class="ph ph-pencil-simple"></i> Actualizar</button>
+                                                class="ph ph-pencil-simple"></i> Actualizar
+                                    </button>
                                     <button type="submit" name="eliminar"
                                             onclick="return confirm('¿Seguro que desea eliminar este número?');"
-                                            title="Eliminar"><i class="ph ph-trash"></i> Eliminar</button>
+                                            title="Eliminar"><i class="ph ph-trash"></i> Eliminar
+                                    </button>
                                 </td>
                             </form>
                         </tr>
