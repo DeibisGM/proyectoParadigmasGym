@@ -1,7 +1,6 @@
 <?php
 include_once 'data.php';
-include_once '../domain/instructor.php';
-include_once '../domain/certificado.php';
+include '../domain/instructor.php';
 
 class InstructorData extends Data
 {
@@ -11,22 +10,25 @@ class InstructorData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo, tbinstructorcertificado, tbinstructorimagenid) VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?)";
-
-        $stmt = mysqli_prepare($conn, $queryInsert);
+        // Generar ID de 3 dígitos si no existe
         $id = $instructor->getInstructorId();
-        $nombre = $instructor->getInstructorNombre();
-        $telefono = $instructor->getInstructorTelefono();
-        $direccion = $instructor->getInstructorDireccion();
-        $correo = $instructor->getInstructorCorreo();
-        $cuenta = $instructor->getInstructorCuenta();
-        $contrasena = $instructor->getInstructorContraseña();
-        $certificado = $instructor->getInstructorCertificado();
-        $imagenid = $instructor->getTbinstructorImagenId();
+        if (empty($id)) {
+            $id = $this->getNextInstructorId();
+        }
+        // Asegurar formato de 3 dígitos
+        $id = str_pad($id, 3, '0', STR_PAD_LEFT);
+        $instructor->setInstructorId($id);
 
-        mysqli_stmt_bind_param($stmt, 'sssssssss', $id, $nombre, $telefono, $direccion, $correo, $cuenta, $contrasena, $certificado, $imagenid);
+        $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo, tbinstructorcertificado) VALUES (" .
+            $instructor->getInstructorId() . ",'" .
+            $instructor->getInstructorNombre() . "','" .
+            $instructor->getInstructorTelefono() . "','" .
+            $instructor->getInstructorDireccion() . "','" .
+            $instructor->getInstructorCorreo() . "','" .
+            $instructor->getInstructorCuenta() . "','" .
+            $instructor->getInstructorContraseña() . "', 1, '');";
 
-        $result = mysqli_stmt_execute($stmt);
+        $result = mysqli_query($conn, $queryInsert);
         mysqli_close($conn);
         return $result;
     }
@@ -36,22 +38,16 @@ class InstructorData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbinstructor SET tbinstructornombre=?, tbinstructortelefono=?, tbinstructordireccion=?, tbinstructorcorreo=?, tbinstructorcuenta=?, tbinstructorcontraseña=?, tbinstructorcertificado=?, tbinstructorimagenid=? WHERE tbinstructorid=?";
+        $queryUpdate = "UPDATE tbinstructor SET tbinstructornombre='" . $instructor->getInstructorNombre() .
+            "', tbinstructortelefono='" . $instructor->getInstructorTelefono() .
+            "', tbinstructordireccion='" . $instructor->getInstructorDireccion() .
+            "', tbinstructorcorreo='" . $instructor->getInstructorCorreo() .
+            "', tbinstructorcuenta='" . $instructor->getInstructorCuenta() .
+            "', tbinstructorcontraseña='" . $instructor->getInstructorContraseña() .
+            "', tbinstructorcertificado='" . $instructor->getInstructorCertificado() .
+            "' WHERE tbinstructorid=" . $instructor->getInstructorId() . ";";
 
-        $stmt = mysqli_prepare($conn, $queryUpdate);
-        $nombre = $instructor->getInstructorNombre();
-        $telefono = $instructor->getInstructorTelefono();
-        $direccion = $instructor->getInstructorDireccion();
-        $correo = $instructor->getInstructorCorreo();
-        $cuenta = $instructor->getInstructorCuenta();
-        $contrasena = $instructor->getInstructorContraseña();
-        $certificado = $instructor->getInstructorCertificado();
-        $imagenid = $instructor->getTbinstructorImagenId();
-        $id = $instructor->getInstructorId();
-
-        mysqli_stmt_bind_param($stmt, 'sssssssss', $nombre, $telefono, $direccion, $correo, $cuenta, $contrasena, $certificado, $imagenid, $id);
-
-        $result = mysqli_stmt_execute($stmt);
+        $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
         return $result;
     }
@@ -60,10 +56,8 @@ class InstructorData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $queryDelete = "UPDATE tbinstructor SET tbinstructoractivo = 0 WHERE tbinstructorid=?;";
-        $stmt = mysqli_prepare($conn, $queryDelete);
-        mysqli_stmt_bind_param($stmt, 's', $instructorId);
-        $result = mysqli_stmt_execute($stmt);
+        $queryDelete = "UPDATE tbinstructor SET tbinstructoractivo = 0 WHERE tbinstructorid=" . $instructorId . ";";
+        $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
     }
@@ -72,10 +66,8 @@ class InstructorData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $queryUpdate = "UPDATE tbinstructor SET tbinstructoractivo = 1 WHERE tbinstructorid=?;";
-        $stmt = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmt, 's', $instructorId);
-        $result = mysqli_stmt_execute($stmt);
+        $queryUpdate = "UPDATE tbinstructor SET tbinstructoractivo = 1 WHERE tbinstructorid=" . $instructorId . ";";
+        $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
         return $result;
     }
@@ -102,8 +94,7 @@ class InstructorData extends Data
                 $row['tbinstructorcuenta'],
                 $row['tbinstructorcontraseña'],
                 $row['tbinstructoractivo'],
-                [], // Initialize with empty array, certificates will be set later
-                isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
+                $row['tbinstructorcertificado']
             );
         }
         return $instructors;
@@ -113,22 +104,28 @@ class InstructorData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $query = "SELECT * FROM tbinstructor WHERE tbinstructorcorreo=? AND tbinstructorcontraseña=? AND tbinstructoractivo = 1 LIMIT 1;";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 'ss', $correo, $contraseña);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
+
+        $correo = mysqli_real_escape_string($conn, $correo);
+        $contraseña = mysqli_real_escape_string($conn, $contraseña);
+
+        $query = "SELECT * FROM tbinstructor WHERE tbinstructorcorreo='" . $correo . "' AND tbinstructorcontraseña='" . $contraseña . "' AND tbinstructoractivo = 1 LIMIT 1;";
+        $result = mysqli_query($conn, $query);
 
         $instructor = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $instructor = new Instructor(
-                $row['tbinstructorid'], $row['tbinstructornombre'], $row['tbinstructortelefono'],
-                $row['tbinstructordireccion'], $row['tbinstructorcorreo'], $row['tbinstructorcuenta'],
-                $row['tbinstructorcontraseña'], $row['tbinstructoractivo'],
-                [], // Initialize with empty array, certificates will be set later
-                isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
+                $row['tbinstructorid'],
+                $row['tbinstructornombre'],
+                $row['tbinstructortelefono'],
+                $row['tbinstructordireccion'],
+                $row['tbinstructorcorreo'],
+                $row['tbinstructorcuenta'],
+                $row['tbinstructorcontraseña'],
+                $row['tbinstructoractivo'],
+                $row['tbinstructorcertificado']
             );
         }
+
         mysqli_close($conn);
         return $instructor;
     }
@@ -137,44 +134,59 @@ class InstructorData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $query = "SELECT * FROM tbinstructor WHERE tbinstructorid=? LIMIT 1;";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 's', $id);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
+
+        $id = mysqli_real_escape_string($conn, $id);
+        $query = "SELECT * FROM tbinstructor WHERE tbinstructorid='" . $id . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
 
         $instructor = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $instructor = new Instructor(
-                $row['tbinstructorid'], $row['tbinstructornombre'], $row['tbinstructortelefono'],
-                $row['tbinstructordireccion'], $row['tbinstructorcorreo'], $row['tbinstructorcuenta'],
-                $row['tbinstructorcontraseña'], $row['tbinstructoractivo'],
-                [], // Initialize with empty array, certificates will be set later
-                isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
+                $row['tbinstructorid'],
+                $row['tbinstructornombre'],
+                $row['tbinstructortelefono'],
+                $row['tbinstructordireccion'],
+                $row['tbinstructorcorreo'],
+                $row['tbinstructorcuenta'],
+                $row['tbinstructorcontraseña'],
+                $row['tbinstructoractivo'],
+                $row['tbinstructorcertificado']
             );
         }
+
         mysqli_close($conn);
         return $instructor;
     }
 
-    // MÉTODO AÑADIDO PARA SOLUCIONAR EL ERROR
     public function existeInstructorPorCorreo($correo)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "SELECT tbinstructorid FROM tbinstructor WHERE tbinstructorcorreo = ? LIMIT 1;";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, 's', $correo);
-        mysqli_stmt_execute($stmt);
-
-        $result = mysqli_stmt_get_result($stmt);
+        $correo = mysqli_real_escape_string($conn, $correo);
+        $query = "SELECT tbinstructorid FROM tbinstructor WHERE tbinstructorcorreo='" . $correo . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
         $existe = mysqli_num_rows($result) > 0;
 
-        mysqli_stmt_close($stmt);
         mysqli_close($conn);
         return $existe;
     }
+
+    public function getNextInstructorId()
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        $query = "SELECT MAX(tbinstructorid) as max_id FROM tbinstructor";
+        $result = mysqli_query($conn, $query);
+        $row = mysqli_fetch_assoc($result);
+        mysqli_close($conn);
+
+        $nextId = ($row['max_id'] ? intval($row['max_id']) + 1 : 1);
+        return $nextId;
+    }
+
+
 }
 
 ?>

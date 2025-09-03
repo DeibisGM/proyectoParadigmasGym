@@ -9,7 +9,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1700px;
     margin: 0 auto;
     background-color: #ffffff;
     padding: 2rem;
@@ -89,7 +89,8 @@ input[type="submit"] {
     flex-shrink: 0;
 }
 
-.button-icon-only i.ph {
+button i.ph,
+input[type="submit"] i.ph {
     margin-right: 0;
 }
 

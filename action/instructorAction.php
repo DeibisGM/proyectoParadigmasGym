@@ -3,37 +3,11 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 session_start();
+include '../business/instructorBusiness.php';
+include '../utility/ImageManager.php';
 
-// Usar include_once para evitar re-declaración de clases
-include_once '../business/instructorBusiness.php';
-include_once '../utility/ImageManager.php';
-
-$instructorBusiness = new InstructorBusiness();
-$imageManager = new ImageManager();
-$redirect_path = '../view/instructorView.php';
-
-// Acción para eliminar solo la imagen
-if (isset($_POST['delete_image'])) {
-    if (isset($_POST['id'])) {
-        $instructorId = $_POST['id'];
-        $instructor = $instructorBusiness->getInstructorPorId($instructorId);
-        if ($instructor) {
-            $imageManager->deleteImage($instructor->getTbinstructorImagenId());
-            $instructor->setTbinstructorImagenId('');
-            $instructorBusiness->actualizarTBInstructor($instructor);
-            header("location: " . $redirect_path . "?success=image_deleted");
-        } else {
-            header("location: " . $redirect_path . "?error=notFound");
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=error");
-    }
-    exit();
-}
-
-// Acción para crear un nuevo instructor
-if (isset($_POST['create'])) {
-    if (isset($_POST['id'], $_POST['nombre'], $_POST['telefono'], $_POST['direccion'], $_POST['correo'], $_POST['cuenta'], $_POST['contraseña'])) {
+if (isset($_POST['update'])) {
+    if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta']) && isset($_POST['contraseña'])) {
         $id = trim($_POST['id']);
         $nombre = trim($_POST['nombre']);
         $telefono = trim($_POST['telefono']);
@@ -42,100 +16,192 @@ if (isset($_POST['create'])) {
         $cuenta = trim($_POST['cuenta']);
         $contraseña = trim($_POST['contraseña']);
 
-        // Aquí irían las validaciones de servidor (longitud, formato, etc.)
+        // Validaciones
+        if (empty($id) || empty($nombre) || empty($correo) || empty($contraseña)) {
+            header("location: ../view/instructorView.php?error=emptyFields");
+            exit();
+        }
 
-        $instructor = new Instructor($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1, '', '');
+        // Validar que la cédula tenga exactamente 3 dígitos
+        if (!preg_match('/^[0-9]{3}$/', $id)) {
+            header("location: ../view/instructorView.php?error=invalidId");
+            exit();
+        }
 
-        $result = $instructorBusiness->insertarTBInstructor($instructor);
-        if ($result === true) { // Check for boolean true for success
-            if (isset($_FILES['tbinstructorimagenid']) && !empty($_FILES['tbinstructorimagenid']['name'][0])) {
-                $newImageIds = $imageManager->addImages($_FILES['tbinstructorimagenid'], $id, 'ins');
-                if (!empty($newImageIds)) {
-                    $instructorCreado = $instructorBusiness->getInstructorPorId($id);
-                    $instructorCreado->setTbinstructorImagenId($newImageIds[0]);
-                    $instructorBusiness->actualizarTBInstructor($instructorCreado);
-                }
+        if (preg_match('/[0-9]/', $nombre)) {
+            header("location: ../view/instructorView.php?error=invalidName");
+            exit();
+        }
+
+        if (strlen($nombre) > 100) {
+            header("location: ../view/instructorView.php?error=nameTooLong");
+            exit();
+        }
+        // Validación de teléfono (solo números)
+        if (!empty($telefono) && !preg_match('/^[0-9]+$/', $telefono)) {
+            header("location: ../view/instructorView.php?error=invalidPhone");
+            exit();
+        }
+
+        // Validación de longitud de teléfono (8-15 dígitos)
+        if (!empty($telefono) && (strlen($telefono) < 8 || strlen($telefono) > 15)) {
+            header("location: ../view/instructorView.php?error=phoneLengthInvalid");
+            exit();
+        }
+
+        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            header("location: ../view/instructorView.php?error=invalidEmail");
+            exit();
+        }
+
+        if (strlen($contraseña) < 4 || strlen($contraseña) > 8) {
+            header("location: ../view/instructorView.php?error=passwordLengthInvalid");
+            exit();
+        }
+
+        $instructorBusiness = new InstructorBusiness();
+
+        // Validar que el correo sea único (excepto para el instructor actual)
+        $correoExistente = $instructorBusiness->existeInstructorPorCorreo($correo);
+        if ($correoExistente) {
+            $instructorActual = $instructorBusiness->getInstructorPorId($id);
+            if ($instructorActual && $instructorActual->getInstructorCorreo() !== $correo) {
+                header("location: ../view/instructorView.php?error=emailExists");
+                exit();
             }
-            header("location: " . $redirect_path . "?success=created");
-        } else if (is_string($result)) { // Check if it's a string (error message)
-            header("location: " . $redirect_path . "?error=" . urlencode($result));
-        } else { // Generic database error
-            header("location: " . $redirect_path . "?error=dbError");
+        }
+
+        $instructor = new Instructor($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1);
+        $result = $instructorBusiness->actualizarTBInstructor($instructor);
+
+        if ($result == 1) {
+            // Gestionar imagen después de actualizar
+            $eliminarImagen = isset($_POST['eliminar_imagen']) && $_POST['eliminar_imagen'] == '1';
+            $resultadoImagen = gestionarImagen('instructores', $id, $_FILES['imagen'], $eliminarImagen);
+
+            header("location: ../view/instructorView.php?success=updated");
+        } else {
+            header("location: ../view/instructorView.php?error=dbError");
         }
     } else {
-        header("location: " . $redirect_path . "?error=error");
+        header("location: ../view/instructorView.php?error=error");
     }
-    exit();
-}
-
-// Acción para actualizar un instructor existente
-if (isset($_POST['update'])) {
-    if (isset($_POST['id'], $_POST['nombre'], $_POST['telefono'], $_POST['direccion'], $_POST['correo'], $_POST['cuenta'], $_POST['contraseña'])) {
+} else if (isset($_POST['delete'])) {
+    if (isset($_POST['id'])) {
+        $instructorBusiness = new InstructorBusiness();
+        $result = $instructorBusiness->eliminarTBInstructor($_POST['id']);
+        if ($result == 1) {
+            $resultadoImagen = gestionarImagen('instructores', $_POST['id'], null, true);
+            header("location: ../view/instructorView.php?success=deleted");
+        } else {
+            header("location: ../view/instructorView.php?error=dbError");
+        }
+    } else {
+        header("location: ../view/instructorView.php?error=error");
+    }
+} else if (isset($_POST['activate'])) {
+    if (!isset($_SESSION['tipo_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
+        header("location: ../view/instructorView.php?error=permission_denied");
+        exit();
+    }
+    if (isset($_POST['id'])) {
+        $instructorBusiness = new InstructorBusiness();
+        $result = $instructorBusiness->activarTBInstructor($_POST['id']);
+        if ($result == 1) {
+            header("location: ../view/instructorView.php?success=activated");
+        } else {
+            header("location: ../view/instructorView.php?error=dbError");
+        }
+    } else {
+        header("location: ../view/instructorView.php?error=error");
+    }
+} else if (isset($_POST['create'])) {
+    if (!isset($_SESSION['tipo_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
+        header("location: ../view/instructorView.php?error=permission_denied");
+        exit();
+    }
+    if (isset($_POST['id']) && ($_POST['nombre']) && isset($_POST['telefono']) && isset($_POST['direccion']) && isset($_POST['correo']) && isset($_POST['cuenta']) && isset($_POST['contraseña'])) {
         $id = trim($_POST['id']);
+        $nombre = trim($_POST['nombre']);
+        $telefono = trim($_POST['telefono']);
+        $direccion = trim($_POST['direccion']);
+        $correo = trim($_POST['correo']);
+        $cuenta = trim($_POST['cuenta']);
+        $contraseña = trim($_POST['contraseña']);
 
-        $instructorActual = $instructorBusiness->getInstructorPorId($id);
-        if ($instructorActual) {
-            $instructorActual->setInstructorNombre(trim($_POST['nombre']));
-            $instructorActual->setInstructorTelefono(trim($_POST['telefono']));
-            $instructorActual->setInstructorDireccion(trim($_POST['direccion']));
-            $instructorActual->setInstructorCorreo(trim($_POST['correo']));
-            $instructorActual->setInstructorCuenta(trim($_POST['cuenta']));
-            $instructorActual->setInstructorContraseña(trim($_POST['contraseña']));
+        // Validaciones
+        if (empty($id) || empty($nombre) || empty($correo) || empty($contraseña)) {
+            header("location: ../view/instructorView.php?error=emptyFields");
+            exit();
+        }
 
-            if (isset($_FILES['tbinstructorimagenid']) && !empty($_FILES['tbinstructorimagenid']['name'][0])) {
-                if ($instructorActual->getTbinstructorImagenId() != '' && $instructorActual->getTbinstructorImagenId() != '0') {
-                    $imageManager->deleteImage($instructorActual->getTbinstructorImagenId());
-                }
-                $newImageIds = $imageManager->addImages($_FILES['tbinstructorimagenid'], $id, 'ins');
-                if (!empty($newImageIds)) {
-                    $instructorActual->setTbinstructorImagenId($newImageIds[0]);
-                }
+        // Validar que la cédula tenga exactamente 3 dígitos
+        if (!preg_match('/^[0-9]{3}$/', $id)) {
+            header("location: ../view/instructorView.php?error=invalidId");
+            exit();
+        }
+
+        if (preg_match('/[0-9]/', $nombre)) {
+            header("location: ../view/instructorView.php?error=invalidName");
+            exit();
+        }
+
+        if (strlen($nombre) > 100) {
+            header("location: ../view/instructorView.php?error=nameTooLong");
+            exit();
+        }
+        // Validación de teléfono (solo números)
+        if (!empty($telefono) && !preg_match('/^[0-9]+$/', $telefono)) {
+            header("location: ../view/instructorView.php?error=invalidPhone");
+            exit();
+        }
+
+        // Validación de longitud de teléfono (8-15 dígitos)
+        if (!empty($telefono) && (strlen($telefono) < 8 || strlen($telefono) > 15)) {
+            header("location: ../view/instructorView.php?error=phoneLengthInvalid");
+            exit();
+        }
+
+        if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            header("location: ../view/instructorView.php?error=invalidEmail");
+            exit();
+        }
+
+        if (strlen($contraseña) < 4 || strlen($contraseña) > 8) {
+            header("location: ../view/instructorView.php?error=passwordLengthInvalid");
+            exit();
+        }
+
+        // Validar que el ID no exista ya
+        $instructorBusiness = new InstructorBusiness();
+        $instructorExistente = $instructorBusiness->getInstructorPorId($id);
+        if ($instructorExistente) {
+            header("location: ../view/instructorView.php?error=idExists");
+            exit();
+        }
+
+        // Validar que el correo sea único
+        $correoExistente = $instructorBusiness->existeInstructorPorCorreo($correo);
+        if ($correoExistente) {
+            header("location: ../view/instructorView.php?error=emailExists");
+            exit();
+        }
+
+        $instructor = new Instructor($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, 1);
+        $result = $instructorBusiness->insertarTBInstructor($instructor);
+
+        if ($result == 1) {
+            if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
+                $resultadoImagen = gestionarImagen('instructores', $id, $_FILES['imagen']);
             }
-
-            $result = $instructorBusiness->actualizarTBInstructor($instructorActual);
-            if ($result === true) { // Check for boolean true for success
-                header("location: " . $redirect_path . "?success=updated");
-            } else if (is_string($result)) { // Check if it's a string (error message)
-                header("location: " . $redirect_path . "?error=" . urlencode($result));
-            } else { // Generic database error
-                header("location: " . $redirect_path . "?error=dbError");
-            }
+            header("location: ../view/instructorView.php?success=created");
         } else {
-            header("location: " . $redirect_path . "?error=notFound");
+            header("location: ../view/instructorView.php?error=dbError");
         }
     } else {
-        header("location: " . $redirect_path . "?error=error");
+        header("location: ../view/instructorView.php?error=error");
     }
-    exit();
+} else {
+    header("location: ../view/instructorView.php?error=invalidRequest");
 }
-
-// Acción para desactivar (eliminar lógicamente)
-if (isset($_POST['delete'])) {
-    if (isset($_POST['id'])) {
-        if ($instructorBusiness->eliminarTBInstructor($_POST['id'])) {
-            header("location: " . $redirect_path . "?success=deleted");
-        } else {
-            header("location: " . $redirect_path . "?error=dbError");
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=error");
-    }
-    exit();
-}
-
-// Acción para activar
-if (isset($_POST['activate'])) {
-    if (isset($_POST['id'])) {
-        if ($instructorBusiness->activarTBInstructor($_POST['id'])) {
-            header("location: " . $redirect_path . "?success=activated");
-        } else {
-            header("location: " . $redirect_path . "?error=dbError");
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=error");
-    }
-    exit();
-}
-
-header("location: " . $redirect_path . "?error=invalidRequest");
 ?>

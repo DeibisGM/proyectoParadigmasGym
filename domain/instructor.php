@@ -10,10 +10,9 @@ class Instructor
     private $instructorCuenta;
     private $instructorContraseña;
     private $instructorActivo;
-    private $instructorCertificado = [];
-    private $tbinstructorimagenid;
+    private $instructorCertificado;
 
-    public function __construct($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, $activo, array $certificado = [], $imagenid = '')
+    public function __construct($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, $activo, $certificado = '')
     {
         $this->instructorId = $id;
         $this->instructorNombre = $nombre;
@@ -24,7 +23,6 @@ class Instructor
         $this->instructorContraseña = $contraseña;
         $this->instructorActivo = $activo;
         $this->instructorCertificado = $certificado;
-        $this->tbinstructorimagenid = $imagenid;
     }
 
     public function getInstructorId()
@@ -72,11 +70,6 @@ class Instructor
         return $this->instructorCertificado;
     }
 
-    public function getTbinstructorImagenId()
-    {
-        return $this->tbinstructorimagenid;
-    }
-
     public function setInstructorId($id)
     {
         $this->instructorId = $id;
@@ -117,14 +110,9 @@ class Instructor
         $this->instructorActivo = $activo;
     }
 
-    public function setInstructorCertificado(array $certificado)
+    public function setInstructorCertificado($certificado)
     {
         $this->instructorCertificado = $certificado;
-    }
-
-    public function setTbinstructorImagenId($imagenid)
-    {
-        $this->tbinstructorimagenid = $imagenid;
     }
 }
 

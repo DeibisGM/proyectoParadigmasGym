@@ -42,10 +42,11 @@ class Data
 
             default:
                 $this->isActive = false;
-                $this->server = "localhost";
+                $this->server = "shortline.proxy.rlwy.net";
                 $this->user = "root";
-                $this->password = "";
-                $this->db = "bdgym";
+                $this->password = "GobisQryHUevnFguFcxHzoFjRMBoxAuv";
+                $this->db = "railway";
+                $this->port = 53962;
 
                 break;
         }
