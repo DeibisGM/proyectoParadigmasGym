@@ -1,12 +1,12 @@
 <?php
     include_once 'data.php';
-    if (!class_exists('DatoClinico')) {
-        include_once '../domain/datoClinico.php';
+    if (!class_exists('ClientePadecimiento')) {
+        include_once '../domain/clientePadecimiento.php';
     }
 
-    class DatoClinicoData extends Data {
+    class ClientePadecimientoData extends Data {
 
-        public function insertarTBDatoClinico($datoClinico) {
+        public function insertarTBClientePadecimiento($clientePadecimiento) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
                 return false;
@@ -14,16 +14,16 @@
             $conn->set_charset('utf8');
 
             // Verificar si ya existe un registro para este cliente
-            $queryExiste = "SELECT * FROM tbdatoclinico WHERE tbclienteid = ?";
+            $queryExiste = "SELECT * FROM tbclientepadecimiento WHERE tbclienteid = ?";
             $stmtExiste = mysqli_prepare($conn, $queryExiste);
-            mysqli_stmt_bind_param($stmtExiste, "i", $datoClinico->getTbclienteid());
+            mysqli_stmt_bind_param($stmtExiste, "i", $clientePadecimiento->getTbclienteid());
             mysqli_stmt_execute($stmtExiste);
             $resultExiste = mysqli_stmt_get_result($stmtExiste);
 
             if ($rowExiste = mysqli_fetch_assoc($resultExiste)) {
                 // YA EXISTE: Concatenar padecimientos
                 $padecimientosActuales = $rowExiste['tbpadecimientoid'];
-                $nuevosPadecimientos = $datoClinico->getTbpadecimientoid();
+                $nuevosPadecimientos = $clientePadecimiento->getTbpadecimientoid();
 
                 // Convertir a arrays, unir y eliminar duplicados
                 $actualesArray = empty($padecimientosActuales) ? array() : explode('$', $padecimientosActuales);
@@ -32,15 +32,15 @@
                 $padecimientosConcatenados = implode('$', array_filter($todosLosPadecimientos));
 
                 // Actualizar registro existente
-                $queryUpdate = "UPDATE tbdatoclinico SET tbpadecimientoid = ? WHERE tbclienteid = ?";
+                $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientoid = ?, tbpadecimientodictamenid = ? WHERE tbclienteid = ?";
                 $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-                mysqli_stmt_bind_param($stmtUpdate, "si", $padecimientosConcatenados, $datoClinico->getTbclienteid());
+                mysqli_stmt_bind_param($stmtUpdate, "sii", $padecimientosConcatenados, $clientePadecimiento->getTbpadecimientodictamenid(), $clientePadecimiento->getTbclienteid());
                 $result = mysqli_stmt_execute($stmtUpdate);
                 mysqli_stmt_close($stmtUpdate);
 
             } else {
                 // NO EXISTE: Crear nuevo registro
-                $queryGetLastId = "SELECT MAX(tbdatoclinicoid) AS tbdatoclinicoid FROM tbdatoclinico";
+                $queryGetLastId = "SELECT MAX(tbclientepadecimientoid) AS tbclientepadecimientoid FROM tbclientepadecimiento";
                 $resultId = mysqli_query($conn, $queryGetLastId);
                 $nextId = 1;
 
@@ -50,11 +50,11 @@
                     }
                 }
 
-                $queryInsert = "INSERT INTO tbdatoclinico (tbdatoclinicoid, tbclienteid, tbpadecimientoid) VALUES (?, ?, ?)";
+                $queryInsert = "INSERT INTO tbclientepadecimiento (tbclientepadecimientoid, tbclienteid, tbpadecimientoid, tbpadecimientodictamenid) VALUES (?, ?, ?, ?)";
                 $stmt = mysqli_prepare($conn, $queryInsert);
 
                 if ($stmt) {
-                    mysqli_stmt_bind_param($stmt, "iis", $nextId, $datoClinico->getTbclienteid(), $datoClinico->getTbpadecimientoid());
+                    mysqli_stmt_bind_param($stmt, "iisi", $nextId, $clientePadecimiento->getTbclienteid(), $clientePadecimiento->getTbpadecimientoid(), $clientePadecimiento->getTbpadecimientodictamenid());
                     $result = mysqli_stmt_execute($stmt);
                     mysqli_stmt_close($stmt);
                 } else {
@@ -67,18 +67,18 @@
             return $result;
         }
 
-        public function actualizarTBDatoClinico($datoClinico) {
+        public function actualizarTBClientePadecimiento($clientePadecimiento) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
                 return false;
             }
             $conn->set_charset('utf8');
 
-            $queryUpdate = "UPDATE tbdatoclinico SET tbclienteid=?, tbpadecimientoid=? WHERE tbdatoclinicoid=?";
+            $queryUpdate = "UPDATE tbclientepadecimiento SET tbclienteid=?, tbpadecimientoid=?, tbpadecimientodictamenid=? WHERE tbclientepadecimientoid=?";
             $stmt = mysqli_prepare($conn, $queryUpdate);
 
             if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "isi", $datoClinico->getTbclienteid(), $datoClinico->getTbpadecimientoid(), $datoClinico->getTbdatoclinicoid());
+                mysqli_stmt_bind_param($stmt, "isii", $clientePadecimiento->getTbclienteid(), $clientePadecimiento->getTbpadecimientoid(), $clientePadecimiento->getTbpadecimientodictamenid(), $clientePadecimiento->getTbclientepadecimientoid());
                 $result = mysqli_stmt_execute($stmt);
                 mysqli_stmt_close($stmt);
             } else {
@@ -89,18 +89,18 @@
             return $result;
         }
 
-        public function eliminarTBDatoClinico($tbdatoclinicoid) {
+        public function eliminarTBClientePadecimiento($tbclientepadecimientoid) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
                 return false;
             }
             $conn->set_charset('utf8');
 
-            $queryDelete = "DELETE FROM tbdatoclinico WHERE tbdatoclinicoid=?";
+            $queryDelete = "DELETE FROM tbclientepadecimiento WHERE tbclientepadecimientoid=?";
             $stmt = mysqli_prepare($conn, $queryDelete);
 
             if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "i", $tbdatoclinicoid);
+                mysqli_stmt_bind_param($stmt, "i", $tbclientepadecimientoid);
                 $result = mysqli_stmt_execute($stmt);
                 mysqli_stmt_close($stmt);
             } else {
@@ -110,14 +110,15 @@
             mysqli_close($conn);
             return $result;
         }
-        public function eliminarTBDatoClinicoPorCliente($tbclienteid) {
+
+        public function eliminarTBClientePadecimientoPorCliente($tbclienteid) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
                 return false;
             }
             $conn->set_charset('utf8');
 
-            $queryDelete = "DELETE FROM tbdatoclinico WHERE tbclienteid=?";
+            $queryDelete = "DELETE FROM tbclientepadecimiento WHERE tbclienteid=?";
             $stmt = mysqli_prepare($conn, $queryDelete);
 
             if ($stmt) {
@@ -132,16 +133,16 @@
             return $result;
         }
 
-        public function obtenerTBDatoClinico() {
+        public function obtenerTBClientePadecimiento() {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
                 return array();
             }
             $conn->set_charset('utf8');
 
-            $querySelect = "SELECT dc.*, c.tbclientecarnet FROM tbdatoclinico dc
-                            LEFT JOIN tbcliente c ON dc.tbclienteid = c.tbclienteid
-                            ORDER BY dc.tbclienteid, dc.tbdatoclinicoid";
+            $querySelect = "SELECT cp.*, c.tbclientecarnet FROM tbclientepadecimiento cp
+                            LEFT JOIN tbcliente c ON cp.tbclienteid = c.tbclienteid
+                            ORDER BY cp.tbclienteid, cp.tbclientepadecimientoid";
             $result = mysqli_query($conn, $querySelect);
 
             if (!$result) {
@@ -149,36 +150,37 @@
                 return array();
             }
 
-            $datosClinicos = array();
+            $clientePadecimientos = array();
             while ($row = mysqli_fetch_array($result)) {
-                $currentDatoClinico = new DatoClinico(
-                    $row['tbdatoclinicoid'],
+                $currentClientePadecimiento = new ClientePadecimiento(
+                    $row['tbclientepadecimientoid'],
                     $row['tbclienteid'],
-                    $row['tbpadecimientoid']
+                    $row['tbpadecimientoid'],
+                    $row['tbpadecimientodictamenid']
                 );
 
                 // Establecer el carnet
-                $currentDatoClinico->setCarnet($row['tbclientecarnet'] ?? '');
+                $currentClientePadecimiento->setCarnet($row['tbclientecarnet'] ?? '');
 
                 // Obtener nombres de padecimientos
                 $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
-                $currentDatoClinico->setPadecimientosNombres($padecimientosNombres);
+                $currentClientePadecimiento->setPadecimientosNombres($padecimientosNombres);
 
-                array_push($datosClinicos, $currentDatoClinico);
+                array_push($clientePadecimientos, $currentClientePadecimiento);
             }
 
             mysqli_close($conn);
-            return $datosClinicos;
+            return $clientePadecimientos;
         }
 
-        public function obtenerTBDatoClinicoPorCliente($tbclienteid) {
+        public function obtenerTBClientePadecimientoPorCliente($tbclienteid) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
                 return null;
             }
             $conn->set_charset('utf8');
 
-            $querySelect = "SELECT * FROM tbdatoclinico WHERE tbclienteid=? ORDER BY tbdatoclinicoid LIMIT 1";
+            $querySelect = "SELECT * FROM tbclientepadecimiento WHERE tbclienteid=? ORDER BY tbclientepadecimientoid LIMIT 1";
             $stmt = mysqli_prepare($conn, $querySelect);
 
             if ($stmt) {
@@ -187,18 +189,19 @@
                 $result = mysqli_stmt_get_result($stmt);
 
                 if ($row = mysqli_fetch_array($result)) {
-                    $datoClinico = new DatoClinico(
-                        $row['tbdatoclinicoid'],
+                    $clientePadecimiento = new ClientePadecimiento(
+                        $row['tbclientepadecimientoid'],
                         $row['tbclienteid'],
-                        $row['tbpadecimientoid']
+                        $row['tbpadecimientoid'],
+                        $row['tbpadecimientodictamenid']
                     );
 
                     $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
-                    $datoClinico->setPadecimientosNombres($padecimientosNombres);
+                    $clientePadecimiento->setPadecimientosNombres($padecimientosNombres);
 
                     mysqli_stmt_close($stmt);
                     mysqli_close($conn);
-                    return $datoClinico;
+                    return $clientePadecimiento;
                 }
 
                 mysqli_stmt_close($stmt);
@@ -208,16 +211,16 @@
             return null;
         }
 
-        public function obtenerTodosTBDatoClinicoPorCliente($tbclienteid) {
+        public function obtenerTodosTBClientePadecimientoPorCliente($tbclienteid) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
                 return array();
             }
             $conn->set_charset('utf8');
 
-            $querySelect = "SELECT dc.*, c.tbclientecarnet FROM tbdatoclinico dc
-                            LEFT JOIN tbcliente c ON dc.tbclienteid = c.tbclienteid
-                            WHERE dc.tbclienteid=? ORDER BY dc.tbdatoclinicoid";
+            $querySelect = "SELECT cp.*, c.tbclientecarnet FROM tbclientepadecimiento cp
+                            LEFT JOIN tbcliente c ON cp.tbclienteid = c.tbclienteid
+                            WHERE cp.tbclienteid=? ORDER BY cp.tbclientepadecimientoid";
             $stmt = mysqli_prepare($conn, $querySelect);
 
             if ($stmt) {
@@ -225,27 +228,28 @@
                 mysqli_stmt_execute($stmt);
                 $result = mysqli_stmt_get_result($stmt);
 
-                $datosClinicos = array();
+                $clientePadecimientos = array();
                 while ($row = mysqli_fetch_array($result)) {
-                    $datoClinico = new DatoClinico(
-                        $row['tbdatoclinicoid'],
+                    $clientePadecimiento = new ClientePadecimiento(
+                        $row['tbclientepadecimientoid'],
                         $row['tbclienteid'],
-                        $row['tbpadecimientoid']
+                        $row['tbpadecimientoid'],
+                        $row['tbpadecimientodictamenid']
                     );
 
                     // Establecer el carnet
-                    $datoClinico->setCarnet($row['tbclientecarnet'] ?? '');
+                    $clientePadecimiento->setCarnet($row['tbclientecarnet'] ?? '');
 
                     // Obtener nombres de padecimientos
                     $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
-                    $datoClinico->setPadecimientosNombres($padecimientosNombres);
+                    $clientePadecimiento->setPadecimientosNombres($padecimientosNombres);
 
-                    array_push($datosClinicos, $datoClinico);
+                    array_push($clientePadecimientos, $clientePadecimiento);
                 }
 
                 mysqli_stmt_close($stmt);
                 mysqli_close($conn);
-                return $datosClinicos;
+                return $clientePadecimientos;
             }
 
             mysqli_close($conn);
@@ -283,42 +287,43 @@
             return $clientes;
         }
 
-    public function obtenerTBDatoClinicoPorId($registroId) {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        if (!$conn) {
-            return null;
-        }
-        $conn->set_charset('utf8');
+        public function obtenerTBClientePadecimientoPorId($registroId) {
+            $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+            if (!$conn) {
+                return null;
+            }
+            $conn->set_charset('utf8');
 
-        $querySelect = "SELECT * FROM tbdatoclinico WHERE tbdatoclinicoid=?";
-        $stmt = mysqli_prepare($conn, $querySelect);
+            $querySelect = "SELECT * FROM tbclientepadecimiento WHERE tbclientepadecimientoid=?";
+            $stmt = mysqli_prepare($conn, $querySelect);
 
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "i", $registroId);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, "i", $registroId);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
 
-            if ($row = mysqli_fetch_array($result)) {
-                $datoClinico = new DatoClinico(
-                    $row['tbdatoclinicoid'],
-                    $row['tbclienteid'],
-                    $row['tbpadecimientoid']
-                );
+                if ($row = mysqli_fetch_array($result)) {
+                    $clientePadecimiento = new ClientePadecimiento(
+                        $row['tbclientepadecimientoid'],
+                        $row['tbclienteid'],
+                        $row['tbpadecimientoid'],
+                        $row['tbpadecimientodictamenid']
+                    );
 
-                $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
-                $datoClinico->setPadecimientosNombres($padecimientosNombres);
+                    $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
+                    $clientePadecimiento->setPadecimientosNombres($padecimientosNombres);
+
+                    mysqli_stmt_close($stmt);
+                    mysqli_close($conn);
+                    return $clientePadecimiento;
+                }
 
                 mysqli_stmt_close($stmt);
-                mysqli_close($conn);
-                return $datoClinico;
             }
 
-            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+            return null;
         }
-
-        mysqli_close($conn);
-        return null;
-    }
 
         public function obtenerPadecimientos() {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);

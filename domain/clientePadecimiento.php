@@ -1,21 +1,23 @@
 <?php
-class DatoClinico {
-    private $tbdatoclinicoid;
+class ClientePadecimiento {
+    private $tbclientepadecimientoid;
     private $tbclienteid;
     private $tbpadecimientoid;
+    private $tbpadecimientodictamenid;
     private $carnet;
     private $padecimientosNombres;
 
-    public function __construct($tbdatoclinicoid, $tbclienteid, $tbpadecimientoid) {
-        $this->tbdatoclinicoid = $tbdatoclinicoid;
+    public function __construct($tbclientepadecimientoid, $tbclienteid, $tbpadecimientoid, $tbpadecimientodictamenid = null) {
+        $this->tbclientepadecimientoid = $tbclientepadecimientoid;
         $this->tbclienteid = $tbclienteid;
         $this->tbpadecimientoid = $tbpadecimientoid;
+        $this->tbpadecimientodictamenid = $tbpadecimientodictamenid;
         $this->carnet = '';
         $this->padecimientosNombres = array();
     }
 
-    public function getTbdatoclinicoid() {
-        return $this->tbdatoclinicoid;
+    public function getTbclientepadecimientoid() {
+        return $this->tbclientepadecimientoid;
     }
 
     public function getTbclienteid() {
@@ -24,6 +26,10 @@ class DatoClinico {
 
     public function getTbpadecimientoid() {
         return $this->tbpadecimientoid;
+    }
+
+    public function getTbpadecimientodictamenid() {
+        return $this->tbpadecimientodictamenid;
     }
 
     public function getCarnet() {
@@ -45,8 +51,8 @@ class DatoClinico {
         return explode('$', $this->tbpadecimientoid);
     }
 
-    public function setTbdatoclinicoid($tbdatoclinicoid) {
-        $this->tbdatoclinicoid = $tbdatoclinicoid;
+    public function setTbclientepadecimientoid($tbclientepadecimientoid) {
+        $this->tbclientepadecimientoid = $tbclientepadecimientoid;
     }
 
     public function setTbclienteid($tbclienteid) {
@@ -55,6 +61,10 @@ class DatoClinico {
 
     public function setTbpadecimientoid($tbpadecimientoid) {
         $this->tbpadecimientoid = $tbpadecimientoid;
+    }
+
+    public function setTbpadecimientodictamenid($tbpadecimientodictamenid) {
+        $this->tbpadecimientodictamenid = $tbpadecimientodictamenid;
     }
 
     public function setCarnet($carnet) {

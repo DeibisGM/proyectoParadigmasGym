@@ -6,10 +6,10 @@ if (!isset($_SESSION['usuario_id'])) {
     exit();
 }
 
-include_once '../business/datoClinicoBusiness.php';
+include_once '../business/clientePadecimientoBusiness.php';
 include_once '../business/padecimientoBusiness.php';
 
-$datoClinicoBusiness = new DatoClinicoBusiness();
+$clientePadecimientoBusiness = new ClientePadecimientoBusiness();
 $padecimientoBusiness = new PadecimientoBusiness();
 
 $esUsuarioCliente = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'cliente';
@@ -31,20 +31,21 @@ foreach ($padecimientosObj as $padecimiento) {
 }
 
 if ($esUsuarioCliente) {
-    $datosClinicosObj = $datoClinicoBusiness->obtenerTodosTBDatoClinicoPorCliente($_SESSION['usuario_id']);
+    $clientePadecimientosObj = $clientePadecimientoBusiness->obtenerTodosTBClientePadecimientoPorCliente($_SESSION['usuario_id']);
 } else {
-    $datosClinicosObj = $datoClinicoBusiness->obtenerTBDatoClinico();
-    $clientes = $datoClinicoBusiness->obtenerTodosLosClientes();
+    $clientePadecimientosObj = $clientePadecimientoBusiness->obtenerTBClientePadecimiento();
+    $clientes = $clientePadecimientoBusiness->obtenerTodosLosClientes();
 }
 
-$datosClinicos = array();
-foreach ($datosClinicosObj as $datoObj) {
-    $datosClinicos[] = array(
-            'tbdatoclinicoid' => $datoObj->getTbdatoclinicoid(),
-            'tbclienteid' => $datoObj->getTbclienteid(),
-            'tbpadecimientoid' => $datoObj->getTbpadecimientoid(),
-            'carnet' => $datoObj->getCarnet(),
-            'padecimientosNombres' => $datoObj->getPadecimientosNombres()
+$clientePadecimientos = array();
+foreach ($clientePadecimientosObj as $clienteObj) {
+    $clientePadecimientos[] = array(
+            'tbclientepadecimientoid' => $clienteObj->getTbclientepadecimientoid(),
+            'tbclienteid' => $clienteObj->getTbclienteid(),
+            'tbpadecimientoid' => $clienteObj->getTbpadecimientoid(),
+            'tbpadecimientodictamenid' => $clienteObj->getTbpadecimientodictamenid(),
+            'carnet' => $clienteObj->getCarnet(),
+            'padecimientosNombres' => $clienteObj->getPadecimientosNombres()
     );
 }
 ?>
@@ -54,7 +55,7 @@ foreach ($datosClinicosObj as $datoObj) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Datos Clínicos</title>
+    <title>Gestión de Cliente Padecimiento</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -63,7 +64,7 @@ foreach ($datosClinicosObj as $datoObj) {
 <div class="container">
     <header>
         <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
-        <h2><i class="ph ph-first-aid-kit"></i>Gestión de Datos Clínicos</h2>
+        <h2><i class="ph ph-first-aid-kit"></i>Gestión de Cliente Padecimiento</h2>
 
     </header>
 
@@ -104,12 +105,12 @@ foreach ($datosClinicosObj as $datoObj) {
 
         <section>
             <h3 id="tituloFormulario"><i class="ph ph-plus-circle"></i>
-                <?php echo $esUsuarioCliente ? 'Registrar nuevo dato clínico' : 'Registrar dato clínico'; ?>
+                <?php echo $esUsuarioCliente ? 'Registrar nuevo cliente padecimiento' : 'Registrar cliente padecimiento'; ?>
             </h3>
 
-            <form id="formDatoClinico">
+            <form id="formClientePadecimiento">
                 <input type="hidden" id="accion" name="accion" value="create">
-                <input type="hidden" id="datoClinicoId" name="id" value="">
+                <input type="hidden" id="clientePadecimientoId" name="id" value="">
 
                 <?php if (!$esUsuarioCliente): ?>
                     <div>
@@ -145,6 +146,11 @@ foreach ($datosClinicosObj as $datoObj) {
                 </div>
 
                 <div>
+                    <label for="dictamenId">ID Dictamen (opcional):</label>
+                    <input type="number" id="dictamenId" name="dictamenId" min="0" placeholder="Ingrese ID del dictamen">
+                </div>
+
+                <div>
                     <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
                     <button type="button" onclick="limpiarFormulario()" id="btnCancelar" style="display: none;"><i
                                 class="ph ph-x-circle"></i>Cancelar
@@ -155,10 +161,10 @@ foreach ($datosClinicosObj as $datoObj) {
 
         <section>
             <h3>
-                <i class="ph ph-list-bullets"></i><?php echo $esUsuarioCliente ? 'Mis datos clínicos' : 'Datos clínicos de todos los clientes'; ?>
+                <i class="ph ph-list-bullets"></i><?php echo $esUsuarioCliente ? 'Mis cliente padecimientos' : 'Cliente padecimientos de todos los clientes'; ?>
             </h3>
             <div style="overflow-x:auto;">
-                <table id="tablaDatosClinicos">
+                <table id="tablaClientePadecimientos">
                     <thead>
                     <tr>
                         <?php if (!$esUsuarioCliente): ?>
@@ -174,7 +180,7 @@ foreach ($datosClinicosObj as $datoObj) {
                 </table>
             </div>
             <div id="mensajeVacio" style="display: none;">
-                <p><?php echo $esUsuarioCliente ? 'No tiene datos clínicos registrados.' : 'No hay datos clínicos registrados.'; ?></p>
+                <p><?php echo $esUsuarioCliente ? 'No tiene cliente padecimientos registrados.' : 'No hay cliente padecimientos registrados.'; ?></p>
             </div>
         </section>
     </main>
@@ -188,22 +194,23 @@ foreach ($datosClinicosObj as $datoObj) {
     let padecimientosData = <?php echo json_encode($padecimientos); ?>;
     let esUsuarioCliente = <?php echo $esUsuarioCliente ? 'true' : 'false'; ?>;
     let esAdmin = <?php echo $esAdmin ? 'true' : 'false'; ?>;
-    let datosClinicos = <?php echo json_encode($datosClinicos); ?>;
+    let clientePadecimientos = <?php echo json_encode($clientePadecimientos); ?>;
 
-    let datosCli = [];
-    datosClinicos.forEach(dato => {
-        let padecimientosString = dato.tbpadecimientoid || '';
+    let clientePad = [];
+    clientePadecimientos.forEach(cliente => {
+        let padecimientosString = cliente.tbpadecimientoid || '';
         let padecimientosIds = [];
         if (padecimientosString && padecimientosString.trim() !== '') {
             padecimientosIds = padecimientosString.split('$').filter(id => id && id.trim() !== '');
         }
-        datosCli.push({
-            id: dato.tbdatoclinicoid,
-            clienteId: dato.tbclienteid,
-            carnet: dato.carnet || '',
+        clientePad.push({
+            id: cliente.tbclientepadecimientoid,
+            clienteId: cliente.tbclienteid,
+            carnet: cliente.carnet || '',
             padecimientos: padecimientosString,
             padecimientosIds: padecimientosIds,
-            padecimientosNombres: dato.padecimientosNombres || []
+            padecimientosNombres: cliente.padecimientosNombres || [],
+            dictamenId: cliente.tbpadecimientodictamenid
         });
     });
 
@@ -232,28 +239,28 @@ foreach ($datosClinicosObj as $datoObj) {
     function cargarDatosEnTabla() {
         const tbody = document.getElementById('tablaBody');
         tbody.innerHTML = '';
-        if (datosCli.length === 0) {
+        if (clientePad.length === 0) {
             document.getElementById('mensajeVacio').style.display = 'block';
             return;
         }
         document.getElementById('mensajeVacio').style.display = 'none';
 
-        datosCli.forEach((dato, datoIndex) => {
-            if (!dato.padecimientosIds || dato.padecimientosIds.length === 0) return;
+        clientePad.forEach((cliente, clienteIndex) => {
+            if (!cliente.padecimientosIds || cliente.padecimientosIds.length === 0) return;
 
-            dato.padecimientosIds.forEach((padecimientoId, index) => {
+            cliente.padecimientosIds.forEach((padecimientoId, index) => {
                 if (padecimientoId && padecimientoId.trim() !== '') {
                     const padecimientoObj = padecimientosData.find(p => p.tbpadecimientoid == padecimientoId);
                     const nombrePadecimiento = padecimientoObj ? padecimientoObj.tbpadecimientonombre : `ID Desconocido: ${padecimientoId}`;
                     const fila = document.createElement('tr');
-                    fila.setAttribute('data-registro-id', dato.id);
-                    fila.setAttribute('data-cliente-id', dato.clienteId);
+                    fila.setAttribute('data-registro-id', cliente.id);
+                    fila.setAttribute('data-cliente-id', cliente.clienteId);
                     fila.setAttribute('data-padecimiento-id', padecimientoId);
                     fila.setAttribute('data-padecimiento-index', index);
 
                     let contenidoFila = '';
                     if (!esUsuarioCliente) {
-                        contenidoFila += `<td>${dato.carnet}</td>`;
+                        contenidoFila += `<td>${cliente.carnet}</td>`;
                     }
                     contenidoFila += `
                         <td class="padecimiento-cell">
@@ -261,7 +268,7 @@ foreach ($datosClinicosObj as $datoObj) {
                             <div class="padecimiento-edit" style="display: none;">
                                 <div>
                                     <label>Tipo:</label>
-                                    <select id="tipo-edit-${dato.id}-${index}" onchange="cargarPadecimientosPorTipoEdicion(${dato.id}, ${index})">
+                                    <select id="tipo-edit-${cliente.id}-${index}" onchange="cargarPadecimientosPorTipoEdicion(${cliente.id}, ${index})">
                                         <option value="">Seleccione un tipo</option>
                                         <?php foreach ($tiposPadecimiento as $tipo): ?>
                                             <option value="<?php echo htmlspecialchars($tipo); ?>"><?php echo htmlspecialchars($tipo); ?></option>
@@ -270,17 +277,17 @@ foreach ($datosClinicosObj as $datoObj) {
                                 </div>
                                 <div>
                                     <label>Padecimiento:</label>
-                                    <select id="padecimiento-edit-${dato.id}-${index}" disabled><option value="">Primero seleccione un tipo</option></select>
+                                    <select id="padecimiento-edit-${cliente.id}-${index}" disabled><option value="">Primero seleccione un tipo</option></select>
                                 </div>
                             </div>
                         </td>
                         <td class="actions-cell">
-                            <button onclick="editarPadecimientoIndividual(${dato.id}, ${index}, '${padecimientoId}')" class="btn-editar" title="Editar"><i class="ph ph-pencil-simple"></i> Editar</button>
-                            <button onclick="cancelarEdicionIndividual(${dato.id}, ${index})" style="display: none;" class="btn-cancelar-edicion" title="Cancelar"><i class="ph ph-x-circle"></i> Cancelar</button>
-                            <button onclick="guardarEdicionIndividual(${dato.id}, ${index}, '${padecimientoId}')" style="display: none;" class="btn-guardar-edicion" title="Guardar"><i class="ph ph-floppy-disk"></i> Guardar</button>
+                            <button onclick="editarPadecimientoIndividual(${cliente.id}, ${index}, '${padecimientoId}')" class="btn-editar" title="Editar"><i class="ph ph-pencil-simple"></i> Editar</button>
+                            <button onclick="cancelarEdicionIndividual(${cliente.id}, ${index})" style="display: none;" class="btn-cancelar-edicion" title="Cancelar"><i class="ph ph-x-circle"></i> Cancelar</button>
+                            <button onclick="guardarEdicionIndividual(${cliente.id}, ${index}, '${padecimientoId}')" style="display: none;" class="btn-guardar-edicion" title="Guardar"><i class="ph ph-floppy-disk"></i> Guardar</button>
                     `;
                     if (esAdmin) {
-                        contenidoFila += `<button onclick="eliminarPadecimientoIndividual(${dato.id}, '${padecimientoId}', '${nombrePadecimiento}')" class="btn-eliminar" title="Eliminar"><i class="ph ph-trash"></i> Eliminar</button>`;
+                        contenidoFila += `<button onclick="eliminarPadecimientoIndividual(${cliente.id}, '${padecimientoId}', '${nombrePadecimiento}')" class="btn-eliminar" title="Eliminar"><i class="ph ph-trash"></i> Eliminar</button>`;
                     }
                     contenidoFila += `</td>`;
                     fila.innerHTML = contenidoFila;
@@ -342,7 +349,7 @@ foreach ($datosClinicosObj as $datoObj) {
         formData.append('padecimientoIdNuevo', nuevoPadecimientoId);
         formData.append('clienteId', obtenerClienteIdDelRegistro(registroId));
 
-        fetch('../action/datoClinicoAction.php', {method: 'POST', body: formData})
+        fetch('../action/clientePadecimientoAction.php', {method: 'POST', body: formData})
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -371,7 +378,7 @@ foreach ($datosClinicosObj as $datoObj) {
         formData.append('deleteIndividual', '1');
         formData.append('registroId', registroId);
         formData.append('padecimientoId', padecimientoId);
-        fetch('../action/datoClinicoAction.php', {method: 'POST', body: formData})
+        fetch('../action/clientePadecimientoAction.php', {method: 'POST', body: formData})
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -389,16 +396,16 @@ foreach ($datosClinicosObj as $datoObj) {
     }
 
     function limpiarFormulario() {
-        document.getElementById('formDatoClinico').reset();
+        document.getElementById('formClientePadecimiento').reset();
         document.getElementById('accion').value = 'create';
-        document.getElementById('datoClinicoId').value = '';
-        document.getElementById('tituloFormulario').innerHTML = `<i class="ph ph-plus-circle"></i> ${esUsuarioCliente ? 'Registrar nuevo dato clínico' : 'Registrar dato clínico'}`;
+        document.getElementById('clientePadecimientoId').value = '';
+        document.getElementById('tituloFormulario').innerHTML = `<i class="ph ph-plus-circle"></i> ${esUsuarioCliente ? 'Registrar nuevo cliente padecimiento' : 'Registrar cliente padecimiento'}`;
         document.getElementById('btnSubmit').innerHTML = '<i class="ph ph-plus"></i>Registrar';
         document.getElementById('btnCancelar').style.display = 'none';
         document.getElementById('padecimiento').disabled = true;
     }
 
-    document.getElementById('formDatoClinico').addEventListener('submit', function (e) {
+    document.getElementById('formClientePadecimiento').addEventListener('submit', function (e) {
         e.preventDefault();
         const padecimientoSeleccionado = document.getElementById('padecimiento').value;
         if (!padecimientoSeleccionado) {
@@ -410,7 +417,7 @@ foreach ($datosClinicosObj as $datoObj) {
         formData.delete('padecimientoId');
         formData.append('padecimientosIds[]', padecimientoSeleccionado);
         formData.append(accion, '1');
-        fetch('../action/datoClinicoAction.php', {method: 'POST', body: formData})
+        fetch('../action/clientePadecimientoAction.php', {method: 'POST', body: formData})
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -442,7 +449,7 @@ foreach ($datosClinicosObj as $datoObj) {
 
     function aplicarFiltros() {
         const tipoBusqueda = document.getElementById('tipoBusqueda').value;
-        const filas = document.getElementById('tablaDatosClinicos').getElementsByTagName('tbody')[0].rows;
+        const filas = document.getElementById('tablaClientePadecimientos').getElementsByTagName('tbody')[0].rows;
         for (let fila of filas) {
             let mostrar = true;
             if (tipoBusqueda === 'cliente') {
@@ -464,7 +471,7 @@ foreach ($datosClinicosObj as $datoObj) {
         document.getElementById('buscarPadecimiento').value = '';
         document.getElementById('filtroCliente').style.display = 'none';
         document.getElementById('filtroPadecimiento').style.display = 'none';
-        const filas = document.getElementById('tablaDatosClinicos').getElementsByTagName('tbody')[0].rows;
+        const filas = document.getElementById('tablaClientePadecimientos').getElementsByTagName('tbody')[0].rows;
         for (let fila of filas) {
             fila.style.display = '';
         }

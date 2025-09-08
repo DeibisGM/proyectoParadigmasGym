@@ -1,14 +1,14 @@
 <?php
 session_start();
 
-include_once '../business/datoClinicoBusiness.php';
-if (!class_exists('DatoClinico')) {
-    include_once '../domain/datoClinico.php';
+include_once '../business/clientePadecimientoBusiness.php';
+if (!class_exists('ClientePadecimiento')) {
+    include_once '../domain/clientePadecimiento.php';
 }
 
 header('Content-Type: application/json');
 
-$datoClinicoBusiness = new DatoClinicoBusiness();
+$clientePadecimientoBusiness = new ClientePadecimientoBusiness();
 $response = array();
 
 try {
@@ -43,22 +43,23 @@ try {
         }
 
         $padecimientosString = empty($padecimientosIds) ? '' : implode('$', $padecimientosIds);
+        $dictamenId = isset($_POST['dictamenId']) ? intval($_POST['dictamenId']) : null;
 
-        $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
+        $errores = $clientePadecimientoBusiness->validarClientePadecimiento($clienteId, $padecimientosString);
 
         if (!empty($errores)) {
             $response['success'] = false;
             $response['message'] = 'Error de validación: ' . implode(', ', $errores);
         } else {
-            $datoClinico = new DatoClinico(0, $clienteId, $padecimientosString);
-            $resultado = $datoClinicoBusiness->insertarTBDatoClinico($datoClinico);
+            $clientePadecimiento = new ClientePadecimiento(0, $clienteId, $padecimientosString, $dictamenId);
+            $resultado = $clientePadecimientoBusiness->insertarTBClientePadecimiento($clientePadecimiento);
 
             if ($resultado) {
                 $response['success'] = true;
-                $response['message'] = 'Éxito: Dato clínico registrado correctamente.';
+                $response['message'] = 'Éxito: Cliente padecimiento registrado correctamente.';
             } else {
                 $response['success'] = false;
-                $response['message'] = 'Error: No se pudo registrar el dato clínico.';
+                $response['message'] = 'Error: No se pudo registrar el cliente padecimiento.';
             }
         }
     }
@@ -83,27 +84,28 @@ try {
         }
 
         $padecimientosString = empty($padecimientosIds) ? '' : implode('$', $padecimientosIds);
+        $dictamenId = isset($_POST['dictamenId']) ? intval($_POST['dictamenId']) : null;
 
         if ($id <= 0) {
             $response['success'] = false;
             $response['message'] = 'Error: ID de registro inválido.';
         } else {
 
-            $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
+            $errores = $clientePadecimientoBusiness->validarClientePadecimiento($clienteId, $padecimientosString);
 
             if (!empty($errores)) {
                 $response['success'] = false;
                 $response['message'] = 'Error de validación: ' . implode(', ', $errores);
             } else {
-                $datoClinico = new DatoClinico($id, $clienteId, $padecimientosString);
-                $resultado = $datoClinicoBusiness->actualizarTBDatoClinico($datoClinico);
+                $clientePadecimiento = new ClientePadecimiento($id, $clienteId, $padecimientosString, $dictamenId);
+                $resultado = $clientePadecimientoBusiness->actualizarTBClientePadecimiento($clientePadecimiento);
 
                 if ($resultado) {
                     $response['success'] = true;
-                    $response['message'] = 'Éxito: Dato clínico actualizado correctamente.';
+                    $response['message'] = 'Éxito: Cliente padecimiento actualizado correctamente.';
                 } else {
                     $response['success'] = false;
-                    $response['message'] = 'Error: No se pudo actualizar el dato clínico.';
+                    $response['message'] = 'Error: No se pudo actualizar el cliente padecimiento.';
                 }
             }
         }
@@ -120,14 +122,14 @@ try {
                 $response['success'] = false;
                 $response['message'] = 'Error: ID de registro inválido.';
             } else {
-                $resultado = $datoClinicoBusiness->eliminarTBDatoClinico($id);
+                $resultado = $clientePadecimientoBusiness->eliminarTBClientePadecimiento($id);
 
                 if ($resultado) {
                     $response['success'] = true;
-                    $response['message'] = 'Éxito: Dato clínico eliminado correctamente.';
+                    $response['message'] = 'Éxito: Cliente padecimiento eliminado correctamente.';
                 } else {
                     $response['success'] = false;
-                    $response['message'] = 'Error: No se pudo eliminar el dato clínico.';
+                    $response['message'] = 'Error: No se pudo eliminar el cliente padecimiento.';
                 }
             }
         }
@@ -142,7 +144,7 @@ try {
             $response['success'] = false;
             $response['message'] = 'Error: Datos de registro inválidos.';
         } else {
-            $resultado = $datoClinicoBusiness->actualizarPadecimientoIndividual($registroId, $padecimientoIdAntiguo, $padecimientoIdNuevo);
+            $resultado = $clientePadecimientoBusiness->actualizarPadecimientoIndividual($registroId, $padecimientoIdAntiguo, $padecimientoIdNuevo);
 
             if ($resultado) {
                 $response['success'] = true;
@@ -166,7 +168,7 @@ try {
                 $response['success'] = false;
                 $response['message'] = 'Error: Datos de registro inválidos.';
             } else {
-                $resultado = $datoClinicoBusiness->eliminarPadecimientoIndividual($registroId, $padecimientoId);
+                $resultado = $clientePadecimientoBusiness->eliminarPadecimientoIndividual($registroId, $padecimientoId);
 
                 if ($resultado['success']) {
                     $response['success'] = true;
@@ -194,7 +196,7 @@ try {
 } catch (Exception $e) {
     $response['success'] = false;
     $response['message'] = 'Error: ' . $e->getMessage();
-    error_log('Error en datoClinicoAction.php: ' . $e->getMessage());
+    error_log('Error en clientePadecimientoAction.php: ' . $e->getMessage());
 }
 
 echo json_encode($response);
