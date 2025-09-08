@@ -50,27 +50,11 @@ if (!$esAdminOInstructor) {
 <div class="container">
     <header>
         <a href="../index.php"><i class="ph ph-arrow-left"></i> Volver al Inicio</a><br><br>
-        <h2><i class="ph ph-arm-flex"></i> Partes de Zona</h2>
+        <h2><i class="ph ph-arm-flex"></i> Partes de Zona del Cuerpo</h2>
     </header>
     <hr>
 
     <main>
-        <!-- Filtro -->
-        <section>
-            <form method="get" action="">
-                <label for="zonaFiltro"><i class="ph ph-funnel"></i> Filtrar por Zona:</label>
-                <select name="zonaFiltro" id="zonaFiltro" onchange="this.form.submit()">
-                    <option value="0">Todas</option>
-                    <?php foreach ($zonasCuerpo as $zona): ?>
-                        <option value="<?= $zona->getIdCuerpoZona() ?>"
-                            <?= ($zonaFiltro == $zona->getIdCuerpoZona()) ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($zona->getNombreCuerpoZona() ?? '') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </form>
-        </section>
-        <br>
 
         <!-- Crear nueva parte de zona -->
         <?php if ($esAdminOInstructor): ?>
@@ -96,8 +80,24 @@ if (!$esAdminOInstructor) {
             </section>
         <?php endif; ?>
 
+
+
         <!-- Listado -->
         <section>
+
+            <form method="get" action="">
+                <label for="zonaFiltro"><i class="ph ph-funnel"></i> Filtrar por Zona:</label>
+                <select name="zonaFiltro" id="zonaFiltro" onchange="this.form.submit()">
+                    <option value="0">Todas</option>
+                    <?php foreach ($zonasCuerpo as $zona): ?>
+                        <option value="<?= $zona->getIdCuerpoZona() ?>"
+                                <?= ($zonaFiltro == $zona->getIdCuerpoZona()) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($zona->getNombreCuerpoZona() ?? '') ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </form>
+
             <h3><i class="ph ph-list-bullets"></i> Partes Registradas</h3>
             <div style="overflow-x:auto;">
                 <table>

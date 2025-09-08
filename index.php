@@ -68,7 +68,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     </a>
 
                     <a href='view/parteZonaView.php'>
-                        <button><i class="ph ph-storefront"></i>Partes de la zona del cuerpo</button>
+                        <button><i class="ph ph-hand"></i>Partes de la zona del cuerpo</button>
                     </a>
                 </div>
             </section>
@@ -86,7 +86,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                         <button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button>
                     </a>
                     <a href='view/parteZonaView.php'>
-                        <button><i class="ph ph-storefront"></i>Ver partes de la zona de cuerpo</button>
+                        <button><i class="ph ph-hand"></i> Partes de la zona del cuerpo</button>
                     </a>
                     <a href='view/salaView.php'>
                         <button><i class="ph ph-storefront"></i>Ver las salas</button>
@@ -135,7 +135,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     </a>
 
                     <a href='view/parteZonaView.php'>
-                        <button><i class="ph ph-person-simple-run"></i>Partes de Zonas del Cuerpo</button>
+                        <button><i class="ph ph-hand"></i>Partes de Zonas del Cuerpo</button>
                     </a>
 
                     <a href='view/salaView.php'>
