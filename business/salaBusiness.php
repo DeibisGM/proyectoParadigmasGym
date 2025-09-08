@@ -21,8 +21,8 @@ class SalaBusiness{
         return $this->salaData->eliminarTbsala($id);
     }
 
-    public function obtenerTbsala(){
-        return $this->salaData->obtenerTbsala();
+    public function getAllSalas(){
+        return $this->salaData->getAllSalas();
     }
 }
 ?>

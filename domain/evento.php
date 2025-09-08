@@ -15,6 +15,7 @@ class Evento
 
     // Propiedad adicional para mostrar nombre del instructor
     private $instructorNombre;
+    private $salasNombre;
 
     // CAMBIO: Constructor actualizado
     public function __construct($id, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $instructorId, $estado)
@@ -29,6 +30,7 @@ class Evento
         $this->instructorId = $instructorId;
         $this->estado = $estado;
         $this->instructorNombre = '';
+        $this->salasNombre = '';
     }
 
     // Getters
@@ -87,6 +89,21 @@ class Evento
     public function setInstructorNombre($nombre)
     {
         $this->instructorNombre = $nombre;
+    }
+
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
+    public function getSalasNombre()
+    {
+        return $this->salasNombre;
+    }
+
+    public function setSalasNombre($salasNombre)
+    {
+        $this->salasNombre = $salasNombre;
     }
 }
 

@@ -5,171 +5,6 @@
       <DefaultCasing>exact</DefaultCasing>
       <DefaultEngine>InnoDB</DefaultEngine>
       <DefaultTmpEngine>InnoDB</DefaultTmpEngine>
-      <Grants>|root||root||ALLOW_NONEXISTENT_DEFINER|G
-|root||root|localhost|ALLOW_NONEXISTENT_DEFINER|G
-|root||root||ALTER|G
-|root||root|localhost|ALTER|G
-|root||root||ALTER ROUTINE|G
-|root||root|localhost|ALTER ROUTINE|G
-|root||root||APPLICATION_PASSWORD_ADMIN|G
-|root||root|localhost|APPLICATION_PASSWORD_ADMIN|G
-|root||mysql.infoschema|localhost|AUDIT_ABORT_EXEMPT|G
-|root||mysql.session|localhost|AUDIT_ABORT_EXEMPT|G
-|root||mysql.sys|localhost|AUDIT_ABORT_EXEMPT|G
-|root||root||AUDIT_ABORT_EXEMPT|G
-|root||root|localhost|AUDIT_ABORT_EXEMPT|G
-|root||root||AUDIT_ADMIN|G
-|root||root|localhost|AUDIT_ADMIN|G
-|root||mysql.session|localhost|AUTHENTICATION_POLICY_ADMIN|G
-|root||root||AUTHENTICATION_POLICY_ADMIN|G
-|root||root|localhost|AUTHENTICATION_POLICY_ADMIN|G
-|root||mysql.session|localhost|BACKUP_ADMIN|G
-|root||root||BACKUP_ADMIN|G
-|root||root|localhost|BACKUP_ADMIN|G
-|root||root||BINLOG_ADMIN|G
-|root||root|localhost|BINLOG_ADMIN|G
-|root||root||BINLOG_ENCRYPTION_ADMIN|G
-|root||root|localhost|BINLOG_ENCRYPTION_ADMIN|G
-|root||mysql.session|localhost|CLONE_ADMIN|G
-|root||root||CLONE_ADMIN|G
-|root||root|localhost|CLONE_ADMIN|G
-|root||mysql.session|localhost|CONNECTION_ADMIN|G
-|root||root||CONNECTION_ADMIN|G
-|root||root|localhost|CONNECTION_ADMIN|G
-|root||root||CREATE|G
-|root||root|localhost|CREATE|G
-|root||root||CREATE ROLE|G
-|root||root|localhost|CREATE ROLE|G
-|root||root||CREATE ROUTINE|G
-|root||root|localhost|CREATE ROUTINE|G
-|root||root||CREATE TABLESPACE|G
-|root||root|localhost|CREATE TABLESPACE|G
-|root||root||CREATE TEMPORARY TABLES|G
-|root||root|localhost|CREATE TEMPORARY TABLES|G
-|root||root||CREATE USER|G
-|root||root|localhost|CREATE USER|G
-|root||root||CREATE VIEW|G
-|root||root|localhost|CREATE VIEW|G
-|root||root||CREATE_SPATIAL_REFERENCE_SYSTEM|G
-|root||root|localhost|CREATE_SPATIAL_REFERENCE_SYSTEM|G
-|root||root||DELETE|G
-|root||root|localhost|DELETE|G
-|root||root||DROP|G
-|root||root|localhost|DROP|G
-|root||root||DROP ROLE|G
-|root||root|localhost|DROP ROLE|G
-|root||root||ENCRYPTION_KEY_ADMIN|G
-|root||root|localhost|ENCRYPTION_KEY_ADMIN|G
-|root||root||EVENT|G
-|root||root|localhost|EVENT|G
-|root||root||EXECUTE|G
-|root||root|localhost|EXECUTE|G
-|root||root||FILE|G
-|root||root|localhost|FILE|G
-|root||mysql.infoschema|localhost|FIREWALL_EXEMPT|G
-|root||mysql.session|localhost|FIREWALL_EXEMPT|G
-|root||mysql.sys|localhost|FIREWALL_EXEMPT|G
-|root||root||FIREWALL_EXEMPT|G
-|root||root|localhost|FIREWALL_EXEMPT|G
-|root||root||FLUSH_OPTIMIZER_COSTS|G
-|root||root|localhost|FLUSH_OPTIMIZER_COSTS|G
-|root||root||FLUSH_PRIVILEGES|G
-|root||root|localhost|FLUSH_PRIVILEGES|G
-|root||root||FLUSH_STATUS|G
-|root||root|localhost|FLUSH_STATUS|G
-|root||root||FLUSH_TABLES|G
-|root||root|localhost|FLUSH_TABLES|G
-|root||root||FLUSH_USER_RESOURCES|G
-|root||root|localhost|FLUSH_USER_RESOURCES|G
-|root||root||GROUP_REPLICATION_ADMIN|G
-|root||root|localhost|GROUP_REPLICATION_ADMIN|G
-|root||root||GROUP_REPLICATION_STREAM|G
-|root||root|localhost|GROUP_REPLICATION_STREAM|G
-|root||root||INDEX|G
-|root||root|localhost|INDEX|G
-|root||root||INNODB_REDO_LOG_ARCHIVE|G
-|root||root|localhost|INNODB_REDO_LOG_ARCHIVE|G
-|root||root||INNODB_REDO_LOG_ENABLE|G
-|root||root|localhost|INNODB_REDO_LOG_ENABLE|G
-|root||root||INSERT|G
-|root||root|localhost|INSERT|G
-|root||root||LOCK TABLES|G
-|root||root|localhost|LOCK TABLES|G
-|root||root||OPTIMIZE_LOCAL_TABLE|G
-|root||root|localhost|OPTIMIZE_LOCAL_TABLE|G
-|root||root||PASSWORDLESS_USER_ADMIN|G
-|root||root|localhost|PASSWORDLESS_USER_ADMIN|G
-|root||mysql.session|localhost|PERSIST_RO_VARIABLES_ADMIN|G
-|root||root||PERSIST_RO_VARIABLES_ADMIN|G
-|root||root|localhost|PERSIST_RO_VARIABLES_ADMIN|G
-|root||root||PROCESS|G
-|root||root|localhost|PROCESS|G
-|root||root||REFERENCES|G
-|root||root|localhost|REFERENCES|G
-|root||root||RELOAD|G
-|root||root|localhost|RELOAD|G
-|root||root||REPLICATION CLIENT|G
-|root||root|localhost|REPLICATION CLIENT|G
-|root||root||REPLICATION SLAVE|G
-|root||root|localhost|REPLICATION SLAVE|G
-|root||root||REPLICATION_APPLIER|G
-|root||root|localhost|REPLICATION_APPLIER|G
-|root||root||REPLICATION_SLAVE_ADMIN|G
-|root||root|localhost|REPLICATION_SLAVE_ADMIN|G
-|root||root||RESOURCE_GROUP_ADMIN|G
-|root||root|localhost|RESOURCE_GROUP_ADMIN|G
-|root||root||RESOURCE_GROUP_USER|G
-|root||root|localhost|RESOURCE_GROUP_USER|G
-|root||root||ROLE_ADMIN|G
-|root||root|localhost|ROLE_ADMIN|G
-|root||mysql.infoschema|localhost|SELECT|G
-|root||root||SELECT|G
-|root||root|localhost|SELECT|G
-|root||root||SENSITIVE_VARIABLES_OBSERVER|G
-|root||root|localhost|SENSITIVE_VARIABLES_OBSERVER|G
-|root||root||SERVICE_CONNECTION_ADMIN|G
-|root||root|localhost|SERVICE_CONNECTION_ADMIN|G
-|root||mysql.session|localhost|SESSION_VARIABLES_ADMIN|G
-|root||root||SESSION_VARIABLES_ADMIN|G
-|root||root|localhost|SESSION_VARIABLES_ADMIN|G
-|root||root||SET_ANY_DEFINER|G
-|root||root|localhost|SET_ANY_DEFINER|G
-|root||root||SHOW DATABASES|G
-|root||root|localhost|SHOW DATABASES|G
-|root||root||SHOW VIEW|G
-|root||root|localhost|SHOW VIEW|G
-|root||root||SHOW_ROUTINE|G
-|root||root|localhost|SHOW_ROUTINE|G
-|root||mysql.session|localhost|SHUTDOWN|G
-|root||root||SHUTDOWN|G
-|root||root|localhost|SHUTDOWN|G
-|root||mysql.session|localhost|SUPER|G
-|root||root||SUPER|G
-|root||root|localhost|SUPER|G
-|root||mysql.infoschema|localhost|SYSTEM_USER|G
-|root||mysql.session|localhost|SYSTEM_USER|G
-|root||mysql.sys|localhost|SYSTEM_USER|G
-|root||root||SYSTEM_USER|G
-|root||root|localhost|SYSTEM_USER|G
-|root||mysql.session|localhost|SYSTEM_VARIABLES_ADMIN|G
-|root||root||SYSTEM_VARIABLES_ADMIN|G
-|root||root|localhost|SYSTEM_VARIABLES_ADMIN|G
-|root||root||TABLE_ENCRYPTION_ADMIN|G
-|root||root|localhost|TABLE_ENCRYPTION_ADMIN|G
-|root||root||TELEMETRY_LOG_ADMIN|G
-|root||root|localhost|TELEMETRY_LOG_ADMIN|G
-|root||root||TRANSACTION_GTID_TAG|G
-|root||root|localhost|TRANSACTION_GTID_TAG|G
-|root||root||TRIGGER|G
-|root||root|localhost|TRIGGER|G
-|root||root||UPDATE|G
-|root||root|localhost|UPDATE|G
-|root||root||XA_RECOVER_ADMIN|G
-|root||root|localhost|XA_RECOVER_ADMIN|G
-|root||root||grant option|G
-|root||root|localhost|grant option|G
-performance_schema|schema||mysql.session|localhost|SELECT|G
-sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <ServerVersion>9.4.0</ServerVersion>
     </root>
     <collation id="2" parent="1" name="armscii8_bin">
@@ -1084,7 +919,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <AutoIntrospectionLevel>3</AutoIntrospectionLevel>
       <Current>1</Current>
       <LastIntrospectionLevel>3</LastIntrospectionLevel>
-      <LastIntrospectionLocalTimestamp>2025-09-08.03:16:53</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-09-08.03:56:59</LastIntrospectionLocalTimestamp>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </schema>
     <user id="292" parent="1" name="mysql.infoschema">
@@ -1174,574 +1009,619 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <table id="310" parent="291" name="tbsala">
+    <table id="310" parent="291" name="tbreservasala">
       <DetailsLevel>3</DetailsLevel>
       <Engine>InnoDB</Engine>
       <CollationName>utf8mb4_0900_ai_ci</CollationName>
     </table>
-    <column id="311" parent="297" name="tbcertificadoid">
+    <table id="311" parent="291" name="tbsala">
+      <DetailsLevel>3</DetailsLevel>
+      <Engine>InnoDB</Engine>
+      <CollationName>utf8mb4_0900_ai_ci</CollationName>
+    </table>
+    <column id="312" parent="297" name="tbcertificadoid">
       <AutoIncrement>14</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="312" parent="297" name="tbinstructorid">
+    <column id="313" parent="297" name="tbinstructorid">
       <Position>2</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="313" parent="297" name="tbcertificadoimagenid">
+    <column id="314" parent="297" name="tbcertificadoimagenid">
       <Position>3</Position>
       <StoredType>varchar(250)|0s</StoredType>
     </column>
-    <column id="314" parent="297" name="tbcertificadonombre">
+    <column id="315" parent="297" name="tbcertificadonombre">
       <Position>4</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="315" parent="297" name="tbcertificadodescripcion">
+    <column id="316" parent="297" name="tbcertificadodescripcion">
       <Position>5</Position>
       <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="316" parent="297" name="tbcertificadoentidad">
+    <column id="317" parent="297" name="tbcertificadoentidad">
       <Position>6</Position>
       <StoredType>varchar(200)|0s</StoredType>
     </column>
-    <index id="317" parent="297" name="PRIMARY">
+    <index id="318" parent="297" name="PRIMARY">
       <ColNames>tbcertificadoid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="318" parent="297" name="PRIMARY">
+    <key id="319" parent="297" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="319" parent="298" name="tbclienteid">
+    <column id="320" parent="298" name="tbclienteid">
       <AutoIncrement>16</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="320" parent="298" name="tbclienteimagenid">
+    <column id="321" parent="298" name="tbclienteimagenid">
       <Position>2</Position>
       <StoredType>varchar(45)|0s</StoredType>
     </column>
-    <column id="321" parent="298" name="tbclientecarnet">
+    <column id="322" parent="298" name="tbclientecarnet">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(10)|0s</StoredType>
     </column>
-    <column id="322" parent="298" name="tbclientenombre">
+    <column id="323" parent="298" name="tbclientenombre">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>varchar(45)|0s</StoredType>
     </column>
-    <column id="323" parent="298" name="tbclientefechanacimiento">
+    <column id="324" parent="298" name="tbclientefechanacimiento">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>varchar(45)|0s</StoredType>
     </column>
-    <column id="324" parent="298" name="tbclientetelefono">
+    <column id="325" parent="298" name="tbclientetelefono">
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="325" parent="298" name="tbclientecorreo">
+    <column id="326" parent="298" name="tbclientecorreo">
       <Position>7</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="326" parent="298" name="tbclientedireccion">
+    <column id="327" parent="298" name="tbclientedireccion">
       <NotNull>1</NotNull>
       <Position>8</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="327" parent="298" name="tbclientegenero">
+    <column id="328" parent="298" name="tbclientegenero">
       <NotNull>1</NotNull>
       <Position>9</Position>
       <StoredType>char(1)|0s</StoredType>
     </column>
-    <column id="328" parent="298" name="tbclienteinscripcion">
+    <column id="329" parent="298" name="tbclienteinscripcion">
       <NotNull>1</NotNull>
       <Position>10</Position>
       <StoredType>date|0s</StoredType>
     </column>
-    <column id="329" parent="298" name="tbclienteestado">
+    <column id="330" parent="298" name="tbclienteestado">
       <DefaultExpression>1</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>11</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <column id="330" parent="298" name="tbclientecontrasena">
+    <column id="331" parent="298" name="tbclientecontrasena">
       <NotNull>1</NotNull>
       <Position>12</Position>
       <StoredType>varchar(8)|0s</StoredType>
     </column>
-    <index id="331" parent="298" name="PRIMARY">
+    <index id="332" parent="298" name="PRIMARY">
       <ColNames>tbclienteid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="332" parent="298" name="PRIMARY">
+    <key id="333" parent="298" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="333" parent="299" name="tbclientepadecimientoid">
+    <column id="334" parent="299" name="tbclientepadecimientoid">
       <AutoIncrement>8</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="334" parent="299" name="tbclienteid">
+    <column id="335" parent="299" name="tbclienteid">
       <Position>2</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="335" parent="299" name="tbpadecimientoid">
+    <column id="336" parent="299" name="tbpadecimientoid">
       <Position>3</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="336" parent="299" name="tbpadecimientodictamenid">
+    <column id="337" parent="299" name="tbpadecimientodictamenid">
       <Position>4</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <index id="337" parent="299" name="PRIMARY">
+    <index id="338" parent="299" name="PRIMARY">
       <ColNames>tbclientepadecimientoid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="338" parent="299" name="PRIMARY">
+    <key id="339" parent="299" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="339" parent="300" name="tbcuerpozonaid">
+    <column id="340" parent="300" name="tbcuerpozonaid">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="340" parent="300" name="tbcuerpozonapartezonaid">
+    <column id="341" parent="300" name="tbcuerpozonapartezonaid">
       <Position>2</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="341" parent="300" name="tbcuerpozonaimagenesids">
+    <column id="342" parent="300" name="tbcuerpozonaimagenesids">
       <Position>3</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="342" parent="300" name="tbcuerpozonanombre">
+    <column id="343" parent="300" name="tbcuerpozonanombre">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="343" parent="300" name="tbcuerpozonadescripcion">
+    <column id="344" parent="300" name="tbcuerpozonadescripcion">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="344" parent="300" name="tbcuerpozonaactivo">
+    <column id="345" parent="300" name="tbcuerpozonaactivo">
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <index id="345" parent="300" name="PRIMARY">
+    <index id="346" parent="300" name="PRIMARY">
       <ColNames>tbcuerpozonaid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="346" parent="300" name="PRIMARY">
+    <key id="347" parent="300" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="347" parent="301" name="tbeventoid">
+    <column id="348" parent="301" name="tbeventoid">
       <AutoIncrement>3</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="348" parent="301" name="tbeventonombre">
+    <column id="349" parent="301" name="tbeventonombre">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(255)|0s</StoredType>
     </column>
-    <column id="349" parent="301" name="tbeventodescripcion">
+    <column id="350" parent="301" name="tbeventodescripcion">
       <Position>3</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="350" parent="301" name="tbeventofecha">
+    <column id="351" parent="301" name="tbeventofecha">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>date|0s</StoredType>
     </column>
-    <column id="351" parent="301" name="tbeventohorainicio">
+    <column id="352" parent="301" name="tbeventohorainicio">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>time|0s</StoredType>
     </column>
-    <column id="352" parent="301" name="tbeventohorafin">
+    <column id="353" parent="301" name="tbeventohorafin">
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>time|0s</StoredType>
     </column>
-    <column id="353" parent="301" name="tbeventoaforo">
+    <column id="354" parent="301" name="tbeventoaforo">
       <Comment>Capacidad máxima de personas para el evento</Comment>
       <NotNull>1</NotNull>
       <Position>7</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="354" parent="301" name="tbinstructorid">
+    <column id="355" parent="301" name="tbinstructorid">
       <Position>8</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="355" parent="301" name="tbeventoestado">
+    <column id="356" parent="301" name="tbeventoestado">
       <Comment>1=Activo, 0=Inactivo</Comment>
       <DefaultExpression>1</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>9</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <index id="356" parent="301" name="PRIMARY">
+    <index id="357" parent="301" name="PRIMARY">
       <ColNames>tbeventoid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="357" parent="301" name="tbinstructorid">
+    <index id="358" parent="301" name="tbinstructorid">
       <ColNames>tbinstructorid</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="358" parent="301" name="PRIMARY">
+    <key id="359" parent="301" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="359" parent="302" name="tbhorarioid">
+    <column id="360" parent="302" name="tbhorarioid">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="360" parent="302" name="tbhorariodia">
+    <column id="361" parent="302" name="tbhorariodia">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(25)|0s</StoredType>
     </column>
-    <column id="361" parent="302" name="tbhorarioactivo">
+    <column id="362" parent="302" name="tbhorarioactivo">
       <DefaultExpression>0</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <column id="362" parent="302" name="tbhorarioapertura">
+    <column id="363" parent="302" name="tbhorarioapertura">
       <Position>4</Position>
       <StoredType>time|0s</StoredType>
     </column>
-    <column id="363" parent="302" name="tbhorariocierre">
+    <column id="364" parent="302" name="tbhorariocierre">
       <Position>5</Position>
       <StoredType>time|0s</StoredType>
     </column>
-    <column id="364" parent="302" name="tbhorariobloqueos">
+    <column id="365" parent="302" name="tbhorariobloqueos">
       <Position>6</Position>
       <StoredType>varchar(255)|0s</StoredType>
     </column>
-    <index id="365" parent="302" name="PRIMARY">
+    <index id="366" parent="302" name="PRIMARY">
       <ColNames>tbhorarioid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="366" parent="302" name="PRIMARY">
+    <key id="367" parent="302" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="367" parent="303" name="tbimagenid">
+    <column id="368" parent="303" name="tbimagenid">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="368" parent="303" name="tbimagenruta">
+    <column id="369" parent="303" name="tbimagenruta">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>varchar(255)|0s</StoredType>
     </column>
-    <column id="369" parent="303" name="tbimagenactivo">
+    <column id="370" parent="303" name="tbimagenactivo">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <index id="370" parent="303" name="PRIMARY">
+    <index id="371" parent="303" name="PRIMARY">
       <ColNames>tbimagenid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="371" parent="303" name="PRIMARY">
+    <key id="372" parent="303" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="372" parent="304" name="tbinstructorid">
+    <column id="373" parent="304" name="tbinstructorid">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="373" parent="304" name="tbinstructorimagenid">
+    <column id="374" parent="304" name="tbinstructorimagenid">
       <Position>2</Position>
       <StoredType>varchar(250)|0s</StoredType>
     </column>
-    <column id="374" parent="304" name="tbinstructornombre">
+    <column id="375" parent="304" name="tbinstructornombre">
       <Position>3</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="375" parent="304" name="tbinstructortelefono">
+    <column id="376" parent="304" name="tbinstructortelefono">
       <Position>4</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="376" parent="304" name="tbinstructordireccion">
+    <column id="377" parent="304" name="tbinstructordireccion">
       <Position>5</Position>
       <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="377" parent="304" name="tbinstructorcorreo">
+    <column id="378" parent="304" name="tbinstructorcorreo">
       <Position>6</Position>
       <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="378" parent="304" name="tbinstructorcuenta">
+    <column id="379" parent="304" name="tbinstructorcuenta">
       <Position>7</Position>
       <StoredType>varchar(500)|0s</StoredType>
     </column>
-    <column id="379" parent="304" name="tbinstructorcontraseña">
+    <column id="380" parent="304" name="tbinstructorcontraseña">
       <Position>8</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="380" parent="304" name="tbinstructoractivo">
+    <column id="381" parent="304" name="tbinstructoractivo">
       <DefaultExpression>1</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>9</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <column id="381" parent="304" name="tbinstructorcertificado">
+    <column id="382" parent="304" name="tbinstructorcertificado">
       <Position>10</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <index id="382" parent="304" name="PRIMARY">
+    <index id="383" parent="304" name="PRIMARY">
       <ColNames>tbinstructorid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="383" parent="304" name="PRIMARY">
+    <key id="384" parent="304" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="384" parent="305" name="tbnumeroemergenciaid">
+    <column id="385" parent="305" name="tbnumeroemergenciaid">
       <AutoIncrement>5</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="385" parent="305" name="tbnumeroemergenciaclienteid">
+    <column id="386" parent="305" name="tbnumeroemergenciaclienteid">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="386" parent="305" name="tbnumeroemergencianombre">
+    <column id="387" parent="305" name="tbnumeroemergencianombre">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(50)|0s</StoredType>
     </column>
-    <column id="387" parent="305" name="tbnumeroemergenciatelefono">
+    <column id="388" parent="305" name="tbnumeroemergenciatelefono">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>varchar(8)|0s</StoredType>
     </column>
-    <column id="388" parent="305" name="tbnumeroemergenciarelacion">
+    <column id="389" parent="305" name="tbnumeroemergenciarelacion">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>varchar(30)|0s</StoredType>
     </column>
-    <index id="389" parent="305" name="PRIMARY">
+    <index id="390" parent="305" name="PRIMARY">
       <ColNames>tbnumeroemergenciaid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="390" parent="305" name="PRIMARY">
+    <key id="391" parent="305" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="391" parent="306" name="tbpadecimientoid">
+    <column id="392" parent="306" name="tbpadecimientoid">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="392" parent="306" name="tbpadecimientotipo">
+    <column id="393" parent="306" name="tbpadecimientotipo">
       <Position>2</Position>
       <StoredType>varchar(200)|0s</StoredType>
     </column>
-    <column id="393" parent="306" name="tbpadecimientonombre">
+    <column id="394" parent="306" name="tbpadecimientonombre">
       <Position>3</Position>
       <StoredType>varchar(200)|0s</StoredType>
     </column>
-    <column id="394" parent="306" name="tbpadecimientodescripcion">
+    <column id="395" parent="306" name="tbpadecimientodescripcion">
       <Position>4</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="395" parent="306" name="tbpadecimientoformadeactuar">
+    <column id="396" parent="306" name="tbpadecimientoformadeactuar">
       <Position>5</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <index id="396" parent="306" name="PRIMARY">
+    <index id="397" parent="306" name="PRIMARY">
       <ColNames>tbpadecimientoid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="397" parent="306" name="PRIMARY">
+    <key id="398" parent="306" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="398" parent="307" name="tbpadecimientodictamenid">
+    <column id="399" parent="307" name="tbpadecimientodictamenid">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="399" parent="307" name="tbpadecimientodictamenfechaemision">
+    <column id="400" parent="307" name="tbpadecimientodictamenfechaemision">
       <Position>2</Position>
       <StoredType>date|0s</StoredType>
     </column>
-    <column id="400" parent="307" name="tbpadecimientodictamenentidademite">
+    <column id="401" parent="307" name="tbpadecimientodictamenentidademision">
       <Position>3</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="401" parent="307" name="tbpadecimientodictamenimagenid">
+    <column id="402" parent="307" name="tbpadecimientodictamenimagenid">
       <Position>4</Position>
       <StoredType>text|0s</StoredType>
     </column>
-    <column id="402" parent="307" name="tbpadecimientodictamenactivo">
+    <column id="403" parent="307" name="tbpadecimientodictamenactivo">
       <Position>5</Position>
-      <StoredType>tinyint|0s</StoredType>
+      <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <index id="403" parent="307" name="PRIMARY">
+    <index id="404" parent="307" name="PRIMARY">
       <ColNames>tbpadecimientodictamenid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="404" parent="307" name="PRIMARY">
+    <key id="405" parent="307" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="405" parent="308" name="tbpartezonaid">
+    <column id="406" parent="308" name="tbpartezonaid">
       <AutoIncrement>1</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="406" parent="308" name="tbpartezonaimagenid">
+    <column id="407" parent="308" name="tbpartezonaimagenid">
       <Position>2</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="407" parent="308" name="tbpartezonanombre">
+    <column id="408" parent="308" name="tbpartezonanombre">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>varchar(50)|0s</StoredType>
     </column>
-    <column id="408" parent="308" name="tbpartezonadescripcion">
+    <column id="409" parent="308" name="tbpartezonadescripcion">
       <Position>4</Position>
       <StoredType>varchar(100)|0s</StoredType>
     </column>
-    <column id="409" parent="308" name="tbpartezonaactivo">
+    <column id="410" parent="308" name="tbpartezonaactivo">
       <DefaultExpression>1</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <index id="410" parent="308" name="PRIMARY">
+    <index id="411" parent="308" name="PRIMARY">
       <ColNames>tbpartezonaid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="411" parent="308" name="PRIMARY">
+    <key id="412" parent="308" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="412" parent="309" name="tbreservaid">
+    <column id="413" parent="309" name="tbreservaid">
       <AutoIncrement>5</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="413" parent="309" name="tbclienteid">
+    <column id="414" parent="309" name="tbclienteid">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="414" parent="309" name="tbeventoid">
+    <column id="415" parent="309" name="tbeventoid">
       <Comment>Si es NULL, es una reserva de uso libre</Comment>
       <Position>3</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="415" parent="309" name="tbreservafecha">
+    <column id="416" parent="309" name="tbreservafecha">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>date|0s</StoredType>
     </column>
-    <column id="416" parent="309" name="tbreservahorainicio">
+    <column id="417" parent="309" name="tbreservahorainicio">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>time|0s</StoredType>
     </column>
-    <column id="417" parent="309" name="tbreservahorafin">
+    <column id="418" parent="309" name="tbreservahorafin">
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>time|0s</StoredType>
     </column>
-    <column id="418" parent="309" name="tbreservaestado">
+    <column id="419" parent="309" name="tbreservaestado">
       <Comment>Ej: activa, cancelada, completada</Comment>
       <DefaultExpression>&apos;activa&apos;</DefaultExpression>
       <NotNull>1</NotNull>
       <Position>7</Position>
       <StoredType>varchar(20)|0s</StoredType>
     </column>
-    <index id="419" parent="309" name="PRIMARY">
+    <index id="420" parent="309" name="PRIMARY">
       <ColNames>tbreservaid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="420" parent="309" name="tbclienteid">
+    <index id="421" parent="309" name="tbclienteid">
       <ColNames>tbclienteid</ColNames>
       <Type>btree</Type>
     </index>
-    <index id="421" parent="309" name="tbeventoid">
+    <index id="422" parent="309" name="tbeventoid">
       <ColNames>tbeventoid</ColNames>
       <Type>btree</Type>
     </index>
-    <key id="422" parent="309" name="PRIMARY">
+    <key id="423" parent="309" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <column id="423" parent="310" name="tbsalaid">
+    <column id="424" parent="310" name="tbreservasalaid">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="425" parent="310" name="tbeventoid">
+      <NotNull>1</NotNull>
+      <Position>2</Position>
+      <StoredType>int|0s</StoredType>
+    </column>
+    <column id="426" parent="310" name="tbsalaid">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>varchar(255)|0s</StoredType>
+    </column>
+    <column id="427" parent="310" name="tbreservafecha">
+      <NotNull>1</NotNull>
+      <Position>4</Position>
+      <StoredType>date|0s</StoredType>
+    </column>
+    <column id="428" parent="310" name="tbreservahorainicio">
+      <NotNull>1</NotNull>
+      <Position>5</Position>
+      <StoredType>time|0s</StoredType>
+    </column>
+    <column id="429" parent="310" name="tbreservahorafin">
+      <NotNull>1</NotNull>
+      <Position>6</Position>
+      <StoredType>time|0s</StoredType>
+    </column>
+    <index id="430" parent="310" name="PRIMARY">
+      <ColNames>tbreservasalaid</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="431" parent="310" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
+    </key>
+    <column id="432" parent="311" name="tbsalaid">
       <AutoIncrement>9</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="424" parent="310" name="tbsalanombre">
+    <column id="433" parent="311" name="tbsalanombre">
       <Position>2</Position>
       <StoredType>varchar(150)|0s</StoredType>
     </column>
-    <column id="425" parent="310" name="tbsalacapacidad">
+    <column id="434" parent="311" name="tbsalacapacidad">
       <Position>3</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="426" parent="310" name="tbsalaestado">
+    <column id="435" parent="311" name="tbsalaestado">
       <Position>4</Position>
       <StoredType>tinyint(1)|0s</StoredType>
     </column>
-    <index id="427" parent="310" name="PRIMARY">
+    <index id="436" parent="311" name="PRIMARY">
       <ColNames>tbsalaid</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="428" parent="310" name="PRIMARY">
+    <key id="437" parent="311" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>

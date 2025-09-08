@@ -51,7 +51,7 @@ class SalaData extends Data{
         return $result;
     }
 
-    public function obtenerTbsala(){
+    public function getAllSalas(){
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 

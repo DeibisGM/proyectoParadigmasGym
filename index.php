@@ -51,6 +51,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                 <div class="menu-grid">
                     <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Ver Reservas</button></a>
                     <a href='view/eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Eventos</button></a>
+                    <a href='view/salaReservasView.php'><button><i class="ph ph-presentation-chart"></i>Ocupación de Salas</button></a>
                 </div>
             </section>
 

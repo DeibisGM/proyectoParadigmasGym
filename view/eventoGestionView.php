@@ -12,12 +12,15 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
 
 include_once '../business/eventoBusiness.php';
 include_once '../business/instructorBusiness.php';
+include_once '../business/salaBusiness.php'; // Incluir SalaBusiness
 
 $eventoBusiness = new EventoBusiness();
 $instructorBusiness = new InstructorBusiness();
+$salaBusiness = new SalaBusiness(); // Instanciar SalaBusiness
 
 $todosLosEventos = $eventoBusiness->getAllEventos();
 $instructores = $instructorBusiness->getAllTBInstructor(true);
+$salas = $salaBusiness->getAllSalas(); // Obtener todas las salas
 
 $misEventos = [];
 $otrosEventos = [];
@@ -66,7 +69,7 @@ if ($tipoUsuario === 'instructor') {
                 <input type="time" name="hora_inicio" required>
                 <input type="time" name="hora_fin" required>
                 <input type="number" name="aforo" placeholder="Aforo" required>
-                
+
                 <?php if ($tipoUsuario === 'admin') : ?>
                     <label for="instructor_id">Asignar a instructor:</label>
                     <select name="instructor_id">
@@ -77,6 +80,13 @@ if ($tipoUsuario === 'instructor') {
                     <p><strong>Instructor:</strong> <?= htmlspecialchars($nombreUsuario) ?></p>
                     <input type="hidden" name="instructor_id" value="<?= $usuarioId ?>">
                 <?php endif; ?>
+
+                <label for="salas">Asignar Salas:</label>
+                <select name="salas[]" id="salas" multiple required>
+                    <?php foreach ($salas as $sala) : ?>
+                        <option value="<?= $sala->getTbsalaid() ?>"><?= htmlspecialchars($sala->getTbsalanombre()) ?></option>
+                    <?php endforeach; ?>
+                </select>
 
                 <textarea name="descripcion" placeholder="Descripción..."></textarea>
                 <button type="submit" name="crear_evento"><i class="ph ph-plus"></i>Crear Evento</button>
@@ -95,6 +105,7 @@ if ($tipoUsuario === 'instructor') {
                         <th>Horario</th>
                         <th>Aforo</th>
                         <th>Instructor</th>
+                        <th>Salas</th>
                         <th>Estado</th>
                         <th>Acciones</th>
                     </tr>
@@ -131,6 +142,7 @@ if ($tipoUsuario === 'instructor') {
                                             <option value="0" <?= $evento->getEstado() == 0 ? 'selected' : '' ?>>Inactivo</option>
                                         </select>
                                     </td>
+                                    <td><?= htmlspecialchars($evento->getSalasNombre()) ?></td>
                                     <td class="actions-cell">
                                         <button type="submit" name="update" title="Guardar"><i class="ph ph-floppy-disk"></i></button>
                                         <?php if ($tipoUsuario === 'admin') : ?>
