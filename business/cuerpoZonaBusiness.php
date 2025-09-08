@@ -1,16 +1,19 @@
 <?php
 
 include_once '../data/cuerpoZonaData.php';
+include_once '../business/parteZonaBusiness.php';
 include_once '../utility/ImageManager.php';
 
 class CuerpoZonaBusiness
 {
     private $cuerpoZonaData;
+    private $parteZonaBusiness;
     private $imageManager;
 
     public function __construct()
     {
         $this->cuerpoZonaData = new CuerpoZonaData();
+        $this->parteZonaBusiness = new parteZonaBusiness();
         $this->imageManager = new ImageManager();
     }
 
@@ -44,6 +47,12 @@ class CuerpoZonaBusiness
 
     public function eliminarTBCuerpoZona($id)
     {
+        $partes = getCuerpoZonaParteZonaId($id);
+
+        if($partes !== null){
+            $this->parteZonaBusiness->desactivarParteZonaLista($partes);
+        }
+
         $zona = $this->cuerpoZonaData->getCuerpoZonaById($id);
         if ($zona) {
             $this->imageManager->deleteImagesFromString($zona->getImagenesIds());
@@ -60,6 +69,16 @@ class CuerpoZonaBusiness
     public function getActiveTBCuerpoZona()
     {
         return $this->cuerpoZonaData->getActiveTBCuerpoZona();
+    }
+
+    public function actualizarParteZonaTBCuerpoZona($id, $partesZona)
+    {
+        return $this->cuerpoZonaData->actualizarParteZonaTBCuerpoZona($id, $partesZona);
+    }
+
+    public function getCuerpoZonaParteZonaId($id)
+    {
+        return $this->cuerpoZonaData->getCuerpoZonaParteZonaId($id);
     }
 }
 

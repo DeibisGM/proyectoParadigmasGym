@@ -76,6 +76,37 @@ class CuerpoZonaData extends Data
         return $result;
     }
 
+    public function actualizarParteZonaTBCuerpoZona($idCuerpoZona, $parteZona)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $queryUpdate = "UPDATE tbcuerpozona SET tbcuerpozonapartezonaid=? WHERE tbcuerpozonaid=?";
+        $stmt = mysqli_prepare($conn, $queryUpdate);
+        mysqli_stmt_bind_param($stmt, "ii", $parteZona, $idCuerpoZona);
+        $result = mysqli_stmt_execute($stmt);
+        mysqli_close($conn);
+        return $result;
+    }
+
+    public function getCuerpoZonaParteZonaId($id)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $querySelect = "SELECT * FROM tbcuerpozona WHERE tbcuerpozonaid = ?;";
+        $stmt = mysqli_prepare($conn, $querySelect);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        mysqli_close($conn);
+
+        if ($row = mysqli_fetch_assoc($result)) {
+
+            return $row['tbcuerpozonapartezonaid'];
+        }
+
+        return null;
+    }
+
     public function getCuerpoZonaById($id)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);

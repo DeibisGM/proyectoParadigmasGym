@@ -4,10 +4,13 @@ class CuerpoZona
 {
 
     private $idCuerpoZona;
+    private $tbcuerpozonapartezonaid;
+
     private $nombreCuerpoZona;
     private $descripcionCuerpoZona;
     private $activoCuerpoZona;
     private $imagenesIds;
+
 
     public function __construct($idCuerpoZona, $nombreCuerpoZona, $descripcionCuerpoZona, $activoCuerpoZona, $imagenesIds = '')
     {
@@ -62,6 +65,18 @@ class CuerpoZona
     {
         $this->activoCuerpoZona = $activo;
     }
+
+    public function getTbcuerpozonapartezonaid()
+    {
+        return $this->tbcuerpozonapartezonaid;
+    }
+
+    public function setTbcuerpozonapartezonaid($tbcuerpozonapartezonaid): void
+    {
+        $this->tbcuerpozonapartezonaid = $tbcuerpozonapartezonaid;
+    }
+
+
 }
 
 ?>
