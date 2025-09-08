@@ -66,6 +66,10 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/salaView.php'>
                         <button><i class="ph ph-storefront"></i>Ver las salas</button>
                     </a>
+
+                    <a href='view/parteZonaView.php'>
+                        <button><i class="ph ph-storefront"></i>Partes de la zona del cuerpo</button>
+                    </a>
                 </div>
             </section>
         <?php elseif ($tipoUsuario == 'instructor'): ?>
@@ -80,6 +84,9 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     </a>
                     <a href='view/cuerpoZonaView.php'>
                         <button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button>
+                    </a>
+                    <a href='view/parteZonaView.php'>
+                        <button><i class="ph ph-storefront"></i>Ver partes de la zona de cuerpo</button>
                     </a>
                     <a href='view/salaView.php'>
                         <button><i class="ph ph-storefront"></i>Ver las salas</button>
@@ -126,6 +133,11 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/cuerpoZonaView.php'>
                         <button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button>
                     </a>
+
+                    <a href='view/parteZonaView.php'>
+                        <button><i class="ph ph-person-simple-run"></i>Partes de Zonas del Cuerpo</button>
+                    </a>
+
                     <a href='view/salaView.php'>
                         <button><i class="ph ph-storefront"></i>Ver las salas</button>
                     </a>
