@@ -11,11 +11,11 @@ if (isset($_POST['login'])) {
         $correo = trim($_POST['correo']);
         $contrasena = trim($_POST['contrasena']);
 
-        if ($correo === 'root@gmail.com' && $contrasena === 'root') {
+        if ($correo === 'admin@gmail.com' && $contrasena === 'admin') {
             // Es el administrador principal
             $_SESSION['usuario_id'] = 0;
             $_SESSION['usuario_nombre'] = 'Admin';
-            $_SESSION['usuario_correo'] = 'root@gmail.com';
+            $_SESSION['usuario_correo'] = 'admin@gmail.com';
             $_SESSION['tipo_usuario'] = 'admin';
 
             // Redirigir a la página principal

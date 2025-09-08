@@ -132,6 +132,32 @@ class ReservaData extends Data
         mysqli_close($conn);
         return $reserva;
     }
+
+    public function getAllReservas()
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        $query = "SELECT r.*, c.tbclientenombre, IFNULL(e.tbeventonombre, 'Uso Libre') as tbeventonombre
+                  FROM tbreserva r
+                  JOIN tbcliente c ON r.tbclienteid = c.tbclienteid
+                  LEFT JOIN tbevento e ON r.tbeventoid = e.tbeventoid
+                  ORDER BY r.tbreservafecha DESC, r.tbreservahorainicio DESC";
+
+        $result = mysqli_query($conn, $query);
+        $reservas = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $reserva = new Reserva(
+                $row['tbreservaid'], $row['tbclienteid'], $row['tbeventoid'], $row['tbreservafecha'],
+                $row['tbreservahorainicio'], $row['tbreservahorafin'], $row['tbreservaestado']
+            );
+            $reserva->setClienteNombre($row['tbclientenombre']);
+            $reserva->setEventoNombre($row['tbeventonombre']);
+            $reservas[] = $reserva;
+        }
+        mysqli_close($conn);
+        return $reservas;
+    }
 }
 
 ?>

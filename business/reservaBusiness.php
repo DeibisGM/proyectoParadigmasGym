@@ -22,6 +22,11 @@ class ReservaBusiness
         return $this->reservaData->getReservasPorFecha($fecha);
     }
 
+    public function getAllReservas()
+    {
+        return $this->reservaData->getAllReservas();
+    }
+
     public function getReservasPorCliente($clienteId)
     {
         return $this->reservaData->getReservasPorCliente($clienteId);

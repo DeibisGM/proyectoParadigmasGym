@@ -12,18 +12,24 @@ $config = include '../config/gymRules.php';
 
 include_once '../business/reservaBusiness.php';
 include_once '../business/eventoBusiness.php';
+include_once '../business/instructorBusiness.php';
 
 $reservaBusiness = new ReservaBusiness();
 $eventoBusiness = new EventoBusiness();
 
-// Carga de datos según el tipo de usuario
-if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor') {
-    $todasLasReservas = $reservaBusiness->getAllReservas(); // Se implementará este método
-} else { // Cliente
+if ($tipoUsuario === 'admin') {
+    $eventos = $eventoBusiness->getAllEventos();
+    $instructorBusiness = new InstructorBusiness();
+    $instructores = $instructorBusiness->getAllTBInstructor(true);
+} else if ($tipoUsuario === 'cliente') {
     $misReservas = $reservaBusiness->getReservasPorCliente($usuarioId);
     $eventos = $eventoBusiness->getAllEventos();
+} else if ($tipoUsuario === 'instructor') {
+    $eventos = $eventoBusiness->getAllEventos();
+    $eventosInstructor = array_filter($eventos, function ($evento) use ($usuarioId) {
+        return $evento->getInstructorId() == $usuarioId;
+    });
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -32,25 +38,18 @@ if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor') {
     <title>Horarios y Reservas</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
 </head>
 <body>
 <div class="container">
     <header>
-        <h2><i class="ph ph-calendar-check"></i>
-            <?php
-            if ($tipoUsuario === 'cliente') {
-                echo "Horarios y Reservas";
-            } else {
-                echo "Vista General de Reservas";
-            }
-            ?>
-        </h2>
+        <h2><i class="ph ph-calendar-check"></i>Horarios y Reservas</h2>
         <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
     </header>
 
     <main>
         <?php if ($tipoUsuario === 'cliente'): ?>
-            <!-- VISTA DEL CLIENTE -->
+            <!-- SECCIÓN DE PRÓXIMOS EVENTOS -->
             <section>
                 <h3><i class="ph ph-sparkle"></i>Próximos Eventos</h3>
                 <?php
@@ -67,14 +66,17 @@ if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor') {
                 ?>
             </section>
 
+            <!-- SECCIÓN PARA RESERVAR -->
             <section>
                 <h3><i class="ph ph-plus-circle"></i>Reservar un espacio</h3>
                 <label for="fechaReserva">Selecciona una fecha para tu reserva:</label>
                 <input type="date" id="fechaReserva" min="<?php echo date('Y-m-d'); ?>">
                 <div id="messages"></div>
-                <div id="disponibilidad-container" data-duracion="<?php echo $config['USO_LIBRE_DURACION_MINUTOS']; ?>"></div>
+                <div id="disponibilidad-container"
+                     data-duracion="<?php echo $config['USO_LIBRE_DURACION_MINUTOS']; ?>"></div>
             </section>
 
+            <!-- SECCIÓN "MIS RESERVAS" MOVIDA AL FINAL -->
             <section>
                 <h3><i class="ph ph-list-checks"></i>Mis Reservas</h3>
                 <div id="mis-reservas-list">
@@ -101,7 +103,9 @@ if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor') {
                                         <td><?php echo htmlspecialchars($reserva->getEstado()); ?></td>
                                         <td>
                                             <?php if ($reserva->getEstado() === 'activa' && new DateTime($reserva->getFecha() . ' ' . $reserva->getHoraInicio()) > new DateTime()): ?>
-                                                <button onclick="cancelarReserva(<?php echo $reserva->getId(); ?>)"><i class="ph ph-x-circle"></i> Cancelar</button>
+                                                <button onclick="cancelarReserva(<?php echo $reserva->getId(); ?>)">
+                                                    <i class="ph ph-x-circle"></i> Cancelar
+                                                </button>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -113,38 +117,121 @@ if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor') {
                 </div>
             </section>
 
-        <?php elseif (in_array($tipoUsuario, ['admin', 'instructor'])): ?>
-            <!-- VISTA DE ADMIN/INSTRUCTOR -->
+        <?php elseif ($tipoUsuario === 'admin'): ?>
             <section>
-                <h3><i class="ph ph-users-three"></i>Todas las Reservas</h3>
+                <h3><i class="ph ph-plus-circle"></i>Gestionar Eventos</h3>
+                <form action="../action/eventoAction.php" method="POST">
+                    <h4>Nuevo Evento</h4>
+                    <input type="text" name="nombre" placeholder="Nombre del Evento" required>
+                    <label>Fecha del evento:</label>
+                    <input type="date" name="fecha" required>
+                    <input type="time" name="hora_inicio" required>
+                    <input type="time" name="hora_fin" required>
+                    <input type="number" name="aforo" placeholder="Aforo" required>
+                    <select name="instructor_id">
+                        <option value="">Sin instructor</option>
+                        <?php foreach ($instructores as $instructor) echo "<option value='{$instructor->getInstructorId()}'>" . htmlspecialchars($instructor->getInstructorNombre()) . "</option>"; ?>
+                    </select>
+                    <textarea name="descripcion" placeholder="Descripción..."></textarea>
+                    <button type="submit" name="crear_evento"><i class="ph ph-plus"></i>Crear Evento</button>
+                </form>
+
+                <h4>Eventos Existentes</h4>
                 <div style="overflow-x:auto;">
                     <table>
                         <thead>
                         <tr>
+                            <th>Nombre</th>
                             <th>Fecha</th>
                             <th>Horario</th>
-                            <th>Cliente</th>
-                            <th>Tipo de Reserva</th>
+                            <th>Aforo</th>
+                            <th>Instructor</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <?php if (empty($todasLasReservas)): ?>
-                            <tr><td colspan="5">No hay ninguna reserva registrada.</td></tr>
-                        <?php else: ?>
-                            <?php foreach ($todasLasReservas as $reserva): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($reserva->getFecha()) ?></td>
-                                    <td><?= date('h:i A', strtotime($reserva->getHoraInicio())) . " - " . date('h:i A', strtotime($reserva->getHoraFin())) ?></td>
-                                    <td><?= htmlspecialchars($reserva->getClienteNombre()) ?></td>
-                                    <td><?= htmlspecialchars($reserva->getEventoNombre()) ?></td>
-                                    <td><?= htmlspecialchars($reserva->getEstado()) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
+                        <?php foreach ($eventos as $evento): ?>
+                            <tr>
+                                <form action="../action/eventoAction.php" method="POST">
+                                    <input type="hidden" name="id" value="<?php echo $evento->getId(); ?>">
+                                    <td><input type="text" name="nombre"
+                                               value="<?php echo htmlspecialchars($evento->getNombre()); ?>"
+                                               placeholder="Nombre del Evento"></td>
+                                    <td><input type="date" name="fecha"
+                                               value="<?php echo htmlspecialchars($evento->getFecha()); ?>" required>
+                                    </td>
+                                    <td><input type="time" name="horaInicio"
+                                               value="<?php echo $evento->getHoraInicio(); ?>"> - <input type="time"
+                                                                                                         name="horaFin"
+                                                                                                         value="<?php echo $evento->getHoraFin(); ?>">
+                                    </td>
+                                    <td><input type="number" name="aforo" value="<?php echo $evento->getAforo(); ?>"
+                                               placeholder="Aforo">
+                                    </td>
+                                    <td>
+                                        <select name="instructorId">
+                                            <option value="">Sin instructor</option>
+                                            <?php foreach ($instructores as $i) echo "<option value='{$i->getInstructorId()}' " . ($evento->getInstructorId() == $i->getInstructorId() ? 'selected' : '') . ">" . htmlspecialchars($i->getInstructorNombre()) . "</option>"; ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="estado">
+                                            <option value="1" <?= $evento->getEstado() == 1 ? 'selected' : ''; ?>>
+                                                Activo
+                                            </option>
+                                            <option value="0" <?= $evento->getEstado() == 0 ? 'selected' : ''; ?>>
+                                                Inactivo
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <button type="submit" name="update" title="Guardar"><i
+                                                    class="ph ph-floppy-disk"></i> Guardar
+                                        </button>
+                                        <button type="submit" name="eliminar_evento"
+                                                onclick="return confirm('¿Seguro?')" title="Eliminar"><i
+                                                    class="ph ph-trash"></i> Eliminar
+                                        </button>
+                                    </td>
+                                    <input type="hidden" name="descripcion"
+                                           value="<?= htmlspecialchars($evento->getDescripcion()); ?>">
+                                </form>
+                            </tr>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
+            </section>
+        <?php elseif ($tipoUsuario === 'instructor'): ?>
+            <section>
+                <h3><i class="ph ph-chalkboard-teacher"></i>Mis Próximas Clases</h3>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Fecha</th>
+                        <th>Horario</th>
+                        <th>Aforo</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php if (empty($eventosInstructor)): ?>
+                        <tr>
+                            <td colspan="4">No tienes clases asignadas.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($eventosInstructor as $evento): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($evento->getNombre()); ?></td>
+                                <td><?php echo htmlspecialchars($evento->getFecha()); ?></td>
+                                <td><?php echo date('h:i A', strtotime($evento->getHoraInicio())) . " - " . date('h:i A', strtotime($evento->getHoraFin())); ?></td>
+                                <td><?php echo $evento->getAforo(); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                    </tbody>
+                </table>
             </section>
         <?php endif; ?>
     </main>
@@ -166,11 +253,11 @@ if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor') {
             return;
         }
         container.innerHTML = '<p>Cargando...</p>';
-        fetch(`../ajax/getDisponibilidad.php?fecha=${fecha}`)
+        fetch(`../action/getDisponibilidad.php?fecha=${fecha}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const {eventos, uso_libre_slots} = data.data;
+                    const {eventos, uso_libre_slots, dia_info} = data.data;
                     let html = '<h4><i class="ph ph-sparkle"></i>Eventos Especiales</h4>';
                     if (eventos.length > 0) {
                         html += '<div class="disponibilidad-grid">';
@@ -196,7 +283,7 @@ if ($tipoUsuario === 'admin' || $tipoUsuario === 'instructor') {
                 } else {
                     container.innerHTML = `<p class="error">${data.message}</p>`;
                 }
-            }).catch(error => container.innerHTML = `<p class="error">Error al cargar la disponibilidad.</p>`);
+            }).catch(error => container.innerHTML = `<p class="error">No disponible aun.</p>`);
     }
 
     function reservar(eventoId, fecha, horaDeEvento) {
