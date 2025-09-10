@@ -6,7 +6,29 @@ error_reporting(E_ALL);
 session_start();
 include_once '../business/certificadoBusiness.php';
 include_once '../domain/certificado.php'; 
+include_once '../utility/ImageManager.php';
+
 $certificadoBusiness = new CertificadoBusiness();
+$imageManager = new ImageManager();
+
+// Manejar eliminación de imagen
+if (isset($_POST['delete_image'])) {
+    if (isset($_POST['id'])) {
+        $certificadoId = $_POST['id'];
+        $certificado = $certificadoBusiness->getCertificadoPorId($certificadoId);
+        if ($certificado) {
+            $imageManager->deleteImage($certificado->getTbcertificadoImagenId());
+            $certificado->setTbcertificadoImagenId('');
+            $certificadoBusiness->updateCertificado($certificado);
+            header("location: ../view/certificadoView.php?success=image_deleted");
+        } else {
+            header("location: ../view/certificadoView.php?error=notFound");
+        }
+    } else {
+        header("location: ../view/certificadoView.php?error=error");
+    }
+    exit();
+}
 
 if (isset($_POST['create'])) {
     if (
@@ -31,16 +53,29 @@ if (isset($_POST['create'])) {
         include '../business/instructorBusiness.php';
         $instructorBusiness = new InstructorBusiness();
         $instructor = $instructorBusiness->getInstructorPorId($idInstructor);
-        
+
         if ($instructor == null) {
             header("location: ../view/certificadoView.php?error=instructorNotFound");
             exit();
         }
 
-        $certificado = new Certificado(null, $nombre, $descripcion, $entidad, $idInstructor);
-        $result = $certificadoBusiness->addCertificado($certificado);
+        $certificado = new Certificado(null, $nombre, $descripcion, $entidad, $idInstructor, '');
+        $newId = $certificadoBusiness->addCertificado($certificado);
 
-        if ($result) {
+        if ($newId) {
+            // Gestionar imagen después de crear el certificado
+            if (isset($_FILES['tbcertificadoimagenid']) && !empty($_FILES['tbcertificadoimagenid']['name'][0])) {
+                $newImageIds = $imageManager->addImages($_FILES['tbcertificadoimagenid'], $newId, 'cert');
+
+                if (!empty($newImageIds)) {
+                    // Actualizar el certificado con el ID de la imagen
+                    $certificadoActualizado = $certificadoBusiness->getCertificadoPorId($newId);
+                    if ($certificadoActualizado) {
+                        $certificadoActualizado->setTbcertificadoImagenId($newImageIds[0]);
+                        $certificadoBusiness->updateCertificado($certificadoActualizado);
+                    }
+                }
+            }
 
             header("location: ../view/certificadoView.php?success=created");
         } else {
@@ -49,9 +84,7 @@ if (isset($_POST['create'])) {
     } else {
         header("location: ../view/certificadoView.php?error=error");
     }
-
 }
-
 
 if (isset($_POST['update'])) {
     if (
@@ -77,19 +110,41 @@ if (isset($_POST['update'])) {
         include '../business/instructorBusiness.php';
         $instructorBusiness = new InstructorBusiness();
         $instructor = $instructorBusiness->getInstructorPorId($idInstructor);
-        
+
         if ($instructor == null) {
             header("location: ../view/certificadoView.php?error=instructorNotFound");
             exit();
         }
 
-        $certificado = new Certificado($id, $nombre, $descripcion, $entidad, $idInstructor);
-        $result = $certificadoBusiness->updateCertificado($certificado);
+        // Obtener el certificado actual
+        $certificadoActual = $certificadoBusiness->getCertificadoPorId($id);
 
-        if ($result) {
-            header("location: ../view/certificadoView.php?success=updated");
+        if ($certificadoActual) {
+            $certificadoActual->setNombre($nombre);
+            $certificadoActual->setDescripcion($descripcion);
+            $certificadoActual->setEntidad($entidad);
+            $certificadoActual->setIdInstructor($idInstructor);
+
+            // Gestionar imagen
+            if (isset($_FILES['tbcertificadoimagenid']) && !empty($_FILES['tbcertificadoimagenid']['name'][0])) {
+                if ($certificadoActual->getTbcertificadoImagenId() != '' && $certificadoActual->getTbcertificadoImagenId() != '0') {
+                    $imageManager->deleteImage($certificadoActual->getTbcertificadoImagenId());
+                }
+                $newImageIds = $imageManager->addImages($_FILES['tbcertificadoimagenid'], $id, 'cert');
+                if (!empty($newImageIds)) {
+                    $certificadoActual->setTbcertificadoImagenId($newImageIds[0]);
+                }
+            }
+
+            $result = $certificadoBusiness->updateCertificado($certificadoActual);
+
+            if ($result) {
+                header("location: ../view/certificadoView.php?success=updated");
+            } else {
+                header("location: ../view/certificadoView.php?error=dbError");
+            }
         } else {
-            header("location: ../view/certificadoView.php?error=dbError");
+            header("location: ../view/certificadoView.php?error=notFound");
         }
     } else {
         header("location: ../view/certificadoView.php?error=error");
