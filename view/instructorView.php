@@ -137,6 +137,13 @@ $instructores = $business->getAllTBInstructor($esAdmin);
             max-height: 100px;
             display: block;
         }
+
+        .password-toggle {
+            cursor: pointer;
+            color: #007bff;
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +169,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                     <th>Correo</th>
                     <th>Cuenta Bancaria</th>
                     <th>Contraseña</th>
+                    <th>Verificar Contraseña</th>
                     <th>Imagen</th>
                     <th>Acción</th>
                 </tr>
@@ -173,11 +181,13 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                     <td><input type="text" name="direccion" placeholder="Dirección"></td>
                     <td><input type="email" name="correo" placeholder="correo@ejemplo.com" required></td>
                     <td><input type="text" name="cuenta" placeholder="Cuenta bancaria"></td>
-                    <td><input type="password" name="contraseña" placeholder="Contraseña (4-8 chars)" required></td>
+                    <td><input type="password" name="contraseña" id="contraseña" placeholder="Contraseña (4-8 chars)" required></td>
+                    <td><input type="password" name="verificar_contraseña" id="verificar_contraseña" placeholder="Repetir contraseña" required></td>
                     <td><input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp"></td>
                     <td><input type="submit" value="Crear" name="create"></td>
                 </tr>
             </table>
+            <div class="password-toggle" onclick="togglePasswordVisibility()">Mostrar/Ocultar Contraseñas</div>
         </form>
     <?php endif; ?>
 
@@ -193,6 +203,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
             <?php if ($esAdmin): ?>
                 <th>Cuenta Bancaria</th>
                 <th>Contraseña</th>
+                <th>Verificar Contraseña</th>
                 <th>Imagen</th>
             <?php endif; ?>
             <th>Certificados</th>
@@ -208,7 +219,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
         <tbody>
         <?php
         if (empty($instructores)) {
-            $colspan = $esAdmin ? 12 : ($esInstructor ? 8 : 7);
+            $colspan = $esAdmin ? 13 : ($esInstructor ? 8 : 7);
             echo "<tr><td colspan='{$colspan}'>No hay instructores registrados</td></tr>";
         } else {
             foreach ($instructores as $instructor) {
@@ -229,7 +240,8 @@ $instructores = $business->getAllTBInstructor($esAdmin);
 
                     if ($esAdmin) {
                         echo '<td><input type="text" name="cuenta" value="' . htmlspecialchars($instructor->getInstructorCuenta() ?? '') . '"></td>';
-                        echo '<td><input type="password" name="contraseña" value="' . htmlspecialchars($instructor->getInstructorContraseña() ?? '') . '" required></td>';
+                        echo '<td><input type="password" name="contraseña" id="contraseña_'.$instructor->getInstructorId().'" value="' . htmlspecialchars($instructor->getInstructorContraseña() ?? '') . '" required></td>';
+                        echo '<td><input type="password" name="verificar_contraseña" id="verificar_contraseña_'.$instructor->getInstructorId().'" placeholder="Repetir contraseña" required></td>';
                       echo '<td>';
                       $imageId = $instructor->getTbinstructorImagenId();
                       if (!empty($imageId)) {
@@ -328,6 +340,8 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                 echo 'Error: El teléfono debe tener entre 8 y 15 dígitos.';
             } else if ($_GET['error'] == "image_deleted") {
                 echo 'Error: No se pudo eliminar la imagen.';
+            } else if ($_GET['error'] == "password_mismatch") {
+                echo 'Error: Las contraseñas no coinciden.';
             }
             echo '</b></p>';
         } else if (isset($_GET['success'])) {
@@ -366,6 +380,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
         const correo = document.querySelector('input[name="correo"]');
         const cuenta = document.querySelector('input[name="cuenta"]');
         const contraseña = document.querySelector('input[name="contraseña"]');
+        const verificarContraseña = document.querySelector('input[name="verificar_contraseña"]');
 
         // Mensajes de error
         const errorMessages = {
@@ -377,6 +392,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
             correoFormato: 'Por favor ingrese un correo electrónico válido.',
             correoUnico: 'Este correo electrónico ya está registrado.',
             contraseñaLongitud: 'La contraseña debe tener entre 4 y 8 caracteres.',
+            contraseñasNoCoinciden: 'Las contraseñas no coinciden.',
             ibanInvalido: 'Por favor ingrese un IBAN válido (Ej: CR05015202001026284066).',
             cedulaUnica: 'Esta cédula ya está registrada.'
         };
@@ -388,6 +404,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
         if (correo) correo.addEventListener('blur', validarCorreo);
         if (cuenta) cuenta.addEventListener('blur', validarCuenta);
         if (contraseña) contraseña.addEventListener('blur', validarContraseña);
+        if (verificarContraseña) verificarContraseña.addEventListener('blur', validarVerificacionContraseña);
 
         // Validación antes de enviar el formulario
         if (form) {
@@ -465,6 +482,22 @@ $instructores = $business->getAllTBInstructor($esAdmin);
             }
 
             hideError(contraseña);
+
+            // Validar también la verificación si ya tiene valor
+            if (verificarContraseña.value) {
+                validarVerificacionContraseña();
+            }
+
+            return true;
+        }
+
+        function validarVerificacionContraseña() {
+            if (contraseña.value !== verificarContraseña.value) {
+                showError(verificarContraseña, errorMessages.contraseñasNoCoinciden);
+                return false;
+            }
+
+            hideError(verificarContraseña);
             return true;
         }
 
@@ -494,6 +527,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
             if (!validarTelefono()) isValid = false;
             if (!validarCorreo()) isValid = false;
             if (!validarContraseña()) isValid = false;
+            if (!validarVerificacionContraseña()) isValid = false;
             if (!validarCuenta()) isValid = false;
 
             if (!isValid) {
@@ -565,6 +599,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
         const correo = document.querySelector('input[name="correo"]');
         const cuenta = document.querySelector('input[name="cuenta"]');
         const contraseña = document.querySelector('input[name="contraseña"]');
+        const verificarContraseña = document.querySelector('input[name="verificar_contraseña"]');
 
         // Validación de cédula (exactamente 3 dígitos)
         if (!cedula.value.match(/^[0-9]{3}$/)) {
@@ -615,6 +650,13 @@ $instructores = $business->getAllTBInstructor($esAdmin);
             return false;
         }
 
+        // Validación de coincidencia de contraseñas
+        if (contraseña.value !== verificarContraseña.value) {
+            alert("Las contraseñas no coinciden.");
+            verificarContraseña.focus();
+            return false;
+        }
+
         // Validación de IBAN (si se ingresa)
         if (cuenta.value && !validateIBAN(cuenta.value)) {
             alert("Por favor ingrese un IBAN válido (Ej: CR05015202001026284066).");
@@ -629,6 +671,18 @@ $instructores = $business->getAllTBInstructor($esAdmin);
         iban = iban.replace(/\s+/g, '').toUpperCase();
         const ibanRegex = /^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/;
         return ibanRegex.test(iban);
+    }
+
+    // Función para mostrar/ocultar contraseñas
+    function togglePasswordVisibility() {
+        const contraseñaInputs = document.querySelectorAll('input[type="password"]');
+        contraseñaInputs.forEach(input => {
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        });
     }
 </script>
 

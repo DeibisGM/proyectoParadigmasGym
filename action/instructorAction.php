@@ -101,6 +101,13 @@ if (isset($_POST['delete_image'])) {
             exit();
         }
 
+        if (isset($_POST['contraseña']) && isset($_POST['verificar_contraseña'])) {
+        if ($_POST['contraseña'] !== $_POST['verificar_contraseña']) {
+            header("Location: ../view/instructorView.php?error=password_mismatch");
+            exit();
+        }
+    }
+
       $instructor = new Instructor($id, $nombre, $telefono, $direccion, $correo, $cuenta, $contraseña, $estado, '', '');
 
          // Primero insertar el instructor sin imagen
