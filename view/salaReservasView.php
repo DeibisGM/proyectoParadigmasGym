@@ -14,7 +14,7 @@ $salaReservasBusiness = new SalaReservasBusiness();
 $reservas = $salaReservasBusiness->getAllReservasDeSalas();
 
 $salaBusiness = new SalaBusiness();
-$todasLasSalas = $salaBusiness->getAllSalas();
+$todasLasSalas = $salaBusiness->obtenerTbsala();
 
 // 3. Crear un mapa de ID de sala -> nombre de sala para una búsqueda eficiente
 $mapaSalas = [];

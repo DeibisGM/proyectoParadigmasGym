@@ -22,7 +22,7 @@ $salaBusiness = new SalaBusiness();
 
 $todosLosEventos = $eventoBusiness->getAllEventos();
 $instructores = $instructorBusiness->getAllTBInstructor(true);
-$salas = $salaBusiness->getAllSalas();
+$salas = $salaBusiness->obtenerTbsala();
 
 $misEventos = [];
 if ($tipoUsuario === 'admin') {
@@ -65,27 +65,27 @@ if ($tipoUsuario === 'admin') {
             <h3><i class="ph ph-plus-circle"></i>Crear Nuevo Evento</h3>
             <form id="crearEventoForm" action="../action/eventoAction.php" method="POST">
                 <div class="form-group">
-                    <input type="text" name="nombre" placeholder="Nombre del Evento" value="<?= htmlspecialchars(Validation::getOldInput('nombre', '')) ?>">
                     <span class="error-message"><?= Validation::getError('nombre') ?></span>
+                    <input type="text" name="nombre" placeholder="Nombre del Evento" value="<?= htmlspecialchars(Validation::getOldInput('nombre', '')) ?>">
                 </div>
                 <div class="form-group">
                     <label>Fecha del evento:</label>
-                    <input type="date" name="fecha" value="<?= htmlspecialchars(Validation::getOldInput('fecha', date('Y-m-d'))) ?>" min="<?= date('Y-m-d') ?>">
                     <span class="error-message"><?= Validation::getError('fecha') ?></span>
+                    <input type="date" name="fecha" value="<?= htmlspecialchars(Validation::getOldInput('fecha', date('Y-m-d'))) ?>" min="<?= date('Y-m-d') ?>">
                 </div>
                 <div class="form-group">
                     <label>Hora de Inicio:</label>
-                    <input type="time" name="hora_inicio" value="<?= htmlspecialchars(Validation::getOldInput('hora_inicio', '')) ?>">
                     <span class="error-message"><?= Validation::getError('hora_inicio') ?></span>
+                    <input type="time" name="hora_inicio" value="<?= htmlspecialchars(Validation::getOldInput('hora_inicio', '')) ?>">
                 </div>
                 <div class="form-group">
                     <label>Hora de Fin:</label>
-                    <input type="time" name="hora_fin" value="<?= htmlspecialchars(Validation::getOldInput('hora_fin', '')) ?>">
                     <span class="error-message"><?= Validation::getError('hora_fin') ?></span>
+                    <input type="time" name="hora_fin" value="<?= htmlspecialchars(Validation::getOldInput('hora_fin', '')) ?>">
                 </div>
                 <div class="form-group">
-                    <input type="number" name="aforo" placeholder="Aforo" min="1" value="<?= htmlspecialchars(Validation::getOldInput('aforo', '')) ?>">
                     <span class="error-message"><?= Validation::getError('aforo') ?></span>
+                    <input type="number" name="aforo" placeholder="Aforo" min="1" value="<?= htmlspecialchars(Validation::getOldInput('aforo', '')) ?>">
                 </div>
 
                 <?php if ($tipoUsuario === 'admin'): ?>
@@ -107,6 +107,7 @@ if ($tipoUsuario === 'admin') {
 
                 <div class="form-group">
                     <label for="salas">Asignar Salas (mantén presionado Ctrl para seleccionar varias):</label>
+                    <span class="error-message"><?= Validation::getError('salas') ?></span>
                     <select name="salas[]" id="salas" multiple size="5">
                         <?php
                         $oldSalas = Validation::getOldInput('salas', []);
@@ -116,7 +117,6 @@ if ($tipoUsuario === 'admin') {
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <span class="error-message"><?= Validation::getError('salas') ?></span>
                 </div>
 
                 <textarea name="descripcion" placeholder="Descripción..."><?= htmlspecialchars(Validation::getOldInput('descripcion', '')) ?></textarea>
@@ -154,22 +154,22 @@ if ($tipoUsuario === 'admin') {
                                 <form action="../action/eventoAction.php" method="POST" id="form-evento-<?= $evento->getId() ?>" style="display: contents;">
                                     <input type="hidden" name="id" value="<?= $evento->getId() ?>">
                                     <td>
-                                        <input type="text" name="nombre" value="<?= htmlspecialchars(Validation::getOldInput('nombre', $evento->getNombre())) ?>" >
                                         <span class="error-message"><?= Validation::getError('nombre_'.$evento->getId()) ?></span>
+                                        <input type="text" name="nombre" value="<?= htmlspecialchars(Validation::getOldInput('nombre', $evento->getNombre())) ?>" >
                                     </td>
                                     <td>
-                                        <input type="date" name="fecha" value="<?= htmlspecialchars(Validation::getOldInput('fecha', $evento->getFecha())) ?>" min="<?= date('Y-m-d') ?>">
                                         <span class="error-message"><?= Validation::getError('fecha_'.$evento->getId()) ?></span>
+                                        <input type="date" name="fecha" value="<?= htmlspecialchars(Validation::getOldInput('fecha', $evento->getFecha())) ?>" min="<?= date('Y-m-d') ?>">
                                     </td>
                                     <td>
-                                        <input type="time" name="horaInicio" value="<?= Validation::getOldInput('horaInicio', $evento->getHoraInicio()) ?>" > -
-                                        <input type="time" name="horaFin" value="<?= Validation::getOldInput('horaFin', $evento->getHoraFin()) ?>" >
                                         <span class="error-message"><?= Validation::getError('horaInicio_'.$evento->getId()) ?></span>
                                         <span class="error-message"><?= Validation::getError('horaFin_'.$evento->getId()) ?></span>
+                                        <input type="time" name="horaInicio" value="<?= Validation::getOldInput('horaInicio', $evento->getHoraInicio()) ?>" > -
+                                        <input type="time" name="horaFin" value="<?= Validation::getOldInput('horaFin', $evento->getHoraFin()) ?>" >
                                     </td>
                                     <td>
-                                        <input type="number" name="aforo" value="<?= htmlspecialchars(Validation::getOldInput('aforo', $evento->getAforo())) ?>" min="1">
                                         <span class="error-message"><?= Validation::getError('aforo_'.$evento->getId()) ?></span>
+                                        <input type="number" name="aforo" value="<?= htmlspecialchars(Validation::getOldInput('aforo', $evento->getAforo())) ?>" min="1">
                                     </td>
                                     <td>
                                         <?php if ($tipoUsuario === 'admin'): ?>

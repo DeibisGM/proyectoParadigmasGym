@@ -14,7 +14,6 @@ if(isset($_POST['insertar'])){
 
         $sala = new Sala(null, $nombre, $capacidad, $estado);
 
-        // AGREGAR ESTA LÍNEA QUE FALTA:
         $salaBusiness = new SalaBusiness();
 
         $result = $salaBusiness->insertarTbsala($sala);
