@@ -124,9 +124,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/clientePadecimientoView.php'>
                         <button><i class="ph ph-clipboard-text"></i>Mis Datos Clínicos</button>
                     </a>
-                    <a href='view/padecimientoDictamenView.php'>
-                       <button><i class="ph ph-file-text"></i> Dictamen Médico</button>
-                   </a>
+
                     <a href='view/numeroEmergenciaView.php'>
                         <button><i class="ph ph-phone-call"></i>Mis Números de Emergencia</button>
                     </a>

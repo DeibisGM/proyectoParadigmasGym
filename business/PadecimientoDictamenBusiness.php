@@ -1,5 +1,4 @@
 <?php
-// VERSIÓN CORREGIDA DE PadecimientoDictamenBusiness
 
 include_once '../data/PadecimientoDictamenData.php';
 include_once '../utility/ImageManager.php';
@@ -19,25 +18,18 @@ class PadecimientoDictamenBusiness
         $this->imageManager = new ImageManager();
     }
 
-    /**
-     * Inserta un padecimiento dictamen y lo asocia al cliente
-     */
+
     public function insertarTBPadecimientoDictamen($padecimientodictamen)
         {
             return $this->padecimientoDictamenData->insertarTBPadecimientoDictamen($padecimientodictamen);
         }
 
-    /**
-     * Actualiza un padecimiento dictamen
-     */
+
     public function actualizarTBPadecimientoDictamen($padecimientodictamen)
     {
         return $this->padecimientoDictamenData->actualizarTBPadecimientoDictamen($padecimientodictamen);
     }
 
-    /**
-     * Elimina una imagen específica de un padecimiento
-     */
     public function eliminarImagenDePadecimiento($padecimientoId, $imagenId)
     {
         $padecimiento = $this->padecimientoDictamenData->getPadecimientoDictamenPorId($padecimientoId);
@@ -52,26 +44,21 @@ class PadecimientoDictamenBusiness
 
         $result = $this->padecimientoDictamenData->actualizarTBPadecimientoDictamen($padecimiento);
 
-        // Si la actualización es exitosa, eliminamos el archivo físico
         if ($result) {
             $this->imageManager->deleteImage($imagenId);
         }
         return $result;
     }
 
-    /**
-     * Elimina un padecimiento dictamen y todas sus relaciones
-     */
     public function eliminarTBPadecimientoDictamen($id)
         {
             try {
-                // 1. Obtener el padecimiento para eliminar imágenes
+
                 $padecimiento = $this->padecimientoDictamenData->getPadecimientoDictamenPorId($id);
                 if (!$padecimiento) {
                     return false;
                 }
 
-                // 2. Eliminar las imágenes físicas asociadas
                 $imageIds = $padecimiento->getPadecimientodictamenimagenid();
                 if (!empty($imageIds)) {
                     $imageIdsArray = explode('$', $imageIds);
@@ -82,10 +69,8 @@ class PadecimientoDictamenBusiness
                     }
                 }
 
-                // 3. Eliminar la relación en la tabla intermedia
                 $this->padecimientoDictamenData->eliminarRelacionPorDictamenId($id);
 
-                // 4. Eliminar el dictamen de la base de datos
                 return $this->padecimientoDictamenData->eliminarTBPadecimientoDictamen($id);
 
             } catch (Exception $e) {
@@ -94,54 +79,37 @@ class PadecimientoDictamenBusiness
             }
         }
 
-    /**
-     * Obtiene todos los padecimientos dictamen
-     */
+
     public function getAllTBPadecimientoDictamen()
     {
         return $this->padecimientoDictamenData->getAllTBPadecimientoDictamen();
     }
 
-    /**
-     * Obtiene padecimientos dictamen por cliente
-     */
+
     public function getPadecimientosDictamenPorCliente($clienteId)
     {
         return $this->padecimientoDictamenData->getPadecimientosDictamenPorCliente($clienteId);
     }
 
-    /**
-     * Obtiene padecimientos dictamen por lista de IDs
-     */
     public function getAllTBPadecimientoDictamenPorId($padecimientoLista)
     {
         return $this->padecimientoDictamenData->getAllTBPadecimientoDictamenPorId($padecimientoLista);
     }
 
-    /**
-     * Verifica si existe un padecimiento dictamen por entidad
-     */
     public function existePadecimientoDictamenEntidad($entidad)
     {
         return $this->padecimientoDictamenData->existePadecimientoDictamenEntidad($entidad);
     }
 
-    /**
-     * Obtiene un padecimiento dictamen por ID
-     */
     public function getPadecimientoDictamenPorId($id)
     {
         return $this->padecimientoDictamenData->getPadecimientoDictamenPorId($id);
     }
 
-    /**
-     * Obtiene todos los clientes
-     */
     public function getAllClientes()
         {
             $clientesData = $this->padecimientoDictamenData->getAllClientes();
 
-            // Convertir al formato esperado por el Action
             $clientesFormateados = array();
             foreach ($clientesData as $cliente) {
                 $clientesFormateados[] = [
@@ -154,42 +122,30 @@ class PadecimientoDictamenBusiness
             return $clientesFormateados;
         }
 
-    /**
-     * Obtiene un cliente por carnet
-     */
     public function getClientePorCarnet($carnet)
     {
         return $this->padecimientoDictamenData->getClientePorCarnet($carnet);
     }
 
-    /**
-     * Alias para mantener compatibilidad
-     */
     public function obtenerTodosLosClientes()
     {
         return $this->getAllClientes();
     }
 
-    /**
-     * Valida los datos antes de crear un dictamen
-     */
     public function validarDatosDictamen($fechaemision, $entidademision, $clienteCarnet)
     {
         $errores = array();
 
-        // Validar fecha
         if (empty($fechaemision)) {
             $errores[] = "La fecha de emisión es obligatoria";
         } elseif (strtotime($fechaemision) > time()) {
             $errores[] = "La fecha de emisión no puede ser futura";
         }
 
-        // Validar entidad
         if (empty($entidademision)) {
             $errores[] = "La entidad de emisión es obligatoria";
         }
 
-        // Validar cliente
         if (empty($clienteCarnet)) {
             $errores[] = "El carnet del cliente es obligatorio";
         } else {
@@ -202,9 +158,6 @@ class PadecimientoDictamenBusiness
         return $errores;
     }
 
-    /**
-     * Obtiene estadísticas de dictámenes
-     */
     public function obtenerEstadisticasDictamenes()
     {
         $dictamenes = $this->getAllTBPadecimientoDictamen();
@@ -217,14 +170,13 @@ class PadecimientoDictamenBusiness
         $fechaLimite = date('Y-m-d', strtotime('-30 days'));
 
         foreach ($dictamenes as $dictamen) {
-            // Contar por entidad
+
             $entidad = $dictamen->getPadecimientodictamenentidademision();
             if (!isset($estadisticas['por_entidad'][$entidad])) {
                 $estadisticas['por_entidad'][$entidad] = 0;
             }
             $estadisticas['por_entidad'][$entidad]++;
 
-            // Contar recientes
             if ($dictamen->getPadecimientodictamenfechaemision() >= $fechaLimite) {
                 $estadisticas['recientes']++;
             }
@@ -232,9 +184,35 @@ class PadecimientoDictamenBusiness
 
         return $estadisticas;
     }
- public function asociarDictamenACliente($clienteId, $dictamenId)
-    {
-        return $this->padecimientoDictamenData->asociarDictamenACliente($clienteId, $dictamenId);
+     public function asociarDictamenACliente($clienteId, $dictamenId)
+        {
+            return $this->padecimientoDictamenData->asociarDictamenACliente($clienteId, $dictamenId);
+        }
+    public function clienteTieneDictamen($clienteId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return false;
+        }
+        $conn->set_charset('utf8');
+
+        $query = "SELECT COUNT(*) as total FROM tbclientepadecimiento
+                  WHERE tbclienteid = ? AND tbpadecimientodictamenid IS NOT NULL
+                  AND tbpadecimientodictamenid != ''";
+
+        $stmt = mysqli_prepare($conn, $query);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "i", $clienteId);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $row = mysqli_fetch_assoc($result);
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+
+            return $row['total'] > 0;
+        }
+
+        mysqli_close($conn);
+        return false;
     }
 }
 ?>

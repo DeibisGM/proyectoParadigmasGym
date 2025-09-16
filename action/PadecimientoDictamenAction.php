@@ -1,7 +1,7 @@
 <?php
 session_start();
 error_reporting(E_ALL);
-ini_set('display_errors', 0); // Desactivar para evitar corromper JSON
+ini_set('display_errors', 0);
 
 ob_start();
 
@@ -38,27 +38,17 @@ try {
             $fechaemision = $_POST['fechaemision'] ?? '';
             $entidademision = $_POST['entidademision'] ?? '';
 
-            // CORREGIDO: Obtener cliente ID correctamente
             $clienteId = null;
+
             if ($esAdminOInstructor) {
-                // Admin/Instructor selecciona de dropdown (envía clienteId directamente)
+
                 $clienteId = $_POST['clienteId'] ?? '';
                 if (empty($clienteId) || !is_numeric($clienteId)) {
                     $response['message'] = 'Debe seleccionar un cliente válido.';
                     break;
                 }
             } else if ($esCliente) {
-                // Cliente: obtener su ID desde la sesión o buscar por carnet
-                if (isset($_SESSION['cliente_id'])) {
-                    $clienteId = $_SESSION['cliente_id'];
-                } else if (isset($_SESSION['carnet'])) {
-                    // Buscar cliente por carnet si no tenemos el ID en sesión
-                    $cliente = $padecimientoDictamenBusiness->getClientePorCarnet($_SESSION['carnet']);
-                    if ($cliente) {
-                        $clienteId = $cliente['tbclienteid']; // Usar el ID real de la tabla
-                        $_SESSION['cliente_id'] = $clienteId; // Guardarlo para próximas veces
-                    }
-                }
+                $clienteId = $_SESSION['usuario_id'];
 
                 if (empty($clienteId)) {
                     $response['message'] = 'No se pudo identificar el cliente. Inicie sesión nuevamente.';
@@ -66,7 +56,6 @@ try {
                 }
             }
 
-            // Validaciones básicas
             if (empty($fechaemision) || empty($entidademision)) {
                 $response['message'] = 'La fecha y entidad de emisión son obligatorias.';
                 break;
@@ -77,31 +66,39 @@ try {
                 break;
             }
 
-            // 1. Crear y insertar el dictamen primero
+            include_once '../business/clientePadecimientoBusiness.php';
+            $clientePadecimientoBusiness = new ClientePadecimientoBusiness();
+            $dictamenesExistentes = $clientePadecimientoBusiness->obtenerDictamenesPorCliente($clienteId);
+
+            if (!empty($dictamenesExistentes)) {
+                $response['message'] = 'Este cliente ya posee un dictamen registrado. No es posible registrar múltiples dictámenes para el mismo cliente.';
+                break;
+            }
+
             $padecimiento = new PadecimientoDictamen(0, $fechaemision, $entidademision, '');
             $nuevoId = $padecimientoDictamenBusiness->insertarTBPadecimientoDictamen($padecimiento);
 
             if ($nuevoId > 0) {
-                // 2. Manejar imágenes si existen
+
                 $imagenIdLista = '';
                 if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
                     $imageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'pad');
                     if (!empty($imageIds)) {
                         $imagenIdLista = implode('$', $imageIds);
 
-                        // Actualizar el dictamen con las imágenes
                         $padecimiento->setPadecimientodictamenid($nuevoId);
                         $padecimiento->setPadecimientodictamenimagenid($imagenIdLista);
                         $padecimientoDictamenBusiness->actualizarTBPadecimientoDictamen($padecimiento);
                     }
                 }
 
-                // 3. Asociar dictamen al cliente en tbclientepadecimiento
                 $asociacionExitosa = $padecimientoDictamenBusiness->asociarDictamenACliente($clienteId, $nuevoId);
 
                 if ($asociacionExitosa) {
                     $response['success'] = true;
                     $response['message'] = 'Padecimiento dictamen creado exitosamente.';
+                    $response['dictamenId'] = $nuevoId;
+                    $response['entidadEmision'] = $entidademision;
                     $response['padecimiento'] = [
                         'id' => $nuevoId,
                         'fechaemision' => $fechaemision,
@@ -109,7 +106,7 @@ try {
                         'imagenes' => $imageManager->getImagesByIds($imagenIdLista)
                     ];
                 } else {
-                    // Rollback: eliminar el dictamen creado si no se pudo asociar
+
                     $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($nuevoId);
                     $response['message'] = 'Error al asociar el dictamen con el cliente.';
                 }
@@ -150,13 +147,11 @@ try {
             $padecimientoActual->setPadecimientodictamenfechaemision($fechaemision);
             $padecimientoActual->setPadecimientodictamenentidademision($entidademision);
 
-            // Manejar nuevas imágenes
             if (isset($imagenesNuevas['name'][0]) && !empty($imagenesNuevas['name'][0])) {
-                $imageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'pad');
+                $currentIds = $padecimientoActual->getPadecimientodictamenimagenid();
+                $imageIds = $imageManager->addImages($_FILES['imagenes'], $id, 'pad');
                 if (!empty($imageIds)) {
-                    $imagenIdLista = implode('$', $imageIds);
-
-                    $newIds = ImageManager::addIdsToString($imageIds['ids'], $currentIds);
+                    $newIds = ImageManager::addIdsToString($imageIds, $currentIds);
                     $padecimientoActual->setPadecimientodictamenimagenid($newIds);
                 }
             }
@@ -195,7 +190,6 @@ try {
                 break;
             }
 
-            // Eliminar (esto incluye las relaciones y imágenes)
             $eliminacionExitosa = $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($id);
 
             if ($eliminacionExitosa) {
@@ -249,7 +243,6 @@ try {
     ];
 }
 
-// Limpiar buffer y enviar solo JSON
 ob_clean();
 echo json_encode($response);
 exit();

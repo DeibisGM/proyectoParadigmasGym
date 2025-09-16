@@ -13,7 +13,6 @@
             }
             $conn->set_charset('utf8');
 
-            // 1. Verificar si ya existe un registro para este cliente
             $queryExiste = "SELECT tbclientepadecimientoid, tbpadecimientoid FROM tbclientepadecimiento WHERE tbclienteid = ?";
             $stmtExiste = mysqli_prepare($conn, $queryExiste);
             mysqli_stmt_bind_param($stmtExiste, "i", $clientePadecimiento->getTbclienteid());
@@ -22,18 +21,16 @@
             $result = false;
 
             if ($rowExiste = mysqli_fetch_assoc($resultExiste)) {
-                // YA EXISTE:
+
                 $registroExistenteId = $rowExiste['tbclientepadecimientoid'];
                 $padecimientosActuales = $rowExiste['tbpadecimientoid'];
                 $nuevosPadecimientos = $clientePadecimiento->getTbpadecimientoid();
 
-                // Convertir a arrays, unir y eliminar duplicados
                 $actualesArray = empty($padecimientosActuales) ? [] : explode('$', $padecimientosActuales);
                 $nuevosArray = empty($nuevosPadecimientos) ? [] : explode('$', $nuevosPadecimientos);
                 $todosLosPadecimientos = array_unique(array_merge($actualesArray, $nuevosArray));
                 $padecimientosConcatenados = implode('$', array_filter($todosLosPadecimientos));
 
-                // Si se proporciona un dictamen, actualizar el registro existente
                 if ($clientePadecimiento->getTbpadecimientodictamenid() !== null) {
                     $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientoid = ?, tbpadecimientodictamenid = ? WHERE tbclientepadecimientoid = ?";
                     $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
@@ -41,7 +38,6 @@
                     $result = mysqli_stmt_execute($stmtUpdate);
                     mysqli_stmt_close($stmtUpdate);
                 } else {
-                    // Si no se proporciona dictamen, actualizar solo los padecimientos
                     $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientoid = ? WHERE tbclientepadecimientoid = ?";
                     $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
                     mysqli_stmt_bind_param($stmtUpdate, "si", $padecimientosConcatenados, $registroExistenteId);
@@ -49,7 +45,6 @@
                     mysqli_stmt_close($stmtUpdate);
                 }
             } else {
-                // NO EXISTE: Crear nuevo registro
                 $queryGetLastId = "SELECT MAX(tbclientepadecimientoid) AS tbclientepadecimientoid FROM tbclientepadecimiento";
                 $resultId = mysqli_query($conn, $queryGetLastId);
                 $nextId = 1;
@@ -64,7 +59,6 @@
                 $stmt = mysqli_prepare($conn, $queryInsert);
 
                 if ($stmt) {
-                    // Nota: el ID de dictamen puede ser NULL, por lo que usamos 's' y ajustamos el valor
                     $dictamenId = $clientePadecimiento->getTbpadecimientodictamenid();
                     $dictamenId = $dictamenId === null ? null : (int)$dictamenId;
                     mysqli_stmt_bind_param($stmt, "iisi", $nextId, $clientePadecimiento->getTbclienteid(), $clientePadecimiento->getTbpadecimientoid(), $dictamenId);
@@ -172,10 +166,8 @@
                     $row['tbpadecimientodictamenid']
                 );
 
-                // Establecer el carnet
                 $currentClientePadecimiento->setCarnet($row['tbclientecarnet'] ?? '');
 
-                // Obtener nombres de padecimientos
                 $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
                 $currentClientePadecimiento->setPadecimientosNombres($padecimientosNombres);
 
@@ -250,10 +242,8 @@
                         $row['tbpadecimientodictamenid']
                     );
 
-                    // Establecer el carnet
                     $clientePadecimiento->setCarnet($row['tbclientecarnet'] ?? '');
 
-                    // Obtener nombres de padecimientos
                     $padecimientosNombres = $this->obtenerNombresPadecimientos($row['tbpadecimientoid']);
                     $clientePadecimiento->setPadecimientosNombres($padecimientosNombres);
 

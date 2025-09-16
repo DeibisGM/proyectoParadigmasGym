@@ -20,7 +20,6 @@ if (!$esAdminOInstructor && !$esCliente) {
 $padecimientoDictamenBusiness = new PadecimientoDictamenBusiness();
 $imageManager = new ImageManager();
 
-// Instancia la clase para obtener la lista de clientes
 $clientePadecimientoBusiness = new ClientePadecimientoBusiness();
 
 $padecimientosDictamen = $padecimientoDictamenBusiness->getAllTBPadecimientoDictamen();
@@ -39,7 +38,7 @@ if ($esAdminOInstructor) {
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-        /* Agrega aquí tus estilos o inclúyelos en un archivo separado */
+
     </style>
 </head>
 <body>

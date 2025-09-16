@@ -1,8 +1,6 @@
 <?php
-// SOLUCIÓN COMPLETA: Capturar y limpiar cualquier output
-ob_start(); // Iniciar buffer de salida
+ob_start();
 
-// Suprimir TODOS los errores y notices
 error_reporting(0);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
@@ -14,10 +12,8 @@ if (!class_exists('ClientePadecimiento')) {
     include_once '../domain/clientePadecimiento.php';
 }
 
-// Limpiar cualquier output previo (notices, warnings, etc.)
 ob_clean();
 
-// Configurar headers para JSON
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-cache, must-revalidate');
 
@@ -25,11 +21,11 @@ $clientePadecimientoBusiness = new ClientePadecimientoBusiness();
 $response = array();
 
 try {
-    // Validación de sesión
+
     if (!isset($_SESSION['usuario_id'])) {
         $response['success'] = false;
         $response['message'] = 'Error: Debe iniciar sesión para acceder a esta funcionalidad.';
-        ob_clean(); // Limpiar buffer antes de enviar respuesta
+        ob_clean();
         echo json_encode($response);
         exit();
     }
@@ -38,16 +34,14 @@ try {
     $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
     $esInstructor = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
 
-    // ============== CREATE ==============
     if (isset($_POST['create'])) {
-        // Determinar cliente ID
+
         if ($esUsuarioCliente) {
             $clienteId = $_SESSION['usuario_id'];
         } else {
             $clienteId = isset($_POST['clienteId']) ? intval($_POST['clienteId']) : 0;
         }
 
-        // Procesar padecimientos
         $padecimientosIds = array();
         if (isset($_POST['padecimientosIds']) && is_array($_POST['padecimientosIds'])) {
             foreach ($_POST['padecimientosIds'] as $id) {
@@ -58,7 +52,6 @@ try {
             }
         }
 
-        // Validar que se haya seleccionado al menos un padecimiento
         if (empty($padecimientosIds)) {
             $response['success'] = false;
             $response['message'] = 'Error: Debe seleccionar al menos un padecimiento.';
@@ -69,32 +62,28 @@ try {
 
         $padecimientosString = implode('$', $padecimientosIds);
 
-        // Procesar dictamen
         $dictamenId = null;
         if (isset($_POST['dictamenId']) && !empty($_POST['dictamenId']) && $_POST['dictamenId'] !== '0') {
             $dictamenId = intval($_POST['dictamenId']);
         }
 
-        // Validación
         $errores = $clientePadecimientoBusiness->validarClientePadecimiento($clienteId, $padecimientosString);
 
         if (!empty($errores)) {
             $response['success'] = false;
             $response['message'] = 'Error de validación: ' . implode(', ', $errores);
         } else {
-            // Crear objeto y guardar - con manejo de errores silencioso
+
             $clientePadecimiento = new ClientePadecimiento(0, $clienteId, $padecimientosString, $dictamenId);
 
-            // Capturar cualquier output durante la inserción
             ob_start();
             $resultado = $clientePadecimientoBusiness->insertarTBClientePadecimiento($clientePadecimiento);
-            ob_end_clean(); // Descartar cualquier output capturado
+            ob_end_clean();
 
             if ($resultado) {
                 $response['success'] = true;
                 $response['message'] = 'Éxito: Cliente padecimiento registrado correctamente.';
 
-                // Limpiar datos temporales de sesión si existen
                 if (isset($_SESSION['temp_form_data'])) {
                     unset($_SESSION['temp_form_data']);
                 }
@@ -105,7 +94,6 @@ try {
         }
     }
 
-    // ============== UPDATE ==============
     else if (isset($_POST['update'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
 
@@ -167,7 +155,6 @@ try {
         }
     }
 
-    // ============== DELETE ==============
     else if (isset($_POST['delete'])) {
         if (!$esAdmin) {
             $response['success'] = false;
@@ -194,7 +181,6 @@ try {
         }
     }
 
-    // ============== UPDATE INDIVIDUAL ==============
     else if (isset($_POST['updateIndividual'])) {
         $registroId = isset($_POST['registroId']) ? intval($_POST['registroId']) : 0;
         $padecimientoIdAntiguo = isset($_POST['padecimientoIdAntiguo']) ? intval($_POST['padecimientoIdAntiguo']) : 0;
@@ -218,7 +204,6 @@ try {
         }
     }
 
-    // ============== DELETE INDIVIDUAL ==============
     else if (isset($_POST['deleteIndividual'])) {
         if (!$esAdmin) {
             $response['success'] = false;
@@ -246,7 +231,6 @@ try {
         }
     }
 
-    // ============== ACCIÓN NO VÁLIDA ==============
     else {
         $response['success'] = false;
         $response['message'] = 'Error: Acción no válida.';
@@ -262,10 +246,8 @@ try {
     error_log('Error fatal en clientePadecimientoAction.php: ' . $e->getMessage());
 }
 
-// CRÍTICO: Limpiar completamente el buffer antes de enviar la respuesta
 ob_clean();
 
-// Enviar solo la respuesta JSON
 echo json_encode($response, JSON_UNESCAPED_UNICODE);
 exit();
 ?>

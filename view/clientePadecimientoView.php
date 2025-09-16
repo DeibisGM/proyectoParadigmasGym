@@ -51,14 +51,12 @@ foreach ($clientePadecimientosObj as $clienteObj) {
     );
 }
 
-// Obtener dictámenes para mostrar en la tabla
 $dictamenes = array();
 $dictamenesObj = $padecimientoDictamenBusiness->getAllTBPadecimientoDictamen();
 foreach ($dictamenesObj as $dictamen) {
     $dictamenes[$dictamen->getPadecimientodictamenid()] = $dictamen->getPadecimientodictamenentidademision();
 }
 
-// Manejar datos persistentes del formulario
 $formData = array();
 if (isset($_SESSION['temp_form_data'])) {
     $formData = $_SESSION['temp_form_data'];
@@ -256,7 +254,6 @@ if (isset($_SESSION['temp_form_data'])) {
 </div>
 
 <script>
-    // Variables y datos globales
     let padecimientosData = <?php echo json_encode($padecimientos); ?>;
     let esUsuarioCliente = <?php echo $esUsuarioCliente ? 'true' : 'false'; ?>;
     let esAdmin = <?php echo $esAdmin ? 'true' : 'false'; ?>;
@@ -285,7 +282,6 @@ if (isset($_SESSION['temp_form_data'])) {
     window.onload = function () {
         cargarDatosEnTabla();
 
-        // Restaurar selección de padecimiento si hay datos del formulario
         <?php if (isset($formData['padecimientoId'])): ?>
             setTimeout(() => {
                 document.getElementById('padecimiento').value = '<?php echo $formData['padecimientoId']; ?>';
@@ -293,9 +289,7 @@ if (isset($_SESSION['temp_form_data'])) {
         <?php endif; ?>
     };
 
-    // Funciones para el formulario principal
     function abrirRegistroDictamen() {
-        // Validar que se haya seleccionado un cliente (solo para admin/instructor)
         if (!esUsuarioCliente) {
             const clienteId = document.getElementById('clienteId').value;
             if (!clienteId) {
@@ -585,7 +579,6 @@ if (isset($_SESSION['temp_form_data'])) {
     }
     <?php endif; ?>
 
-    // --- Lógica del Modal de Dictamen (AJAX) ---
     function cerrarModalDictamen() {
         if (confirm('¿Está seguro que desea cerrar? Se perderán los datos no guardados del dictamen.')) {
             document.getElementById('modalDictamen').style.display = 'none';

@@ -32,7 +32,7 @@ class ClientePadecimientoBusiness {
         $conn->set_charset('utf8');
 
         try {
-            // Buscar registros que tengan este dictamen
+
             $querySelect = "SELECT tbclientepadecimientoid, tbpadecimientodictamenid FROM tbclientepadecimiento WHERE tbpadecimientodictamenid LIKE ?";
             $searchPattern = "%$dictamenId%";
             $stmt = mysqli_prepare($conn, $querySelect);
@@ -44,7 +44,6 @@ class ClientePadecimientoBusiness {
                 $registroId = $row['tbclientepadecimientoid'];
                 $dictamenesActuales = $row['tbpadecimientodictamenid'];
 
-                // Remover el dictamen de la cadena - MEJORADO
                 $dictamenesArray = array_filter(explode('$', $dictamenesActuales), function($id) {
                     return !empty(trim($id));
                 });
@@ -55,9 +54,8 @@ class ClientePadecimientoBusiness {
 
                 $nuevaCadena = implode('$', $nuevosDictamenes);
 
-                // Actualizar o eliminar según el caso
                 if (empty($nuevaCadena)) {
-                    // Si no quedan dictámenes, eliminar el registro completo
+
                     $queryDelete = "DELETE FROM tbclientepadecimiento WHERE tbclientepadecimientoid = ?";
                     $stmtDelete = mysqli_prepare($conn, $queryDelete);
                     mysqli_stmt_bind_param($stmtDelete, "i", $registroId);
@@ -68,7 +66,7 @@ class ClientePadecimientoBusiness {
                         error_log("Error al eliminar registro completo de cliente-padecimiento: " . mysqli_error($conn));
                     }
                 } else {
-                    // Actualizar con la nueva cadena
+
                     $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientodictamenid = ? WHERE tbclientepadecimientoid = ?";
                     $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
                     mysqli_stmt_bind_param($stmtUpdate, "si", $nuevaCadena, $registroId);
@@ -91,7 +89,7 @@ class ClientePadecimientoBusiness {
             return false;
         }
     }
-    // Método agregado para usar el que existe en Data
+
     public function eliminarTBClientePadecimientoPorCliente($tbclienteid) {
         return $this->clientePadecimientoData->eliminarTBClientePadecimientoPorCliente($tbclienteid);
     }
@@ -226,7 +224,6 @@ class ClientePadecimientoBusiness {
         }
     }
 
-    // MÉTODO CORREGIDO: Validación individual de padecimientos
     public function limpiarPadecimientosEliminados() {
         $todosClientePadecimientos = $this->clientePadecimientoData->obtenerTBClientePadecimiento();
         $actualizacionesRealizadas = 0;
@@ -237,7 +234,7 @@ class ClientePadecimientoBusiness {
 
             foreach ($padecimientosOriginales as $padecimientoId) {
                 if (!empty($padecimientoId) && is_numeric($padecimientoId)) {
-                    // CORREGIDO: Validar cada padecimiento individualmente
+
                     if ($this->validarPadecimientoIndividualExiste($padecimientoId)) {
                         $padecimientosValidos[] = $padecimientoId;
                     }
@@ -264,7 +261,6 @@ class ClientePadecimientoBusiness {
         return $actualizacionesRealizadas;
     }
 
-    // NUEVO MÉTODO: Para validar un padecimiento individual
     private function validarPadecimientoIndividualExiste($padecimientoId) {
         return $this->clientePadecimientoData->validarPadecimientosExisten($padecimientoId);
     }
@@ -365,8 +361,6 @@ class ClientePadecimientoBusiness {
         );
     }
 
-    // MÉTODOS ADICIONALES SUGERIDOS
-
     public function validarClienteExiste($clienteId) {
         $clientes = $this->obtenerTodosLosClientes();
         foreach ($clientes as $cliente) {
@@ -418,9 +412,6 @@ class ClientePadecimientoBusiness {
         return $estadisticas;
     }
 
-        /**
-     * Obtiene todos los dictámenes asociados a un cliente
-     */
     public function obtenerDictamenesPorCliente($clienteId) {
         $registros = $this->clientePadecimientoData->obtenerTodosTBClientePadecimientoPorCliente($clienteId);
         $dictamenes = array();
@@ -436,18 +427,13 @@ class ClientePadecimientoBusiness {
         return array_unique(array_filter($dictamenes));
     }
 
-    /**
-     * Valida si un cliente puede tener un dictamen asociado
-     */
     public function validarAsociacionClienteDictamen($clienteId, $dictamenId) {
         $errores = array();
 
-        // Validar que el cliente existe
         if (!$this->validarClienteExiste($clienteId)) {
             $errores[] = "El cliente especificado no existe";
         }
 
-        // Validar que el dictamen ID es válido
         if (empty($dictamenId) || !is_numeric($dictamenId) || $dictamenId <= 0) {
             $errores[] = "El ID del dictamen no es válido";
         }
@@ -455,36 +441,31 @@ class ClientePadecimientoBusiness {
         return $errores;
     }
 
-    /**
-     * Actualiza las relaciones de dictámenes para un cliente específico
-     */
     public function actualizarDictamenesCliente($clienteId, $dictamenesIds) {
         if (!$this->validarClienteExiste($clienteId)) {
             return false;
         }
 
-        // Convertir array a string si es necesario
         if (is_array($dictamenesIds)) {
             $dictamenesString = implode('$', array_filter($dictamenesIds));
         } else {
             $dictamenesString = $dictamenesIds;
         }
 
-        // Obtener o crear registro existente
         $registroExistente = $this->clientePadecimientoData->obtenerTBClientePadecimientoPorCliente($clienteId);
 
         if ($registroExistente) {
-            // Actualizar registro existente
+
             $registroExistente->setTbpadecimientodictamenid($dictamenesString);
             return $this->clientePadecimientoData->actualizarTBClientePadecimiento($registroExistente);
         } else {
-            // Crear nuevo registro
+
             $nuevoRegistro = new ClientePadecimiento(0, $clienteId, '', $dictamenesString);
             return $this->clientePadecimientoData->insertarTBClientePadecimiento($nuevoRegistro);
         }
     }
     public function eliminarTBClientePadecimientoConDictamenes($tbclientepadecimientoid) {
-        // 1. Obtener el registro antes de eliminarlo para saber qué dictámenes tiene
+
         $registro = $this->obtenerTBClientePadecimientoPorId($tbclientepadecimientoid);
 
         if (!$registro) {
@@ -493,15 +474,13 @@ class ClientePadecimientoBusiness {
 
         $dictamenId = $registro->getTbpadecimientodictamenid();
 
-        // 2. Eliminar el registro de cliente-padecimiento
         $eliminacionExitosa = $this->clientePadecimientoData->eliminarTBClientePadecimiento($tbclientepadecimientoid);
 
         if ($eliminacionExitosa && !empty($dictamenId)) {
-            // 3. Si tenía dictamen, eliminarlo también
+
             include_once '../business/PadecimientoDictamenBusiness.php';
             $dictamenBusiness = new PadecimientoDictamenBusiness();
 
-            // Verificar si este dictamen está siendo usado por otros clientes
             if (!$this->dictamenEnUsoPorOtrosClientes($dictamenId, $tbclientepadecimientoid)) {
                 $dictamenBusiness->eliminarTBPadecimientoDictamen($dictamenId);
             }
@@ -510,14 +489,11 @@ class ClientePadecimientoBusiness {
         return $eliminacionExitosa;
     }
 
-    /**
-     * Verifica si un dictamen está siendo usado por otros clientes
-     */
     private function dictamenEnUsoPorOtrosClientes($dictamenId, $registroIdExcluir = null) {
         $todosRegistros = $this->clientePadecimientoData->obtenerTBClientePadecimiento();
 
         foreach ($todosRegistros as $registro) {
-            // Saltar el registro que estamos eliminando
+
             if ($registroIdExcluir && $registro->getTbclientepadecimientoid() == $registroIdExcluir) {
                 continue;
             }
@@ -526,17 +502,14 @@ class ClientePadecimientoBusiness {
             if (!empty($dictamenesIds)) {
                 $dictamenesArray = explode('$', $dictamenesIds);
                 if (in_array($dictamenId, $dictamenesArray)) {
-                    return true; // El dictamen está siendo usado por otro cliente
+                    return true;
                 }
             }
         }
 
-        return false; // El dictamen no está siendo usado por otros
+        return false;
     }
 
-    /**
-     * Obtiene el cliente ID asociado a un dictamen específico
-     */
     public function obtenerClienteIdPorDictamenId($dictamenId) {
         $todosRegistros = $this->clientePadecimientoData->obtenerTBClientePadecimiento();
 
@@ -553,15 +526,12 @@ class ClientePadecimientoBusiness {
         return null;
     }
 
-    /**
-     * Asocia un dictamen a un cliente específico
-     */
     public function asociarDictamenACliente($clienteId, $dictamenId) {
-        // Buscar si ya existe un registro para este cliente
+
         $registroExistente = $this->clientePadecimientoData->obtenerTBClientePadecimientoPorCliente($clienteId);
 
         if ($registroExistente) {
-            // Ya existe: agregar el dictamen a los existentes
+
             $dictamenesActuales = $registroExistente->getTbpadecimientodictamenid();
             $dictamenesArray = empty($dictamenesActuales) ? [] : explode('$', $dictamenesActuales);
 
@@ -573,9 +543,8 @@ class ClientePadecimientoBusiness {
                 return $this->clientePadecimientoData->actualizarTBClientePadecimiento($registroExistente);
             }
 
-            return true; // Ya estaba asociado
+            return true;
         } else {
-            // No existe: crear nuevo registro solo con el dictamen
             $nuevoRegistro = new ClientePadecimiento(0, $clienteId, '', $dictamenId);
             return $this->clientePadecimientoData->insertarTBClientePadecimiento($nuevoRegistro);
         }
