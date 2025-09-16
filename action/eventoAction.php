@@ -1,7 +1,9 @@
 <?php
-session_start();
 include_once '../business/eventoBusiness.php';
 include_once '../domain/evento.php';
+include_once '../utility/Validation.php';
+
+Validation::start();
 
 if (!isset($_SESSION['tipo_usuario']) || !in_array($_SESSION['tipo_usuario'], ['admin', 'instructor'])) {
     header("location: ../view/loginView.php?error=unauthorized");
@@ -11,12 +13,9 @@ if (!isset($_SESSION['tipo_usuario']) || !in_array($_SESSION['tipo_usuario'], ['
 $eventoBusiness = new EventoBusiness();
 $redirect = "location: ../view/eventoGestionView.php";
 
-function guardarDatosEnSesion($post_data)
-{
-    $_SESSION['form_data'] = $post_data;
-}
-
 if (isset($_POST['crear_evento'])) {
+    Validation::setOldInput($_POST);
+
     $nombre = $_POST['nombre'];
     $descripcion = $_POST['descripcion'];
     $fecha = $_POST['fecha'];
@@ -26,18 +25,34 @@ if (isset($_POST['crear_evento'])) {
     $instructorId = $_POST['instructor_id'] ?: null;
     $salas = isset($_POST['salas']) ? $_POST['salas'] : [];
 
-    $_SESSION['form_data'] = $_POST;
+    if (empty($nombre)) {
+        Validation::setError('nombre', 'El nombre es obligatorio.');
+    }
+    if (empty($fecha)) {
+        Validation::setError('fecha', 'La fecha es obligatoria.');
+    } elseif ($fecha < date('Y-m-d')) {
+        Validation::setError('fecha', 'La fecha no puede ser en el pasado.');
+    }
+    if (empty($horaInicio)) {
+        Validation::setError('hora_inicio', 'La hora de inicio es obligatoria.');
+    }
+    if (empty($horaFin)) {
+        Validation::setError('hora_fin', 'La hora de fin es obligatoria.');
+    }
+    if (!empty($horaInicio) && !empty($horaFin) && $horaInicio >= $horaFin) {
+        Validation::setError('hora_fin', 'La hora de fin debe ser posterior a la hora de inicio.');
+    }
+    if (empty($aforo)) {
+        Validation::setError('aforo', 'El aforo es obligatorio.');
+    } elseif (!filter_var($aforo, FILTER_VALIDATE_INT) || $aforo <= 0) {
+        Validation::setError('aforo', 'El aforo debe ser un número positivo.');
+    }
+    if (empty($salas)) {
+        Validation::setError('salas', 'Debe seleccionar al menos una sala.');
+    }
 
-    if (empty($nombre) || empty($fecha) || empty($horaInicio) || empty($horaFin) || empty($aforo) || empty($salas)) {
-        header($redirect . "?error=" . urlencode("Todos los campos son obligatorios."));
-        exit();
-    }
-    if ($fecha < date('Y-m-d')) {
-        header($redirect . "?error=" . urlencode("La fecha del evento no puede ser anterior a hoy."));
-        exit();
-    }
-    if ($horaInicio >= $horaFin) {
-        header($redirect . "?error=" . urlencode("La hora de inicio debe ser anterior a la hora de fin."));
+    if (Validation::hasErrors()) {
+        header($redirect);
         exit();
     }
 
@@ -45,13 +60,15 @@ if (isset($_POST['crear_evento'])) {
     $resultado = $eventoBusiness->insertarEvento($evento, $salas);
 
     if ($resultado === true) {
-        unset($_SESSION['form_data']);
+        Validation::clear();
         header($redirect . "?success=event_created");
     } else {
-        header($redirect . "?error=" . urlencode($resultado));
+        Validation::setError('general', $resultado);
+        header($redirect);
     }
 
 } else if (isset($_POST['update'])) {
+    Validation::setOldInput($_POST);
     $id = $_POST['id'];
     $nombre = $_POST['nombre'];
     $descripcion = $_POST['descripcion'];
@@ -62,25 +79,30 @@ if (isset($_POST['crear_evento'])) {
     $instructorId = $_POST['instructorId'] ?: null;
     $estado = $_POST['estado'];
 
-    // Obtener las salas originales de la base de datos, ya que no son editables.
-    $salasStr = $eventoBusiness->getSalaIdsPorEventoId($id);
-    if ($salasStr === null) {
-        header($redirect . "?error=" . urlencode("Error: No se encontraron las salas originales para este evento."));
-        exit();
-    }
-    $salas = explode('$', $salasStr);
+    // Salas no son editables, así que las obtenemos de la BD
+    $salas = $eventoBusiness->getSalaIdsPorEvento($id);
 
-    // Validaciones
-    if (empty($id) || empty($nombre) || empty($fecha) || empty($horaInicio) || empty($horaFin) || empty($aforo)) {
-        header($redirect . "?error=" . urlencode("Todos los campos son obligatorios al actualizar."));
-        exit();
+    if (empty($nombre)) {
+        Validation::setError('nombre_'.$id, 'El nombre es obligatorio.');
     }
-    if ($fecha < date('Y-m-d')) {
-        header($redirect . "?error=" . urlencode("La fecha del evento no puede ser anterior a hoy."));
-        exit();
+    if (empty($fecha)) {
+        Validation::setError('fecha_'.$id, 'La fecha es obligatoria.');
     }
-    if ($horaInicio >= $horaFin) {
-        header($redirect . "?error=" . urlencode("La hora de inicio debe ser anterior a la hora de fin."));
+    if (empty($horaInicio)) {
+        Validation::setError('horaInicio_'.$id, 'La hora de inicio es obligatoria.');
+    }
+    if (empty($horaFin)) {
+        Validation::setError('horaFin_'.$id, 'La hora de fin es obligatoria.');
+    }
+    if (!empty($horaInicio) && !empty($horaFin) && $horaInicio >= $horaFin) {
+        Validation::setError('horaFin_'.$id, 'La hora de fin debe ser posterior a la de inicio.');
+    }
+    if (empty($aforo)) {
+        Validation::setError('aforo_'.$id, 'El aforo es obligatorio.');
+    }
+
+    if (Validation::hasErrors()) {
+        header($redirect);
         exit();
     }
 
@@ -88,12 +110,15 @@ if (isset($_POST['crear_evento'])) {
     $resultado = $eventoBusiness->actualizarEvento($evento, $salas);
 
     if ($resultado === true) {
+        Validation::clear();
         header($redirect . "?success=event_updated");
     } else {
-        header($redirect . "?error=" . urlencode($resultado));
+        Validation::setError('general', $resultado);
+        header($redirect);
     }
 
 } else if (isset($_POST['eliminar_evento'])) {
+    // Mantener la lógica anterior para delete por ahora
     $id = $_POST['id'];
     if (!empty($id)) {
         if ($eventoBusiness->eliminarEvento($id)) {

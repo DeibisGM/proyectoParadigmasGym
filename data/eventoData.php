@@ -1,9 +1,18 @@
 <?php
 include_once 'data.php';
 include_once '../domain/evento.php';
+include_once 'salaReservasData.php';
 
 class EventoData extends Data
 {
+    private $salaReservasData;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->salaReservasData = new SalaReservasData();
+    }
+
     public function insertarEvento($evento, $salas)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
@@ -33,17 +42,10 @@ class EventoData extends Data
                 throw new Exception("Error al insertar el evento: " . mysqli_stmt_error($stmtEvento));
             }
 
-            // 3. Insertar la reserva de la(s) sala(s)
-            $salasStr = implode('$', $salas);
-            $queryReserva = "INSERT INTO tbreservasala (tbsalaid, tbeventoid, tbreservafecha, tbreservahorainicio, tbreservahorafin) VALUES (?, ?, ?, ?, ?)";
-            $stmtReserva = mysqli_prepare($conn, $queryReserva);
-            mysqli_stmt_bind_param(
-                $stmtReserva, "sisss",
-                $salasStr, $evento->getId(), $evento->getFecha(),
-                $evento->getHoraInicio(), $evento->getHoraFin()
-            );
-            if (!mysqli_stmt_execute($stmtReserva)) {
-                throw new Exception("Error al reservar las salas: " . mysqli_stmt_error($stmtReserva));
+            // 3. Insertar la reserva de la(s) sala(s) usando la clase SalaReservasData
+            $salaReserva = new SalaReserva(0, $salas, $evento->getId(), $evento->getFecha(), $evento->getHoraInicio(), $evento->getHoraFin());
+            if (!$this->salaReservasData->insertarReservaDeSala($salaReserva, $conn)) {
+                throw new Exception("Error al reservar las salas.");
             }
 
             mysqli_commit($conn);
@@ -80,17 +82,10 @@ class EventoData extends Data
                 throw new Exception("Error al actualizar el evento: " . mysqli_stmt_error($stmtEvento));
             }
 
-            // 2. Actualizar tbreservasala (SOLO FECHA Y HORA, NO LAS SALAS)
-            $salasStr = implode('$', $salas); // Usamos las salas originales
-            $queryReserva = "UPDATE tbreservasala SET tbsalaid=?, tbreservafecha=?, tbreservahorainicio=?, tbreservahorafin=? WHERE tbeventoid=?";
-            $stmtReserva = mysqli_prepare($conn, $queryReserva);
-            mysqli_stmt_bind_param(
-                $stmtReserva, "ssssi",
-                $salasStr, $evento->getFecha(), $evento->getHoraInicio(),
-                $evento->getHoraFin(), $evento->getId()
-            );
-            if (!mysqli_stmt_execute($stmtReserva)) {
-                throw new Exception("Error al actualizar la reserva de salas: " . mysqli_stmt_error($stmtReserva));
+            // 2. Actualizar tbreservasala
+            $salaReserva = new SalaReserva(0, $salas, $evento->getId(), $evento->getFecha(), $evento->getHoraInicio(), $evento->getHoraFin());
+            if (!$this->salaReservasData->actualizarReservaDeSala($salaReserva, $conn)) {
+                throw new Exception("Error al actualizar la reserva de salas.");
             }
 
             mysqli_commit($conn);
@@ -123,10 +118,7 @@ class EventoData extends Data
             }
 
             // 2. Eliminar la reserva de la sala para este evento
-            $queryReserva = "DELETE FROM tbreservasala WHERE tbeventoid = ?";
-            $stmtReserva = mysqli_prepare($conn, $queryReserva);
-            mysqli_stmt_bind_param($stmtReserva, "i", $id);
-            if (!mysqli_stmt_execute($stmtReserva)) {
+            if (!$this->salaReservasData->eliminarReservaDeSalaPorEvento($id, $conn)) {
                 throw new Exception("Error al eliminar la reserva de sala.");
             }
 
@@ -152,105 +144,20 @@ class EventoData extends Data
         }
     }
 
-    public function verificarDisponibilidadSalas($salas, $fecha, $horaInicio, $horaFin, $eventoIdExcluir = null)
-    {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        if (!$conn) return ["Error de conexión"];
-        $conn->set_charset('utf8');
-
-        $query = "SELECT tbsalaid FROM tbreservasala WHERE tbreservafecha = ? AND (? < tbreservahorafin AND ? > tbreservahorainicio)";
-        if ($eventoIdExcluir) {
-            $query .= " AND tbeventoid != ?";
-        }
-        $stmt = mysqli_prepare($conn, $query);
-        if ($eventoIdExcluir) {
-            mysqli_stmt_bind_param($stmt, "sssi", $fecha, $horaInicio, $horaFin, $eventoIdExcluir);
-        } else {
-            mysqli_stmt_bind_param($stmt, "sss", $fecha, $horaInicio, $horaFin);
-        }
-
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        $salasOcupadasIds = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $salasOcupadasIds = array_merge($salasOcupadasIds, explode('$', $row['tbsalaid']));
-        }
-        mysqli_stmt_close($stmt);
-
-        $salasOcupadasIds = array_unique(array_filter($salasOcupadasIds));
-        $conflictos = array_intersect($salas, $salasOcupadasIds);
-
-        if (!empty($conflictos)) {
-            $listaConflictos = implode(',', array_map('intval', $conflictos));
-            $queryNombres = "SELECT tbsalanombre FROM tbsala WHERE tbsalaid IN ($listaConflictos)";
-            $resultNombres = mysqli_query($conn, $queryNombres);
-            $nombresSalasConflicto = [];
-            while ($rowNombre = mysqli_fetch_assoc($resultNombres)) {
-                $nombresSalasConflicto[] = $rowNombre['tbsalanombre'];
-            }
-            mysqli_close($conn);
-            return $nombresSalasConflicto;
-        }
-
-        mysqli_close($conn);
-        return [];
-    }
-
-    public function getSalaIdsPorEventoId($eventoId)
-    {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        if (!$conn) return null;
-        $conn->set_charset('utf8');
-
-        $query = "SELECT tbsalaid FROM tbreservasala WHERE tbeventoid = ?";
-        $stmt = mysqli_prepare($conn, $query);
-        mysqli_stmt_bind_param($stmt, "i", $eventoId);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
-
-        mysqli_stmt_close($stmt);
-        mysqli_close($conn);
-
-        return $row ? $row['tbsalaid'] : null;
-    }
-
     public function getAllEventos()
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         if (!$conn) return [];
         $conn->set_charset('utf8');
 
-        $query = "SELECT e.*, i.tbinstructornombre, rs.tbsalaid
+        $query = "SELECT e.*, i.tbinstructornombre
                   FROM tbevento e
                   LEFT JOIN tbinstructor i ON e.tbinstructorid = i.tbinstructorid
-                  LEFT JOIN tbreservasala rs ON e.tbeventoid = rs.tbeventoid
                   ORDER BY e.tbeventofecha, e.tbeventohorainicio";
         $result = mysqli_query($conn, $query);
 
-        $eventosData = [];
-        $todosLosSalaIds = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $eventosData[] = $row;
-            if (!empty($row['tbsalaid'])) {
-                $todosLosSalaIds = array_merge($todosLosSalaIds, explode('$', $row['tbsalaid']));
-            }
-        }
-
-        $todosLosSalaIds = array_unique(array_filter($todosLosSalaIds));
-        $mapaNombresSalas = [];
-        if (!empty($todosLosSalaIds)) {
-            $listaIds = implode(',', array_map('intval', $todosLosSalaIds));
-            $queryNombres = "SELECT tbsalaid, tbsalanombre FROM tbsala WHERE tbsalaid IN ($listaIds)";
-            $resultNombres = mysqli_query($conn, $queryNombres);
-            while ($rowNombre = mysqli_fetch_assoc($resultNombres)) {
-                $mapaNombresSalas[$rowNombre['tbsalaid']] = $rowNombre['tbsalanombre'];
-            }
-        }
-
         $eventos = [];
-        foreach ($eventosData as $row) {
+        while ($row = mysqli_fetch_assoc($result)) {
             $evento = new Evento(
                 $row['tbeventoid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'],
                 $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'],
@@ -258,23 +165,71 @@ class EventoData extends Data
             );
             $evento->setInstructorNombre($row['tbinstructornombre'] ?? 'No asignado');
 
-            $nombresConcatenados = '';
-            if (!empty($row['tbsalaid'])) {
-                $ids = explode('$', $row['tbsalaid']);
+            // Obtener salas y sus nombres
+            $salaIds = $this->salaReservasData->getSalaIdsPorEventoId($evento->getId());
+            if (!empty($salaIds)) {
+                $listaIds = implode(',', array_map('intval', $salaIds));
+                $queryNombres = "SELECT tbsalanombre FROM tbsala WHERE tbsalaid IN ($listaIds)";
+                $resultNombres = mysqli_query($conn, $queryNombres);
                 $nombresArr = [];
-                foreach ($ids as $id) {
-                    if (isset($mapaNombresSalas[trim($id)])) {
-                        $nombresArr[] = $mapaNombresSalas[trim($id)];
-                    }
+                while ($rowNombre = mysqli_fetch_assoc($resultNombres)) {
+                    $nombresArr[] = $rowNombre['tbsalanombre'];
                 }
-                $nombresConcatenados = implode(', ', $nombresArr);
+                $evento->setSalasNombre(implode(', ', $nombresArr));
             }
-            $evento->setSalasNombre($nombresConcatenados);
+
             $eventos[] = $evento;
         }
 
         mysqli_close($conn);
         return $eventos;
+    }
+
+    public function getEventoById($id)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) return null;
+        $conn->set_charset('utf8');
+
+        $query = "SELECT e.*, i.tbinstructornombre
+                  FROM tbevento e
+                  LEFT JOIN tbinstructor i ON e.tbinstructorid = i.tbinstructorid
+                  WHERE e.tbeventoid = ?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+
+        if (!$row) {
+            mysqli_stmt_close($stmt);
+            mysqli_close($conn);
+            return null;
+        }
+
+        $evento = new Evento(
+            $row['tbeventoid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'],
+            $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'],
+            $row['tbinstructorid'], $row['tbeventoestado']
+        );
+        $evento->setInstructorNombre($row['tbinstructornombre'] ?? 'No asignado');
+
+        // Obtener salas y sus nombres
+        $salaIds = $this->salaReservasData->getSalaIdsPorEventoId($id);
+        if (!empty($salaIds)) {
+            $listaIds = implode(',', array_map('intval', $salaIds));
+            $queryNombres = "SELECT tbsalanombre FROM tbsala WHERE tbsalaid IN ($listaIds)";
+            $resultNombres = mysqli_query($conn, $queryNombres);
+            $nombresArr = [];
+            while ($rowNombre = mysqli_fetch_assoc($resultNombres)) {
+                $nombresArr[] = $rowNombre['tbsalanombre'];
+            }
+            $evento->setSalasNombre(implode(', ', $nombresArr));
+        }
+
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
+        return $evento;
     }
 }
 

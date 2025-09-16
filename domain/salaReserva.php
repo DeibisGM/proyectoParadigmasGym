@@ -32,5 +32,6 @@ class SalaReserva
 
     // Setters
     public function setSalasNombre($salasNombre) { $this->salasNombre = $salasNombre; }
+    public function setReservaId($reservaId) { $this->id = $reservaId; }
 }
 ?>
