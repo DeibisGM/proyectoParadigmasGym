@@ -1,14 +1,23 @@
 <?php
+ob_start();
+
+error_reporting(0);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
 session_start();
 
-include_once '../business/datoClinicoBusiness.php';
-if (!class_exists('DatoClinico')) {
-    include_once '../domain/datoClinico.php';
+include_once '../business/clientePadecimientoBusiness.php';
+if (!class_exists('ClientePadecimiento')) {
+    include_once '../domain/clientePadecimiento.php';
 }
 
-header('Content-Type: application/json');
+ob_clean();
 
-$datoClinicoBusiness = new DatoClinicoBusiness();
+header('Content-Type: application/json; charset=utf-8');
+header('Cache-Control: no-cache, must-revalidate');
+
+$clientePadecimientoBusiness = new ClientePadecimientoBusiness();
 $response = array();
 
 try {
@@ -16,6 +25,7 @@ try {
     if (!isset($_SESSION['usuario_id'])) {
         $response['success'] = false;
         $response['message'] = 'Error: Debe iniciar sesión para acceder a esta funcionalidad.';
+        ob_clean();
         echo json_encode($response);
         exit();
     }
@@ -42,23 +52,44 @@ try {
             }
         }
 
-        $padecimientosString = empty($padecimientosIds) ? '' : implode('$', $padecimientosIds);
+        if (empty($padecimientosIds)) {
+            $response['success'] = false;
+            $response['message'] = 'Error: Debe seleccionar al menos un padecimiento.';
+            ob_clean();
+            echo json_encode($response);
+            exit();
+        }
 
-        $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
+        $padecimientosString = implode('$', $padecimientosIds);
+
+        $dictamenId = null;
+        if (isset($_POST['dictamenId']) && !empty($_POST['dictamenId']) && $_POST['dictamenId'] !== '0') {
+            $dictamenId = intval($_POST['dictamenId']);
+        }
+
+        $errores = $clientePadecimientoBusiness->validarClientePadecimiento($clienteId, $padecimientosString);
 
         if (!empty($errores)) {
             $response['success'] = false;
             $response['message'] = 'Error de validación: ' . implode(', ', $errores);
         } else {
-            $datoClinico = new DatoClinico(0, $clienteId, $padecimientosString);
-            $resultado = $datoClinicoBusiness->insertarTBDatoClinico($datoClinico);
+
+            $clientePadecimiento = new ClientePadecimiento(0, $clienteId, $padecimientosString, $dictamenId);
+
+            ob_start();
+            $resultado = $clientePadecimientoBusiness->insertarTBClientePadecimiento($clientePadecimiento);
+            ob_end_clean();
 
             if ($resultado) {
                 $response['success'] = true;
-                $response['message'] = 'Éxito: Dato clínico registrado correctamente.';
+                $response['message'] = 'Éxito: Cliente padecimiento registrado correctamente.';
+
+                if (isset($_SESSION['temp_form_data'])) {
+                    unset($_SESSION['temp_form_data']);
+                }
             } else {
                 $response['success'] = false;
-                $response['message'] = 'Error: No se pudo registrar el dato clínico.';
+                $response['message'] = 'Error: No se pudo registrar el cliente padecimiento en la base de datos.';
             }
         }
     }
@@ -82,28 +113,43 @@ try {
             }
         }
 
-        $padecimientosString = empty($padecimientosIds) ? '' : implode('$', $padecimientosIds);
+        if (empty($padecimientosIds)) {
+            $response['success'] = false;
+            $response['message'] = 'Error: Debe seleccionar al menos un padecimiento.';
+            ob_clean();
+            echo json_encode($response);
+            exit();
+        }
+
+        $padecimientosString = implode('$', $padecimientosIds);
+
+        $dictamenId = null;
+        if (isset($_POST['dictamenId']) && !empty($_POST['dictamenId']) && $_POST['dictamenId'] !== '0') {
+            $dictamenId = intval($_POST['dictamenId']);
+        }
 
         if ($id <= 0) {
             $response['success'] = false;
             $response['message'] = 'Error: ID de registro inválido.';
         } else {
-
-            $errores = $datoClinicoBusiness->validarDatoClinico($clienteId, $padecimientosString);
+            $errores = $clientePadecimientoBusiness->validarClientePadecimiento($clienteId, $padecimientosString);
 
             if (!empty($errores)) {
                 $response['success'] = false;
                 $response['message'] = 'Error de validación: ' . implode(', ', $errores);
             } else {
-                $datoClinico = new DatoClinico($id, $clienteId, $padecimientosString);
-                $resultado = $datoClinicoBusiness->actualizarTBDatoClinico($datoClinico);
+                $clientePadecimiento = new ClientePadecimiento($id, $clienteId, $padecimientosString, $dictamenId);
+
+                ob_start();
+                $resultado = $clientePadecimientoBusiness->actualizarTBClientePadecimiento($clientePadecimiento);
+                ob_end_clean();
 
                 if ($resultado) {
                     $response['success'] = true;
-                    $response['message'] = 'Éxito: Dato clínico actualizado correctamente.';
+                    $response['message'] = 'Éxito: Cliente padecimiento actualizado correctamente.';
                 } else {
                     $response['success'] = false;
-                    $response['message'] = 'Error: No se pudo actualizar el dato clínico.';
+                    $response['message'] = 'Error: No se pudo actualizar el cliente padecimiento.';
                 }
             }
         }
@@ -120,14 +166,16 @@ try {
                 $response['success'] = false;
                 $response['message'] = 'Error: ID de registro inválido.';
             } else {
-                $resultado = $datoClinicoBusiness->eliminarTBDatoClinico($id);
+                ob_start();
+                $resultado = $clientePadecimientoBusiness->eliminarTBClientePadecimientoConDictamenes($id);
+                ob_end_clean();
 
                 if ($resultado) {
                     $response['success'] = true;
-                    $response['message'] = 'Éxito: Dato clínico eliminado correctamente.';
+                    $response['message'] = 'Éxito: Cliente padecimiento eliminado correctamente.';
                 } else {
                     $response['success'] = false;
-                    $response['message'] = 'Error: No se pudo eliminar el dato clínico.';
+                    $response['message'] = 'Error: No se pudo eliminar el cliente padecimiento.';
                 }
             }
         }
@@ -142,7 +190,9 @@ try {
             $response['success'] = false;
             $response['message'] = 'Error: Datos de registro inválidos.';
         } else {
-            $resultado = $datoClinicoBusiness->actualizarPadecimientoIndividual($registroId, $padecimientoIdAntiguo, $padecimientoIdNuevo);
+            ob_start();
+            $resultado = $clientePadecimientoBusiness->actualizarPadecimientoIndividual($registroId, $padecimientoIdAntiguo, $padecimientoIdNuevo);
+            ob_end_clean();
 
             if ($resultado) {
                 $response['success'] = true;
@@ -166,14 +216,16 @@ try {
                 $response['success'] = false;
                 $response['message'] = 'Error: Datos de registro inválidos.';
             } else {
-                $resultado = $datoClinicoBusiness->eliminarPadecimientoIndividual($registroId, $padecimientoId);
+                ob_start();
+                $resultado = $clientePadecimientoBusiness->eliminarPadecimientoIndividual($registroId, $padecimientoId);
+                ob_end_clean();
 
-                if ($resultado['success']) {
-                    $response['success'] = true;
+                if (is_array($resultado)) {
+                    $response['success'] = $resultado['success'];
                     $response['message'] = $resultado['message'];
                 } else {
                     $response['success'] = false;
-                    $response['message'] = $resultado['message'];
+                    $response['message'] = 'Error: Respuesta inesperada del servidor.';
                 }
             }
         }
@@ -182,20 +234,20 @@ try {
     else {
         $response['success'] = false;
         $response['message'] = 'Error: Acción no válida.';
-        $response['debug'] = [
-            'POST_data' => $_POST,
-            'session_data' => [
-                'usuario_id' => isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 'no_set',
-                'tipo_usuario' => isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : 'no_set'
-            ]
-        ];
     }
 
 } catch (Exception $e) {
     $response['success'] = false;
-    $response['message'] = 'Error: ' . $e->getMessage();
-    error_log('Error en datoClinicoAction.php: ' . $e->getMessage());
+    $response['message'] = 'Error del servidor: ' . $e->getMessage();
+    error_log('Error en clientePadecimientoAction.php: ' . $e->getMessage());
+} catch (Error $e) {
+    $response['success'] = false;
+    $response['message'] = 'Error fatal del servidor.';
+    error_log('Error fatal en clientePadecimientoAction.php: ' . $e->getMessage());
 }
 
-echo json_encode($response);
+ob_clean();
+
+echo json_encode($response, JSON_UNESCAPED_UNICODE);
+exit();
 ?>

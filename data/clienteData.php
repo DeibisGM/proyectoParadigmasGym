@@ -2,7 +2,7 @@
 
 include_once 'data.php';
 include '../domain/cliente.php';
-include_once 'datoClinicoData.php';
+include_once 'clientePadecimientoData.php';
 
 class ClienteData extends Data
 {
@@ -77,8 +77,8 @@ class ClienteData extends Data
 
         try {
             // 1. Primero eliminar datos clínicos del cliente
-            $datoClinicoData = new DatoClinicoData();
-            $resultDatoClinico = $datoClinicoData->eliminarTBDatoClinicoPorCliente($id);
+            $clientePadecimientoData = new ClientePadecimientoData();
+            $resultClientePadecimiento = $clientePadecimientoData->eliminarTBClientePadecimientoPorCliente($id);
 
             // 2. Luego eliminar el cliente
             $queryDelete = "DELETE FROM tbcliente WHERE tbclienteid=?";
@@ -93,7 +93,7 @@ class ClienteData extends Data
             }
 
             // Si ambas operaciones fueron exitosas, confirmar
-            if ($resultDatoClinico && $resultCliente) {
+            if ($resultClientePadecimiento && $resultCliente) {
                 mysqli_commit($conn);
                 $result = true;
             } else {
