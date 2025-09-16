@@ -18,6 +18,9 @@ include_once '../business/certificadoBusiness.php';
 $certificadoBusiness = new CertificadoBusiness();
 $todosCertificados = $certificadoBusiness->getCertificados();
 
+include_once '../utility/ImageManager.php';
+$imageManager = new ImageManager();
+
 require_once '../business/instructorBusiness.php';
 $business = new InstructorBusiness();
 $instructores = $business->getAllTBInstructor($esAdmin);
@@ -108,6 +111,32 @@ $instructores = $business->getAllTBInstructor($esAdmin);
             border-color: red;
             background-color: #ffe6e6;
         }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .delete-image-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .image-container img {
+            max-width: 100px;
+            max-height: 100px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -145,7 +174,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                     <td><input type="email" name="correo" placeholder="correo@ejemplo.com" required></td>
                     <td><input type="text" name="cuenta" placeholder="Cuenta bancaria"></td>
                     <td><input type="password" name="contraseña" placeholder="Contraseña (4-8 chars)" required></td>
-                    <td><input type="file" name="imagen" accept="image/png, image/jpeg, image/webp"></td>
+                    <td><input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp"></td>
                     <td><input type="submit" value="Crear" name="create"></td>
                 </tr>
             </table>
@@ -201,27 +230,20 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                     if ($esAdmin) {
                         echo '<td><input type="text" name="cuenta" value="' . htmlspecialchars($instructor->getInstructorCuenta() ?? '') . '"></td>';
                         echo '<td><input type="password" name="contraseña" value="' . htmlspecialchars($instructor->getInstructorContraseña() ?? '') . '" required></td>';
-                        echo '<td data-image-manager>';
-                        $nombreImagen = 'instructores_' . $instructor->getInstructorId() . '.jpg';
-                        $rutaImagen = '../img/instructores/' . $nombreImagen;
-
-                        if (file_exists($rutaImagen)) {
-                            echo '<div class="imagen-actual-container">';
-                            echo '<img src="' . $rutaImagen . '?t=' . time() . '" alt="Imagen actual">';
-                            echo '<button type="button" class="eliminar-imagen-btn">X</button>';
-                            echo '</div>';
-                            echo '<div class="input-imagen-container" style="display: none;">';
-                            echo '<input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">';
-                            echo '</div>';
-                        } else {
-                            echo '<div class="imagen-actual-container" style="display: none;">';
-                            echo '</div>';
-                            echo '<div class="input-imagen-container">';
-                            echo '<input type="file" name="imagen" accept="image/png, image/jpeg, image/webp">';
-                            echo '</div>';
-                        }
-                        echo '<input type="hidden" name="eliminar_imagen" value="0">';
-                        echo '</td>';
+                      echo '<td>';
+                      $imageId = $instructor->getTbinstructorImagenId();
+                      if (!empty($imageId)) {
+                          $imagen = $imageManager->getImagesByIds($imageId);
+                          if (!empty($imagen) && !empty($imagen[0]['tbimagenruta'])) {
+                              $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
+                              $finalSrc = $imagePath . '?t=' . time();
+                              echo '<div class="image-container"><img src="' . $finalSrc . '" alt="Imagen"><button type="button" data-instructor-id="' . $instructor->getInstructorId() . '" data-image-id="' . $imageId . '" class="delete-image-btn" onclick="confirmImageDelete(this)">X</button></div>';                          } else {
+                              echo '<input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp">';
+                          }
+                      } else {
+                          echo '<input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp">';
+                      }
+                      echo '</td>';
                     }
                 } else {
                     // PARA USUARIOS NO ADMIN Y NO ES SU PROPIO PERFIL
@@ -246,7 +268,6 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                 }
                 echo '</td>';
 
-                // BOTÓN VER CERTIFICADOS (siempre visible)
                 echo '<td>';
                 echo '<a href="../view/certificadoView.php?instructor_id=' . $instructor->getInstructorId() . '" class="btn-ver-certificados">Ver Certificados</a>';
                 echo '</td>';
@@ -281,13 +302,13 @@ $instructores = $business->getAllTBInstructor($esAdmin);
         <?php
         if (isset($_GET['error'])) {
             echo '<p class="error"><b>';
-            if ($_GET['error'] == "emptyFields") {
+            if ($_GET['error'] == "datos_faltantes") {
                 echo 'Error: Los campos obligatorios no pueden estar vacíos.';
             } else if ($_GET['error'] == "invalidName") {
                 echo 'Error: El nombre no puede contener números.';
             } else if ($_GET['error'] == "nameTooLong") {
                 echo 'Error: El nombre es demasiado largo.';
-            } else if ($_GET['error'] == "invalidEmail") {
+            } else if ($_GET['error'] == "correo_invalido") {
                 echo 'Error: El correo electrónico no es válido.';
             } else if ($_GET['error'] == "dbError") {
                 echo 'Error: No se pudo procesar la transacción en la base de datos.';
@@ -295,7 +316,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                 echo 'Error: La contraseña debe tener entre 4 y 8 caracteres.';
             } else if ($_GET['error'] == "invalidId") {
                 echo 'Error: La cédula debe contener exactamente 3 dígitos numéricos.';
-            } else if ($_GET['error'] == "idExists") {
+            } else if ($_GET['error'] == "existe") {
                 echo 'Error: La cédula ya está registrada para otro instructor.';
             } else if ($_GET['error'] == "emailExists") {
                 echo 'Error: El correo electrónico ya está registrado para otro instructor.';
@@ -305,18 +326,22 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                 echo 'Error: El teléfono solo puede contener números.';
             } else if ($_GET['error'] == "phoneLengthInvalid") {
                 echo 'Error: El teléfono debe tener entre 8 y 15 dígitos.';
+            } else if ($_GET['error'] == "image_deleted") {
+                echo 'Error: No se pudo eliminar la imagen.';
             }
             echo '</b></p>';
         } else if (isset($_GET['success'])) {
             echo '<p class="success"><b>';
-            if ($_GET['success'] == "created") {
+            if ($_GET['success'] == "inserted") {
                 echo 'Éxito: Instructor creado correctamente.';
             } else if ($_GET['success'] == "updated") {
                 echo 'Éxito: Instructor actualizado correctamente.';
-            } else if ($_GET['success'] == "deleted") {
+            } else if ($_GET['success'] == "eliminado") {
                 echo 'Éxito: Instructor eliminado correctamente.';
             } else if ($_GET['success'] == "activated") {
                 echo 'Éxito: Instructor activado correctamente.';
+            } else if ($_GET['success'] == "image_deleted") {
+                echo 'Éxito: Imagen eliminada correctamente.';
             }
             echo '</b></p>';
         }
@@ -605,62 +630,49 @@ $instructores = $business->getAllTBInstructor($esAdmin);
         const ibanRegex = /^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/;
         return ibanRegex.test(iban);
     }
+</script>
 
-    // Gestión de imágenes (manteniendo tu código original)
-    document.addEventListener('DOMContentLoaded', function () {
-        // Delegación de eventos para los botónes 'X' y los inputs de archivo
-        document.addEventListener('click', function (event) {
-            // Si se hizo clic en un botón de eliminar imagen
-            if (event.target.classList.contains('eliminar-imagen-btn')) {
-                const manager = event.target.closest('[data-image-manager]');
-                if (manager) {
-                    const imagenActualContainer = manager.querySelector('.imagen-actual-container');
-                    const inputContainer = manager.querySelector('.input-imagen-container');
-                    const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
+<script>
+// Reemplaza todo el script de eliminación con este:
+function confirmImageDelete(button) {
+    if (confirm('¿Estás seguro de eliminar esta imagen?')) {
+        const instructorId = button.getAttribute('data-instructor-id');
+        const imageId = button.getAttribute('data-image-id');
 
-                    imagenActualContainer.style.display = 'none';
-                    inputContainer.style.display = 'block';
-                    hiddenEliminar.value = '1';
-                }
-            }
-        });
+        // Crear formulario temporal
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '../action/instructorAction.php';
 
-        document.addEventListener('change', function (event) {
-            // Si se seleccionó un archivo en an input de imagen
-            if (event.target.matches('input[type="file"][name="imagen"]')) {
-                const inputImagen = event.target;
-                const manager = inputImagen.closest('[data-image-manager]');
-                const inputContainer = inputImagen.parentElement;
+        // Agregar campos ocultos
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = instructorId;
+        form.appendChild(idInput);
 
-                const [file] = inputImagen.files;
-                if (file) {
-                    // Limpiar previsualización anterior si existe
-                    const oldPreview = inputContainer.querySelector('img.preview');
-                    if (oldPreview) {
-                        oldPreview.remove();
-                    }
+        const deleteInput = document.createElement('input');
+        deleteInput.type = 'hidden';
+        deleteInput.name = 'delete_image';
+        deleteInput.value = imageId;
+        form.appendChild(deleteInput);
 
-                    // Crear y mostrar nueva previsualización
-                    const preview = document.createElement('img');
-                    preview.src = URL.createObjectURL(file);
-                    preview.alt = 'Previsualización de nueva imagen';
-                    preview.className = 'preview';
-                    preview.style.maxWidth = '100px';
-                    preview.style.maxHeight = '100px';
-                    preview.style.marginTop = '10px';
-                    inputContainer.appendChild(preview);
+        // Enviar formulario
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 
-                    // Si hay un campo oculto de eliminar, anular la orden
-                    if (manager) {
-                        const hiddenEliminar = manager.querySelector('input[name="eliminar_imagen"]');
-                        if (hiddenEliminar) {
-                            hiddenEliminar.value = '0';
-                        }
-                    }
-                }
-            }
+// También asegúrate de que los botones de submit normales no interfieran
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteButtons = document.querySelectorAll('.delete-image-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
         });
     });
+});
 </script>
 </body>
 </html>

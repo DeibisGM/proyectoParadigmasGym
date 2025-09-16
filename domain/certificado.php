@@ -9,14 +9,17 @@ class Certificado {
     private $descripcion;
     private $entidad;
     private $idInstructor;
+    private $tbcerticadoimagenid;
 
 
-    public function __construct($id, $nombre, $descripcion, $entidad, $idInstructor) {
+    public function __construct($id, $nombre, $descripcion, $entidad, $idInstructor,$imagenid = '') {
         $this->id = $id;
         $this->nombre = $nombre;
         $this->descripcion = $descripcion;
         $this->entidad = $entidad;
         $this->idInstructor = $idInstructor;
+        $this->tbcerticadoimagenid = $imagenid;
+
     }
 
 
@@ -36,6 +39,10 @@ class Certificado {
     public function getIdInstructor() {
         return $this->idInstructor;
     }
+    public function getTbcertificadoImagenId()
+    {
+    return $this->tbcerticadoimagenid;
+    }
     public function setId($id) {
         $this->id = $id;
     }
@@ -50,6 +57,10 @@ class Certificado {
     }  
     public function setIdInstructor($idInstructor) {
         $this->idInstructor = $idInstructor;
-    }   
+    }
+    public function setTbcertificadoImagenId($imagenid)
+    {
+       $this->tbcerticadoimagenid = $imagenid;
+    }
 }
 ?>

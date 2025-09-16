@@ -1,3 +1,4 @@
+
 <?php
 include_once 'data.php';
 include '../domain/instructor.php';
@@ -5,52 +6,54 @@ include '../domain/instructor.php';
 class InstructorData extends Data
 {
 
-    public function insertarTBInstructor($instructor)
-    {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        $conn->set_charset('utf8');
+// En instructorData.php - método insertarTBInstructor
+public function insertarTBInstructor($instructor)
+{
+    $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+    $conn->set_charset('utf8');
 
-        // Generar ID de 3 dígitos si no existe
-        $id = $instructor->getInstructorId();
-        if (empty($id)) {
-            $id = $this->getNextInstructorId();
-        }
-        // Asegurar formato de 3 dígitos
-        $id = str_pad($id, 3, '0', STR_PAD_LEFT);
-        $instructor->setInstructorId($id);
+    $id = $instructor->getInstructorId();
+    $imagenId = $instructor->getTbinstructorImagenId();
 
-        $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo, tbinstructorcertificado) VALUES (" .
-            $instructor->getInstructorId() . ",'" .
-            $instructor->getInstructorNombre() . "','" .
-            $instructor->getInstructorTelefono() . "','" .
-            $instructor->getInstructorDireccion() . "','" .
-            $instructor->getInstructorCorreo() . "','" .
-            $instructor->getInstructorCuenta() . "','" .
-            $instructor->getInstructorContraseña() . "', 1, '');";
+    // Si no hay imagen, establecer como NULL o cadena vacía
+    $imagenValue = ($imagenId === '' || $imagenId === null) ? "NULL" : "'" . mysqli_real_escape_string($conn, $imagenId) . "'";
 
-        $result = mysqli_query($conn, $queryInsert);
-        mysqli_close($conn);
-        return $result;
-    }
+    $queryInsert = "INSERT INTO tbinstructor (tbinstructorid, tbinstructornombre, tbinstructortelefono, tbinstructordireccion, tbinstructorcorreo, tbinstructorcuenta, tbinstructorcontraseña, tbinstructoractivo, tbinstructorcertificado, tbinstructorimagenid) VALUES ('" .
+        $id . "','" .
+        mysqli_real_escape_string($conn, $instructor->getInstructorNombre()) . "','" .
+        mysqli_real_escape_string($conn, $instructor->getInstructorTelefono()) . "','" .
+        mysqli_real_escape_string($conn, $instructor->getInstructorDireccion()) . "','" .
+        mysqli_real_escape_string($conn, $instructor->getInstructorCorreo()) . "','" .
+        mysqli_real_escape_string($conn, $instructor->getInstructorCuenta()) . "','" .
+        mysqli_real_escape_string($conn, $instructor->getInstructorContraseña()) . "', 1, '', " .
+        $imagenValue . ");";
 
-    public function actualizarTBInstructor($instructor)
-    {
-        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
-        $conn->set_charset('utf8');
+    $result = mysqli_query($conn, $queryInsert);
+    mysqli_close($conn);
 
-        $queryUpdate = "UPDATE tbinstructor SET tbinstructornombre='" . $instructor->getInstructorNombre() .
-            "', tbinstructortelefono='" . $instructor->getInstructorTelefono() .
-            "', tbinstructordireccion='" . $instructor->getInstructorDireccion() .
-            "', tbinstructorcorreo='" . $instructor->getInstructorCorreo() .
-            "', tbinstructorcuenta='" . $instructor->getInstructorCuenta() .
-            "', tbinstructorcontraseña='" . $instructor->getInstructorContraseña() .
-            "', tbinstructorcertificado='" . $instructor->getInstructorCertificado() .
-            "' WHERE tbinstructorid=" . $instructor->getInstructorId() . ";";
+    return $result;
+}
 
-        $result = mysqli_query($conn, $queryUpdate);
-        mysqli_close($conn);
-        return $result;
-    }
+public function actualizarTBInstructor($instructor)
+{
+    $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+    $conn->set_charset('utf8');
+
+    $queryUpdate = "UPDATE tbinstructor SET
+        tbinstructornombre='" . mysqli_real_escape_string($conn, $instructor->getInstructorNombre()) .
+        "', tbinstructortelefono='" . mysqli_real_escape_string($conn, $instructor->getInstructorTelefono()) .
+        "', tbinstructordireccion='" . mysqli_real_escape_string($conn, $instructor->getInstructorDireccion()) .
+        "', tbinstructorcorreo='" . mysqli_real_escape_string($conn, $instructor->getInstructorCorreo()) .
+        "', tbinstructorcuenta='" . mysqli_real_escape_string($conn, $instructor->getInstructorCuenta()) .
+        "', tbinstructorcontraseña='" . mysqli_real_escape_string($conn, $instructor->getInstructorContraseña()) .
+        "', tbinstructorcertificado='" . mysqli_real_escape_string($conn, $instructor->getInstructorCertificado()) .
+        "', tbinstructorimagenid='" . mysqli_real_escape_string($conn, $instructor->getTbinstructorImagenId()) .
+        "' WHERE tbinstructorid='" . mysqli_real_escape_string($conn, $instructor->getInstructorId()) . "';";
+
+    $result = mysqli_query($conn, $queryUpdate);
+    mysqli_close($conn);
+    return $result;
+}
 
     public function eliminarTBInstructor($instructorId)
     {
@@ -72,14 +75,18 @@ class InstructorData extends Data
         return $result;
     }
 
+    // En el método getAllTBInstructor
     public function getAllTBInstructor($esAdmin = false)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
+
         $querySelect = "SELECT * FROM tbinstructor";
         if (!$esAdmin) {
             $querySelect .= " WHERE tbinstructoractivo = 1";
         }
+        $querySelect .= " ORDER BY LPAD(tbinstructorid, 3, '0') ASC";
+
         $result = mysqli_query($conn, $querySelect);
         mysqli_close($conn);
 
@@ -94,7 +101,8 @@ class InstructorData extends Data
                 $row['tbinstructorcuenta'],
                 $row['tbinstructorcontraseña'],
                 $row['tbinstructoractivo'],
-                $row['tbinstructorcertificado']
+                $row['tbinstructorcertificado'],
+                isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
             );
         }
         return $instructors;
@@ -122,7 +130,8 @@ class InstructorData extends Data
                 $row['tbinstructorcuenta'],
                 $row['tbinstructorcontraseña'],
                 $row['tbinstructoractivo'],
-                $row['tbinstructorcertificado']
+                $row['tbinstructorcertificado'],
+                isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
             );
         }
 
@@ -150,7 +159,8 @@ class InstructorData extends Data
                 $row['tbinstructorcuenta'],
                 $row['tbinstructorcontraseña'],
                 $row['tbinstructoractivo'],
-                $row['tbinstructorcertificado']
+                $row['tbinstructorcertificado'],
+                isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
             );
         }
 
@@ -185,8 +195,5 @@ class InstructorData extends Data
         $nextId = ($row['max_id'] ? intval($row['max_id']) + 1 : 1);
         return $nextId;
     }
-
-
 }
-
 ?>
