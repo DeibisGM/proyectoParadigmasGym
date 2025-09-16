@@ -48,7 +48,11 @@ class ClientePadecimiento {
         if (empty($this->tbpadecimientoid)) {
             return array();
         }
-        return explode('$', $this->tbpadecimientoid);
+
+        $ids = explode('$', $this->tbpadecimientoid);
+        return array_filter($ids, function($id) {
+            return !empty(trim($id)) && is_numeric($id);
+        });
     }
 
     public function setTbclientepadecimientoid($tbclientepadecimientoid) {
@@ -83,6 +87,10 @@ class ClientePadecimiento {
             return $id > 0;
         });
         return implode('$', $idsLimpios);
+    }
+
+    public function contarPadecimientos() {
+        return count($this->getPadecimientosIds());
     }
 }
 ?>

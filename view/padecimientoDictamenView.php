@@ -2,6 +2,7 @@
 session_start();
 include_once '../business/PadecimientoDictamenBusiness.php';
 include_once '../utility/ImageManager.php';
+include_once '../business/clientePadecimientoBusiness.php'; // Incluir para obtener la lista completa de clientes
 
 if (!isset($_SESSION['tipo_usuario'])) {
     header("location: ../view/loginView.php");
@@ -11,7 +12,6 @@ if (!isset($_SESSION['tipo_usuario'])) {
 $esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor');
 $esCliente = ($_SESSION['tipo_usuario'] === 'cliente');
 
-// Permitir acceso a admin, instructor y cliente
 if (!$esAdminOInstructor && !$esCliente) {
     header("location: ../view/loginView.php");
     exit();
@@ -20,79 +20,14 @@ if (!$esAdminOInstructor && !$esCliente) {
 $padecimientoDictamenBusiness = new PadecimientoDictamenBusiness();
 $imageManager = new ImageManager();
 
-// Por ahora, obtener todos los padecimientos dictamen (luego filtraremos por funcionalidad)
+// Instancia la clase para obtener la lista de clientes
+$clientePadecimientoBusiness = new ClientePadecimientoBusiness();
+
 $padecimientosDictamen = $padecimientoDictamenBusiness->getAllTBPadecimientoDictamen();
 
-// Obtener lista de clientes para admin/instructor
 $clientes = [];
 if ($esAdminOInstructor) {
-    $clientes = $padecimientoDictamenBusiness->getAllClientes();
-}
-
-// Mensajes de estado
-$mensaje = '';
-$tipoMensaje = '';
-
-if (isset($_GET['success'])) {
-    $tipoMensaje = 'success';
-    switch ($_GET['success']) {
-        case 'inserted':
-            $mensaje = 'Padecimiento dictamen creado exitosamente.';
-            break;
-        case 'updated':
-            $mensaje = 'Padecimiento dictamen actualizado exitosamente.';
-            break;
-        case 'eliminado':
-            $mensaje = 'Padecimiento dictamen eliminado exitosamente.';
-            break;
-        case 'image_deleted':
-            $mensaje = 'Imagen eliminada exitosamente.';
-            break;
-    }
-}
-
-if (isset($_GET['error'])) {
-    $tipoMensaje = 'error';
-    switch ($_GET['error']) {
-        case 'datos_faltantes':
-            $mensaje = 'Error: Faltan datos obligatorios.';
-            break;
-        case 'fecha_futura':
-            $mensaje = 'Error: La fecha de emisión no puede ser futura.';
-            break;
-        case 'cliente_no_encontrado':
-            $mensaje = 'Error: Cliente no encontrado con ese carnet.';
-            break;
-        case 'cliente_requerido':
-            $mensaje = 'Error: Debe seleccionar un cliente.';
-            break;
-        case 'insertar':
-            $mensaje = 'Error al crear el padecimiento dictamen.';
-            break;
-        case 'dbError':
-            $mensaje = 'Error en la base de datos.';
-            break;
-        case 'notFound':
-            $mensaje = 'Padecimiento dictamen no encontrado.';
-            break;
-        case 'eliminar':
-            $mensaje = 'Error al eliminar el padecimiento dictamen.';
-            break;
-        case 'unauthorized':
-            $mensaje = 'No tiene permisos para realizar esta acción.';
-            break;
-        case 'id_faltante':
-            $mensaje = 'Error: ID faltante.';
-            break;
-        case 'accion_no_valida':
-            $mensaje = 'Error: Acción no válida.';
-            break;
-        case 'exception':
-            $mensaje = 'Error del sistema: ' . (isset($_GET['msg']) ? $_GET['msg'] : 'Error desconocido');
-            break;
-        default:
-            $mensaje = 'Ha ocurrido un error.';
-    }
+    $clientes = $clientePadecimientoBusiness->obtenerTodosLosClientes();
 }
 
 ?>
@@ -103,6 +38,9 @@ if (isset($_GET['error'])) {
     <title>Gestión de Padecimientos Dictamen</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        /* Agrega aquí tus estilos o inclúyelos en un archivo separado */
+    </style>
 </head>
 <body>
 <div class="container">
@@ -115,33 +53,24 @@ if (isset($_GET['error'])) {
     </header>
     <hr>
 
-    <?php if (!empty($mensaje)): ?>
-        <div id="mensaje" class="<?= $tipoMensaje ?>">
-            <?= htmlspecialchars($mensaje) ?>
-        </div>
-    <?php endif; ?>
+    <div id="mensaje" style="display:none;"></div>
 
     <main>
-        <!-- Crear nuevo padecimiento dictamen -->
         <section>
             <h3><i class="ph ph-plus-circle"></i> Crear Nuevo Padecimiento Dictamen</h3>
-            <form method="post" action="../action/PadecimientoDictamenAction.php" enctype="multipart/form-data">
+            <form id="crearPadecimientoForm">
                 <div class="form-grid">
                     <?php if ($esAdminOInstructor): ?>
-                        <!-- Solo admin e instructor pueden seleccionar cliente -->
                         <div class="form-group">
-                            <label for="cliente_carnet">Cliente (Carnet):</label>
-                            <input type="text" name="cliente_carnet" id="cliente_carnet"
-                                   placeholder="Ingrese el carnet del cliente" required
-                                   list="clientes-list">
-                            <datalist id="clientes-list">
+                            <label for="clienteId">Cliente:</label>
+                            <select name="clienteId" id="clienteId" required>
+                                <option value="">Seleccione un cliente</option>
                                 <?php foreach ($clientes as $cliente): ?>
-                                    <option value="<?= htmlspecialchars($cliente['tbclientecarnet']) ?>">
-                                        <?= htmlspecialchars($cliente['tbclientecarnet'] . ' - ' . $cliente['tbclientenombre']) ?>
+                                    <option value="<?= htmlspecialchars($cliente['id']) ?>">
+                                        <?= htmlspecialchars($cliente['carnet'] . ' - ' . $cliente['nombre']) ?>
                                     </option>
                                 <?php endforeach; ?>
-                            </datalist>
-                            <small>Seleccione o escriba el carnet del cliente</small>
+                            </select>
                         </div>
                     <?php endif; ?>
 
@@ -159,15 +88,16 @@ if (isset($_GET['error'])) {
                         <small>Formatos aceptados: JPG, PNG, WebP. Máximo 5MB por imagen.</small>
                     </div>
                 </div>
-                <button type="submit" name="guardar"><i class="ph ph-plus"></i> Guardar Padecimiento Dictamen</button>
+                <button type="submit"><i class="ph ph-plus"></i> Guardar Padecimiento Dictamen</button>
             </form>
         </section>
 
-        <!-- Listado de padecimientos dictamen -->
+        <hr>
+
         <section>
             <h3><i class="ph ph-list-bullets"></i> Padecimientos Dictamen Registrados</h3>
             <div style="overflow-x:auto;">
-                <table>
+                <table id="padecimientoTabla">
                     <thead>
                     <tr>
                         <th>Fecha de Emisión</th>
@@ -179,57 +109,48 @@ if (isset($_GET['error'])) {
                     <tbody>
                     <?php if (!empty($padecimientosDictamen)): ?>
                         <?php foreach ($padecimientosDictamen as $padecimiento): ?>
-                            <tr>
-                                <form method="post" action="../action/PadecimientoDictamenAction.php" enctype="multipart/form-data">
-                                    <input type="hidden" name="id" value="<?= $padecimiento->getPadecimientodictamenid() ?>">
-
-                                    <td>
-                                        <input type="date" name="fechaemision"
-                                               value="<?= htmlspecialchars($padecimiento->getPadecimientodictamenfechaemision()) ?>"
-                                               required max="<?= date('Y-m-d') ?>">
-                                    </td>
-                                    <td>
-                                        <input type="text" name="entidademision"
-                                               value="<?= htmlspecialchars($padecimiento->getPadecimientodictamenentidademision()) ?>"
-                                               required>
-                                    </td>
-                                    <td>
-                                        <div class="image-gallery">
-                                            <?php
-                                            $imagenes = $imageManager->getImagesByIds($padecimiento->getPadecimientodictamenimagenid());
-                                            if (empty($imagenes)) {
-                                                echo '<span style="color: #6c757d;">Sin imágenes</span>';
-                                            } else {
-                                                foreach ($imagenes as $img) {
-                                                    echo '<div class="image-container">';
-                                                    echo '<img src="..' . htmlspecialchars($img['tbimagenruta'] ?? '') . '?t=' . time() . '" alt="Imagen del dictamen">';
-                                                    // Solo admin e instructor pueden borrar imágenes
-                                                    if ($esAdminOInstructor) {
-                                                        echo '<button type="submit" name="borrar_imagen" value="' . $img['tbimagenid'] . '" class="delete-image-btn" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button>';
-                                                    }
-                                                    echo '</div>';
+                            <tr data-id="<?= $padecimiento->getPadecimientodictamenid() ?>">
+                                <td>
+                                    <input type="date" name="fechaemision"
+                                           value="<?= htmlspecialchars($padecimiento->getPadecimientodictamenfechaemision()) ?>"
+                                           required max="<?= date('Y-m-d') ?>">
+                                </td>
+                                <td>
+                                    <input type="text" name="entidademision"
+                                           value="<?= htmlspecialchars($padecimiento->getPadecimientodictamenentidademision()) ?>"
+                                           required>
+                                </td>
+                                <td>
+                                    <div class="image-gallery">
+                                        <?php
+                                        $imagenes = $imageManager->getImagesByIds($padecimiento->getPadecimientodictamenimagenid());
+                                        if (empty($imagenes)) {
+                                            echo '<span style="color: #6c757d;">Sin imágenes</span>';
+                                        } else {
+                                            foreach ($imagenes as $img) {
+                                                echo '<div class="image-container">';
+                                                echo '<img src="..' . htmlspecialchars($img['tbimagenruta'] ?? '') . '?t=' . time() . '" alt="Imagen del dictamen">';
+                                                if ($esAdminOInstructor) {
+                                                    echo '<button type="button" class="delete-image-btn" data-image-id="' . $img['tbimagenid'] . '">X</button>';
                                                 }
+                                                echo '</div>';
                                             }
-                                            ?>
-                                        </div>
-                                        <label>Añadir más imágenes:</label>
-                                        <input type="file" name="imagenes[]" multiple accept="image/*">
-                                    </td>
-
-                                    <td class="actions-cell">
-                                        <button type="submit" name="actualizar" title="Actualizar">
-                                            <i class="ph ph-floppy-disk"></i> Actualizar
+                                        }
+                                        ?>
+                                    </div>
+                                    <label>Añadir más imágenes:</label>
+                                    <input type="file" name="imagenes[]" multiple accept="image/*">
+                                </td>
+                                <td class="actions-cell">
+                                    <button type="button" class="actualizar-btn" title="Actualizar">
+                                        <i class="ph ph-floppy-disk"></i> Actualizar
+                                    </button>
+                                    <?php if ($esAdminOInstructor): ?>
+                                        <button type="button" class="eliminar-btn" title="Eliminar">
+                                            <i class="ph ph-trash"></i> Eliminar
                                         </button>
-
-                                        <?php if ($esAdminOInstructor): ?>
-                                            <button type="submit" name="eliminar"
-                                                    onclick="return confirm('¿Está seguro de eliminar este padecimiento dictamen?');"
-                                                    title="Eliminar">
-                                                <i class="ph ph-trash"></i> Eliminar
-                                            </button>
-                                        <?php endif; ?>
-                                    </td>
-                                </form>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -251,50 +172,211 @@ if (isset($_GET['error'])) {
 </div>
 
 <script>
-// Auto-ocultar mensajes después de 5 segundos
-document.addEventListener('DOMContentLoaded', function() {
-    const mensaje = document.getElementById('mensaje');
-    if (mensaje) {
-        setTimeout(function() {
-            mensaje.style.opacity = '0';
-            setTimeout(function() {
-                mensaje.style.display = 'none';
+    const ACTION_URL = '../action/PadecimientoDictamenAction.php';
+
+    function mostrarMensaje(mensaje, tipo) {
+        const mensajeDiv = document.getElementById('mensaje');
+        mensajeDiv.textContent = mensaje;
+        mensajeDiv.className = tipo;
+        mensajeDiv.style.display = 'block';
+        setTimeout(() => {
+            mensajeDiv.style.opacity = '0';
+            setTimeout(() => {
+                mensajeDiv.style.display = 'none';
             }, 300);
         }, 5000);
     }
-});
 
-// Validación de fecha en el cliente
-document.addEventListener('DOMContentLoaded', function() {
-    const fechaInputs = document.querySelectorAll('input[type="date"]');
-    const hoy = new Date().toISOString().split('T')[0];
+    async function manejarRespuesta(response) {
+        if (!response.ok) {
+            throw new Error('Error en la red o en el servidor.');
+        }
+        const data = await response.json();
+        if (data.success) {
+            mostrarMensaje(data.message, 'success');
+        } else {
+            mostrarMensaje(data.message, 'error');
+        }
+        return data;
+    }
 
-    fechaInputs.forEach(function(input) {
-        input.addEventListener('change', function() {
-            if (this.value > hoy) {
-                alert('La fecha de emisión no puede ser futura.');
-                this.value = hoy;
+    function crearFilaTabla(padecimiento) {
+        const esAdminOInstructor = <?= $esAdminOInstructor ? 'true' : 'false' ?>;
+
+        const row = document.createElement('tr');
+        row.dataset.id = padecimiento.id;
+        row.innerHTML = `
+            <td>
+                <input type="date" name="fechaemision" value="${padecimiento.fechaemision}" required max="<?= date('Y-m-d') ?>">
+            </td>
+            <td>
+                <input type="text" name="entidademision" value="${padecimiento.entidademision}" required>
+            </td>
+            <td>
+                <div class="image-gallery">
+                    ${padecimiento.imagenes.map(img => `
+                        <div class="image-container">
+                            <img src="${img.ruta}?t=${Date.now()}" alt="Imagen del dictamen">
+                            ${esAdminOInstructor ? `<button type="button" class="delete-image-btn" data-image-id="${img.id}">X</button>` : ''}
+                        </div>
+                    `).join('')}
+                    ${padecimiento.imagenes.length === 0 ? '<span style="color: #6c757d;">Sin imágenes</span>' : ''}
+                </div>
+                <label>Añadir más imágenes:</label>
+                <input type="file" name="imagenes[]" multiple accept="image/*">
+            </td>
+            <td class="actions-cell">
+                <button type="button" class="actualizar-btn" title="Actualizar">
+                    <i class="ph ph-floppy-disk"></i> Actualizar
+                </button>
+                ${esAdminOInstructor ? `
+                    <button type="button" class="eliminar-btn" title="Eliminar">
+                        <i class="ph ph-trash"></i> Eliminar
+                    </button>
+                ` : ''}
+            </td>
+        `;
+        return row;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('crearPadecimientoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            formData.append('accion', 'guardar');
+
+            // Obtener el ID del cliente del combobox
+            const clienteId = document.getElementById('clienteId');
+            if (clienteId) {
+                formData.append('clienteId', clienteId.value);
+            }
+
+            try {
+                const response = await fetch(ACTION_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await manejarRespuesta(response);
+
+                if (data.success) {
+                    form.reset();
+                    const tablaBody = document.querySelector('#padecimientoTabla tbody');
+                    if (tablaBody.querySelector('tr[data-id]')) {
+                         tablaBody.prepend(crearFilaTabla(data.padecimiento));
+                    } else {
+                        tablaBody.innerHTML = '';
+                        tablaBody.appendChild(crearFilaTabla(data.padecimiento));
+                    }
+                }
+            } catch (error) {
+                mostrarMensaje('Error al conectar con el servidor: ' + error.message, 'error');
+            }
+        });
+
+        document.getElementById('padecimientoTabla').addEventListener('click', async (e) => {
+            if (e.target.closest('.actualizar-btn')) {
+                const row = e.target.closest('tr');
+                const id = row.dataset.id;
+                const fechaemision = row.querySelector('input[name="fechaemision"]').value;
+                const entidademision = row.querySelector('input[name="entidademision"]').value;
+                const imagenes = row.querySelector('input[name="imagenes[]"]').files;
+
+                if (!fechaemision || !entidademision) {
+                    mostrarMensaje('Faltan datos obligatorios para actualizar.', 'error');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('accion', 'actualizar');
+                formData.append('id', id);
+                formData.append('fechaemision', fechaemision);
+                formData.append('entidademision', entidademision);
+
+                if (imagenes.length > 0) {
+                    for (const file of imagenes) {
+                        formData.append('imagenes[]', file);
+                    }
+                }
+
+                try {
+                    const response = await fetch(ACTION_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await manejarRespuesta(response);
+
+                    if (data.success && data.padecimiento) {
+                         const imageGallery = row.querySelector('.image-gallery');
+                         imageGallery.innerHTML = data.padecimiento.imagenes.map(img => `
+                            <div class="image-container">
+                                <img src="${img.ruta}?t=${Date.now()}" alt="Imagen del dictamen">
+                                <button type="button" class="delete-image-btn" data-image-id="${img.id}">X</button>
+                            </div>
+                         `).join('') + (data.padecimiento.imagenes.length === 0 ? '<span style="color: #6c757d;">Sin imágenes</span>' : '');
+                    }
+
+                } catch (error) {
+                    mostrarMensaje('Error al conectar con el servidor: ' + error.message, 'error');
+                }
+            }
+
+            if (e.target.closest('.eliminar-btn')) {
+                const row = e.target.closest('tr');
+                const id = row.dataset.id;
+
+                if (confirm('¿Está seguro de eliminar este padecimiento dictamen?')) {
+                    const formData = new FormData();
+                    formData.append('accion', 'eliminar');
+                    formData.append('id', id);
+
+                    try {
+                        const response = await fetch(ACTION_URL, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await manejarRespuesta(response);
+
+                        if (data.success) {
+                            row.remove();
+                        }
+                    } catch (error) {
+                        mostrarMensaje('Error al conectar con el servidor: ' + error.message, 'error');
+                    }
+                }
+            }
+
+            if (e.target.closest('.delete-image-btn')) {
+                const button = e.target.closest('.delete-image-btn');
+                const imageId = button.dataset.imageId;
+                const row = button.closest('tr');
+                const padecimientoId = row.dataset.id;
+
+                if (confirm('¿Eliminar esta imagen?')) {
+                    const formData = new FormData();
+                    formData.append('accion', 'borrar_imagen');
+                    formData.append('padecimiento_id', padecimientoId);
+                    formData.append('imagen_id', imageId);
+
+                    try {
+                        const response = await fetch(ACTION_URL, {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await manejarRespuesta(response);
+                        if (data.success) {
+                            button.closest('.image-container').remove();
+                            if (row.querySelector('.image-gallery').childElementCount === 0) {
+                                row.querySelector('.image-gallery').innerHTML = '<span style="color: #6c757d;">Sin imágenes</span>';
+                            }
+                        }
+                    } catch (error) {
+                        mostrarMensaje('Error al conectar con el servidor: ' + error.message, 'error');
+                    }
+                }
             }
         });
     });
-});
-
-// Validación de cliente carnet (solo para admin/instructor)
-<?php if ($esAdminOInstructor): ?>
-document.addEventListener('DOMContentLoaded', function() {
-    const clienteCarnetInput = document.getElementById('cliente_carnet');
-    if (clienteCarnetInput) {
-        clienteCarnetInput.addEventListener('blur', function() {
-            if (this.value.trim() === '') {
-                this.setCustomValidity('Debe seleccionar un cliente');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    }
-});
-<?php endif; ?>
 </script>
-
 </body>
 </html>

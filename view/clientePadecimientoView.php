@@ -8,9 +8,11 @@ if (!isset($_SESSION['usuario_id'])) {
 
 include_once '../business/clientePadecimientoBusiness.php';
 include_once '../business/padecimientoBusiness.php';
+include_once '../business/PadecimientoDictamenBusiness.php';
 
 $clientePadecimientoBusiness = new ClientePadecimientoBusiness();
 $padecimientoBusiness = new PadecimientoBusiness();
+$padecimientoDictamenBusiness = new PadecimientoDictamenBusiness();
 
 $esUsuarioCliente = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'cliente';
 $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
@@ -22,11 +24,11 @@ $tiposPadecimiento = $padecimientoBusiness->obtenerTiposPadecimiento();
 $padecimientos = array();
 foreach ($padecimientosObj as $padecimiento) {
     $padecimientos[] = array(
-            'tbpadecimientoid' => $padecimiento->getTbpadecimientoid(),
-            'tbpadecimientotipo' => $padecimiento->getTbpadecimientotipo(),
-            'tbpadecimientonombre' => $padecimiento->getTbpadecimientonombre(),
-            'tbpadecimientodescripcion' => $padecimiento->getTbpadecimientodescripcion(),
-            'tbpadecimientoformadeactuar' => $padecimiento->getTbpadecimientoformadeactuar()
+        'tbpadecimientoid' => $padecimiento->getTbpadecimientoid(),
+        'tbpadecimientotipo' => $padecimiento->getTbpadecimientotipo(),
+        'tbpadecimientonombre' => $padecimiento->getTbpadecimientonombre(),
+        'tbpadecimientodescripcion' => $padecimiento->getTbpadecimientodescripcion(),
+        'tbpadecimientoformadeactuar' => $padecimiento->getTbpadecimientoformadeactuar()
     );
 }
 
@@ -40,13 +42,27 @@ if ($esUsuarioCliente) {
 $clientePadecimientos = array();
 foreach ($clientePadecimientosObj as $clienteObj) {
     $clientePadecimientos[] = array(
-            'tbclientepadecimientoid' => $clienteObj->getTbclientepadecimientoid(),
-            'tbclienteid' => $clienteObj->getTbclienteid(),
-            'tbpadecimientoid' => $clienteObj->getTbpadecimientoid(),
-            'tbpadecimientodictamenid' => $clienteObj->getTbpadecimientodictamenid(),
-            'carnet' => $clienteObj->getCarnet(),
-            'padecimientosNombres' => $clienteObj->getPadecimientosNombres()
+        'tbclientepadecimientoid' => $clienteObj->getTbclientepadecimientoid(),
+        'tbclienteid' => $clienteObj->getTbclienteid(),
+        'tbpadecimientoid' => $clienteObj->getTbpadecimientoid(),
+        'tbpadecimientodictamenid' => $clienteObj->getTbpadecimientodictamenid(),
+        'carnet' => $clienteObj->getCarnet(),
+        'padecimientosNombres' => $clienteObj->getPadecimientosNombres()
     );
+}
+
+// Obtener dictámenes para mostrar en la tabla
+$dictamenes = array();
+$dictamenesObj = $padecimientoDictamenBusiness->getAllTBPadecimientoDictamen();
+foreach ($dictamenesObj as $dictamen) {
+    $dictamenes[$dictamen->getPadecimientodictamenid()] = $dictamen->getPadecimientodictamenentidademision();
+}
+
+// Manejar datos persistentes del formulario
+$formData = array();
+if (isset($_SESSION['temp_form_data'])) {
+    $formData = $_SESSION['temp_form_data'];
+    unset($_SESSION['temp_form_data']);
 }
 ?>
 
@@ -65,7 +81,6 @@ foreach ($clientePadecimientosObj as $clienteObj) {
     <header>
         <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-first-aid-kit"></i>Gestión de Cliente Padecimiento</h2>
-
     </header>
 
     <main>
@@ -97,8 +112,7 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <button type="button" onclick="aplicarFiltros()"><i class="ph ph-funnel-simple"></i>Aplicar Filtro
-                </button>
+                <button type="button" onclick="aplicarFiltros()"><i class="ph ph-funnel-simple"></i>Aplicar Filtro</button>
                 <button type="button" onclick="limpiarFiltros()"><i class="ph ph-x-circle"></i>Limpiar</button>
             </section>
         <?php endif; ?>
@@ -111,6 +125,7 @@ foreach ($clientePadecimientosObj as $clienteObj) {
             <form id="formClientePadecimiento">
                 <input type="hidden" id="accion" name="accion" value="create">
                 <input type="hidden" id="clientePadecimientoId" name="id" value="">
+                <input type="hidden" id="dictamenIdHidden" name="dictamenId" value="<?php echo isset($formData['dictamenId']) ? $formData['dictamenId'] : ''; ?>">
 
                 <?php if (!$esUsuarioCliente): ?>
                     <div>
@@ -118,7 +133,8 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                         <select id="clienteId" name="clienteId" required>
                             <option value="">Seleccione un cliente</option>
                             <?php foreach ($clientes as $cliente): ?>
-                                <option value="<?php echo $cliente['id']; ?>">
+                                <option value="<?php echo $cliente['id']; ?>"
+                                    <?php echo (isset($formData['clienteId']) && $formData['clienteId'] == $cliente['id']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($cliente['carnet'] . ' - ' . $cliente['nombre']); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -131,7 +147,8 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                     <select id="tipoPadecimiento" onchange="cargarPadecimientosPorTipo()">
                         <option value="">Seleccione un tipo</option>
                         <?php foreach ($tiposPadecimiento as $tipo): ?>
-                            <option value="<?php echo htmlspecialchars($tipo); ?>">
+                            <option value="<?php echo htmlspecialchars($tipo); ?>"
+                                <?php echo (isset($formData['tipoPadecimiento']) && $formData['tipoPadecimiento'] == $tipo) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($tipo); ?>
                             </option>
                         <?php endforeach; ?>
@@ -146,18 +163,66 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                 </div>
 
                 <div>
-                    <label for="dictamenId">ID Dictamen (opcional):</label>
-                    <input type="number" id="dictamenId" name="dictamenId" min="0" placeholder="Ingrese ID del dictamen">
+                    <label>Dictamen (opcional):</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="dictamenDisplay" readonly
+                               placeholder="No se ha registrado dictamen"
+                               style="flex: 1;"
+                               value="<?php echo isset($formData['dictamenEntidad']) ? $formData['dictamenEntidad'] : ''; ?>">
+                        <button type="button" onclick="abrirRegistroDictamen()" style="white-space: nowrap;">
+                            <i class="ph ph-file-plus"></i> Registrar Dictamen
+                        </button>
+                        <button type="button" onclick="limpiarDictamen()" style="white-space: nowrap;"
+                                <?php echo !isset($formData['dictamenId']) ? 'style="display: none;"' : ''; ?> id="btnLimpiarDictamen">
+                            <i class="ph ph-x-circle"></i> Quitar
+                        </button>
+                    </div>
                 </div>
 
                 <div>
                     <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
-                    <button type="button" onclick="limpiarFormulario()" id="btnCancelar" style="display: none;"><i
-                                class="ph ph-x-circle"></i>Cancelar
-                    </button>
+                    <button type="button" onclick="limpiarFormulario()" id="btnCancelar" style="display: none;"><i class="ph ph-x-circle"></i>Cancelar</button>
                 </div>
             </form>
         </section>
+
+        <div id="modalDictamen" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="ph ph-file-plus"></i> Registrar Nuevo Dictamen</h3>
+                    <button type="button" class="close" onclick="cerrarModalDictamen()">&times;</button>
+                </div>
+                <div id="mensajeModal" style="display: none; margin-bottom: 15px;"></div>
+                <form id="formDictamen" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="fechaemisionModal">Fecha de Emisión:</label>
+                        <input type="date" id="fechaemisionModal" name="fechaemision" required>
+                        <small>La fecha no puede ser futura</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="entidademisionModal">Entidad de Emisión:</label>
+                        <input type="text" id="entidademisionModal" name="entidademision"
+                            placeholder="Nombre de la entidad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="imagenesModal">Imágenes del Dictamen:</label>
+                        <input type="file" id="imagenesModal" name="imagenes[]" multiple accept="image/*">
+                        <small>Formatos aceptados: JPG, PNG, WebP. Máximo 5MB por imagen.</small>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="button" onclick="cerrarModalDictamen()">
+                            <i class="ph ph-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" id="btnGuardarDictamen">
+                            <i class="ph ph-plus"></i> Guardar Dictamen
+                        </button>
+                    </div>
+                </form>
+                <div id="loadingDictamen" style="display: none; text-align: center; padding: 20px;">
+                    <p>Procesando dictamen...</p>
+                </div>
+            </div>
+        </div>
 
         <section>
             <h3>
@@ -171,11 +236,11 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                             <th>Carnet</th>
                         <?php endif; ?>
                         <th>Padecimiento</th>
+                        <th>Entidad Dictamen</th>
                         <th>Acciones</th>
                     </tr>
                     </thead>
                     <tbody id="tablaBody">
-                    <!-- El contenido se cargará dinámicamente con JavaScript -->
                     </tbody>
                 </table>
             </div>
@@ -191,10 +256,13 @@ foreach ($clientePadecimientosObj as $clienteObj) {
 </div>
 
 <script>
+    // Variables y datos globales
     let padecimientosData = <?php echo json_encode($padecimientos); ?>;
     let esUsuarioCliente = <?php echo $esUsuarioCliente ? 'true' : 'false'; ?>;
     let esAdmin = <?php echo $esAdmin ? 'true' : 'false'; ?>;
     let clientePadecimientos = <?php echo json_encode($clientePadecimientos); ?>;
+    let dictamenes = <?php echo json_encode($dictamenes); ?>;
+    let modalDictamenAbierto = false;
 
     let clientePad = [];
     clientePadecimientos.forEach(cliente => {
@@ -216,7 +284,40 @@ foreach ($clientePadecimientosObj as $clienteObj) {
 
     window.onload = function () {
         cargarDatosEnTabla();
+
+        // Restaurar selección de padecimiento si hay datos del formulario
+        <?php if (isset($formData['padecimientoId'])): ?>
+            setTimeout(() => {
+                document.getElementById('padecimiento').value = '<?php echo $formData['padecimientoId']; ?>';
+            }, 100);
+        <?php endif; ?>
     };
+
+    // Funciones para el formulario principal
+    function abrirRegistroDictamen() {
+        // Validar que se haya seleccionado un cliente (solo para admin/instructor)
+        if (!esUsuarioCliente) {
+            const clienteId = document.getElementById('clienteId').value;
+            if (!clienteId) {
+                mostrarMensaje('Error: Primero debe seleccionar un cliente para poder registrar un dictamen.', 'error');
+                return;
+            }
+        }
+
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('fechaemisionModal').max = hoy;
+        document.getElementById('fechaemisionModal').value = hoy;
+        document.getElementById('formDictamen').reset();
+        document.getElementById('mensajeModal').style.display = 'none';
+        document.getElementById('modalDictamen').style.display = 'block';
+        modalDictamenAbierto = true;
+    }
+
+    function limpiarDictamen() {
+        document.getElementById('dictamenIdHidden').value = '';
+        document.getElementById('dictamenDisplay').value = '';
+        document.getElementById('btnLimpiarDictamen').style.display = 'none';
+    }
 
     function cargarPadecimientosPorTipo() {
         const tipoSeleccionado = document.getElementById('tipoPadecimiento').value;
@@ -252,6 +353,8 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                 if (padecimientoId && padecimientoId.trim() !== '') {
                     const padecimientoObj = padecimientosData.find(p => p.tbpadecimientoid == padecimientoId);
                     const nombrePadecimiento = padecimientoObj ? padecimientoObj.tbpadecimientonombre : `ID Desconocido: ${padecimientoId}`;
+                    const entidadDictamen = cliente.dictamenId && dictamenes[cliente.dictamenId] ? dictamenes[cliente.dictamenId] : 'Sin dictamen';
+
                     const fila = document.createElement('tr');
                     fila.setAttribute('data-registro-id', cliente.id);
                     fila.setAttribute('data-cliente-id', cliente.clienteId);
@@ -281,6 +384,7 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                                 </div>
                             </div>
                         </td>
+                        <td>${entidadDictamen}</td>
                         <td class="actions-cell">
                             <button onclick="editarPadecimientoIndividual(${cliente.id}, ${index}, '${padecimientoId}')" class="btn-editar" title="Editar"><i class="ph ph-pencil-simple"></i> Editar</button>
                             <button onclick="cancelarEdicionIndividual(${cliente.id}, ${index})" style="display: none;" class="btn-cancelar-edicion" title="Cancelar"><i class="ph ph-x-circle"></i> Cancelar</button>
@@ -399,6 +503,9 @@ foreach ($clientePadecimientosObj as $clienteObj) {
         document.getElementById('formClientePadecimiento').reset();
         document.getElementById('accion').value = 'create';
         document.getElementById('clientePadecimientoId').value = '';
+        document.getElementById('dictamenIdHidden').value = '';
+        document.getElementById('dictamenDisplay').value = '';
+        document.getElementById('btnLimpiarDictamen').style.display = 'none';
         document.getElementById('tituloFormulario').innerHTML = `<i class="ph ph-plus-circle"></i> ${esUsuarioCliente ? 'Registrar nuevo cliente padecimiento' : 'Registrar cliente padecimiento'}`;
         document.getElementById('btnSubmit').innerHTML = '<i class="ph ph-plus"></i>Registrar';
         document.getElementById('btnCancelar').style.display = 'none';
@@ -457,7 +564,7 @@ foreach ($clientePadecimientosObj as $clienteObj) {
                 const carnet = fila.cells[0].textContent.toLowerCase();
                 mostrar = carnet.includes(textoBusqueda);
             } else if (tipoBusqueda === 'padecimiento') {
-                const padecimientoBuscado = document.getElementById('buscarPadecimiento').value.toLowerCase();
+                const padecimientoBuscado = document.getElementById('buscarPadecimiento').value.value.toLowerCase();
                 const padecimientos = fila.cells[1].textContent.toLowerCase();
                 mostrar = padecimientos.includes(padecimientoBuscado);
             }
@@ -477,6 +584,117 @@ foreach ($clientePadecimientosObj as $clienteObj) {
         }
     }
     <?php endif; ?>
+
+    // --- Lógica del Modal de Dictamen (AJAX) ---
+    function cerrarModalDictamen() {
+        if (confirm('¿Está seguro que desea cerrar? Se perderán los datos no guardados del dictamen.')) {
+            document.getElementById('modalDictamen').style.display = 'none';
+            modalDictamenAbierto = false;
+        }
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalDictamen');
+        if (event.target == modal && modalDictamenAbierto) {
+            cerrarModalDictamen();
+        }
+    }
+
+    document.getElementById('formDictamen').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const btnGuardar = document.getElementById('btnGuardarDictamen');
+        const loading = document.getElementById('loadingDictamen');
+        const mensajeModal = document.getElementById('mensajeModal');
+
+        const fecha = document.getElementById('fechaemisionModal').value;
+        const entidad = document.getElementById('entidademisionModal').value.trim();
+
+        if (!fecha || !entidad) {
+            mostrarMensajeModal('Error: Todos los campos son obligatorios.', 'error');
+            return;
+        }
+
+        const hoy = new Date().toISOString().split('T')[0];
+        if (fecha > hoy) {
+            mostrarMensajeModal('Error: La fecha de emisión no puede ser futura.', 'error');
+            return;
+        }
+
+        let clienteId;
+        if (esUsuarioCliente) {
+            clienteId = '<?php echo $_SESSION['usuario_id']; ?>';
+        } else {
+            clienteId = document.getElementById('clienteId').value;
+            if (!clienteId) {
+                mostrarMensajeModal('Error: Debe seleccionar un cliente.', 'error');
+                return;
+            }
+        }
+
+        formData.append('clienteId', clienteId);
+
+        btnGuardar.disabled = true;
+        loading.style.display = 'block';
+        mensajeModal.style.display = 'none';
+
+        formData.append('accion', 'guardar');
+        formData.append('ajax_request', '1');
+
+        fetch('../action/PadecimientoDictamenAction.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('dictamenIdHidden').value = data.dictamenId || data.padecimiento?.id || '';
+                document.getElementById('dictamenDisplay').value = data.entidadEmision || data.padecimiento?.entidademision || entidad;
+                document.getElementById('btnLimpiarDictamen').style.display = 'inline-block';
+
+                mostrarMensajeModal('Éxito: Dictamen registrado correctamente.', 'success');
+
+                setTimeout(() => {
+                    document.getElementById('modalDictamen').style.display = 'none';
+                    modalDictamenAbierto = false;
+                    mostrarMensaje('Dictamen registrado. Ahora puede completar el registro del cliente padecimiento.', 'success');
+                }, 2000);
+
+            } else {
+                mostrarMensajeModal('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            mostrarMensajeModal('Error: Error de conexión. Intente nuevamente.', 'error');
+        })
+        .finally(() => {
+            btnGuardar.disabled = false;
+            loading.style.display = 'none';
+        });
+    });
+
+    function mostrarMensajeModal(mensaje, tipo) {
+        const mensajeModal = document.getElementById('mensajeModal');
+        mensajeModal.textContent = mensaje;
+        mensajeModal.className = tipo === 'success' ? 'success' : 'error';
+        mensajeModal.style.display = 'block';
+
+        if (tipo !== 'success') {
+            setTimeout(() => {
+                mensajeModal.style.display = 'none';
+            }, 5000);
+        }
+    }
+
+    document.getElementById('fechaemisionModal').addEventListener('change', function() {
+        const hoy = new Date().toISOString().split('T')[0];
+        if (this.value > hoy) {
+            mostrarMensajeModal('La fecha de emisión no puede ser futura.', 'error');
+            this.value = hoy;
+        }
+    });
 </script>
 </body>
 </html>

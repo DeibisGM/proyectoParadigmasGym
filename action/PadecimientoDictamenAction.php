@@ -1,213 +1,256 @@
 <?php
 session_start();
-
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
-ini_set('log_errors', 1);
+ini_set('display_errors', 0); // Desactivar para evitar corromper JSON
 
-include '../business/PadecimientoDictamenBusiness.php';
-include_once '../utility/ImageManager.php';
+ob_start();
 
-// Usar ruta relativa como en el ejemplo
-$redirect_path = '../view/PadecimientoDictamenView.php';
+try {
+    include_once '../business/PadecimientoDictamenBusiness.php';
+    include_once '../utility/ImageManager.php';
 
-// Verificar sesión
-if (!isset($_SESSION['tipo_usuario'])) {
-    header("location: ../view/loginView.php");
-    exit();
-}
+    header('Content-Type: application/json');
 
-// Verificar permisos
-$esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor');
-$esCliente = ($_SESSION['tipo_usuario'] === 'cliente');
+    $response = [
+        'success' => false,
+        'message' => 'Ha ocurrido un error.',
+        'padecimiento' => null
+    ];
 
-if (!$esAdminOInstructor && !$esCliente) {
-    header("location: " . $redirect_path . "?error=unauthorized");
-    exit();
-}
-
-$padecimientoDictamenBusiness = new PadecimientoDictamenBusiness();
-$imageManager = new ImageManager();
-
-// Logging para debugging
-error_log("POST data: " . print_r($_POST, true));
-
-if (isset($_POST['borrar_imagen'])) {
-    // Solo admin e instructor pueden borrar imágenes
-    if (!$esAdminOInstructor) {
-        header("location: " . $redirect_path . "?error=unauthorized");
+    if (!isset($_SESSION['tipo_usuario'])) {
+        $response['message'] = 'No autorizado. Por favor, inicie sesión.';
+        echo json_encode($response);
         exit();
     }
 
-    if (isset($_POST['id'])) {
-        $padecimientoId = $_POST['id'];
-        $imagenId = $_POST['borrar_imagen'];
+    $esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor');
+    $esCliente = ($_SESSION['tipo_usuario'] === 'cliente');
 
-        $padecimiento = $padecimientoDictamenBusiness->getPadecimientoDictamenPorId($padecimientoId);
-        if ($padecimiento) {
-            $imageManager->deleteImage($imagenId);
-            $currentIds = $padecimiento->getPadecimientodictamenimagenid();
-            $newIds = ImageManager::removeIdFromString($imagenId, $currentIds);
-            $padecimiento->setPadecimientodictamenimagenid($newIds);
-            $padecimientoDictamenBusiness->actualizarTBPadecimientoDictamen($padecimiento);
-            header("location: " . $redirect_path . "?success=image_deleted");
-        } else {
-            header("location: " . $redirect_path . "?error=notFound");
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=error");
-    }
+    $padecimientoDictamenBusiness = new PadecimientoDictamenBusiness();
+    $imageManager = new ImageManager();
 
-} else if (isset($_POST['guardar'])) {
-    if (isset($_POST['fechaemision']) && isset($_POST['entidademision'])) {
+    $accion = $_POST['accion'] ?? '';
 
-        $fechaemision = trim($_POST['fechaemision']);
-        $entidademision = trim($_POST['entidademision']);
+    switch ($accion) {
+        case 'guardar':
+            ob_clean();
 
-        // Validaciones
-        if (empty($fechaemision) || empty($entidademision)) {
-            header("location: " . $redirect_path . "?error=datos_faltantes");
-            exit();
-        }
+            $fechaemision = $_POST['fechaemision'] ?? '';
+            $entidademision = $_POST['entidademision'] ?? '';
 
-        // Para admin/instructor, validar que se haya proporcionado un carnet
-        if ($esAdminOInstructor) {
-            if (!isset($_POST['cliente_carnet']) || empty(trim($_POST['cliente_carnet']))) {
-                header("location: " . $redirect_path . "?error=cliente_requerido");
-                exit();
+            // CORREGIDO: Obtener cliente ID correctamente
+            $clienteId = null;
+            if ($esAdminOInstructor) {
+                // Admin/Instructor selecciona de dropdown (envía clienteId directamente)
+                $clienteId = $_POST['clienteId'] ?? '';
+                if (empty($clienteId) || !is_numeric($clienteId)) {
+                    $response['message'] = 'Debe seleccionar un cliente válido.';
+                    break;
+                }
+            } else if ($esCliente) {
+                // Cliente: obtener su ID desde la sesión o buscar por carnet
+                if (isset($_SESSION['cliente_id'])) {
+                    $clienteId = $_SESSION['cliente_id'];
+                } else if (isset($_SESSION['carnet'])) {
+                    // Buscar cliente por carnet si no tenemos el ID en sesión
+                    $cliente = $padecimientoDictamenBusiness->getClientePorCarnet($_SESSION['carnet']);
+                    if ($cliente) {
+                        $clienteId = $cliente['tbclienteid']; // Usar el ID real de la tabla
+                        $_SESSION['cliente_id'] = $clienteId; // Guardarlo para próximas veces
+                    }
+                }
+
+                if (empty($clienteId)) {
+                    $response['message'] = 'No se pudo identificar el cliente. Inicie sesión nuevamente.';
+                    break;
+                }
             }
 
-            // Validar que el cliente existe
-            $cliente = $padecimientoDictamenBusiness->getClientePorCarnet(trim($_POST['cliente_carnet']));
-            if (!$cliente) {
-                header("location: " . $redirect_path . "?error=cliente_no_encontrado");
-                exit();
+            // Validaciones básicas
+            if (empty($fechaemision) || empty($entidademision)) {
+                $response['message'] = 'La fecha y entidad de emisión son obligatorias.';
+                break;
             }
-        }
 
-        // Validar que la fecha no sea futura
-        if (strtotime($fechaemision) > time()) {
-            header("location: " . $redirect_path . "?error=fecha_futura");
-            exit();
-        }
+            if (strtotime($fechaemision) > time()) {
+                $response['message'] = 'La fecha de emisión no puede ser futura.';
+                break;
+            }
 
-        try {
+            // 1. Crear y insertar el dictamen primero
             $padecimiento = new PadecimientoDictamen(0, $fechaemision, $entidademision, '');
             $nuevoId = $padecimientoDictamenBusiness->insertarTBPadecimientoDictamen($padecimiento);
 
             if ($nuevoId > 0) {
-                // Procesar imágenes si existen
+                // 2. Manejar imágenes si existen
+                $imagenIdLista = '';
                 if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
-                    $newImageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'pad');
-                    if (!empty($newImageIds)) {
-                        $padecimientoAgregado = $padecimientoDictamenBusiness->getPadecimientoDictamenPorId($nuevoId);
-                        $idString = ImageManager::addIdsToString($newImageIds, '');
-                        $padecimientoAgregado->setPadecimientodictamenimagenid($idString);
-                        $padecimientoDictamenBusiness->actualizarTBPadecimientoDictamen($padecimientoAgregado);
+                    $imageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'pad');
+                    if (!empty($imageIds)) {
+                        $imagenIdLista = implode('$', $imageIds);
+
+                        // Actualizar el dictamen con las imágenes
+                        $padecimiento->setPadecimientodictamenid($nuevoId);
+                        $padecimiento->setPadecimientodictamenimagenid($imagenIdLista);
+                        $padecimientoDictamenBusiness->actualizarTBPadecimientoDictamen($padecimiento);
                     }
                 }
 
-                // TODO: Aquí deberías agregar la lógica para asociar el padecimiento
-                // con el cliente en tu tabla intermedia cuando esté disponible
+                // 3. Asociar dictamen al cliente en tbclientepadecimiento
+                $asociacionExitosa = $padecimientoDictamenBusiness->asociarDictamenACliente($clienteId, $nuevoId);
 
-                header("location: " . $redirect_path . "?success=inserted");
-            } else {
-                error_log("Error al insertar: nuevoId = " . $nuevoId);
-                header("location: " . $redirect_path . "?error=insertar");
-            }
-        } catch (Exception $e) {
-            error_log("Exception en guardar: " . $e->getMessage());
-            header("location: " . $redirect_path . "?error=exception&msg=" . urlencode($e->getMessage()));
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=datos_faltantes");
-    }
-
-} else if (isset($_POST['actualizar'])) {
-    if (isset($_POST['id']) && isset($_POST['fechaemision']) && isset($_POST['entidademision'])) {
-
-        $id = $_POST['id'];
-        $padecimientoActual = $padecimientoDictamenBusiness->getPadecimientoDictamenPorId($id);
-
-        if ($padecimientoActual) {
-            // TODO: Si es cliente, aquí deberías verificar que sea dueño del registro
-            // usando la tabla intermedia cuando esté disponible
-
-            $fechaemision = trim($_POST['fechaemision']);
-            $entidademision = trim($_POST['entidademision']);
-
-            // Validaciones
-            if (empty($fechaemision) || empty($entidademision)) {
-                header("location: " . $redirect_path . "?error=datos_faltantes");
-                exit();
-            }
-
-            // Validar que la fecha no sea futura
-            if (strtotime($fechaemision) > time()) {
-                header("location: " . $redirect_path . "?error=fecha_futura");
-                exit();
-            }
-
-            try {
-                $padecimientoActual->setPadecimientodictamenfechaemision($fechaemision);
-                $padecimientoActual->setPadecimientodictamenentidademision($entidademision);
-
-                // Procesar nuevas imágenes si existen
-                if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
-                    $newImageIds = $imageManager->addImages($_FILES['imagenes'], $id, 'pad');
-                    $currentIdString = $padecimientoActual->getPadecimientodictamenimagenid();
-                    $newIdString = ImageManager::addIdsToString($newImageIds, $currentIdString);
-                    $padecimientoActual->setPadecimientodictamenimagenid($newIdString);
-                }
-
-                if ($padecimientoDictamenBusiness->actualizarTBPadecimientoDictamen($padecimientoActual)) {
-                    header("location: " . $redirect_path . "?success=updated");
+                if ($asociacionExitosa) {
+                    $response['success'] = true;
+                    $response['message'] = 'Padecimiento dictamen creado exitosamente.';
+                    $response['padecimiento'] = [
+                        'id' => $nuevoId,
+                        'fechaemision' => $fechaemision,
+                        'entidademision' => $entidademision,
+                        'imagenes' => $imageManager->getImagesByIds($imagenIdLista)
+                    ];
                 } else {
-                    error_log("Error al actualizar en la base de datos");
-                    header("location: " . $redirect_path . "?error=dbError");
+                    // Rollback: eliminar el dictamen creado si no se pudo asociar
+                    $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($nuevoId);
+                    $response['message'] = 'Error al asociar el dictamen con el cliente.';
                 }
-            } catch (Exception $e) {
-                error_log("Exception en actualizar: " . $e->getMessage());
-                header("location: " . $redirect_path . "?error=exception&msg=" . urlencode($e->getMessage()));
-            }
-        } else {
-            header("location: " . $redirect_path . "?error=notFound");
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=error");
-    }
-
-} else if (isset($_POST['eliminar'])) {
-    // Solo admin e instructor pueden eliminar
-    if (!$esAdminOInstructor) {
-        header("location: " . $redirect_path . "?error=unauthorized");
-        exit();
-    }
-
-    if (isset($_POST['id'])) {
-        $id = $_POST['id'];
-
-        try {
-            // TODO: Aquí deberías remover las asociaciones del padecimiento
-            // con clientes en la tabla intermedia cuando esté disponible
-
-            $result = $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($id);
-
-            if ($result == 1) {
-                header("location: " . $redirect_path . "?success=eliminado");
             } else {
-                error_log("Error al eliminar: result = " . $result);
-                header("location: " . $redirect_path . "?error=eliminar");
+                $response['message'] = 'Error al crear el padecimiento dictamen en la base de datos.';
             }
-        } catch (Exception $e) {
-            error_log("Exception en eliminar: " . $e->getMessage());
-            header("location: " . $redirect_path . "?error=exception&msg=" . urlencode($e->getMessage()));
-        }
-    } else {
-        header("location: " . $redirect_path . "?error=id_faltante");
+            break;
+
+        case 'actualizar':
+            ob_clean();
+
+            $id = $_POST['id'] ?? null;
+            $fechaemision = $_POST['fechaemision'] ?? null;
+            $entidademision = $_POST['entidademision'] ?? null;
+            $imagenesNuevas = $_FILES['imagenes'] ?? null;
+
+            if (empty($id) || empty($fechaemision) || empty($entidademision)) {
+                $response['message'] = 'Faltan datos obligatorios para actualizar.';
+                break;
+            }
+
+            if (!is_numeric($id)) {
+                $response['message'] = 'ID de padecimiento inválido.';
+                break;
+            }
+
+            if (strtotime($fechaemision) > time()) {
+                $response['message'] = 'La fecha de emisión no puede ser futura.';
+                break;
+            }
+
+            $padecimientoActual = $padecimientoDictamenBusiness->getPadecimientoDictamenPorId($id);
+            if (!$padecimientoActual) {
+                $response['message'] = 'Padecimiento no encontrado.';
+                break;
+            }
+
+            $padecimientoActual->setPadecimientodictamenfechaemision($fechaemision);
+            $padecimientoActual->setPadecimientodictamenentidademision($entidademision);
+
+            // Manejar nuevas imágenes
+            if (isset($imagenesNuevas['name'][0]) && !empty($imagenesNuevas['name'][0])) {
+                $imageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'pad');
+                if (!empty($imageIds)) {
+                    $imagenIdLista = implode('$', $imageIds);
+
+                    $newIds = ImageManager::addIdsToString($imageIds['ids'], $currentIds);
+                    $padecimientoActual->setPadecimientodictamenimagenid($newIds);
+                }
+            }
+
+            if ($padecimientoDictamenBusiness->actualizarTBPadecimientoDictamen($padecimientoActual)) {
+                $response['success'] = true;
+                $response['message'] = 'Padecimiento actualizado exitosamente.';
+                $response['padecimiento'] = [
+                    'id' => $id,
+                    'fechaemision' => $fechaemision,
+                    'entidademision' => $entidademision,
+                    'imagenes' => $imageManager->getImagesByIds($padecimientoActual->getPadecimientodictamenimagenid())
+                ];
+            } else {
+                $response['message'] = 'Error al actualizar el padecimiento en la base de datos.';
+            }
+            break;
+
+        case 'eliminar':
+            ob_clean();
+
+            if (!$esAdminOInstructor) {
+                $response['message'] = 'No tiene permisos para eliminar padecimientos.';
+                break;
+            }
+
+            $id = $_POST['id'] ?? null;
+            if (empty($id) || !is_numeric($id)) {
+                $response['message'] = 'ID de padecimiento inválido.';
+                break;
+            }
+
+            $padecimientoExistente = $padecimientoDictamenBusiness->getPadecimientoDictamenPorId($id);
+            if (!$padecimientoExistente) {
+                $response['message'] = 'El padecimiento no existe en la base de datos.';
+                break;
+            }
+
+            // Eliminar (esto incluye las relaciones y imágenes)
+            $eliminacionExitosa = $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($id);
+
+            if ($eliminacionExitosa) {
+                $response['success'] = true;
+                $response['message'] = 'Padecimiento eliminado exitosamente.';
+            } else {
+                $response['message'] = 'Error al eliminar el padecimiento de la base de datos.';
+            }
+            break;
+
+        case 'borrar_imagen':
+            ob_clean();
+
+            if (!$esAdminOInstructor) {
+                $response['message'] = 'No tiene permisos para eliminar imágenes.';
+                break;
+            }
+
+            $padecimientoId = $_POST['padecimiento_id'] ?? null;
+            $imagenId = $_POST['imagen_id'] ?? null;
+
+            if (empty($padecimientoId) || empty($imagenId)) {
+                $response['message'] = 'ID de padecimiento o imagen faltante.';
+                break;
+            }
+
+            if (!is_numeric($padecimientoId) || !is_numeric($imagenId)) {
+                $response['message'] = 'IDs deben ser numéricos.';
+                break;
+            }
+
+            if ($padecimientoDictamenBusiness->eliminarImagenDePadecimiento($padecimientoId, $imagenId)) {
+                $response['success'] = true;
+                $response['message'] = 'Imagen eliminada exitosamente.';
+            } else {
+                $response['message'] = 'Error al eliminar la imagen.';
+            }
+            break;
+
+        default:
+            $response['message'] = 'Acción no válida. Acciones disponibles: guardar, actualizar, eliminar, borrar_imagen';
+            break;
     }
 
-} else {
-    header("location: " . $redirect_path . "?error=accion_no_valida");
+} catch (Exception $e) {
+    ob_clean();
+    error_log("Exception en PadecimientoDictamenAction: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
+    $response = [
+        'success' => false,
+        'message' => 'Error del sistema. Por favor, revise los logs del servidor.'
+    ];
 }
+
+// Limpiar buffer y enviar solo JSON
+ob_clean();
+echo json_encode($response);
+exit();
 ?>

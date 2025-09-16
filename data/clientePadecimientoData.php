@@ -13,38 +13,48 @@
             }
             $conn->set_charset('utf8');
 
-            // Verificar si ya existe un registro para este cliente
-            $queryExiste = "SELECT * FROM tbclientepadecimiento WHERE tbclienteid = ?";
+            // 1. Verificar si ya existe un registro para este cliente
+            $queryExiste = "SELECT tbclientepadecimientoid, tbpadecimientoid FROM tbclientepadecimiento WHERE tbclienteid = ?";
             $stmtExiste = mysqli_prepare($conn, $queryExiste);
             mysqli_stmt_bind_param($stmtExiste, "i", $clientePadecimiento->getTbclienteid());
             mysqli_stmt_execute($stmtExiste);
             $resultExiste = mysqli_stmt_get_result($stmtExiste);
+            $result = false;
 
             if ($rowExiste = mysqli_fetch_assoc($resultExiste)) {
-                // YA EXISTE: Concatenar padecimientos
+                // YA EXISTE:
+                $registroExistenteId = $rowExiste['tbclientepadecimientoid'];
                 $padecimientosActuales = $rowExiste['tbpadecimientoid'];
                 $nuevosPadecimientos = $clientePadecimiento->getTbpadecimientoid();
 
                 // Convertir a arrays, unir y eliminar duplicados
-                $actualesArray = empty($padecimientosActuales) ? array() : explode('$', $padecimientosActuales);
-                $nuevosArray = empty($nuevosPadecimientos) ? array() : explode('$', $nuevosPadecimientos);
+                $actualesArray = empty($padecimientosActuales) ? [] : explode('$', $padecimientosActuales);
+                $nuevosArray = empty($nuevosPadecimientos) ? [] : explode('$', $nuevosPadecimientos);
                 $todosLosPadecimientos = array_unique(array_merge($actualesArray, $nuevosArray));
                 $padecimientosConcatenados = implode('$', array_filter($todosLosPadecimientos));
 
-                // Actualizar registro existente
-                $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientoid = ?, tbpadecimientodictamenid = ? WHERE tbclienteid = ?";
-                $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
-                mysqli_stmt_bind_param($stmtUpdate, "sii", $padecimientosConcatenados, $clientePadecimiento->getTbpadecimientodictamenid(), $clientePadecimiento->getTbclienteid());
-                $result = mysqli_stmt_execute($stmtUpdate);
-                mysqli_stmt_close($stmtUpdate);
-
+                // Si se proporciona un dictamen, actualizar el registro existente
+                if ($clientePadecimiento->getTbpadecimientodictamenid() !== null) {
+                    $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientoid = ?, tbpadecimientodictamenid = ? WHERE tbclientepadecimientoid = ?";
+                    $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+                    mysqli_stmt_bind_param($stmtUpdate, "sii", $padecimientosConcatenados, $clientePadecimiento->getTbpadecimientodictamenid(), $registroExistenteId);
+                    $result = mysqli_stmt_execute($stmtUpdate);
+                    mysqli_stmt_close($stmtUpdate);
+                } else {
+                    // Si no se proporciona dictamen, actualizar solo los padecimientos
+                    $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientoid = ? WHERE tbclientepadecimientoid = ?";
+                    $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+                    mysqli_stmt_bind_param($stmtUpdate, "si", $padecimientosConcatenados, $registroExistenteId);
+                    $result = mysqli_stmt_execute($stmtUpdate);
+                    mysqli_stmt_close($stmtUpdate);
+                }
             } else {
                 // NO EXISTE: Crear nuevo registro
                 $queryGetLastId = "SELECT MAX(tbclientepadecimientoid) AS tbclientepadecimientoid FROM tbclientepadecimiento";
                 $resultId = mysqli_query($conn, $queryGetLastId);
                 $nextId = 1;
-
-                if ($row = mysqli_fetch_row($resultId)) {
+                $row = mysqli_fetch_row($resultId);
+                if ($row) {
                     if ($row[0] !== null) {
                         $nextId = (int)$row[0] + 1;
                     }
@@ -54,11 +64,12 @@
                 $stmt = mysqli_prepare($conn, $queryInsert);
 
                 if ($stmt) {
-                    mysqli_stmt_bind_param($stmt, "iisi", $nextId, $clientePadecimiento->getTbclienteid(), $clientePadecimiento->getTbpadecimientoid(), $clientePadecimiento->getTbpadecimientodictamenid());
+                    // Nota: el ID de dictamen puede ser NULL, por lo que usamos 's' y ajustamos el valor
+                    $dictamenId = $clientePadecimiento->getTbpadecimientodictamenid();
+                    $dictamenId = $dictamenId === null ? null : (int)$dictamenId;
+                    mysqli_stmt_bind_param($stmt, "iisi", $nextId, $clientePadecimiento->getTbclienteid(), $clientePadecimiento->getTbpadecimientoid(), $dictamenId);
                     $result = mysqli_stmt_execute($stmt);
                     mysqli_stmt_close($stmt);
-                } else {
-                    $result = false;
                 }
             }
 
@@ -78,7 +89,9 @@
             $stmt = mysqli_prepare($conn, $queryUpdate);
 
             if ($stmt) {
-                mysqli_stmt_bind_param($stmt, "isii", $clientePadecimiento->getTbclienteid(), $clientePadecimiento->getTbpadecimientoid(), $clientePadecimiento->getTbpadecimientodictamenid(), $clientePadecimiento->getTbclientepadecimientoid());
+                 $dictamenId = $clientePadecimiento->getTbpadecimientodictamenid();
+                $dictamenId = $dictamenId === null ? null : (int)$dictamenId;
+                mysqli_stmt_bind_param($stmt, "isii", $clientePadecimiento->getTbclienteid(), $clientePadecimiento->getTbpadecimientoid(), $dictamenId, $clientePadecimiento->getTbclientepadecimientoid());
                 $result = mysqli_stmt_execute($stmt);
                 mysqli_stmt_close($stmt);
             } else {

@@ -1,6 +1,5 @@
 <?php
 include_once 'data.php';
-include '../domain/PadecimientoDictamen.php';
 
 class PadecimientoDictamenData extends Data
 {
@@ -8,26 +7,37 @@ class PadecimientoDictamenData extends Data
     public function insertarTBPadecimientoDictamen($padecimientodictamen)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            error_log("No se pudo conectar a la base de datos.");
+            return null;
+        }
         $conn->set_charset('utf8');
 
         $queryInsert = "INSERT INTO tbpadecimientodictamen (
             tbpadecimientodictamenfechaemision,
             tbpadecimientodictamenentidademision,
             tbpadecimientodictamenimagenid
-        ) VALUES (
-            '" . $padecimientodictamen->getPadecimientodictamenfechaemision() . "',
-            '" . $padecimientodictamen->getPadecimientodictamenentidademision() . "',
-            '" . $padecimientodictamen->getPadecimientodictamenimagenid() . "'
-        );";
+        ) VALUES (?, ?, ?);";
 
-        $result = mysqli_query($conn, $queryInsert);
+        $stmt = mysqli_prepare($conn, $queryInsert);
+        mysqli_stmt_bind_param(
+            $stmt,
+            'sss', // Corrección: 's' para fecha y entidad, 'i' para el ID de imagen
+            $padecimientodictamen->getPadecimientodictamenfechaemision(),
+            $padecimientodictamen->getPadecimientodictamenentidademision(),
+            $padecimientodictamen->getPadecimientodictamenimagenid()
+        );
+
+        $result = mysqli_stmt_execute($stmt);
 
         if ($result) {
             $id = mysqli_insert_id($conn);
+            mysqli_stmt_close($stmt);
             mysqli_close($conn);
             return $id;
         } else {
-            error_log("Error SQL: " . mysqli_error($conn));
+            error_log("Error SQL: " . mysqli_stmt_error($stmt));
+            mysqli_stmt_close($stmt);
             mysqli_close($conn);
             return null;
         }
@@ -36,15 +46,29 @@ class PadecimientoDictamenData extends Data
     public function actualizarTBPadecimientoDictamen($padecimientodictamen)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return false;
+        }
         $conn->set_charset('utf8');
 
         $queryUpdate = "UPDATE tbpadecimientodictamen SET
-            tbpadecimientodictamenfechaemision='" . $padecimientodictamen->getPadecimientodictamenfechaemision() . "',
-            tbpadecimientodictamenentidademision='" . $padecimientodictamen->getPadecimientodictamenentidademision() . "',
-            tbpadecimientodictamenimagenid='" . $padecimientodictamen->getPadecimientodictamenimagenid() . "'
-            WHERE tbpadecimientodictamenid=" . $padecimientodictamen->getPadecimientodictamenid() . ";";
+            tbpadecimientodictamenfechaemision = ?,
+            tbpadecimientodictamenentidademision = ?,
+            tbpadecimientodictamenimagenid = ?
+            WHERE tbpadecimientodictamenid = ?;";
 
-        $result = mysqli_query($conn, $queryUpdate);
+        $stmt = mysqli_prepare($conn, $queryUpdate);
+        mysqli_stmt_bind_param(
+            $stmt,
+            'sssi',
+            $padecimientodictamen->getPadecimientodictamenfechaemision(),
+            $padecimientodictamen->getPadecimientodictamenentidademision(),
+            $padecimientodictamen->getPadecimientodictamenimagenid(),
+            $padecimientodictamen->getPadecimientodictamenid()
+        );
+
+        $result = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
         mysqli_close($conn);
         return $result;
     }
@@ -52,6 +76,9 @@ class PadecimientoDictamenData extends Data
     public function eliminarTBPadecimientoDictamen($id)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return false;
+        }
         $conn->set_charset('utf8');
 
         $queryDelete = "DELETE FROM tbpadecimientodictamen WHERE tbpadecimientodictamenid=?;";
@@ -60,6 +87,7 @@ class PadecimientoDictamenData extends Data
         mysqli_stmt_bind_param($stmt, 'i', $id);
         $result = mysqli_stmt_execute($stmt);
 
+        mysqli_stmt_close($stmt);
         mysqli_close($conn);
         return $result;
     }
@@ -125,10 +153,14 @@ class PadecimientoDictamenData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "SELECT tbpadecimientodictamenentidademision FROM tbpadecimientodictamen WHERE tbpadecimientodictamenentidademision='" . $entidad . "' LIMIT 1;";
-        $result = mysqli_query($conn, $query);
-        $existe = mysqli_num_rows($result) > 0;
+        $query = "SELECT tbpadecimientodictamenentidademision FROM tbpadecimientodictamen WHERE tbpadecimientodictamenentidademision=? LIMIT 1;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, 's', $entidad);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        $existe = mysqli_stmt_num_rows($stmt) > 0;
 
+        mysqli_stmt_close($stmt);
         mysqli_close($conn);
         return $existe;
     }
@@ -138,9 +170,11 @@ class PadecimientoDictamenData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $id = mysqli_real_escape_string($conn, $id);
-        $query = "SELECT * FROM tbpadecimientodictamen WHERE tbpadecimientodictamenid='" . $id . "' LIMIT 1;";
-        $result = mysqli_query($conn, $query);
+        $query = "SELECT * FROM tbpadecimientodictamen WHERE tbpadecimientodictamenid=? LIMIT 1;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
         $padecimientodictamen = null;
         if ($row = mysqli_fetch_assoc($result)) {
@@ -152,11 +186,11 @@ class PadecimientoDictamenData extends Data
             );
         }
 
+        mysqli_stmt_close($stmt);
         mysqli_close($conn);
         return $padecimientodictamen;
     }
 
-    // Método para obtener todos los clientes (para el selector)
     public function getAllClientes()
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
@@ -174,32 +208,88 @@ class PadecimientoDictamenData extends Data
         return $clientes;
     }
 
-    // Método para obtener cliente por carnet
     public function getClientePorCarnet($carnet)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $carnet = mysqli_real_escape_string($conn, $carnet);
-        $query = "SELECT tbclienteid, tbclientecarnet, tbclientenombre FROM tbcliente WHERE tbclientecarnet='" . $carnet . "' LIMIT 1;";
-        $result = mysqli_query($conn, $query);
+        $query = "SELECT tbclienteid, tbclientecarnet, tbclientenombre FROM tbcliente WHERE tbclientecarnet=? LIMIT 1;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, 's', $carnet);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
         $cliente = null;
         if ($row = mysqli_fetch_assoc($result)) {
             $cliente = $row;
         }
 
+        mysqli_stmt_close($stmt);
         mysqli_close($conn);
         return $cliente;
     }
 
-    // Métodos para manejar la relación cliente-padecimiento dictamen en tabla intermedia
-    public function getPadecimientosDictamenPorCliente($clienteId)
+    // Método para obtener la cadena de IDs de padecimientos de un cliente
+    public function getListaIdsPadecimientosPorClienteId($clienteId)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        // Obtener los IDs de padecimientos dictamen del cliente desde tbdatoclinico
+        $query = "SELECT tbpadecimientodictamenid FROM tbclientepadecimiento WHERE tbclienteid = ?;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, 'i', $clienteId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $listaIds = '';
+        if ($row = mysqli_fetch_assoc($result)) {
+            $listaIds = $row['tbpadecimientodictamenid'] ?? '';
+        }
+
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
+        return $listaIds;
+    }
+
+    // Método para actualizar la cadena de IDs de padecimientos de un cliente
+    public function actualizarListaPadecimientosPorClienteId($clienteId, $nuevaLista)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            error_log("No se pudo conectar a la base de datos.");
+            return false;
+        }
+        $conn->set_charset('utf8');
+
+        // Buscar si ya existe una entrada para el cliente
+        $queryExiste = "SELECT tbclienteid FROM tbclientepadecimiento WHERE tbclienteid = ?;";
+        $stmtExiste = mysqli_prepare($conn, $queryExiste);
+        mysqli_stmt_bind_param($stmtExiste, 'i', $clienteId);
+        mysqli_stmt_execute($stmtExiste);
+        $resultExiste = mysqli_stmt_get_result($stmtExiste);
+
+        if (mysqli_num_rows($resultExiste) > 0) {
+            // Actualizar si ya existe
+            $query = "UPDATE tbclientepadecimiento SET tbpadecimientodictamenid = ? WHERE tbclienteid = ?;";
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, 'si', $nuevaLista, $clienteId);
+        } else {
+            // Insertar si no existe
+            $query = "INSERT INTO tbclientepadecimiento (tbclienteid, tbpadecimientodictamenid) VALUES (?, ?);";
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, 'is', $clienteId, $nuevaLista);
+        }
+
+        $result = mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
+        return $result;
+    }
+
+    public function getPadecimientosDictamenPorCliente($clienteId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
         $query = "SELECT tbpadecimientodictamenid FROM tbclientepadecimiento WHERE tbclienteid = ?";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, 'i', $clienteId);
@@ -218,8 +308,139 @@ class PadecimientoDictamenData extends Data
             return [];
         }
 
-        // Obtener los padecimientos dictamen usando los IDs
         return $this->getAllTBPadecimientoDictamenPorId($padecimientosIds);
+    }
+public function eliminarRelacionPorDictamenId($dictamenId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return false;
+        }
+        $conn->set_charset('utf8');
+
+        // Buscar registros que tengan este dictamen
+        $querySelect = "SELECT tbclientepadecimientoid, tbpadecimientodictamenid FROM tbclientepadecimiento WHERE tbpadecimientodictamenid LIKE ?";
+        $searchPattern = "%$dictamenId%";
+        $stmt = mysqli_prepare($conn, $querySelect);
+        mysqli_stmt_bind_param($stmt, "s", $searchPattern);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $registroId = $row['tbclientepadecimientoid'];
+            $dictamenesActuales = $row['tbpadecimientodictamenid'];
+
+            // Remover el dictamen de la cadena
+            $dictamenesArray = explode('$', $dictamenesActuales);
+            $nuevosDictamenes = array_filter($dictamenesArray, function($id) use ($dictamenId) {
+                return $id != $dictamenId;
+            });
+
+            $nuevaCadena = implode('$', $nuevosDictamenes);
+
+            // Actualizar o eliminar según el caso
+            if (empty($nuevaCadena)) {
+                // Si no quedan dictámenes, poner NULL
+                $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientodictamenid = NULL WHERE tbclientepadecimientoid = ?";
+                $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+                mysqli_stmt_bind_param($stmtUpdate, "i", $registroId);
+            } else {
+                // Actualizar con la nueva cadena
+                $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientodictamenid = ? WHERE tbclientepadecimientoid = ?";
+                $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+                mysqli_stmt_bind_param($stmtUpdate, "si", $nuevaCadena, $registroId);
+            }
+
+            mysqli_stmt_execute($stmtUpdate);
+            mysqli_stmt_close($stmtUpdate);
+        }
+
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
+        return true;
+    }
+
+    /**
+     * Obtiene el ID del cliente asociado a un dictamen
+     */
+    public function obtenerClienteIdPorDictamenId($dictamenId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return null;
+        }
+        $conn->set_charset('utf8');
+
+        $querySelect = "SELECT tbclienteid FROM tbclientepadecimiento WHERE tbpadecimientodictamenid LIKE ?";
+        $searchPattern = "%$dictamenId%";
+        $stmt = mysqli_prepare($conn, $querySelect);
+        mysqli_stmt_bind_param($stmt, "s", $searchPattern);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $clienteId = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $clienteId = $row['tbclienteid'];
+        }
+
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
+        return $clienteId;
+    }
+
+    /**
+     * Asocia un dictamen a un cliente existente
+     */
+    public function asociarDictamenACliente($clienteId, $dictamenId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            return false;
+        }
+        $conn->set_charset('utf8');
+
+        // Verificar si ya existe un registro para este cliente
+        $queryExiste = "SELECT tbclientepadecimientoid, tbpadecimientodictamenid FROM tbclientepadecimiento WHERE tbclienteid = ?";
+        $stmtExiste = mysqli_prepare($conn, $queryExiste);
+        mysqli_stmt_bind_param($stmtExiste, "i", $clienteId);
+        mysqli_stmt_execute($stmtExiste);
+        $resultExiste = mysqli_stmt_get_result($stmtExiste);
+
+        if ($rowExiste = mysqli_fetch_assoc($resultExiste)) {
+            // Ya existe: agregar el dictamen a la cadena existente
+            $registroId = $rowExiste['tbclientepadecimientoid'];
+            $dictamenesActuales = $rowExiste['tbpadecimientodictamenid'] ?? '';
+
+            $dictamenesArray = empty($dictamenesActuales) ? [] : explode('$', $dictamenesActuales);
+            if (!in_array($dictamenId, $dictamenesArray)) {
+                $dictamenesArray[] = $dictamenId;
+            }
+            $nuevaCadena = implode('$', array_filter($dictamenesArray));
+
+            $queryUpdate = "UPDATE tbclientepadecimiento SET tbpadecimientodictamenid = ? WHERE tbclientepadecimientoid = ?";
+            $stmtUpdate = mysqli_prepare($conn, $queryUpdate);
+            mysqli_stmt_bind_param($stmtUpdate, "si", $nuevaCadena, $registroId);
+            $result = mysqli_stmt_execute($stmtUpdate);
+            mysqli_stmt_close($stmtUpdate);
+        } else {
+            // No existe: crear nuevo registro solo con el dictamen
+            $queryGetLastId = "SELECT MAX(tbclientepadecimientoid) AS tbclientepadecimientoid FROM tbclientepadecimiento";
+            $resultId = mysqli_query($conn, $queryGetLastId);
+            $nextId = 1;
+
+            if ($row = mysqli_fetch_row($resultId)) {
+                if ($row[0] !== null) {
+                    $nextId = (int)$row[0] + 1;
+                }
+            }
+
+            $queryInsert = "INSERT INTO tbclientepadecimiento (tbclientepadecimientoid, tbclienteid, tbpadecimientoid, tbpadecimientodictamenid) VALUES (?, ?, NULL, ?)";
+            $stmtInsert = mysqli_prepare($conn, $queryInsert);
+            mysqli_stmt_bind_param($stmtInsert, "iis", $nextId, $clienteId, $dictamenId);
+            $result = mysqli_stmt_execute($stmtInsert);
+            mysqli_stmt_close($stmtInsert);
+        }
+
+        mysqli_stmt_close($stmtExiste);
+        mysqli_close($conn);
+        return $result ?? false;
     }
 }
 ?>
