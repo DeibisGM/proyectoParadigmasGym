@@ -2,7 +2,7 @@
 session_start();
 
 include_once '../business/padecimientoBusiness.php';
-include_once '../business/datoClinicoBusiness.php';
+include_once '../business/clientePadecimientoBusiness.php';
 if (!class_exists('Padecimiento')) {
     include_once '../domain/padecimiento.php';
 }
@@ -10,7 +10,7 @@ if (!class_exists('Padecimiento')) {
 header('Content-Type: application/json');
 
 $padecimientoBusiness = new PadecimientoBusiness();
-$datoClinicoBusiness = new DatoClinicoBusiness();
+$clientePadecimientoBusiness = new clientePadecimientoBusiness();
 $response = array();
 
 try {
@@ -73,7 +73,7 @@ try {
                 $response['success'] = false;
                 $response['message'] = 'Error de validación: ' . implode(', ', $errores);
             } else {
-                $clientesAfectados = $datoClinicoBusiness->padecimientoEnUso($id);
+                $clientesAfectados = $clientePadecimientoBusiness->padecimientoEnUso($id);
 
                 $padecimiento = new Padecimiento($id, $tipo, $nombre, $descripcion, $formaDeActuar);
                 $resultado = $padecimientoBusiness->actualizarTbpadecimiento($padecimiento);
@@ -82,7 +82,7 @@ try {
                     $mensaje = 'Éxito: Padecimiento actualizado correctamente.';
 
                     if (!empty($clientesAfectados)) {
-                        $registrosAfectados = $datoClinicoBusiness->modificarPadecimientoEnRegistros($id, $id);
+                        $registrosAfectados = $clientePadecimientoBusiness->modificarPadecimientoEnRegistros($id, $id);
                         if ($registrosAfectados > 0) {
                             $mensaje .= " Se reordenaron $registrosAfectados registros de datos clínicos (el padecimiento modificado se movió al final de las listas).";
                         }
@@ -104,7 +104,7 @@ try {
             $response['message'] = 'Error: ID de padecimiento inválido.';
         } else {
 
-            $clientesAfectados = $datoClinicoBusiness->padecimientoEnUso($id);
+            $clientesAfectados = $clientePadecimientoBusiness->padecimientoEnUso($id);
 
             if (!empty($clientesAfectados)) {
 
@@ -143,7 +143,7 @@ try {
             $response['message'] = 'Error: ID de padecimiento inválido.';
         } else {
 
-            $resultadosLimpieza = $datoClinicoBusiness->eliminarPadecimientoDeRegistros($id);
+            $resultadosLimpieza = $clientePadecimientoBusiness->eliminarPadecimientoDeRegistros($id);
 
             $resultado = $padecimientoBusiness->eliminarTbpadecimiento($id);
 

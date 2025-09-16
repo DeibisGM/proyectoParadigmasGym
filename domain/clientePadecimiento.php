@@ -1,21 +1,23 @@
 <?php
-class DatoClinico {
-    private $tbdatoclinicoid;
+class ClientePadecimiento {
+    private $tbclientepadecimientoid;
     private $tbclienteid;
     private $tbpadecimientoid;
+    private $tbpadecimientodictamenid;
     private $carnet;
     private $padecimientosNombres;
 
-    public function __construct($tbdatoclinicoid, $tbclienteid, $tbpadecimientoid) {
-        $this->tbdatoclinicoid = $tbdatoclinicoid;
+    public function __construct($tbclientepadecimientoid, $tbclienteid, $tbpadecimientoid, $tbpadecimientodictamenid = null) {
+        $this->tbclientepadecimientoid = $tbclientepadecimientoid;
         $this->tbclienteid = $tbclienteid;
         $this->tbpadecimientoid = $tbpadecimientoid;
+        $this->tbpadecimientodictamenid = $tbpadecimientodictamenid;
         $this->carnet = '';
         $this->padecimientosNombres = array();
     }
 
-    public function getTbdatoclinicoid() {
-        return $this->tbdatoclinicoid;
+    public function getTbclientepadecimientoid() {
+        return $this->tbclientepadecimientoid;
     }
 
     public function getTbclienteid() {
@@ -24,6 +26,10 @@ class DatoClinico {
 
     public function getTbpadecimientoid() {
         return $this->tbpadecimientoid;
+    }
+
+    public function getTbpadecimientodictamenid() {
+        return $this->tbpadecimientodictamenid;
     }
 
     public function getCarnet() {
@@ -42,11 +48,15 @@ class DatoClinico {
         if (empty($this->tbpadecimientoid)) {
             return array();
         }
-        return explode('$', $this->tbpadecimientoid);
+
+        $ids = explode('$', $this->tbpadecimientoid);
+        return array_filter($ids, function($id) {
+            return !empty(trim($id)) && is_numeric($id);
+        });
     }
 
-    public function setTbdatoclinicoid($tbdatoclinicoid) {
-        $this->tbdatoclinicoid = $tbdatoclinicoid;
+    public function setTbclientepadecimientoid($tbclientepadecimientoid) {
+        $this->tbclientepadecimientoid = $tbclientepadecimientoid;
     }
 
     public function setTbclienteid($tbclienteid) {
@@ -55,6 +65,10 @@ class DatoClinico {
 
     public function setTbpadecimientoid($tbpadecimientoid) {
         $this->tbpadecimientoid = $tbpadecimientoid;
+    }
+
+    public function setTbpadecimientodictamenid($tbpadecimientodictamenid) {
+        $this->tbpadecimientodictamenid = $tbpadecimientodictamenid;
     }
 
     public function setCarnet($carnet) {
@@ -73,6 +87,10 @@ class DatoClinico {
             return $id > 0;
         });
         return implode('$', $idsLimpios);
+    }
+
+    public function contarPadecimientos() {
+        return count($this->getPadecimientosIds());
     }
 }
 ?>

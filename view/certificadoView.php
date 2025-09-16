@@ -15,9 +15,11 @@ $puedeCrearCertificados = ($tipoUsuario === 'admin' || $tipoUsuario === 'instruc
 
 include_once '../business/certificadoBusiness.php';
 include_once '../business/instructorBusiness.php';
+include_once '../utility/ImageManager.php';
 
 $certificadoBusiness = new CertificadoBusiness();
 $instructorBusiness = new InstructorBusiness();
+$imageManager = new ImageManager();
 
 $certificados = $certificadoBusiness->getCertificados();
 $instructores = $instructorBusiness->getAllTBInstructor(true); // Obtener todos los instructores
@@ -66,6 +68,32 @@ if (isset($_GET['instructor_id'])) {
             padding: 8px 15px;
             cursor: pointer;
         }
+
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .delete-image-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #ff4444;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .image-container img {
+            max-width: 100px;
+            max-height: 100px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -82,7 +110,7 @@ if (isset($_GET['instructor_id'])) {
 <main>
     <?php if ($puedeCrearCertificados): ?>
         <h2>Agregar Certificado</h2>
-        <form method="post" action="../action/certificadoAction.php">
+        <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data">
             <input type="text" name="nombre" placeholder="Nombre" required maxlength="100"><br>
             <input type="text" name="descripcion" placeholder="Descripción" required><br>
             <input type="text" name="entidad" placeholder="Entidad" required><br>
@@ -97,6 +125,10 @@ if (isset($_GET['instructor_id'])) {
                 <?php endforeach; ?>
             </select><br>
 
+            <!-- Agregar campo para imagen -->
+            <label for="tbcertificadoimagenid">Imagen del certificado:</label><br>
+            <input type="file" name="tbcertificadoimagenid[]" accept="image/png, image/jpeg, image/webp"><br>
+
             <button type="submit" name="create">Agregar</button>
         </form>
     <?php endif; ?>
@@ -109,6 +141,7 @@ if (isset($_GET['instructor_id'])) {
             <th>Descripción</th>
             <th>Entidad</th>
             <th>Instructor</th>
+            <th>Imagen</th>
             <?php if ($puedeCrearCertificados): ?>
                 <th>Acciones</th>
             <?php endif; ?>
@@ -122,30 +155,60 @@ if (isset($_GET['instructor_id'])) {
                     break;
                 }
             }
+
+            // Obtener la imagen del certificado
+        $imagenCertificado = null;
+        $imageId = $cert->getTbcertificadoImagenId();
+
+        if (!empty($imageId)) {
+            $imagen = $imageManager->getImagesByIds($imageId);
+
+            // EXACTAMENTE IGUAL QUE EN INSTRUCTOR
+            if (!empty($imagen) && !empty($imagen[0]['tbimagenruta'])) {
+                $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
+                $imagenCertificado = $imagePath . '?t=' . time();
+            }
+        }
             ?>
             <tr>
-                <form method="post" action="../action/certificadoAction.php">
+                <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data">
                     <td>
                         <input type="hidden" name="id" value="<?php echo $cert->getId(); ?>">
                         <?php echo str_pad($cert->getId(), 3, '0', STR_PAD_LEFT); ?>
                     </td>
-                    <td><?php echo htmlspecialchars($cert->getNombre()); ?></td>
-                    <td><?php echo htmlspecialchars($cert->getDescripcion()); ?></td>
-                    <td><?php echo htmlspecialchars($cert->getEntidad()); ?></td>
+                    <td><input type="text" name="nombre" value="<?php echo htmlspecialchars($cert->getNombre()); ?>" required></td>
+                    <td><input type="text" name="descripcion" value="<?php echo htmlspecialchars($cert->getDescripcion()); ?>" required></td>
+                    <td><input type="text" name="entidad" value="<?php echo htmlspecialchars($cert->getEntidad()); ?>" required></td>
                     <td>
-                        <?php
-                        if ($instructorCert) {
-                            echo htmlspecialchars($instructorCert->getInstructorNombre() . ' (' . str_pad($instructorCert->getInstructorId(), 3, '0', STR_PAD_LEFT) . ')');
-                        } else {
-                            echo "Instructor no encontrado";
-                        }
-                        ?>
+                        <select name="idInstructor" required>
+                            <option value="">Seleccione un instructor</option>
+                            <?php foreach ($instructores as $instructor): ?>
+                                <option value="<?php echo $instructor->getInstructorId(); ?>" <?php echo $instructor->getInstructorId() == $cert->getIdInstructor() ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($instructor->getInstructorNombre() . ' (' . $instructor->getInstructorId() . ')'); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td>
+                        <?php if ($imagenCertificado): ?>
+                          <div class="image-container">
+                                 <img src="<?php echo $imagenCertificado; ?>" alt="Imagen certificado">
+                                <?php if ($puedeCrearCertificados): ?>
+                                    <button type="button" data-certificado-id="<?php echo $cert->getId(); ?>" data-image-id="<?php echo $cert->getTbcertificadoImagenId(); ?>" class="delete-image-btn" onclick="confirmImageDeleteCert(this)">X</button>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <?php if ($puedeCrearCertificados): ?>
+                                <input type="file" name="tbcertificadoimagenid[]" accept="image/png, image/jpeg, image/webp">
+                            <?php else: ?>
+                                Sin imagen
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </td>
                     <?php if ($puedeCrearCertificados): ?>
                         <td>
-                            <button type="submit" name="delete"
-                                    onclick="return confirm('¿Eliminar este certificado?');">Eliminar
-                            </button>
+                            <button type="submit" name="update">Actualizar</button>
+                            <button type="submit" name="delete" onclick="return confirm('¿Eliminar este certificado?');">Eliminar</button>
                         </td>
                     <?php endif; ?>
                 </form>
@@ -159,6 +222,7 @@ if (isset($_GET['instructor_id'])) {
             if ($_GET['success'] == 'created') echo 'Certificado creado correctamente.';
             elseif ($_GET['success'] == 'updated') echo 'Certificado actualizado correctamente.';
             elseif ($_GET['success'] == 'deleted') echo 'Certificado eliminado correctamente.';
+            elseif ($_GET['success'] == 'image_deleted') echo 'Imagen eliminada correctamente.';
             ?>
         </p>
     <?php elseif (isset($_GET['error'])): ?>
@@ -167,6 +231,9 @@ if (isset($_GET['instructor_id'])) {
             if ($_GET['error'] == 'emptyFields') echo 'Error: Todos los campos son obligatorios.';
             elseif ($_GET['error'] == 'nameTooLong') echo 'Error: El nombre es demasiado largo (máximo 100 caracteres).';
             elseif ($_GET['error'] == 'dbError') echo 'Error: No se pudo completar la operación en la base de datos.';
+            elseif ($_GET['error'] == 'instructorNotFound') echo 'Error: Instructor no encontrado.';
+            elseif ($_GET['error'] == 'notFound') echo 'Error: Certificado no encontrado.';
+            elseif ($_GET['error'] == 'image_deleted') echo 'Error: No se pudo eliminar la imagen.';
             else echo 'Error: ' . htmlspecialchars($_GET['error']);
             ?>
         </p>
@@ -176,5 +243,36 @@ if (isset($_GET['instructor_id'])) {
 <footer>
     <p>Fin de la página.</p>
 </footer>
+
+<script>
+function confirmImageDeleteCert(button) {
+    if (confirm('¿Estás seguro de eliminar esta imagen?')) {
+        const certificadoId = button.getAttribute('data-certificado-id');
+        const imageId = button.getAttribute('data-image-id');
+
+        // Crear formulario temporal
+        const form = document.createElement('form');
+        form.method = 'post';
+        form.action = '../action/certificadoAction.php';
+
+        // Agregar campos ocultos
+        const idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.name = 'id';
+        idInput.value = certificadoId;
+        form.appendChild(idInput);
+
+        const deleteInput = document.createElement('input');
+        deleteInput.type = 'hidden';
+        deleteInput.name = 'delete_image';
+        deleteInput.value = imageId;
+        form.appendChild(deleteInput);
+
+        // Enviar formulario
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
 </body>
 </html>

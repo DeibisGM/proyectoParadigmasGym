@@ -40,7 +40,8 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/horarioView.php'><button><i class="ph ph-clock-clockwise"></i>Horario General</button></a>
                     <a href='view/padecimientoView.php'><button><i class="ph ph-bandaids"></i>Padecimientos</button></a>
                     <a href='view/certificadoView.php'><button><i class="ph ph-certificate"></i>Certificados</button></a>
-                    <a href='view/datoClinicoView.php'><button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button></a>
+                    <a href='view/clientePadecimientoView.php'><button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button></a>
+                    <a href='view/padecimientoDictamenView.php'><button><i class="ph ph-file-text"></i> Dictamen Médico</button></a>
                     <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-plus"></i>Números Emergencia</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Salas</button></a>
                     <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zona</button></a>
@@ -72,7 +73,8 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                 <h3><i class="ph ph-heartbeat"></i>Salud de Clientes</h3>
                 <div class="menu-grid">
                     <a href='view/padecimientoView.php'><button><i class="ph ph-bandaids"></i>Padecimientos</button></a>
-                    <a href='view/datoClinicoView.php'><button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button></a>
+                    <a href='view/clientePadecimientoView.php'><button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button></a>
+                    <a href='view/padecimientoDictamenView.php'><button><i class="ph ph-file-text"></i> Dictamen Médico</button></a>
                     <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-plus"></i>Contactos Emergencia</button></a>
                 </div>
             </section>
@@ -92,7 +94,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                 <h3><i class="ph ph-user-focus"></i>Mi Perfil y Salud</h3>
                 <div class="menu-grid">
                     <a href='view/clienteView.php'><button><i class="ph ph-user-rectangle"></i>Ver mi Perfil</button></a>
-                    <a href='view/datoClinicoView.php'><button><i class="ph ph-clipboard-text"></i>Mis Datos Clínicos</button></a>
+                    <a href='view/clientePadecimientoView.php'><button><i class="ph ph-clipboard-text"></i>Mis Datos Clínicos</button></a>
                     <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-call"></i>Mis Números de Emergencia</button></a>
                 </div>
             </section>
