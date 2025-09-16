@@ -1,6 +1,6 @@
 <?php
 session_start();
-header('Content-Type: application/json'); // Esencial para que JavaScript entienda la respuesta
+header('Content-Type: application/json');
 
 // 1. Verificación de seguridad: el usuario debe haber iniciado sesión
 if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
@@ -62,5 +62,6 @@ if (isset($_POST['action'])) {
 }
 
 // 3. Devolver la respuesta final en formato JSON
+ob_clean();
 echo json_encode($response);
 ?>

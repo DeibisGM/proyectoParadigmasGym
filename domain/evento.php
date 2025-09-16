@@ -5,7 +5,6 @@ class Evento
     private $id;
     private $nombre;
     private $descripcion;
-    // CAMBIO: De 'diaSemana' a 'fecha'
     private $fecha;
     private $horaInicio;
     private $horaFin;
@@ -13,10 +12,10 @@ class Evento
     private $instructorId;
     private $estado;
 
-    // Propiedad adicional para mostrar nombre del instructor
+    // Propiedades adicionales
     private $instructorNombre;
+    private $salasNombre;
 
-    // CAMBIO: Constructor actualizado
     public function __construct($id, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $instructorId, $estado)
     {
         $this->id = $id;
@@ -29,6 +28,7 @@ class Evento
         $this->instructorId = $instructorId;
         $this->estado = $estado;
         $this->instructorNombre = '';
+        $this->salasNombre = '';
     }
 
     // Getters
@@ -47,7 +47,6 @@ class Evento
         return $this->descripcion;
     }
 
-    // CAMBIO: Getter actualizado
     public function getFecha()
     {
         return $this->fecha;
@@ -83,10 +82,25 @@ class Evento
         return $this->instructorNombre;
     }
 
+    public function getSalasNombre()
+    {
+        return $this->salasNombre;
+    }
+
     // Setters
+    public function setId($id)
+    {
+        $this->id = $id;
+    }
+
     public function setInstructorNombre($nombre)
     {
         $this->instructorNombre = $nombre;
+    }
+
+    public function setSalasNombre($salasNombre)
+    {
+        $this->salasNombre = $salasNombre;
     }
 }
 

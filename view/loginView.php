@@ -37,7 +37,7 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
         <strong><i class="ph ph-info"></i>Credenciales de Prueba:</strong><br><br>
         • <strong>Cliente:</strong> cliente@gmail.com / 12345678<br>
         • <strong>Instructor:</strong> instructor@gmail.com / 12345678<br>
-        • <strong>Admin:</strong> root@gmail.com / root
+        • <strong>Admin:</strong> admin@gmail.com / admin
     </div>
 
     <?php if (isset($_GET['error'])) : ?>

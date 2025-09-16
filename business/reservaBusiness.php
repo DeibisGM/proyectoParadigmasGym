@@ -1,19 +1,27 @@
 <?php
 include_once '../data/reservaData.php';
 include_once '../data/clienteData.php';
-include_once '../data/eventoData.php'; // Asegurarse de incluir esto
+include_once '../data/eventoData.php';
+include_once '../data/salaData.php';
+include_once '../data/salaReservasData.php';
 include_once '../domain/reserva.php';
 
 class ReservaBusiness
 {
     private $reservaData;
     private $clienteData;
+    private $eventoData;
+    private $salaData;
+    private $salaReservasData;
     private $config;
 
     public function __construct()
     {
         $this->reservaData = new ReservaData();
         $this->clienteData = new ClienteData();
+        $this->eventoData = new EventoData();
+        $this->salaData = new SalaData();
+        $this->salaReservasData = new SalaReservasData();
         $this->config = include '../config/gymRules.php';
     }
 
@@ -22,176 +30,145 @@ class ReservaBusiness
         return $this->reservaData->getReservasPorFecha($fecha);
     }
 
+    public function getAllReservas()
+    {
+        return $this->reservaData->getAllReservas();
+    }
+
     public function getReservasPorCliente($clienteId)
     {
         return $this->reservaData->getReservasPorCliente($clienteId);
     }
 
-    public function cancelarReserva($reservaId, $clienteId, $tipoUsuario)
+    public function cancelarReserva($reservaId)
     {
-        // El administrador siempre puede cancelar. El cliente solo si la reserva es suya.
-        if ($tipoUsuario == 'admin') {
-            $reservaACancelar = $this->reservaData->getReservaPorId($reservaId); // Necesitarás añadir esta función en Data
-        } else {
-            $reservasCliente = $this->getReservasPorCliente($clienteId);
-            $reservaACancelar = null;
-            foreach ($reservasCliente as $reserva) {
-                if ($reserva->getId() == $reservaId) {
-                    $reservaACancelar = $reserva;
-                    break;
-                }
-            }
+        $reserva = $this->reservaData->getReservaPorId($reservaId);
+
+        if (!$reserva) {
+            return "No se encontró la reserva.";
         }
 
-        if (!$reservaACancelar) {
-            return "No se encontró la reserva o no tiene permisos.";
-        }
-
-        // No se puede cancelar una reserva que ya ha pasado
-        if (new DateTime() > new DateTime($reservaACancelar->getFecha() . ' ' . $reservaACancelar->getHoraInicio())) {
+        if (new DateTime() > new DateTime($reserva->getFecha() . ' ' . $reserva->getHoraInicio())) {
             return "No se puede cancelar una reserva que ya ha comenzado o pasado.";
         }
 
         if ($this->reservaData->actualizarEstadoReserva($reservaId, 'cancelada')) {
+            // Si es una reserva de uso libre, también debemos liberar la sala
+            if ($reserva->getEventoId() === null) {
+                $this->salaReservasData->eliminarReservaDeSalaPorReserva($reservaId);
+            }
             return true;
         }
 
-        return "Error al actualizar el estado en la base de datos.";
+        return "Error al cancelar la reserva.";
     }
 
 
-    public function crearReserva($clienteId, $eventoId, $fecha, $horaInicio)
+    public function crearReserva($clienteId, $eventoId, $fecha, $horaInicio, $salaId = null)
     {
-        // 1. Obtener todos los datos necesarios
         $cliente = $this->clienteData->getClientePorId($clienteId);
-        $reservasEnFecha = $this->reservaData->getReservasPorFecha($fecha);
-        $reservasDelCliente = $this->reservaData->getReservasPorCliente($clienteId);
+        if (!$cliente) {
+            return "Cliente no encontrado.";
+        }
 
         $evento = null;
         if ($eventoId) {
-            $eventoData = new EventoData();
-            $todosEventos = $eventoData->getAllEventos();
-            foreach ($todosEventos as $ev) {
-                if ($ev->getId() == $eventoId) {
-                    $evento = $ev;
-                    break;
-                }
+            $evento = $this->eventoData->getEventoById($eventoId);
+            if (!$evento) {
+                return "Evento no encontrado.";
             }
         }
 
-        // 2. Validar si el cliente puede realizar la reserva
-        $puede = $this->puedeReservar($cliente, $fecha, $horaInicio, $evento, $reservasEnFecha, $reservasDelCliente);
+        $puede = $this->puedeReservar($cliente, $fecha, $horaInicio, $evento, $salaId);
         if ($puede !== true) {
-            return $puede; // Devuelve el mensaje de error específico
+            return $puede;
         }
 
-        // 3. Calcular la hora de fin real
-        $horaFinReal = '';
-        if ($evento) {
-            $horaFinReal = $evento->getHoraFin();
-        } else {
-            $diaSemana = date('N', strtotime($fecha));
-            $horaFinPotencial = date("H:i:s", strtotime($horaInicio) + $this->config['USO_LIBRE_DURACION_MINUTOS'] * 60);
-            $horaFinReal = $horaFinPotencial;
+        $horaFin = $evento ? $evento->getHoraFin() : date("H:i:s", strtotime($horaInicio) + $this->config['USO_LIBRE_DURACION_MINUTOS'] * 60);
 
-            // Acortar la reserva si termina después del cierre del gimnasio
-            $horaCierreDia = $this->config['HORARIO_CIERRE'][$diaSemana];
-            if ($horaFinReal > $horaCierreDia) {
-                $horaFinReal = $horaCierreDia;
+        $reserva = new Reserva(0, $clienteId, $eventoId, $fecha, $horaInicio, $horaFin, 'activa');
+
+        $reservaId = $this->reservaData->insertarReserva($reserva);
+
+        if ($reservaId) {
+            if (!$eventoId && $salaId) {
+                // Si es uso libre, creamos la reserva de la sala
+                $salaReserva = new SalaReserva(0, [$salaId], null, $fecha, $horaInicio, $horaFin);
+                $salaReserva->setReservaId($reservaId); // Vinculamos con la reserva del cliente
+                $this->salaReservasData->insertarReservaDeSala($salaReserva);
             }
-
-            // Acortar la reserva si se cruza con una hora bloqueada (ej. limpieza)
-            foreach ($this->config['HORAS_BLOQUEADAS'][$diaSemana] as $bloqueo) {
-                if ($horaInicio < $bloqueo['inicio'] && $horaFinReal > $bloqueo['inicio']) {
-                    $horaFinReal = $bloqueo['inicio'];
-                }
-            }
-        }
-
-        // 4. Crear el objeto y guardarlo
-        $reserva = new Reserva(0, $clienteId, $eventoId, $fecha, $horaInicio, $horaFinReal, 'activa');
-        if ($this->reservaData->insertarReserva($reserva)) {
             return true;
         }
 
-        return "Error al guardar la reserva en la base de datos.";
+        return "Error al guardar la reserva.";
     }
 
-    private function puedeReservar($cliente, $fecha, $horaInicio, $evento, $reservasEnFecha, $reservasDelCliente)
+    private function puedeReservar($cliente, $fecha, $horaInicio, $evento, $salaId)
     {
-        $diaSemana = date('N', strtotime($fecha));
-        $fechaReserva = new DateTime($fecha);
+        // Regla 0: Validaciones de fecha y estado global
         $hoy = new DateTime(date('Y-m-d'));
+        $fechaReserva = new DateTime($fecha);
+        $diaSemana = date('N', strtotime($fecha));
 
         if ($fechaReserva < $hoy) return "No se puede reservar en una fecha pasada.";
-
-        // Regla 1: Vigencia de la membresía
-        $fechaInscripcion = new DateTime($cliente->getInscripcion());
-        $fechaLimite = (clone $fechaInscripcion)->modify("+" . $this->config['DURACION_MEMBRESIA_DIAS'] . " days");
-        if ($fechaReserva > $fechaLimite) return "Su membresía ha expirado. Fecha límite: " . $fechaLimite->format('Y-m-d');
-
-        // Regla 2: Anticipación máxima
         $fechaMaxAnticipacion = (clone $hoy)->modify("+" . $this->config['MAX_DIAS_ANTICIPACION'] . " days");
         if ($fechaReserva > $fechaMaxAnticipacion) return "No puede reservar con más de " . $this->config['MAX_DIAS_ANTICIPACION'] . " días de anticipación.";
 
-        // Regla 3: Gimnasio abierto ese día de la semana
         if (!in_array($diaSemana, $this->config['DIAS_ABIERTOS'])) return "El gimnasio está cerrado ese día de la semana.";
-
-        // Regla 4: No es un día festivo o cerrado especial
         if (in_array($fecha, $this->config['DIAS_CERRADOS_ESPECIALES'])) return "El gimnasio permanecerá cerrado en esa fecha.";
 
-        // --- INICIO DE LA LÓGICA MODIFICADA ---
-        // Regla 5: Límites de reserva por tipo (Uso Libre vs. Evento)
-        if ($evento) {
-            // Si es un evento, solo validamos que no se haya inscrito ya en ESE MISMO evento.
-            foreach ($reservasDelCliente as $res) {
-                if ($res->getFecha() == $fecha && $res->getEstado() == 'activa' && $res->getEventoId() == $evento->getId()) {
-                    return "Ya tienes una reserva para este mismo evento.";
-                }
-            }
-        } else {
-            // Si es Uso Libre, contamos cuántas reservas de Uso Libre tiene ya para ese día.
-            $reservasUsoLibreHoy = 0;
-            foreach ($reservasDelCliente as $res) {
-                if ($res->getFecha() == $fecha && $res->getEstado() == 'activa' && $res->getEventoId() === null) {
-                    $reservasUsoLibreHoy++;
-                }
-            }
-            if ($reservasUsoLibreHoy >= $this->config['MAX_USO_LIBRE_POR_DIA']) {
-                return "Ya ha alcanzado el límite de reservas de 'Uso Libre' para este día.";
-            }
-        }
-        // --- FIN DE LA LÓGICA MODIFICADA ---
-
-        // Regla 6: Horario de apertura
         $horaApertura = $this->config['HORARIO_APERTURA'][$diaSemana];
         $horaCierre = $this->config['HORARIO_CIERRE'][$diaSemana];
         if ($horaInicio < $horaApertura || $horaInicio >= $horaCierre) return "La hora de inicio está fuera del horario de apertura ($horaApertura - $horaCierre).";
 
-        // Regla 7: No empezar en una hora bloqueada
         foreach ($this->config['HORAS_BLOQUEADAS'][$diaSemana] as $bloqueo) {
             if ($horaInicio >= $bloqueo['inicio'] && $horaInicio < $bloqueo['fin']) return "Este horario está bloqueado por mantenimiento o descanso.";
         }
 
-        // Regla 8: Comprobar aforo disponible
-        $aforo = $evento ? $evento->getAforo() : $this->config['USO_LIBRE_AFORO'];
-        $horaFin = $evento ? $evento->getHoraFin() : date("H:i:s", strtotime($horaInicio) + $this->config['USO_LIBRE_DURACION_MINUTOS'] * 60);
-        $reservasSolapadas = 0;
+        // Regla 1: Validaciones de Cliente
+        if (!$cliente->getEstado()) return "Su cuenta de cliente está inactiva.";
 
-        foreach ($reservasEnFecha as $res) {
-            if ($res->getEstado() == 'activa') {
-                if ($evento && $res->getEventoId() == $evento->getId()) {
-                    $reservasSolapadas++;
-                } else if (!$evento && !$res->getEventoId()) { // Es uso libre, chequear solapamiento de tiempo
-                    if ($horaInicio < $res->getHoraFin() && $horaFin > $res->getHoraInicio()) {
-                        $reservasSolapadas++;
-                    }
+        $fechaInscripcion = new DateTime($cliente->getInscripcion());
+        $fechaLimite = (clone $fechaInscripcion)->modify("+" . $this->config['DURACION_MEMBRESIA_DIAS'] . " days");
+        if ($fechaReserva > $fechaLimite) return "Su membresía ha expirado. Fecha límite: " . $fechaLimite->format('Y-m-d');
+
+        // Regla 2: Lógica específica de Evento o Uso Libre
+        if ($evento) { // Lógica para eventos
+            if (!$evento->getEstado()) return "No se puede reservar en un evento que está inactivo.";
+
+            $reservasDelCliente = $this->reservaData->getReservasPorCliente($cliente->getId());
+            foreach ($reservasDelCliente as $res) {
+                if ($res->getFecha() == $fecha && $res->getEstado() == 'activa' && $res->getEventoId() == $evento->getId()) {
+                    return "Ya tienes una reserva para este evento.";
                 }
             }
-        }
-        if ($reservasSolapadas >= $aforo) return "Aforo completo para este horario/evento.";
+            $reservasDelEvento = $this->reservaData->getReservasPorEvento($evento->getId());
+            if (count($reservasDelEvento) >= $evento->getAforo()) {
+                return "Aforo completo para este evento.";
+            }
+        } else { // Lógica para Uso Libre
+            if (empty($salaId)) return "Debe seleccionar una sala para una reserva de uso libre.";
 
-        return true; // Si pasa todas las validaciones
+            $sala = $this->salaData->getSalaById($salaId);
+            if(!$sala) return "La sala seleccionada no es válida.";
+            if(!$sala->getTbsalaestado()) return "La sala seleccionada no está activa.";
+
+            $reservasUsoLibreHoy = $this->reservaData->getReservasUsoLibrePorClienteYFecha($cliente->getId(), $fecha);
+            if(count($reservasUsoLibreHoy) >= $this->config['MAX_USO_LIBRE_POR_DIA']){
+                return "Ha alcanzado el límite de reservas de 'Uso Libre' para hoy.";
+            }
+
+            $horaFin = date("H:i:s", strtotime($horaInicio) + $this->config['USO_LIBRE_DURACION_MINUTOS'] * 60);
+            $disponibilidad = $this->salaReservasData->verificarDisponibilidad([$salaId], $fecha, $horaInicio, $horaFin);
+            if(isset($disponibilidad['conflictos'])) return "La sala seleccionada no está disponible en ese horario.";
+
+            $reservasEnSala = $this->reservaData->getReservasUsoLibrePorSalaYHorario($salaId, $fecha, $horaInicio, $horaFin);
+            if(count($reservasEnSala) >= $sala->getCapacidad()){
+                return "Aforo completo para la sala en ese horario.";
+            }
+        }
+
+        return true;
     }
 }
 
