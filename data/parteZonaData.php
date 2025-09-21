@@ -49,18 +49,37 @@ class parteZonaData extends Data
         return $result;
     }
 
+    public function eliminarTBParteZona2($id)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        $queryDelete = "UPDATE tbpartezona SET tbpartezonaactivo = 0 WHERE tbpartezonaid = ?;";
+        $stmt = mysqli_prepare($conn, $queryDelete);
+
+        mysqli_stmt_bind_param($stmt, 'i', $id);
+        $result = mysqli_stmt_execute($stmt);
+
+        mysqli_stmt_close($stmt);
+        mysqli_close($conn);
+
+        return $result;
+    }
+
     public function eliminarTBParteZona($id)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryDelete = "UPDATE tbpartezona SET tbpartezonaactivo = 0 WHERE tbpartezonaactivo=?;";
+        $queryDelete = "DELETE FROM tbpartezona WHERE tbpartezonaid = ?;";
         $stmt = mysqli_prepare($conn, $queryDelete);
 
-        mysqli_stmt_bind_param($stmt, 's', $id);
+        mysqli_stmt_bind_param($stmt, 'i', $id);
         $result = mysqli_stmt_execute($stmt);
 
+        mysqli_stmt_close($stmt);
         mysqli_close($conn);
+
         return $result;
     }
 

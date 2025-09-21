@@ -32,6 +32,20 @@ class ClienteData extends Data
         return $result;
     }
 
+    public function existeclientePorCorreo($correo)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        $correo = mysqli_real_escape_string($conn, $correo);
+        $query = "SELECT tbclienteid FROM tbcliente WHERE tbclientecorreo='" . $correo . "' LIMIT 1;";
+        $result = mysqli_query($conn, $query);
+        $existe = mysqli_num_rows($result) > 0;
+
+        mysqli_close($conn);
+        return $existe;
+    }
+
     public function actualizarTBCliente($cliente)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);

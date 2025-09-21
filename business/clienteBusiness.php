@@ -21,6 +21,10 @@ class ClienteBusiness {
         return $this->clienteData->actualizarTBCliente($cliente);
     }
 
+    public function existeclientePorCorreo($correo) {
+        return $this->clienteData->existeclientePorCorreo($correo);
+    }
+
     public function eliminarTBCliente($idCliente) {
         $cliente = $this->clienteData->getClientePorId($idCliente);
         if ($cliente && $cliente->getTbclienteImagenId() != '' && $cliente->getTbclienteImagenId() != '0') {

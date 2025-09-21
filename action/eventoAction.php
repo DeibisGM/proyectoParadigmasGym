@@ -28,11 +28,13 @@ if (isset($_POST['crear_evento'])) {
     if (empty($nombre)) {
         Validation::setError('nombre', 'El nombre es obligatorio.');
     }
+
     if (empty($fecha)) {
         Validation::setError('fecha', 'La fecha es obligatoria.');
     } elseif ($fecha < date('Y-m-d')) {
         Validation::setError('fecha', 'La fecha no puede ser en el pasado.');
     }
+
     if (empty($horaInicio)) {
         Validation::setError('hora_inicio', 'La hora de inicio es obligatoria.');
     }

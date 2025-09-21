@@ -34,4 +34,8 @@ class numeroEmergenciaBusiness
         return $this->numeroEmergenciaData->existeNumeroEmergencia($clienteId, $telefono);
     }
 
+    public function getNumeroPorId($id) {
+        return $this->numeroEmergenciaData->getNumeroPorId($id);
+    }
+
 }
