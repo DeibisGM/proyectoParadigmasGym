@@ -159,12 +159,12 @@ if (!$esAdminOInstructor) {
                                     <input type="hidden" name="id" value="<?= $parte->getPartezonaid() ?>">
                                     <td>
                                         <input type="text" name="nombre" maxlength="50"
-                                               value="<?= htmlspecialchars($parte->getPartezonanombre()) ?>">
+                                               value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$parte->getPartezonaid(), $parte->getPartezonanombre())) ?>">
                                         <span class="error-message"><?= Validation::getError('nombre_'.$parte->getPartezonaid()) ?></span>
                                     </td>
                                     <td>
                                         <input type="text" name="descripcion" maxlength="100"
-                                               value="<?= htmlspecialchars($parte->getPartezonadescripcion()) ?>">
+                                               value="<?= htmlspecialchars(Validation::getOldInput('descripcion_'.$parte->getPartezonaid(), $parte->getPartezonadescripcion())) ?>">
                                     </td>
                                     <td>
                                         <div class="image-gallery">
@@ -184,8 +184,8 @@ if (!$esAdminOInstructor) {
                                     </td>
                                     <td>
                                         <select name="activo">
-                                            <option value="1" <?= $parte->getPartezonaactivo() ? 'selected' : '' ?>>Activo</option>
-                                            <option value="0" <?= !$parte->getPartezonaactivo() ? 'selected' : '' ?>>Inactivo</option>
+                                            <option value="1" <?= Validation::getOldInput('activo_'.$parte->getPartezonaid(), $parte->getPartezonaactivo()) == 1 ? 'selected' : '' ?>>Activo</option>
+                                            <option value="0" <?= Validation::getOldInput('activo_'.$parte->getPartezonaid(), $parte->getPartezonaactivo()) == 0 ? 'selected' : '' ?>>Inactivo</option>
                                         </select>
                                     </td>
                                     <td>

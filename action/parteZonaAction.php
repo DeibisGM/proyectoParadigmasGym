@@ -23,7 +23,6 @@ $parteZonaBusiness = new parteZonaBusiness();
 $cuerpoZonaBusiness = new cuerpoZonaBusiness();
 $imageManager = new ImageManager();
 
-
 if (isset($_POST['borrar_imagen'])) {
     if (isset($_POST['id'])) {
         $parteId = $_POST['id'];
@@ -45,6 +44,7 @@ if (isset($_POST['borrar_imagen'])) {
     }
 
 } else if (isset($_POST['guardar'])) {
+
     if (isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['zonaId'])) {
 
         Validation::setOldInput($_POST);
@@ -56,10 +56,10 @@ if (isset($_POST['borrar_imagen'])) {
 
         if (empty($nombre)) {
             Validation::setError('nombre', 'El nombre es obligatorio.');
-        }elseif (preg_match('/[0-9]/', $nombre)) {
+        } elseif (preg_match('/[0-9]/', $nombre)) {
             Validation::setError('nombre', 'El nombre no puede contener números.');
-        }elseif ($parteZonaBusiness->existeParteZonaNombre($nombre)) {
-            Validation::setError('nombre', 'El nombre ya esta asociado a una zona del cuerpo.');
+        } elseif ($parteZonaBusiness->existeParteZonaNombre($nombre)) {
+            Validation::setError('nombre', 'El nombre ya está asociado a una zona del cuerpo.');
         }
 
         if (empty($zonaId)) {
@@ -90,9 +90,7 @@ if (isset($_POST['borrar_imagen'])) {
             $partes = $cuerpoZonaBusiness->getCuerpoZonaParteZonaId($zonaId);
 
             if($partes !== null){
-
                 $partes .= "$" . $nuevoId;
-
             }
 
             $cuerpoZonaBusiness->actualizarParteZonaTBCuerpoZona($zonaId, $partes);
@@ -110,8 +108,6 @@ if (isset($_POST['borrar_imagen'])) {
 
     if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['activo'])) {
 
-        Validation::setOldInput($_POST);
-
         $id = $_POST['id'];
         $parteActual = $parteZonaBusiness->getParteZonaPorId($id);
 
@@ -121,16 +117,22 @@ if (isset($_POST['borrar_imagen'])) {
             $descripcion = $_POST['descripcion'];
             $activo = $_POST['activo'];
 
+            // Guardar old input por fila
+            Validation::setOldInput('nombre_'.$id, $nombre);
+            Validation::setOldInput('descripcion_'.$id, $descripcion);
+            Validation::setOldInput('activo_'.$id, $activo);
+
+            // Validación por fila
             if (empty($nombre)) {
-                Validation::setError('nombre', 'El nombre es obligatorio.');
-            }elseif (preg_match('/[0-9]/', $nombre)) {
-                Validation::setError('nombre', 'El nombre no puede contener números.');
-            }elseif ($parteActual->getPartezonanombre() != $nombre && $parteZonaBusiness->existeParteZonaNombre($nombre)) {
-                Validation::setError('nombre', 'El nombre ya esta asociado a una zona del cuerpo.');
+                Validation::setError('nombre_'.$id, 'El nombre es obligatorio.');
+            } elseif (preg_match('/[0-9]/', $nombre)) {
+                Validation::setError('nombre_'.$id, 'El nombre no puede contener números.');
+            } elseif ($parteActual->getPartezonanombre() != $nombre && $parteZonaBusiness->existeParteZonaNombre($nombre)) {
+                Validation::setError('nombre_'.$id, 'El nombre ya está asociado a una zona del cuerpo.');
             }
 
             if (empty($activo)) {
-                 Validation::setError('activo', 'El estado es obligatorio.');
+                Validation::setError('activo_'.$id, 'El estado es obligatorio.');
             }
 
             if (Validation::hasErrors()) {
@@ -161,6 +163,7 @@ if (isset($_POST['borrar_imagen'])) {
     } else {
         header("location: " . $redirect_path . "?error=error");
     }
+
 } else if (isset($_POST['eliminar'])) {
     if (isset($_POST['id'])) {
         $id = $_POST['id'];

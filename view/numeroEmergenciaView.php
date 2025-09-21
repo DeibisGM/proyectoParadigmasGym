@@ -41,7 +41,7 @@ if ($tipoUsuario == 'cliente') {
 
     <main>
         <?php
-        // Mensajes de error o éxito
+        // Mensajes de error o éxito generales
         $generalError = Validation::getError('general');
         if ($generalError) {
             echo '<p class="error-message"><b>Error: '.htmlspecialchars($generalError).'</b></p>';
@@ -64,7 +64,7 @@ if ($tipoUsuario == 'cliente') {
         }
         ?>
 
-        <!-- Formulario de registro -->
+        <!-- Formulario de agregar nuevo contacto -->
         <section>
             <h3><i class="ph ph-plus-circle"></i>Agregar Contacto</h3>
             <form method="post" action="../action/numeroEmergenciaAction.php">
@@ -88,17 +88,20 @@ if ($tipoUsuario == 'cliente') {
                 <div class="form-group">
                     <label>Nombre Contacto:</label>
                     <span class="error-message"><?= Validation::getError('nombre') ?></span>
-                    <input type="text" name="nombre" maxlength="50" placeholder="Nombre del Contacto" value="<?= Validation::getOldInput('nombre') ?>">
+                    <input type="text" name="nombre" maxlength="50" placeholder="Nombre del Contacto"
+                           value="<?= Validation::getOldInput('nombre') ?>">
                 </div>
                 <div class="form-group">
                     <label>Teléfono:</label>
                     <span class="error-message"><?= Validation::getError('telefono') ?></span>
-                    <input type="text" name="telefono" maxlength="8" placeholder="Teléfono" value="<?= Validation::getOldInput('telefono') ?>">
+                    <input type="text" name="telefono" maxlength="8" placeholder="Teléfono"
+                           value="<?= Validation::getOldInput('telefono') ?>">
                 </div>
                 <div class="form-group">
                     <label>Relación:</label>
                     <span class="error-message"><?= Validation::getError('relacion') ?></span>
-                    <input type="text" name="relacion" maxlength="30" placeholder="Relación" value="<?= Validation::getOldInput('relacion') ?>">
+                    <input type="text" name="relacion" maxlength="30" placeholder="Relación"
+                           value="<?= Validation::getOldInput('relacion') ?>">
                 </div>
                 <button type="submit" name="insertar"><i class="ph ph-plus"></i>Agregar</button>
             </form>
@@ -138,12 +141,26 @@ if ($tipoUsuario == 'cliente') {
                                     }
                                     ?>
                                 </td>
-                                <td><input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars($n->getNombre()) ?>"></td>
-                                <td><input type="text" name="telefono" maxlength="8" value="<?= htmlspecialchars($n->getTelefono()) ?>"></td>
-                                <td><input type="text" name="relacion" maxlength="30" value="<?= htmlspecialchars($n->getRelacion()) ?>"></td>
+                                <td>
+                                    <input type="text" name="nombre" maxlength="50"
+                                           value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$n->getId(), $n->getNombre())) ?>">
+                                    <span class="error-message"><?= Validation::getError('nombre_'.$n->getId()) ?></span>
+                                </td>
+                                <td>
+                                    <input type="text" name="telefono" maxlength="8"
+                                           value="<?= htmlspecialchars(Validation::getOldInput('telefono_'.$n->getId(), $n->getTelefono())) ?>">
+                                    <span class="error-message"><?= Validation::getError('telefono_'.$n->getId()) ?></span>
+                                </td>
+                                <td>
+                                    <input type="text" name="relacion" maxlength="30"
+                                           value="<?= htmlspecialchars(Validation::getOldInput('relacion_'.$n->getId(), $n->getRelacion())) ?>">
+                                    <span class="error-message"><?= Validation::getError('relacion_'.$n->getId()) ?></span>
+                                </td>
                                 <td>
                                     <button type="submit" name="actualizar"><i class="ph ph-pencil-simple"></i>Actualizar</button>
-                                    <button type="submit" name="eliminar" onclick="return confirm('¿Seguro que desea eliminar este número?');"><i class="ph ph-trash"></i>Eliminar</button>
+                                    <button type="submit" name="eliminar" onclick="return confirm('¿Seguro que desea eliminar este número?');">
+                                        <i class="ph ph-trash"></i>Eliminar
+                                    </button>
                                 </td>
                             </form>
                         </tr>

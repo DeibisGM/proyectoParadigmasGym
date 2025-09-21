@@ -1,13 +1,26 @@
 <?php
+session_start();
+include_once '../business/clienteBusiness.php';
 include_once '../business/numeroEmergenciaBusiness.php';
 include_once '../utility/Validation.php';
 
 Validation::start();
 
-// Insertar un nuevo numero
+if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
+    header("Location: loginView.php");
+    exit();
+}
+
+$usuarioId = $_SESSION['usuario_id'];
+$tipoUsuario = $_SESSION['tipo_usuario'];
+
+$clienteBusiness = new ClienteBusiness();
+$numeroEmergenciaBusiness = new numeroEmergenciaBusiness();
+
+$redirect_path = '../view/numeroEmergenciaView.php';
+
 if (isset($_POST['insertar'])) {
-    if (isset($_POST['clienteId']) && isset($_POST['nombre']) && isset($_POST['telefono']) &&
-        isset($_POST['relacion'])) {
+    if (isset($_POST['clienteId'], $_POST['nombre'], $_POST['telefono'], $_POST['relacion'])) {
 
         Validation::setOldInput($_POST);
 
@@ -27,48 +40,42 @@ if (isset($_POST['insertar'])) {
             Validation::setError('nombre', 'El nombre no puede contener números.');
         }
 
-        // Verificar si el numero ya existe al cliente
-        $numeroEmergenciaBusiness = new numeroEmergenciaBusiness();
-        if(empty($telefono)){
+        if (empty($telefono)) {
             Validation::setError('telefono', 'El numero de telefono es obligatorio.');
-        }elseif (!preg_match('/^[428657][0-9]+$/', $telefono)) {
+        } elseif (!preg_match('/^[428657][0-9]+$/', $telefono)) {
             Validation::setError('telefono', 'El teléfono debe iniciar con 4, 2, 8, 6, 5 o 7.');
-        }elseif ($numeroEmergenciaBusiness->existeNumeroEmergencia($clienteId, $telefono)) {
+        }elseif (!preg_match('/^\d{8}$/', $telefono)) {
+            Validation::setError('telefono', 'El numero de telefono tiene que tener 8 digitos.');
+        } elseif ($numeroEmergenciaBusiness->existeNumeroEmergencia($clienteId, $telefono)) {
             Validation::setError('telefono', 'El numero ya se encuentra registrado al cliente.');
         }
 
-        if(empty($relacion)) {
+        if (empty($relacion)) {
             Validation::setError('relacion', 'El tipo de relacion con el cliente es obligatorio.');
-        }elseif (preg_match('/[0-9]/', $relacion)) {
+        } elseif (preg_match('/[0-9]/', $relacion)) {
             Validation::setError('relacion', 'La relacion no puede contener números.');
         }
 
         if (Validation::hasErrors()) {
-            header("location: ../view/numeroEmergenciaView.php");
+            header("location: " . $redirect_path);
             exit();
         }
 
-        // Crear y guardar el numero de emegercia
         $numeroEmergencia = new numeroEmergencia(null, $clienteId, $nombre, $telefono, $relacion);
-
         $result = $numeroEmergenciaBusiness->insertarTBNumeroEmergencia($numeroEmergencia);
 
         if ($result == 1) {
             Validation::clear();
-            header("location: ../view/numeroEmergenciaView.php?success=insertado");
+            header("location: " . $redirect_path . "?success=insertado");
         } else {
-            header("location: ../view/numeroEmergenciaView.php?error=insertar");
+            header("location: " . $redirect_path . "?error=insertar");
         }
     } else {
-        header("location: ../view/numeroEmergenciaView.php?error=datos_faltantes");
+        header("location: " . $redirect_path . "?error=datos_faltantes");
     }
 }
-// Actualizar un numero existente
 else if (isset($_POST['actualizar'])) {
-    if (isset($_POST['id']) && isset($_POST['clienteId']) && isset($_POST['nombre']) &&
-        isset($_POST['telefono']) && isset($_POST['relacion'])) {
-
-        Validation::setOldInput($_POST);
+    if (isset($_POST['id'], $_POST['clienteId'], $_POST['nombre'], $_POST['telefono'], $_POST['relacion'])) {
 
         $id = $_POST['id'];
         $clienteId = $_POST['clienteId'];
@@ -76,70 +83,68 @@ else if (isset($_POST['actualizar'])) {
         $telefono = trim($_POST['telefono']);
         $relacion = trim($_POST['relacion']);
 
-        // Validaciones
+        // Guardar old input por fila
+        Validation::setOldInput('nombre_'.$id, $nombre);
+        Validation::setOldInput('telefono_'.$id, $telefono);
+        Validation::setOldInput('relacion_'.$id, $relacion);
+
+        // Validaciones por fila
         if (empty($nombre)) {
-            Validation::setError('nombre', 'El nombre es obligatorio.');
+            Validation::setError('nombre_'.$id, 'El nombre es obligatorio.');
         } elseif (preg_match('/[0-9]/', $nombre)) {
-            Validation::setError('nombre', 'El nombre no puede contener números.');
+            Validation::setError('nombre_'.$id, 'El nombre no puede contener números.');
         }
 
-        // Verificar si el numero ya existe al cliente
-        $numeroEmergenciaBusiness = new numeroEmergenciaBusiness();
         $numeroEmergencia = $numeroEmergenciaBusiness->getNumeroPorId($id);
 
-        if(empty($telefono)){
-            Validation::setError('telefono', 'El numero de telefono es obligatorio.');
-        }elseif (!preg_match('/^[428657][0-9]+$/', $telefono)) {
-            Validation::setError('telefono', 'El teléfono debe iniciar con 4, 2, 8, 6, 5 o 7.');
+        if (empty($telefono)) {
+            Validation::setError('telefono_'.$id, 'El numero de telefono es obligatorio.');
+        } elseif (!preg_match('/^[428657][0-9]+$/', $telefono)) {
+            Validation::setError('telefono_'.$id, 'El teléfono debe iniciar con 4, 2, 8, 6, 5 o 7.');
+        }elseif (!preg_match('/^\d{8}$/', $telefono)) {
+            Validation::setError('telefono_'.$id, 'El numero de telefono tiene que tener 8 digitos.');
         }elseif ($numeroEmergencia->getTelefono() != $telefono && $numeroEmergenciaBusiness->existeNumeroEmergencia($clienteId, $telefono)) {
-            Validation::setError('telefono', 'El numero ya se encuentra registrado al cliente.');
+            Validation::setError('telefono_'.$id, 'El numero ya se encuentra registrado al cliente.');
         }
 
-        if(empty($relacion)) {
-            Validation::setError('relacion', 'El tipo de relacion con el cliente es obligatorio.');
-        }elseif (preg_match('/[0-9]/', $relacion)) {
-            Validation::setError('relacion', 'La relacion no puede contener números.');
+        if (empty($relacion)) {
+            Validation::setError('relacion_'.$id, 'El tipo de relacion con el cliente es obligatorio.');
+        } elseif (preg_match('/[0-9]/', $relacion)) {
+            Validation::setError('relacion_'.$id, 'La relacion no puede contener números.');
         }
 
         if (Validation::hasErrors()) {
-            header("location: ../view/numeroEmergenciaView.php");
+            header("location: " . $redirect_path);
             exit();
         }
-        // Actualizar el numero de emergencia
-        $numeroEmergencia = new numeroEmergencia($id, $clienteId, $nombre, $telefono, $relacion);
 
-        $numeroEmergenciaBusiness = new numeroEmergenciaBusiness();
-        $result = $numeroEmergenciaBusiness->actualizarTBNumeroEmergencia($numeroEmergencia);
+        $numeroEmergenciaActual = new numeroEmergencia($id, $clienteId, $nombre, $telefono, $relacion);
+        $result = $numeroEmergenciaBusiness->actualizarTBNumeroEmergencia($numeroEmergenciaActual);
 
         if ($result == 1) {
-
             Validation::clear();
-            header("location: ../view/numeroEmergenciaView.php?success=actualizado");
+            header("location: " . $redirect_path . "?success=actualizado");
         } else {
-            header("location: ../view/numeroEmergenciaView.php?error=actualizar");
+            header("location: " . $redirect_path . "?error=actualizar");
         }
     } else {
-        header("location: ../view/numeroEmergenciaView.php?error=datos_faltantes");
+        header("location: " . $redirect_path . "?error=datos_faltantes");
     }
 }
-
-// Eliminar numero de emergencia
 else if (isset($_POST['eliminar'])) {
     if (isset($_POST['id'])) {
         $id = $_POST['id'];
-
-        $numeroEmergenciaBusiness = new numeroEmergenciaBusiness();
         $result = $numeroEmergenciaBusiness->eliminarTBNumeroEmergencia($id);
 
         if ($result == 1) {
-            header("location: ../view/numeroEmergenciaView.php?success=eliminado");
+            header("location: " . $redirect_path . "?success=eliminado");
         } else {
-            header("location: ../view/numeroEmergenciaView.php?error=eliminar");
+            header("location: " . $redirect_path . "?error=eliminar");
         }
     } else {
-        header("location: ../view/numeroEmergenciaView.php?error=id_faltante");
+        header("location: " . $redirect_path . "?error=id_faltante");
     }
 } else {
-    header("location: ../view/numeroEmergenciaView.php?error=accion_no_valida");
+    header("location: " . $redirect_path . "?error=accion_no_valida");
 }
 ?>

@@ -1,4 +1,5 @@
 <?php
+session_start();
 include '../business/clienteBusiness.php';
 include_once '../utility/ImageManager.php';
 include_once '../utility/Validation.php';
@@ -50,6 +51,7 @@ if ($tipoUsuario == 'cliente') {
             else if ($error == "insertar") echo 'No se pudo insertar el cliente.';
             else if ($error == "actualizar") echo 'No se pudo actualizar el cliente.';
             else if ($error == "eliminar") echo 'No se pudo eliminar el cliente.';
+            else if ($error == "dbError") echo 'Error en la base de datos.';
             else echo 'Acción no válida.';
             echo '</b></p>';
         } else if (isset($_GET['success'])) {
@@ -58,12 +60,12 @@ if ($tipoUsuario == 'cliente') {
             if ($success == "inserted") echo 'Cliente insertado correctamente.';
             else if ($success == "updated") echo 'Cliente actualizado correctamente.';
             else if ($success == "eliminado") echo 'Cliente eliminado correctamente.';
+            else if ($success == "image_deleted") echo 'Imagen eliminada correctamente.';
             echo '</b></p>';
         }
         ?>
 
         <?php if ($tipoUsuario == 'admin' || $tipoUsuario == 'instructor') { ?>
-            <!-- Registro de cliente -->
             <section>
                 <h3><i class="ph ph-user-plus"></i>Registrar Cliente</h3>
                 <form name="clienteForm" method="post" action="../action/clienteAction.php" enctype="multipart/form-data">
@@ -85,7 +87,7 @@ if ($tipoUsuario == 'cliente') {
                     <div class="form-group">
                         <label>Telefono: </label>
                         <span class="error-message"><?= Validation::getError('telefono') ?></span>
-                        <input type="text" name="telefono" maxlength="8" placeholder="Teléfono" maxlength="8" value="<?= Validation::getOldInput('telefono') ?>">
+                        <input type="text" name="telefono" maxlength="8" placeholder="Teléfono" value="<?= Validation::getOldInput('telefono') ?>">
                     </div>
                     <div class="form-group">
                         <label>Correo: </label>
@@ -124,7 +126,6 @@ if ($tipoUsuario == 'cliente') {
                 </form>
             </section>
 
-            <!-- Lista de clientes -->
             <section>
                 <h3><i class="ph ph-list-bullets"></i>Clientes Registrados</h3>
                 <div style="overflow-x:auto;">
@@ -146,30 +147,58 @@ if ($tipoUsuario == 'cliente') {
                         </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($clienteBusiness->getAllTBCliente() as $c): ?>
+                        <?php
+                        // Los errores y datos antiguos para el formulario de actualización se limpian al recargar la página
+
+                        foreach ($clienteBusiness->getAllTBCliente() as $c):
+                            $rowId = $c->getId();
+                            ?>
                             <tr>
                                 <form method="post" action="../action/clienteAction.php" enctype="multipart/form-data">
-                                    <input type="hidden" name="id" value="<?= $c->getId() ?>">
+                                    <input type="hidden" name="id" value="<?= $rowId ?>">
                                     <input type="hidden" name="carnet" value="<?= htmlspecialchars($c->getCarnet()) ?>">
-                                    <td><input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars($c->getNombre()) ?>"></td>
-                                    <td><?= htmlspecialchars($c->getCarnet()) ?></td>
-                                    <td><input type="date" name="fechaNacimiento" value="<?= $c->getFechaNacimiento() ?>"></td>
-                                    <td><input type="text" name="telefono" maxlength="8" value="<?= htmlspecialchars($c->getTelefono()) ?>" maxlength="8"></td>
-                                    <td><input type="email" name="correo" maxlength="100" value="<?= htmlspecialchars($c->getCorreo()) ?>"></td>
-                                    <td><input type="password" name="contrasena" maxlength="8" value="<?= htmlspecialchars($c->getContrasena()) ?>"></td>
-                                    <td><input type="text" name="direccion" maxlength="100" value="<?= htmlspecialchars($c->getDireccion()) ?>"></td>
                                     <td>
+                                        <span class="error-message"><?= Validation::getError('nombre_'.$rowId) ?></span>
+                                        <input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$rowId, $c->getNombre())) ?>">
+                                    </td>
+                                    <td><?= htmlspecialchars($c->getCarnet()) ?></td>
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('fechaNacimiento_'.$rowId) ?></span>
+                                        <input type="date" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento_'.$rowId, $c->getFechaNacimiento()) ?>">
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('telefono_'.$rowId) ?></span>
+                                        <input type="text" name="telefono" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('telefono_'.$rowId, $c->getTelefono())) ?>">
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('correo_'.$rowId) ?></span>
+                                        <input type="email" name="correo" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('correo_'.$rowId, $c->getCorreo())) ?>">
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('contrasena_'.$rowId) ?></span>
+                                        <input type="password" name="contrasena" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('contrasena_'.$rowId, $c->getContrasena())) ?>">
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('direccion_'.$rowId) ?></span>
+                                        <input type="text" name="direccion" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('direccion_'.$rowId, $c->getDireccion())) ?>">
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('genero_'.$rowId) ?></span>
                                         <select name="genero">
-                                            <option value="M" <?= $c->getGenero()=='M'?'selected':'' ?>>Masculino</option>
-                                            <option value="F" <?= $c->getGenero()=='F'?'selected':'' ?>>Femenino</option>
-                                            <option value="Otro" <?= $c->getGenero()=='Otro'?'selected':'' ?>>Otro</option>
+                                            <option value="M" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='M'?'selected':'' ?>>Masculino</option>
+                                            <option value="F" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='F'?'selected':'' ?>>Femenino</option>
+                                            <option value="Otro" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='Otro'?'selected':'' ?>>Otro</option>
                                         </select>
                                     </td>
-                                    <td><input type="date" name="fechaInscripcion" value="<?= $c->getInscripcion() ?>"></td>
                                     <td>
+                                        <span class="error-message"><?= Validation::getError('fechaInscripcion_'.$rowId) ?></span>
+                                        <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion_'.$rowId, $c->getInscripcion()) ?>">
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('estado_'.$rowId) ?></span>
                                         <select name="estado">
-                                            <option value="1" <?= $c->getEstado()==1?'selected':'' ?>>Activo</option>
-                                            <option value="0" <?= $c->getEstado()==0?'selected':'' ?>>Inactivo</option>
+                                            <option value="1" <?= Validation::getOldInput('estado_'.$rowId, $c->getEstado())==1?'selected':'' ?>>Activo</option>
+                                            <option value="0" <?= Validation::getOldInput('estado_'.$rowId, $c->getEstado())==0?'selected':'' ?>>Inactivo</option>
                                         </select>
                                     </td>
                                     <td>
@@ -196,7 +225,6 @@ if ($tipoUsuario == 'cliente') {
             </section>
 
         <?php } else { ?>
-            <!-- Vista del cliente -->
             <section>
                 <h3><i class="ph ph-user-circle"></i>Mi Información</h3>
                 <?php if ($cliente): ?>

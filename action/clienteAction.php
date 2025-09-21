@@ -67,6 +67,8 @@ if (isset($_POST['delete_image'])) {
             Validation::setError('telefono', 'El teléfono es obligatorio.');
         } elseif (!preg_match('/^[428657][0-9]+$/', $telefono)) {
             Validation::setError('telefono', 'El teléfono debe iniciar con 4, 2, 8, 6, 5 o 7.');
+        }elseif (!preg_match('/^\d{8}$/', $telefono)) {
+            Validation::setError('telefono', 'El numero de telefono tiene que tener 8 digitos.');
         }
 
         if (empty($correo)){
@@ -90,8 +92,8 @@ if (isset($_POST['delete_image'])) {
         }
 
         if (empty($fechaInscripcion)){
-            Validation::setError('fechaInscripcion', 'El carnet es obligatorio.');
-        }elseif ($fechaNacimiento > date('Y-m-d')) {
+            Validation::setError('fechaInscripcion', 'La fecha de inscripcion es obligatoria es obligatorio.');
+        }elseif ($fechaInscripcion > date('Y-m-d')) {
             Validation::setError('fechaInscripcion', 'La fecha no puede ser mayor al dia actual.');
         }
 
@@ -123,104 +125,87 @@ if (isset($_POST['delete_image'])) {
     } else {
         header("location: " . $redirect_path . "?error=datos_faltantes");
     }
-} else if (isset($_POST['actualizar'])) {
-    if (isset($_POST['id']) && isset($_POST['carnet']) && isset($_POST['nombre']) &&
-        isset($_POST['fechaNacimiento']) && isset($_POST['telefono']) && isset($_POST['correo']) &&
-        isset($_POST['contrasena']) && isset($_POST['direccion']) && isset($_POST['genero']) &&
-        isset($_POST['fechaInscripcion']) && isset($_POST['estado'])) {
+} else if(isset($_POST['actualizar'])){
+    $id = $_POST['id'];
+    $nombre = $_POST['nombre'];
+    $fechaNacimiento = $_POST['fechaNacimiento'];
+    $telefono = $_POST['telefono'];
+    $correo = $_POST['correo'];
+    $contrasena = $_POST['contrasena'];
+    $direccion = $_POST['direccion'];
+    $genero = $_POST['genero'];
+    $fechaInscripcion = $_POST['fechaInscripcion'];
+    $estado = $_POST['estado'];
 
-        $id = $_POST['id'];
-        $clienteActual = $clienteBusiness->getClientePorId($id);
+    // Guardar old input para preservar los datos del formulario, usando el ID para cada campo
+    Validation::setOldInput('id_'.$id, $id);
+    Validation::setOldInput('nombre_'.$id, $nombre);
+    Validation::setOldInput('fechaNacimiento_'.$id, $fechaNacimiento);
+    Validation::setOldInput('telefono_'.$id, $telefono);
+    Validation::setOldInput('correo_'.$id, $correo);
+    Validation::setOldInput('contrasena_'.$id, $contrasena);
+    Validation::setOldInput('direccion_'.$id, $direccion);
+    Validation::setOldInput('genero_'.$id, $genero);
+    Validation::setOldInput('fechaInscripcion_'.$id, $fechaInscripcion);
+    Validation::setOldInput('estado_'.$id, $estado);
 
-        Validation::setOldInput($_POST);
-        $nombre = trim($_POST['nombre']);
-        $fechaNacimiento = $_POST['fechaNacimiento'];
-        $telefono = trim($_POST['telefono']);
-        $correo = trim($_POST['correo']);
-        $contrasena = trim($_POST['contrasena']);
-        $direccion = trim($_POST['direccion']);
-        $genero = $_POST['genero'];
-        $estado = $_POST['estado'];
+    // Validaciones
+    if(empty($nombre)){
+        Validation::setError('nombre_'.$id, 'El nombre es obligatorio.');
+    } elseif(preg_match('/[0-9]/', $nombre)) {
+        Validation::setError('nombre_'.$id, 'No se permiten números.');
+    }
 
-        if (empty($nombre)){
-            Validation::setError('nombre', 'El nombre es obligatorio.');
-        }elseif (preg_match('/[0-9]/', $nombre)) {
-            Validation::setError('nombre', 'El nombre no puede contener números.');
-        }
+    if(empty($telefono)){
+        Validation::setError('telefono_'.$id, 'El teléfono es obligatorio.');
+    } elseif(!preg_match('/^\d{8}$/', $telefono)){
+        Validation::setError('telefono_'.$id, 'El teléfono debe tener 8 dígitos.');
+    }
 
-        if (empty($fechaNacimiento)){
-            Validation::setError('fechaNacimiento', 'La fecha de nacimiento es obligatoria.');
-        }elseif ($fechaNacimiento > date('Y-m-d')) {
-            Validation::setError('fechaNacimiento', 'La fecha no puede ser mayor al dia actual.');
-        }
+    if(empty($correo)){
+        Validation::setError('correo_'.$id, 'El correo es obligatorio.');
+    } elseif(!filter_var($correo, FILTER_VALIDATE_EMAIL)){
+        Validation::setError('correo_'.$id, 'Correo no válido.');
+    }
 
-        if (empty($telefono)) {
-            Validation::setError('telefono', 'El teléfono es obligatorio.');
-        } elseif (!preg_match('/^[428657][0-9]+$/', $telefono)) {
-            Validation::setError('telefono', 'El teléfono debe iniciar con 4, 2, 8, 6, 5 o 7.');
-        }
+    if(empty($contrasena)){
+        Validation::setError('contrasena_'.$id, 'La contraseña es obligatoria.');
+    }
 
+    if(empty($direccion)){
+        Validation::setError('direccion_'.$id, 'La dirección es obligatoria.');
+    }
 
-        if (empty($correo)){
-            Validation::setError('correo', 'El correo es obligatorio.');
-        }elseif (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            Validation::setError('correo', 'El formato del correo no es valido.');
-        }elseif ($clienteActual->getCorreo() != $correo && $clienteBusiness->existeclientePorCorreo($correo)
-            || $instructorBusiness->existeInstructorPorCorreo($correo)) {
-            Validation::setError('correo', 'El correo ya se encuentra registrado a un usuario.');
-        }
+    if(empty($genero)){
+        Validation::setError('genero_'.$id, 'Debe seleccionar un género.');
+    }
 
-        if (empty($contrasena)){
-            Validation::setError('contrasena', 'La contraseña es obligatoria.');
-        }
+    if(empty($fechaNacimiento)){
+        Validation::setError('fechaNacimiento_'.$id, 'Debe seleccionar fecha de nacimiento.');
+    } elseif ($fechaNacimiento > date('Y-m-d')) {
+        Validation::setError('fechaNacimiento_'.$id, 'La fecha no puede ser mayor al día actual.');
+    }
 
-        if (empty($direccion)){
-            Validation::setError('direccion', 'La direccion es obligatoria.');
-        }
+    if(empty($fechaInscripcion)){
+        Validation::setError('fechaInscripcion_'.$id, 'Debe seleccionar fecha de inscripción.');
+    } elseif ($fechaInscripcion > date('Y-m-d')) {
+        Validation::setError('fechaInscripcion_'.$id, 'La fecha no puede ser mayor al día actual.');
+    }
 
-        if (empty($genero)){
-            Validation::setError('genero', 'El genero es obligatorio.');
-        }
+    if(Validation::hasErrors()){
+        // Redirigir de vuelta mostrando errores en la tabla
+        header("Location: ../view/clienteView.php?error=actualizar");
+        exit;
+    }
 
-        if (Validation::hasErrors()) {
-            header($redirect_path);
-            exit();
-        }
+    // Si pasa validación, actualizar cliente
+    $clienteActualizado = new Cliente($id, null, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $fechaInscripcion, $estado, $contrasena, '');
+    $resultado = $clienteBusiness->actualizarTBCliente($clienteActualizado);
 
-        if ($clienteActual) {
-            $clienteActual->setCarnet(trim($_POST['carnet']));
-            $clienteActual->setNombre($nombre);
-            $clienteActual->setFechaNacimiento($fechaNacimiento);
-            $clienteActual->setTelefono($telefono);
-            $clienteActual->setCorreo($correo);
-            $clienteActual->setContrasena($contrasena);
-            $clienteActual->setDireccion($direccion);
-            $clienteActual->setGenero($genero);
-            $clienteActual->setInscripcion($_POST['fechaInscripcion']);
-            $clienteActual->setEstado($estado);
-
-            if (isset($_FILES['tbclienteimagenid']) && !empty($_FILES['tbclienteimagenid']['name'][0])) {
-                if ($clienteActual->getTbclienteImagenId() != '' && $clienteActual->getTbclienteImagenId() != '0'){
-                    $imageManager->deleteImage($clienteActual->getTbclienteImagenId());
-                }
-                $newImageIds = $imageManager->addImages($_FILES['tbclienteimagenid'], $id, 'cli');
-                if (!empty($newImageIds)) {
-                    $clienteActual->setTbclienteImagenId($newImageIds[0]);
-                }
-            }
-
-            if ($clienteBusiness->actualizarTBCliente($clienteActual)) {
-                Validation::clear();
-                header("location: " . $redirect_path . "?success=updated");
-            } else {
-                header("location: " . $redirect_path . "?error=dbError");
-            }
-
-        } else {
-            header("location: " . $redirect_path . "?error=notFound");
-        }
+    if($resultado){
+        header("Location: ../view/clienteView.php?success=updated");
     } else {
-        header("location: " . $redirect_path . "?error=error");
+        header("Location: ../view/clienteView.php?error=dbError");
     }
 } else if (isset($_POST['eliminar'])) {
     if (isset($_POST['id'])) {
