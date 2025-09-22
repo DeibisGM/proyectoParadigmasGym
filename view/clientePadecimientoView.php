@@ -9,6 +9,9 @@ if (!isset($_SESSION['usuario_id'])) {
 include_once '../business/clientePadecimientoBusiness.php';
 include_once '../business/padecimientoBusiness.php';
 include_once '../business/PadecimientoDictamenBusiness.php';
+include_once '../utility/Validation.php';
+
+Validation::start();
 
 $clientePadecimientoBusiness = new ClientePadecimientoBusiness();
 $padecimientoBusiness = new PadecimientoBusiness();
@@ -62,6 +65,19 @@ if (isset($_SESSION['temp_form_data'])) {
     $formData = $_SESSION['temp_form_data'];
     unset($_SESSION['temp_form_data']);
 }
+
+$successMessage = null;
+$errorMessage = Validation::getError('general');
+
+if (isset($_GET['success'])) {
+    if ($_GET['success'] === 'created') {
+        $successMessage = 'Registro creado con éxito.';
+    } elseif ($_GET['success'] === 'updated') {
+        $successMessage = 'Registro actualizado con éxito.';
+    } elseif ($_GET['success'] === 'deleted') {
+        $successMessage = 'Registro eliminado con éxito.';
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -73,6 +89,17 @@ if (isset($_SESSION['temp_form_data'])) {
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .error-message {
+            color: #d32f2f;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: block;
+        }
+        .form-field {
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -83,6 +110,13 @@ if (isset($_SESSION['temp_form_data'])) {
 
     <main>
         <div id="mensaje" style="display: none;"></div>
+
+        <?php if ($successMessage): ?>
+            <div class="success"><?php echo $successMessage; ?></div>
+        <?php endif; ?>
+        <?php if ($errorMessage): ?>
+            <div class="error"><?php echo $errorMessage; ?></div>
+        <?php endif; ?>
 
         <?php if (!$esUsuarioCliente): ?>
             <section>
@@ -120,19 +154,22 @@ if (isset($_SESSION['temp_form_data'])) {
                 <?php echo $esUsuarioCliente ? 'Registrar nuevo cliente padecimiento' : 'Registrar cliente padecimiento'; ?>
             </h3>
 
-            <form id="formClientePadecimiento">
+            <form id="formClientePadecimiento" action="../action/clientePadecimientoAction.php" method="POST">
                 <input type="hidden" id="accion" name="accion" value="create">
                 <input type="hidden" id="clientePadecimientoId" name="id" value="">
-                <input type="hidden" id="dictamenIdHidden" name="dictamenId" value="<?php echo isset($formData['dictamenId']) ? $formData['dictamenId'] : ''; ?>">
+                <input type="hidden" id="dictamenIdHidden" name="dictamenId" value="<?php echo Validation::getOldInput('dictamenId'); ?>">
 
                 <?php if (!$esUsuarioCliente): ?>
-                    <div>
+                    <div class="form-field">
+                        <?php if ($error = Validation::getError('clienteId')): ?>
+                            <div class="error-message"><?php echo $error; ?></div>
+                        <?php endif; ?>
                         <label for="clienteId">Cliente:</label>
-                        <select id="clienteId" name="clienteId" required>
+                        <select id="clienteId" name="clienteId">
                             <option value="">Seleccione un cliente</option>
                             <?php foreach ($clientes as $cliente): ?>
                                 <option value="<?php echo $cliente['id']; ?>"
-                                    <?php echo (isset($formData['clienteId']) && $formData['clienteId'] == $cliente['id']) ? 'selected' : ''; ?>>
+                                    <?php echo (Validation::getOldInput('clienteId') == $cliente['id']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($cliente['carnet'] . ' - ' . $cliente['nombre']); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -140,45 +177,62 @@ if (isset($_SESSION['temp_form_data'])) {
                     </div>
                 <?php endif; ?>
 
-                <div>
+                <div class="form-field">
+                    <?php if ($error = Validation::getError('tipoPadecimiento')): ?>
+                        <div class="error-message"><?php echo $error; ?></div>
+                    <?php endif; ?>
                     <label for="tipoPadecimiento">Tipo de padecimiento:</label>
-                    <select id="tipoPadecimiento" onchange="cargarPadecimientosPorTipo()">
+                    <select id="tipoPadecimiento" name="tipoPadecimiento" onchange="cargarPadecimientosPorTipo()">
                         <option value="">Seleccione un tipo</option>
                         <?php foreach ($tiposPadecimiento as $tipo): ?>
                             <option value="<?php echo htmlspecialchars($tipo); ?>"
-                                <?php echo (isset($formData['tipoPadecimiento']) && $formData['tipoPadecimiento'] == $tipo) ? 'selected' : ''; ?>>
+                                <?php echo (Validation::getOldInput('tipoPadecimiento') == $tipo) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($tipo); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
 
-                <div>
+                <div class="form-field">
+                    <?php if ($error = Validation::getError('padecimientos')): ?>
+                        <div class="error-message"><?php echo $error; ?></div>
+                    <?php endif; ?>
                     <label for="padecimiento">Padecimiento:</label>
-                    <select id="padecimiento" name="padecimientoId" disabled required>
+                    <select id="padecimiento" name="padecimientosIds[]" disabled>
                         <option value="">Primero seleccione un tipo</option>
+                        <?php
+                            $oldPadecimientoId = Validation::getOldInput('padecimientosIds');
+                            if ($oldPadecimientoId && is_array($oldPadecimientoId) && count($oldPadecimientoId) > 0) {
+                                $selectedId = $oldPadecimientoId[0];
+                                $selectedPadecimiento = $padecimientoBusiness->getTbpadecimientoById($selectedId);
+                                if ($selectedPadecimiento) {
+                                    echo '<option value="' . htmlspecialchars($selectedPadecimiento->getTbpadecimientoid()) . '" selected>' . htmlspecialchars($selectedPadecimiento->getTbpadecimientonombre()) . '</option>';
+                                }
+                            }
+                        ?>
                     </select>
                 </div>
 
-                <div>
+                <div class="form-field">
+                    <div id="errorDictamen" class="error-message" style="display: none;"></div>
                     <label>Dictamen (opcional):</label>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <input type="text" id="dictamenDisplay" readonly
                                placeholder="No se ha registrado dictamen"
                                style="flex: 1;"
-                               value="<?php echo isset($formData['dictamenEntidad']) ? $formData['dictamenEntidad'] : ''; ?>">
+                               value="<?php echo Validation::getOldInput('dictamenEntidad'); ?>">
                         <button type="button" onclick="abrirRegistroDictamen()" style="white-space: nowrap;">
                             <i class="ph ph-file-plus"></i> Registrar Dictamen
                         </button>
                         <button type="button" onclick="limpiarDictamen()" style="white-space: nowrap;"
-                                <?php echo !isset($formData['dictamenId']) ? 'style="display: none;"' : ''; ?> id="btnLimpiarDictamen">
+                                <?php echo !Validation::getOldInput('dictamenId') ? 'style="display: none;"' : ''; ?> id="btnLimpiarDictamen">
                             <i class="ph ph-x-circle"></i> Quitar
                         </button>
                     </div>
                 </div>
 
                 <div>
-                    <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
+                    <button type="submit" id="btnSubmit" name="create"><i class="ph ph-plus"></i>Registrar</button>
                     <button type="button" onclick="limpiarFormulario()" id="btnCancelar" style="display: none;"><i class="ph ph-x-circle"></i>Cancelar</button>
                 </div>
             </form>
@@ -194,13 +248,13 @@ if (isset($_SESSION['temp_form_data'])) {
                 <form id="formDictamen" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="fechaemisionModal">Fecha de Emisión:</label>
-                        <input type="date" id="fechaemisionModal" name="fechaemision" required>
+                        <input type="date" id="fechaemisionModal" name="fechaemision">
                         <small>La fecha no puede ser futura</small>
                     </div>
                     <div class="form-group">
                         <label for="entidademisionModal">Entidad de Emisión:</label>
                         <input type="text" id="entidademisionModal" name="entidademision"
-                            placeholder="Nombre de la entidad" required>
+                            placeholder="Nombre de la entidad">
                     </div>
                     <div class="form-group">
                         <label for="imagenesModal">Imágenes del Dictamen:</label>
@@ -282,10 +336,41 @@ if (isset($_SESSION['temp_form_data'])) {
     window.onload = function () {
         cargarDatosEnTabla();
 
-        <?php if (isset($formData['padecimientoId'])): ?>
+        // Ocultar mensajes de éxito después de 5 segundos
+        const successMessageDiv = document.querySelector('.success');
+        if (successMessageDiv) {
             setTimeout(() => {
-                document.getElementById('padecimiento').value = '<?php echo $formData['padecimientoId']; ?>';
-            }, 100);
+                successMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Ocultar mensajes de error después de 5 segundos
+        const errorMessageDiv = document.querySelector('.error');
+        if (errorMessageDiv) {
+            setTimeout(() => {
+                errorMessageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Ocultar mensajes de error de campos específicos después de 5 segundos
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach(errorMsg => {
+            if (errorMsg.style.display !== 'none' && errorMsg.textContent.trim() !== '') {
+                setTimeout(() => {
+                    errorMsg.style.display = 'none';
+                }, 5000);
+            }
+        });
+
+        <?php if ($oldPadecimientoId && is_array($oldPadecimientoId) && count($oldPadecimientoId) > 0): ?>
+            const oldPadecimiento = padecimientosData.find(p => p.tbpadecimientoid == '<?php echo $selectedId; ?>');
+            if (oldPadecimiento) {
+                document.getElementById('tipoPadecimiento').value = oldPadecimiento.tbpadecimientotipo;
+                cargarPadecimientosPorTipo();
+                setTimeout(() => {
+                    document.getElementById('padecimiento').value = '<?php echo $selectedId; ?>';
+                }, 100);
+            }
         <?php endif; ?>
     };
 
@@ -293,8 +378,20 @@ if (isset($_SESSION['temp_form_data'])) {
         if (!esUsuarioCliente) {
             const clienteId = document.getElementById('clienteId').value;
             if (!clienteId) {
-                mostrarMensaje('Error: Primero debe seleccionar un cliente para poder registrar un dictamen.', 'error');
+                // Mostrar error arriba del campo Dictamen
+                const errorDictamen = document.getElementById('errorDictamen');
+                errorDictamen.textContent = 'Primero debe seleccionar un cliente para poder registrar un dictamen.';
+                errorDictamen.style.display = 'block';
+
+                // Ocultar mensaje después de 5 segundos
+                setTimeout(() => {
+                    errorDictamen.style.display = 'none';
+                }, 5000);
+
                 return;
+            } else {
+                // Ocultar error si hay cliente seleccionado
+                document.getElementById('errorDictamen').style.display = 'none';
             }
         }
 
@@ -311,6 +408,8 @@ if (isset($_SESSION['temp_form_data'])) {
         document.getElementById('dictamenIdHidden').value = '';
         document.getElementById('dictamenDisplay').value = '';
         document.getElementById('btnLimpiarDictamen').style.display = 'none';
+        // Limpiar mensaje de error de dictamen
+        document.getElementById('errorDictamen').style.display = 'none';
     }
 
     function cargarPadecimientosPorTipo() {
@@ -445,7 +544,6 @@ if (isset($_SESSION['temp_form_data'])) {
         formData.append('registroId', registroId);
         formData.append('padecimientoIdAntiguo', padecimientoIdAntiguo);
         formData.append('padecimientoIdNuevo', nuevoPadecimientoId);
-        formData.append('clienteId', obtenerClienteIdDelRegistro(registroId));
 
         fetch('../action/clientePadecimientoAction.php', {method: 'POST', body: formData})
             .then(response => response.json())
@@ -488,11 +586,6 @@ if (isset($_SESSION['temp_form_data'])) {
             }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
     }
 
-    function obtenerClienteIdDelRegistro(registroId) {
-        const fila = document.querySelector(`tr[data-registro-id="${registroId}"]`);
-        return fila ? fila.getAttribute('data-cliente-id') : null;
-    }
-
     function limpiarFormulario() {
         document.getElementById('formClientePadecimiento').reset();
         document.getElementById('accion').value = 'create';
@@ -504,32 +597,9 @@ if (isset($_SESSION['temp_form_data'])) {
         document.getElementById('btnSubmit').innerHTML = '<i class="ph ph-plus"></i>Registrar';
         document.getElementById('btnCancelar').style.display = 'none';
         document.getElementById('padecimiento').disabled = true;
+        // Limpiar mensajes de error
+        document.getElementById('errorDictamen').style.display = 'none';
     }
-
-    document.getElementById('formClientePadecimiento').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const padecimientoSeleccionado = document.getElementById('padecimiento').value;
-        if (!padecimientoSeleccionado) {
-            mostrarMensaje('Error: Debe seleccionar un padecimiento.', 'error');
-            return;
-        }
-        const formData = new FormData(this);
-        const accion = document.getElementById('accion').value;
-        formData.delete('padecimientoId');
-        formData.append('padecimientosIds[]', padecimientoSeleccionado);
-        formData.append(accion, '1');
-        fetch('../action/clientePadecimientoAction.php', {method: 'POST', body: formData})
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    mostrarMensaje(data.message, 'success');
-                    limpiarFormulario();
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    mostrarMensaje(data.message, 'error');
-                }
-            }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
-    });
 
     function mostrarMensaje(mensaje, tipo) {
         const divMensaje = document.getElementById('mensaje');
@@ -558,7 +628,7 @@ if (isset($_SESSION['temp_form_data'])) {
                 const carnet = fila.cells[0].textContent.toLowerCase();
                 mostrar = carnet.includes(textoBusqueda);
             } else if (tipoBusqueda === 'padecimiento') {
-                const padecimientoBuscado = document.getElementById('buscarPadecimiento').value.value.toLowerCase();
+                const padecimientoBuscado = document.getElementById('buscarPadecimiento').value.toLowerCase();
                 const padecimientos = fila.cells[1].textContent.toLowerCase();
                 mostrar = padecimientos.includes(padecimientoBuscado);
             }
@@ -639,55 +709,41 @@ if (isset($_SESSION['temp_form_data'])) {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
+            loading.style.display = 'none';
+            btnGuardar.disabled = false;
             if (data.success) {
-                document.getElementById('dictamenIdHidden').value = data.dictamenId || data.padecimiento?.id || '';
-                document.getElementById('dictamenDisplay').value = data.entidadEmision || data.padecimiento?.entidademision || entidad;
-                document.getElementById('btnLimpiarDictamen').style.display = 'inline-block';
-
-                mostrarMensajeModal('Éxito: Dictamen registrado correctamente.', 'success');
-
+                document.getElementById('dictamenIdHidden').value = data.dictamenId;
+                document.getElementById('dictamenDisplay').value = entidad;
+                document.getElementById('btnLimpiarDictamen').style.display = 'inline-flex';
+                mostrarMensajeModal(data.message, 'success');
                 setTimeout(() => {
-                    document.getElementById('modalDictamen').style.display = 'none';
-                    modalDictamenAbierto = false;
-                    mostrarMensaje('Dictamen registrado. Ahora puede completar el registro del cliente padecimiento.', 'success');
-                }, 2000);
-
+                    cerrarModalDictamen(false);
+                }, 1500);
             } else {
-                mostrarMensajeModal('Error: ' + data.message, 'error');
+                mostrarMensajeModal(data.message, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            mostrarMensajeModal('Error: Error de conexión. Intente nuevamente.', 'error');
-        })
-        .finally(() => {
-            btnGuardar.disabled = false;
             loading.style.display = 'none';
+            btnGuardar.disabled = false;
+            mostrarMensajeModal('Error de conexión o del servidor.', 'error');
         });
     });
 
     function mostrarMensajeModal(mensaje, tipo) {
-        const mensajeModal = document.getElementById('mensajeModal');
-        mensajeModal.textContent = mensaje;
-        mensajeModal.className = tipo === 'success' ? 'success' : 'error';
-        mensajeModal.style.display = 'block';
-
-        if (tipo !== 'success') {
-            setTimeout(() => {
-                mensajeModal.style.display = 'none';
-            }, 5000);
-        }
+        const divMensaje = document.getElementById('mensajeModal');
+        divMensaje.textContent = mensaje;
+        divMensaje.style.display = 'block';
+        divMensaje.className = tipo === 'success' ? 'success' : 'error';
     }
-
-    document.getElementById('fechaemisionModal').addEventListener('change', function() {
-        const hoy = new Date().toISOString().split('T')[0];
-        if (this.value > hoy) {
-            mostrarMensajeModal('La fecha de emisión no puede ser futura.', 'error');
-            this.value = hoy;
-        }
-    });
 </script>
 </body>
 </html>
