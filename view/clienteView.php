@@ -29,6 +29,8 @@ if ($tipoUsuario == 'cliente') {
     <title>Gestión de Clientes</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="../utility/Events.js"></script>
+
 </head>
 <body>
 <div class="container">
@@ -42,10 +44,10 @@ if ($tipoUsuario == 'cliente') {
         // Mensajes de error o éxito
         $generalError = Validation::getError('general');
         if ($generalError) {
-            echo '<p class="error-message"><b>Error: '.htmlspecialchars($generalError).'</b></p>';
+            echo '<p class="error-message flash-msg"><b>Error: ' . htmlspecialchars($generalError) . '</b></p>';
         } else if (isset($_GET['error'])) {
             $error = $_GET['error'];
-            echo '<p class="error-message"><b>Error: ';
+            echo '<p class="error-message flash-msg"><b>Error: ';
             if ($error == "existe") echo 'Este carnet ya está registrado.';
             else if ($error == "datos_faltantes") echo 'Datos incompletos.';
             else if ($error == "insertar") echo 'No se pudo insertar el cliente.';
@@ -56,7 +58,7 @@ if ($tipoUsuario == 'cliente') {
             echo '</b></p>';
         } else if (isset($_GET['success'])) {
             $success = $_GET['success'];
-            echo '<p class="success-message"><b>Éxito: ';
+            echo '<p class="success-message flash-msg"><b>Éxito: ';
             if ($success == "inserted") echo 'Cliente insertado correctamente.';
             else if ($success == "updated") echo 'Cliente actualizado correctamente.';
             else if ($success == "eliminado") echo 'Cliente eliminado correctamente.';
@@ -148,7 +150,6 @@ if ($tipoUsuario == 'cliente') {
                         </thead>
                         <tbody>
                         <?php
-                        // Los errores y datos antiguos para el formulario de actualización se limpian al recargar la página
 
                         foreach ($clienteBusiness->getAllTBCliente() as $c):
                             $rowId = $c->getId();

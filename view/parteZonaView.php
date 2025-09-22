@@ -47,6 +47,7 @@ if (!$esAdminOInstructor) {
     <meta charset="UTF-8">
     <title>Gestión de Partes de Zona</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="../utility/Events.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
@@ -62,10 +63,10 @@ if (!$esAdminOInstructor) {
         // Mostrar errores o mensajes
         $generalError = Validation::getError('general');
         if ($generalError) {
-            echo '<p class="error-message"><b>Error: '.htmlspecialchars($generalError).'</b></p>';
+            echo '<p class="error-message flash-msg"><b>Error: '.htmlspecialchars($generalError).'</b></p>';
         } else if (isset($_GET['error'])) {
             $error = $_GET['error'];
-            echo '<p class="error-message"><b>Error: ';
+            echo '<p class="error-message flash-msg"><b>Error: ';
             if ($error == "datos_faltantes") echo 'Datos incompletos.';
             else if ($error == "insertar") echo 'No se pudo insertar la parte.';
             else if ($error == "dbError") echo 'Error en base de datos.';
@@ -74,7 +75,7 @@ if (!$esAdminOInstructor) {
             echo '</b></p>';
         } else if (isset($_GET['success'])) {
             $success = $_GET['success'];
-            echo '<p class="success-message"><b>Éxito: ';
+            echo '<p class="success-message flash-msg"><b>Éxito: ';
             if ($success == "inserted") echo 'Parte de zona creada correctamente.';
             else if ($success == "updated") echo 'Parte de zona actualizada correctamente.';
             else if ($success == "eliminado") echo 'Parte de zona eliminada correctamente.';

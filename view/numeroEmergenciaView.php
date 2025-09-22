@@ -30,6 +30,7 @@ if ($tipoUsuario == 'cliente') {
     <meta charset="UTF-8"/>
     <title>Gestión de Números de Emergencia</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="../utility/Events.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
@@ -44,10 +45,10 @@ if ($tipoUsuario == 'cliente') {
         // Mensajes de error o éxito generales
         $generalError = Validation::getError('general');
         if ($generalError) {
-            echo '<p class="error-message"><b>Error: '.htmlspecialchars($generalError).'</b></p>';
+            echo '<p class="error-message flash-msg"><b>Error: '.htmlspecialchars($generalError).'</b></p>';
         } else if (isset($_GET['error'])) {
             $error = $_GET['error'];
-            echo '<p class="error-message"><b>Error: ';
+            echo '<p class="error-message flash-msg"><b>Error: ';
             if ($error == "datos_faltantes") echo 'Datos incompletos.';
             else if ($error == "insertar") echo 'No se pudo insertar el número.';
             else if ($error == "actualizar") echo 'No se pudo actualizar el número.';
@@ -56,7 +57,7 @@ if ($tipoUsuario == 'cliente') {
             echo '</b></p>';
         } else if (isset($_GET['success'])) {
             $success = $_GET['success'];
-            echo '<p class="success-message"><b>Éxito: ';
+            echo '<p class="success-message flash-msg"><b>Éxito: ';
             if ($success == "insertado") echo 'Número insertado correctamente.';
             else if ($success == "actualizado") echo 'Número actualizado correctamente.';
             else if ($success == "eliminado") echo 'Número eliminado correctamente.';

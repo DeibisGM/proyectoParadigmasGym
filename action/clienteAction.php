@@ -10,7 +10,7 @@ Validation::start();
 $instructorBusiness = new InstructorBusiness();
 $clienteBusiness = new ClienteBusiness();
 $imageManager = new ImageManager();
-$redirect_path = 'location:../view/clienteView.php';
+$redirect_path = '../view/clienteView.php';
 
 if (isset($_POST['delete_image'])) {
     if (isset($_POST['id'])) {
@@ -117,8 +117,8 @@ if (isset($_POST['delete_image'])) {
                 }
             }
 
-            Validation::clear();
             header("location: " . $redirect_path . "?success=inserted");
+            Validation::clear();
         } else {
             header("location: " . $redirect_path . "?error=insertar");
         }
@@ -127,6 +127,7 @@ if (isset($_POST['delete_image'])) {
     }
 } else if(isset($_POST['actualizar'])){
     $id = $_POST['id'];
+    $carnet = $_POST['carnet'];
     $nombre = $_POST['nombre'];
     $fechaNacimiento = $_POST['fechaNacimiento'];
     $telefono = $_POST['telefono'];
@@ -137,7 +138,6 @@ if (isset($_POST['delete_image'])) {
     $fechaInscripcion = $_POST['fechaInscripcion'];
     $estado = $_POST['estado'];
 
-    // Guardar old input para preservar los datos del formulario, usando el ID para cada campo
     Validation::setOldInput('id_'.$id, $id);
     Validation::setOldInput('nombre_'.$id, $nombre);
     Validation::setOldInput('fechaNacimiento_'.$id, $fechaNacimiento);
@@ -199,10 +199,12 @@ if (isset($_POST['delete_image'])) {
     }
 
     // Si pasa validación, actualizar cliente
-    $clienteActualizado = new Cliente($id, null, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $fechaInscripcion, $estado, $contrasena, '');
+    $clienteActualizado = new Cliente($id, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $fechaInscripcion, $estado, $contrasena, '');
     $resultado = $clienteBusiness->actualizarTBCliente($clienteActualizado);
 
     if($resultado){
+
+        Validation::clear();
         header("Location: ../view/clienteView.php?success=updated");
     } else {
         header("Location: ../view/clienteView.php?error=dbError");
