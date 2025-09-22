@@ -53,6 +53,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Ver Reservas</button></a>
                     <a href='view/eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Eventos</button></a>
                     <a href='view/salaReservasView.php'><button><i class="ph ph-presentation-chart"></i>Ocupación de Salas</button></a>
+                    <a href='view/horarioLibreView.php'><button><i class="ph ph-calendar-grid"></i>Gestionar Horario Libre</button></a>
                 </div>
             </section>
 
@@ -67,6 +68,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zona</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
+                    <a href='view/horarioLibreView.php'><button><i class="ph ph-calendar-grid"></i>Gestionar Horario Libre</button></a>
                 </div>
             </section>
             <section>
@@ -83,7 +85,8 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             <section>
                 <h3><i class="ph ph-barbell"></i>Actividad en el Gimnasio</h3>
                 <div class="menu-grid">
-                    <a href='view/reservaView.php'><button><i class="ph ph-calendar-plus"></i>Reservar Horario/Evento</button></a>
+
+                    <a href='view/reservaView.php'><button><i class="ph ph-calendar-plus"></i>Mis Reservas y Horarios</button></a>
                     <a href='view/instructorClienteView.php'><button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zonas</button></a>
