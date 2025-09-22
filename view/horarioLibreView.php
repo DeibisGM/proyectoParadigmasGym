@@ -16,7 +16,7 @@ $esAdmin = ($tipoUsuario === 'admin');
 // --- Lógica de Fechas para la Semana ---
 $timestamp = isset($_GET['semana']) ? strtotime($_GET['semana']) : time();
 $diaSemanaActual = date('N', $timestamp);
-$inicioSemana = (clone (new DateTime(date('Y-m-d', $timestamp))))->modify('-' . ($diaSemanaActual - 1) . ' days');
+$inicioSemana = (new DateTime(date('Y-m-d', $timestamp)))->modify('-' . ($diaSemanaActual - 1) . ' days');
 $finSemana = (clone $inicioSemana)->modify('+6 days');
 
 $semanaAnterior = (clone $inicioSemana)->modify('-7 days')->format('Y-m-d');
@@ -60,9 +60,9 @@ foreach ($horariosSemanales as $horario) {
         if ($cierre > $horaMaxima) $horaMaxima = $cierre;
     }
 }
-if ($horaMinima >= $horaMaxima) {
+if ($horaMinima >= $horaMaxima) { // Fallback por si no hay horarios definidos
     $horaMinima = 8;
-    $horaMaxima = 18;
+    $horaMaxima = 20;
 }
 
 $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -77,26 +77,37 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
     <style>
         .grid-container { overflow-x: auto; }
         .grid-horario { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        .grid-horario th, .grid-horario td { border: 1px solid #ddd; padding: 4px; text-align: center; min-height: 50px; }
-        .grid-horario th { background-color: #f2f2f2; }
-        .hora-label { font-weight: bold; vertical-align: middle; }
-        .celda-horario { vertical-align: top; font-size: 0.75em; position: relative; line-height: 1.3; }
-        .celda-horario.deshabilitado { background-color: #e9ecef; color: #adb5bd; cursor: not-allowed; }
-        .celda-horario.disponible { background-color: #fff; }
-        .celda-horario.seleccionado { background-color: #b3d7ff !important; border: 2px solid #007bff; }
-        .celda-horario.creado { background-color: #d4edda; }
-        .celda-horario.creado strong { font-size: 1.1em; }
-        .celda-horario.creado.disponible-cliente { cursor: pointer; }
-        .celda-horario.creado.disponible-cliente:hover { background-color: #c3e6cb; border: 2px solid #155724; }
-        .celda-horario.creado.lleno { background-color: #f8d7da; color: #721c24; cursor: not-allowed; }
-        .navegacion-semana { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); }
-        .modal-content { background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 500px; border-radius: 8px; }
-        .btn-eliminar-slot, .btn-seleccionar-slot { position: absolute; top: 2px; right: 2px; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; line-height: 20px; }
-        .btn-eliminar-slot { background: #dc3545; color: white; }
-        .btn-seleccionar-slot { background: #007bff; color: white; }
-        .celda-horario.seleccionado .btn-seleccionar-slot { background-color: #28a745; }
-        #panel-admin { border: 1px solid #ddd; padding: 15px; margin-top: 20px; border-radius: 8px; background-color: #f8f9fa; }
+        .grid-horario th, .grid-horario td { border: 1px solid #dee2e6; padding: 8px; text-align: center; height: 70px; }
+        .hora-label { font-weight: bold; vertical-align: middle; background-color: #f8f9fa;}
+        .celda-horario { vertical-align: middle; font-size: 0.85em; position: relative; }
+        .btn-delete-slot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 22px;
+            height: 22px;
+            padding: 0;
+            background-color: #dc3545;
+            color: white;
+            border: 1px solid #c82333;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .btn-delete-slot:hover { background-color: #c82333; }
+        #btn-limpiar-seleccion {
+            background-color: #6c757d;
+            color: white;
+            border-color: #5a6268;
+        }
+        #btn-limpiar-seleccion:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
     </style>
 </head>
 <body>
@@ -113,7 +124,11 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
             <a href="?semana=<?php echo $semanaSiguiente; ?>"><button>Semana Siguiente <i class="ph ph-caret-right"></i></button></a>
         </div>
 
-        <div id="mensaje" style="display:none;"></div>
+        <?php if (isset($_GET['success'])): ?>
+            <p class="success">Acción realizada con éxito.</p>
+        <?php elseif (isset($_GET['error'])): ?>
+            <p class="error">Error: <?= htmlspecialchars(urldecode($_GET['error'])) ?></p>
+        <?php endif; ?>
 
         <div class="grid-container">
             <table class="grid-horario">
@@ -156,7 +171,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                             }
 
                             if ($estaAbierto && !$estaBloqueado) {
-                                $clase = 'disponible';
                                 $fechaHoraKey = $fechaCelda->format('Y-m-d') . '_' . str_pad($hora, 2, '0', STR_PAD_LEFT);
                                 $dataAttr = 'data-fecha-hora="' . $fechaCelda->format('Y-m-d') . ' ' . str_pad($hora, 2, '0', STR_PAD_LEFT) . '"';
 
@@ -169,11 +183,17 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                                     if ($disponibles <= 0) $clase .= ' lleno';
                                     elseif ($tipoUsuario == 'cliente') $clase .= ' disponible-cliente';
 
-                                    $contenido = "<strong>{$instructorNombre}</strong><br>Cupos: {$disponibles}/{$slot->getCupos()}";
-                                    if ($esAdmin) $contenido .= '<button class="btn-eliminar-slot" data-id="' . $slot->getId() . '">X</button>';
+                                    $contenido = "<span>{$instructorNombre}<br>Cupos: {$disponibles}/{$slot->getCupos()}</span>";
+                                    if ($esAdmin) {
+                                        $contenido .= '<form method="POST" action="../action/horarioLibreAction.php" style="display:inline;">
+                                                         <input type="hidden" name="accion" value="eliminar">
+                                                         <input type="hidden" name="id" value="' . $slot->getId() . '">
+                                                         <button type="submit" title="Eliminar Espacio" onclick="return confirm(\'¿Eliminar este espacio y sus reservas asociadas?\');" class="btn-delete-slot">X</button>
+                                                       </form>';
+                                    }
                                     $dataAttr .= ' data-id="' . $slot->getId() . '"';
                                 } else {
-                                    if ($esAdmin) $contenido = '<button class="btn-seleccionar-slot" title="Seleccionar/Deseleccionar">+</button>';
+                                    if ($esAdmin) $clase = 'disponible-admin';
                                 }
                             }
 
@@ -188,39 +208,34 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         </div>
 
         <?php if ($esAdmin): ?>
-            <div id="panel-admin">
-                <p>Haga clic en el botón <button class="btn-seleccionar-slot" style="position:relative; top:0; right:0;">+</button> de cada celda para añadirla a la selección.</p>
-                <button id="btn-crear-slots" style="display: none;"><i class="ph ph-plus-circle"></i> Crear Espacios para (<span id="contador-seleccion">0</span>) Celdas</button>
-                <button id="btn-limpiar-seleccion" style="display: none; background-color: #ffc107;">Limpiar Selección</button>
-            </div>
+            <section id="panel-admin-creacion">
+                <h3><i class="ph ph-plus-circle"></i> Crear Nuevos Espacios</h3>
+                <p>Se crearán <strong id="contador-seleccion">0</strong> espacios en las celdas seleccionadas.</p>
+                <form id="form-crear-slots" method="POST" action="../action/horarioLibreAction.php">
+                    <input type="hidden" name="accion" value="crear">
+                    <div id="slots-seleccionados-container"></div>
+
+                    <label for="instructorId">Seleccionar Instructor:</label>
+                    <select id="instructorId" name="instructorId" required>
+                        <option value="">-- Elige un instructor --</option>
+                        <?php foreach($instructores as $instructor): ?>
+                            <option value="<?php echo $instructor->getInstructorId(); ?>"><?php echo htmlspecialchars($instructor->getInstructorNombre()); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <label for="cupos">Cantidad de Cupos por Hora:</label>
+                    <input type="number" id="cupos" name="cupos" min="1" required>
+
+                    <button type="submit"><i class="ph ph-check-circle"></i> Confirmar Creación</button>
+                    <button type="button" id="btn-limpiar-seleccion">Limpiar Selección</button>
+                </form>
+            </section>
         <?php else: ?>
             <p style="margin-top: 20px;"><strong>Instrucciones:</strong> Haz clic en un espacio verde disponible para realizar tu reserva.</p>
         <?php endif; ?>
 
     </main>
 </div>
-
-<?php if ($esAdmin): ?>
-    <div id="modal-crear" class="modal">
-        <div class="modal-content">
-            <h3>Crear Nuevos Espacios de Uso Libre</h3>
-            <p>Se crearán <strong id="num-seleccionados"></strong> espacios.</p>
-            <form id="form-crear-slots">
-                <label for="instructorId">Seleccionar Instructor:</label>
-                <select id="instructorId" name="instructorId" required>
-                    <option value="">-- Elige un instructor --</option>
-                    <?php foreach($instructores as $instructor): ?>
-                        <option value="<?php echo $instructor->getInstructorId(); ?>"><?php echo htmlspecialchars($instructor->getInstructorNombre()); ?></option>
-                    <?php endforeach; ?>
-                </select>
-                <label for="cupos">Cantidad de Cupos por Hora:</label>
-                <input type="number" id="cupos" name="cupos" min="1" required>
-                <button type="submit">Confirmar Creación</button>
-                <button type="button" onclick="document.getElementById('modal-crear').style.display='none'">Cancelar</button>
-            </form>
-        </div>
-    </div>
-<?php endif; ?>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -233,87 +248,40 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
 
     function setupAdminInteractions() {
         const grid = document.querySelector('.grid-horario');
-        const btnCrear = document.getElementById('btn-crear-slots');
+        const panel = document.getElementById('panel-admin-creacion');
+        const contador = document.getElementById('contador-seleccion');
+        const container = document.getElementById('slots-seleccionados-container');
         const btnLimpiar = document.getElementById('btn-limpiar-seleccion');
-        const contadorSeleccion = document.getElementById('contador-seleccion');
 
         grid.addEventListener('click', function(e) {
-            if (e.target.classList.contains('btn-eliminar-slot')) {
-                e.stopPropagation();
-                const slotId = e.target.dataset.id;
-                if (confirm('¿Seguro que quieres eliminar este espacio? Se borrarán también las reservas de los clientes asociadas.')) {
-                    eliminarSlot(slotId);
-                }
-                return;
-            }
-
-            if (e.target.classList.contains('btn-seleccionar-slot')) {
-                const cell = e.target.closest('td');
+            const cell = e.target.closest('.disponible-admin');
+            if (cell) {
                 cell.classList.toggle('seleccionado');
-                e.target.textContent = cell.classList.contains('seleccionado') ? '✓' : '+';
                 updateAdminPanel();
             }
-        });
-
-        btnCrear.addEventListener('click', function() {
-            const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
-            document.getElementById('num-seleccionados').textContent = seleccionados.length;
-            document.getElementById('modal-crear').style.display = 'block';
         });
 
         btnLimpiar.addEventListener('click', function() {
             document.querySelectorAll('.celda-horario.seleccionado').forEach(cell => {
                 cell.classList.remove('seleccionado');
-                const btn = cell.querySelector('.btn-seleccionar-slot');
-                if (btn) btn.textContent = '+';
             });
             updateAdminPanel();
         });
 
-        document.getElementById('form-crear-slots').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
-            const slots = Array.from(seleccionados).map(c => c.dataset.fechaHora);
-            const instructorId = document.getElementById('instructorId').value;
-            const cupos = document.getElementById('cupos').value;
-
-            if (!instructorId || !cupos || cupos < 1) {
-                alert("Por favor, selecciona un instructor y define una cantidad de cupos válida.");
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('accion', 'crear');
-            slots.forEach(s => formData.append('slots[]', s));
-            formData.append('instructorId', instructorId);
-            formData.append('cupos', cupos);
-
-            fetch('../action/horarioLibreAction.php', { method: 'POST', body: formData })
-                .then(res => res.json()).then(data => {
-                mostrarMensaje(data.message, data.success);
-                if(data.success) setTimeout(() => location.reload(), 1500);
-            }).catch(err => mostrarMensaje("Error de conexión.", false));
-
-            document.getElementById('modal-crear').style.display = 'none';
-        });
-
         function updateAdminPanel() {
-            const count = document.querySelectorAll('.celda-horario.seleccionado').length;
-            contadorSeleccion.textContent = count;
-            btnCrear.style.display = count > 0 ? 'inline-block' : 'none';
-            btnLimpiar.style.display = count > 0 ? 'inline-block' : 'none';
-        }
+            const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
+            contador.textContent = seleccionados.length;
 
-        function eliminarSlot(id) {
-            const formData = new FormData();
-            formData.append('accion', 'eliminar');
-            formData.append('id', id);
+            container.innerHTML = '';
+            seleccionados.forEach(cell => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'slots[]';
+                input.value = cell.dataset.fechaHora;
+                container.appendChild(input);
+            });
 
-            fetch('../action/horarioLibreAction.php', { method: 'POST', body: formData })
-                .then(res => res.json()).then(data => {
-                mostrarMensaje(data.message, data.success);
-                if(data.success) setTimeout(() => location.reload(), 1500);
-            }).catch(err => mostrarMensaje("Error de conexión.", false));
+            panel.style.display = seleccionados.length > 0 ? 'block' : 'none';
         }
     }
 
@@ -331,23 +299,14 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                 formData.append('horarioLibreId', horarioLibreId);
 
                 fetch('../action/reservaAction.php', { method: 'POST', body: formData })
-                    .then(res => res.json()).then(data => {
-                    mostrarMensaje(data.message, data.success);
-                    if(data.success) setTimeout(() => location.reload(), 1500);
-                }).catch(err => mostrarMensaje("Error de conexión.", false));
+                    .then(res => res.json())
+                    .then(data => {
+                        alert(data.message);
+                        if(data.success) window.location.reload();
+                    })
+                    .catch(err => alert("Error de conexión."));
             }
         });
-    }
-
-    function mostrarMensaje(mensaje, esExito) {
-        const div = document.getElementById('mensaje');
-        div.textContent = mensaje;
-        div.className = esExito ? 'success' : 'error';
-        div.style.display = 'block';
-        setTimeout(() => {
-            div.style.display = 'none';
-            div.className = '';
-        }, 5000);
     }
 </script>
 </body>

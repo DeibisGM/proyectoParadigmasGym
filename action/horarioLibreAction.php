@@ -1,16 +1,14 @@
 <?php
 session_start();
-header('Content-Type: application/json');
 
 if (!isset($_SESSION['usuario_id'])) {
-    echo json_encode(['success' => false, 'message' => 'No autorizado.']);
+    header("Location: ../view/loginView.php?error=not_logged_in");
     exit;
 }
 
 include_once '../business/horarioLibreBusiness.php';
 $horarioLibreBusiness = new HorarioLibreBusiness();
-
-$response = ['success' => false, 'message' => 'Acción no reconocida.'];
+$redirectURL = '../view/horarioLibreView.php';
 
 if (isset($_POST['accion'])) {
     $accion = $_POST['accion'];
@@ -24,26 +22,30 @@ if (isset($_POST['accion'])) {
         if (!empty($slots) && $instructorId && $cupos > 0) {
             $creados = $horarioLibreBusiness->crearMultiplesHorarios($slots, $salaId, $instructorId, $cupos);
             if ($creados > 0) {
-                $response = ['success' => true, 'message' => "Se crearon $creados espacios correctamente."];
+                header("Location: {$redirectURL}?success=created");
             } else {
-                $response['message'] = 'No se pudo crear ningún espacio. Es probable que ya existan para la misma hora, fecha y sala.';
+                header("Location: {$redirectURL}?error=No+se+pudo+crear+ningun+espacio.+Verifique+que+no+existan+previamente.");
             }
         } else {
-            $response['message'] = 'Datos incompletos para crear los espacios.';
+            header("Location: {$redirectURL}?error=Datos+incompletos.");
         }
+        exit;
+
     } elseif ($accion === 'eliminar' && $_SESSION['tipo_usuario'] === 'admin') {
         $id = $_POST['id'] ?? null;
         if ($id) {
             if ($horarioLibreBusiness->eliminarHorarioLibre($id)) {
-                $response = ['success' => true, 'message' => 'Espacio y sus reservas asociadas eliminados correctamente.'];
+                header("Location: {$redirectURL}?success=deleted");
             } else {
-                $response['message'] = 'No se pudo eliminar el espacio.';
+                header("Location: {$redirectURL}?error=db_error_on_delete");
             }
         } else {
-            $response['message'] = 'ID no proporcionado.';
+            header("Location: {$redirectURL}?error=id_missing");
         }
+        exit;
     }
 }
 
-echo json_encode($response);
+header("Location: {$redirectURL}?error=invalid_action");
+exit;
 ?>

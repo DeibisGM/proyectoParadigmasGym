@@ -1,3 +1,6 @@
+/* =================================================================
+   ESTILOS BASE Y GENERALES
+   ================================================================= */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f8f9fa;
@@ -35,9 +38,31 @@ a {
 }
 
 a:hover {
-    text-decoration: none;
+    text-decoration: underline;
 }
 
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #dee2e6;
+    margin: 2rem 0;
+}
+
+main section {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+main section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* =================================================================
+   FORMULARIOS Y BOTONES
+   ================================================================= */
 form {
     margin-bottom: 2rem;
 }
@@ -69,7 +94,7 @@ input[type="submit"] {
     background-color: #f8f9fa;
     border: 1px solid #ced4da;
     border-radius: 4px;
-    padding: 0.75rem 0.75rem;
+    padding: 0.75rem 1rem;
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 500;
@@ -77,64 +102,15 @@ input[type="submit"] {
     align-items: center;
     justify-content: center;
     gap: 0.5em;
-    margin: 0;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
     transition: background-color 0.2s, border-color 0.2s;
-}
-
-.button-icon-only {
-    padding: 0.5rem;
-    width: 2.5em;
-    height: 2.5em;
-    flex-shrink: 0;
-}
-
-button i.ph,
-input[type="submit"] i.ph {
-    margin-right: 0;
 }
 
 button:hover,
 input[type="submit"]:hover {
     background-color: #e9ecef;
     border-color: #adb5bd;
-}
-
-
-.menu-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-}
-
-main section {
-    padding-bottom: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
-}
-
-main section:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 2rem;
-    border: 1px solid #dee2e6;
-}
-
-th, td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
-    vertical-align: top;
-}
-
-th {
-    background-color: #f8f9fa;
-    font-weight: 600;
 }
 
 .form-grid {
@@ -159,51 +135,33 @@ th {
     grid-column: 1 / -1;
 }
 
-.actions-cell {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
 
-.actions-cell button {
-    padding: 0.6rem;
-}
-
-td .image-gallery {
+/* =================================================================
+   COMPONENTES REUTILIZABLES (Tablas, Menús, Imágenes)
+   ================================================================= */
+.menu-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
+    gap: 0.75rem;
 }
 
-.image-container img {
-    border-radius: 4px;
-    object-fit: cover;
-    width: 60px;
-    height: 60px;
-}
-
-.delete-image-btn {
-    width: 20px;
-    height: 20px;
-    font-size: 12px;
-    line-height: 20px;
-    padding: 0 !important;
-}
-
-td textarea, td input[type="text"] {
+table {
     width: 100%;
-    box-sizing: border-box;
-    margin: 0;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    border: 1px solid #dee2e6;
 }
 
-.login-container {
-    max-width: 400px;
-    margin: 4rem auto;
-    padding: 2rem;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    background-color: #fff;
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: 600;
 }
 
 td input[type="text"],
@@ -212,12 +170,24 @@ td input[type="password"],
 td input[type="date"],
 td input[type="time"],
 td input[type="number"],
-td select {
-    min-width: 200px;
+td select,
+td textarea {
+    min-width: 150px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
 }
 
-td {
-    min-width: 160px;
+.actions-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    min-width: 220px;
+}
+
+.actions-cell button, .actions-cell input[type="submit"] {
+    padding: 0.6rem;
 }
 
 .image-gallery {
@@ -235,29 +205,83 @@ td {
 .image-container img {
     max-width: 100px;
     max-height: 100px;
+    border-radius: 4px;
+    object-fit: cover;
     border: 1px solid #ddd;
 }
 
 .delete-image-btn {
     position: absolute;
-    top: 0;
-    right: 0;
-    background: red;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
     color: white;
-    border: none;
+    border: 1px solid white;
+    border-radius: 50%;
     cursor: pointer;
     font-size: 12px;
     line-height: 1;
-    padding: 2px 5px;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+}
+.delete-image-btn:hover {
+    background: #c82333;
 }
 
-.profile-pic {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
+
+/* =================================================================
+   MENSAJES DE FEEDBACK
+   ================================================================= */
+.success, .success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
 }
 
+.error, .error-message {
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+}
+
+#mensaje {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+}
+
+/* =================================================================
+   VISTAS ESPECÍFICAS
+   ================================================================= */
+
+/* --- Login View --- */
+.login-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    padding: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.nota-credenciales {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* --- Horario General View --- */
 .day-container {
     border: 1px solid #dee2e6;
     padding: 1.5rem;
@@ -275,6 +299,10 @@ td {
     margin-left: 20px;
 }
 
+.bloqueos-container h4 {
+    margin-top: 1.5rem;
+}
+
 .bloqueo-item {
     margin-bottom: 10px;
     display: flex;
@@ -282,79 +310,136 @@ td {
     align-items: center;
 }
 
-.bloqueos-container h4 {
-    margin-top: 1.5rem;
-}
-
-.error {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 1rem;
-    margin-top: 1rem;
-    border-radius: 4px;
-}
-
-.success {
-    color: #155724;
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-    padding: 1rem;
-    margin-top: 1rem;
-    border-radius: 4px;
-}
-
-.page-layout {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-}
-
-@media (max-width: 900px) {
-    .page-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-.disponibilidad-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+/* --- Horario Libre View --- */
+.navegacion-semana {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
     gap: 1rem;
 }
 
-.slot {
-    border: 1px solid #dee2e6;
-    padding: 1rem;
-    border-radius: 4px;
+.grid-container {
+    overflow-x: auto;
+    padding-bottom: 1rem;
 }
 
-.slot.lleno {
+.grid-horario {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.grid-horario th, .grid-horario td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: center;
+    height: 70px;
+}
+
+.grid-horario th {
     background-color: #f8f9fa;
-    color: #6c757d;
+    font-weight: 600;
 }
 
-.nota-credenciales {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+.hora-label {
+    font-weight: bold;
+    vertical-align: middle;
+    background-color: #f8f9fa;
+}
+
+.celda-horario {
+    vertical-align: middle;
+    font-size: 0.85em;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.celda-horario.deshabilitado {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.celda-horario.disponible-admin {
+    cursor: pointer;
+    background-color: #fff;
+}
+.celda-horario.disponible-admin:hover {
+    background-color: #e2e6ea;
+}
+
+.celda-horario.seleccionado {
+    background-color: #b8daff !important;
+    border: 2px solid #007bff;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+
+.celda-horario.creado {
+    background-color: #d4edda;
+    color: #155724;
+    font-weight: 500;
+}
+.celda-horario.creado span {
+    display: block;
+    line-height: 1.4;
+}
+
+.celda-horario.creado.disponible-cliente {
+    cursor: pointer;
+}
+.celda-horario.creado.disponible-cliente:hover {
+    background-color: #c3e6cb;
+    border: 2px solid #28a745;
+}
+
+.celda-horario.creado.lleno {
+    background-color: #f8d7da;
+    color: #721c24;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+#panel-admin-creacion {
+    border: 1px solid #ced4da;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    display: none;
+}
+
+#btn-limpiar-seleccion {
+    background-color: #6c757d;
+    color: white;
+    border-color: #5a6268;
+}
+
+#btn-limpiar-seleccion:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-delete-slot {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background-color: #dc3545;
+    color: white;
+    border: 1px solid #c82333;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     border-radius: 4px;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    line-height: 1;
 }
-
-.error-message {
-    color: red;
-    margin-top: 1rem;
-}
-
-.success-message {
-    color: green;
-}
-
-#mensaje {
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid;
-    border-radius: 5px;
+.btn-delete-slot:hover {
+    background-color: #c82333;
 }
