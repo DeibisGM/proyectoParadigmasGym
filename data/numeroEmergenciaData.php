@@ -58,6 +58,33 @@ class numeroEmergenciaData extends Data
         return $result;
     }
 
+    public function getNumeroPorId($id)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        $query = "SELECT * FROM tbnumeroemergencia WHERE tbnumeroemergenciaid=? LIMIT 1;";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $numero = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $numero = new numeroEmergencia(
+                $row['tbnumeroemergenciaid'],
+                $row['tbnumeroemergenciaclienteid'],
+                $row['tbnumeroemergencianombre'],
+                $row['tbnumeroemergenciatelefono'],
+                $row['tbnumeroemergenciarelacion']
+            );
+        }
+
+
+        mysqli_close($conn);
+        return $numero;
+    }
+
     public function getAllTBNumeroEmergencia() {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
