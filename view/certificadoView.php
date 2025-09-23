@@ -94,6 +94,18 @@ if (isset($_GET['instructor_id'])) {
             max-height: 100px;
             display: block;
         }
+
+        .field-error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+
+        input.error, select.error {
+            border-color: red;
+            background-color: #ffe6e6;
+        }
     </style>
 </head>
 <body>
@@ -110,13 +122,13 @@ if (isset($_GET['instructor_id'])) {
 <main>
     <?php if ($puedeCrearCertificados): ?>
         <h2>Agregar Certificado</h2>
-        <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data">
-            <input type="text" name="nombre" placeholder="Nombre" required maxlength="100"><br>
-            <input type="text" name="descripcion" placeholder="Descripción" required><br>
-            <input type="text" name="entidad" placeholder="Entidad" required><br>
+        <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data" onsubmit="return validateCertificadoForm()">
+            <input type="text" name="nombre" id="nombre" placeholder="Nombre" required maxlength="100"><br>
+            <input type="text" name="descripcion" id="descripcion" placeholder="Descripción" required><br>
+            <input type="text" name="entidad" id="entidad" placeholder="Entidad" required><br>
 
             <label for="idInstructor">Instructor:</label><br>
-            <select name="idInstructor" required>
+            <select name="idInstructor" id="idInstructor" required>
                 <option value="">Seleccione un instructor</option>
                 <?php foreach ($instructores as $instructor): ?>
                     <option value="<?php echo $instructor->getInstructorId(); ?>">
@@ -127,7 +139,7 @@ if (isset($_GET['instructor_id'])) {
 
             <!-- Agregar campo para imagen -->
             <label for="tbcertificadoimagenid">Imagen del certificado:</label><br>
-            <input type="file" name="tbcertificadoimagenid[]" accept="image/png, image/jpeg, image/webp"><br>
+            <input type="file" name="tbcertificadoimagenid[]" id="tbcertificadoimagenid" accept="image/png, image/jpeg, image/webp"><br>
 
             <button type="submit" name="create">Agregar</button>
         </form>
@@ -171,7 +183,7 @@ if (isset($_GET['instructor_id'])) {
         }
             ?>
             <tr>
-                <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data">
+                <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data" onsubmit="return validateCertificadoEditForm(this)">
                     <td>
                         <input type="hidden" name="id" value="<?php echo $cert->getId(); ?>">
                         <?php echo str_pad($cert->getId(), 3, '0', STR_PAD_LEFT); ?>
@@ -245,6 +257,181 @@ if (isset($_GET['instructor_id'])) {
 </footer>
 
 <script>
+// Validación en tiempo real para el formulario de creación
+document.addEventListener('DOMContentLoaded', function () {
+    const nombre = document.getElementById('nombre');
+    const descripcion = document.getElementById('descripcion');
+    const entidad = document.getElementById('entidad');
+    const idInstructor = document.getElementById('idInstructor');
+
+    // Mensajes de error
+    const errorMessages = {
+        nombreLongitud: 'El nombre no puede tener más de 100 caracteres.',
+        descripcionVacia: 'La descripción no puede estar vacía.',
+        entidadVacia: 'La entidad no puede estar vacía.',
+        instructorNoSeleccionado: 'Debe seleccionar un instructor.'
+    };
+
+    // Validación en tiempo real
+    if (nombre) nombre.addEventListener('blur', validarNombre);
+    if (descripcion) descripcion.addEventListener('blur', validarDescripcion);
+    if (entidad) entidad.addEventListener('blur', validarEntidad);
+    if (idInstructor) idInstructor.addEventListener('blur', validarInstructor);
+
+    function validarNombre() {
+        const value = nombre.value.trim();
+
+        if (value.length > 100) {
+            showError(nombre, errorMessages.nombreLongitud);
+            return false;
+        }
+
+        hideError(nombre);
+        return true;
+    }
+
+    function validarDescripcion() {
+        const value = descripcion.value.trim();
+
+        if (value === '') {
+            showError(descripcion, errorMessages.descripcionVacia);
+            return false;
+        }
+
+        hideError(descripcion);
+        return true;
+    }
+
+    function validarEntidad() {
+        const value = entidad.value.trim();
+
+        if (value === '') {
+            showError(entidad, errorMessages.entidadVacia);
+            return false;
+        }
+
+        hideError(entidad);
+        return true;
+    }
+
+    function validarInstructor() {
+        const value = idInstructor.value;
+
+        if (value === '') {
+            showError(idInstructor, errorMessages.instructorNoSeleccionado);
+            return false;
+        }
+
+        hideError(idInstructor);
+        return true;
+    }
+
+    function showError(input, message) {
+        // Remover error previo
+        hideError(input);
+
+        // Crear elemento de error
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'field-error';
+        errorDiv.textContent = message;
+
+        // Insertar después del input
+        input.parentNode.appendChild(errorDiv);
+
+        // Resaltar input
+        input.classList.add('error');
+    }
+
+    function hideError(input) {
+        // Remover mensaje de error
+        const errorDiv = input.parentNode.querySelector('.field-error');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+
+        // Restaurar borde
+        input.classList.remove('error');
+    }
+});
+
+// Validación antes de enviar el formulario de creación
+function validateCertificadoForm() {
+    const nombre = document.getElementById('nombre');
+    const descripcion = document.getElementById('descripcion');
+    const entidad = document.getElementById('entidad');
+    const idInstructor = document.getElementById('idInstructor');
+
+    let isValid = true;
+
+    // Validar nombre
+    if (nombre.value.trim().length > 100) {
+        alert('El nombre no puede tener más de 100 caracteres.');
+        nombre.focus();
+        return false;
+    }
+
+    // Validar descripción
+    if (descripcion.value.trim() === '') {
+        alert('La descripción no puede estar vacía.');
+        descripcion.focus();
+        return false;
+    }
+
+    // Validar entidad
+    if (entidad.value.trim() === '') {
+        alert('La entidad no puede estar vacía.');
+        entidad.focus();
+        return false;
+    }
+
+    // Validar instructor
+    if (idInstructor.value === '') {
+        alert('Debe seleccionar un instructor.');
+        idInstructor.focus();
+        return false;
+    }
+
+    return true;
+}
+
+// Validación para formularios de edición
+function validateCertificadoEditForm(form) {
+    const nombre = form.querySelector('input[name="nombre"]');
+    const descripcion = form.querySelector('input[name="descripcion"]');
+    const entidad = form.querySelector('input[name="entidad"]');
+    const idInstructor = form.querySelector('select[name="idInstructor"]');
+
+    // Validar nombre
+    if (nombre.value.trim().length > 100) {
+        alert('El nombre no puede tener más de 100 caracteres.');
+        nombre.focus();
+        return false;
+    }
+
+    // Validar descripción
+    if (descripcion.value.trim() === '') {
+        alert('La descripción no puede estar vacía.');
+        descripcion.focus();
+        return false;
+    }
+
+    // Validar entidad
+    if (entidad.value.trim() === '') {
+        alert('La entidad no puede estar vacía.');
+        entidad.focus();
+        return false;
+    }
+
+    // Validar instructor
+    if (idInstructor.value === '') {
+        alert('Debe seleccionar un instructor.');
+        idInstructor.focus();
+        return false;
+    }
+
+    return true;
+}
+
 function confirmImageDeleteCert(button) {
     if (confirm('¿Estás seguro de eliminar esta imagen?')) {
         const certificadoId = button.getAttribute('data-certificado-id');
