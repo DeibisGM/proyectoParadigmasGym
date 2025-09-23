@@ -3,7 +3,9 @@
     if (!class_exists('ClientePadecimiento')) {
         include_once '../domain/clientePadecimiento.php';
     }
-
+    if (!class_exists('PadecimientoDictamenData')) {
+        include_once 'padecimientoDictamenData.php';
+    }
     class ClientePadecimientoData extends Data {
 
         public function insertarTBClientePadecimiento($clientePadecimiento) {
@@ -103,6 +105,33 @@
             }
             $conn->set_charset('utf8');
 
+            // Primero obtenemos el registro para saber qué dictámenes eliminar
+            $querySelect = "SELECT tbpadecimientodictamenid FROM tbclientepadecimiento WHERE tbclientepadecimientoid=?";
+            $stmtSelect = mysqli_prepare($conn, $querySelect);
+            mysqli_stmt_bind_param($stmtSelect, "i", $tbclientepadecimientoid);
+            mysqli_stmt_execute($stmtSelect);
+            $result = mysqli_stmt_get_result($stmtSelect);
+
+            $dictamenesIds = null;
+            if ($row = mysqli_fetch_assoc($result)) {
+                $dictamenesIds = $row['tbpadecimientodictamenid'];
+            }
+            mysqli_stmt_close($stmtSelect);
+
+            // Si hay dictámenes asociados, los eliminamos
+            if (!empty($dictamenesIds)) {
+                $padecimientoDictamenData = new PadecimientoDictamenData();
+                $idsArray = explode('$', $dictamenesIds);
+
+                foreach ($idsArray as $dictamenId) {
+                    $dictamenId = intval($dictamenId);
+                    if ($dictamenId > 0) {
+                        $padecimientoDictamenData->eliminarTBPadecimientoDictamen($dictamenId);
+                    }
+                }
+            }
+
+            // Ahora eliminamos el registro de clientepadecimiento
             $queryDelete = "DELETE FROM tbclientepadecimiento WHERE tbclientepadecimientoid=?";
             $stmt = mysqli_prepare($conn, $queryDelete);
 
@@ -118,6 +147,7 @@
             return $result;
         }
 
+        // Método modificado para eliminar todos los padecimientos de un cliente
         public function eliminarTBClientePadecimientoPorCliente($tbclienteid) {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {
@@ -125,6 +155,36 @@
             }
             $conn->set_charset('utf8');
 
+            // Primero obtenemos todos los registros del cliente para saber qué dictámenes eliminar
+            $querySelect = "SELECT tbpadecimientodictamenid FROM tbclientepadecimiento WHERE tbclienteid=?";
+            $stmtSelect = mysqli_prepare($conn, $querySelect);
+            mysqli_stmt_bind_param($stmtSelect, "i", $tbclienteid);
+            mysqli_stmt_execute($stmtSelect);
+            $result = mysqli_stmt_get_result($stmtSelect);
+
+            $todosDictamenes = array();
+            while ($row = mysqli_fetch_assoc($result)) {
+                if (!empty($row['tbpadecimientodictamenid'])) {
+                    $idsArray = explode('$', $row['tbpadecimientodictamenid']);
+                    $todosDictamenes = array_merge($todosDictamenes, $idsArray);
+                }
+            }
+            mysqli_stmt_close($stmtSelect);
+
+            // Eliminamos los dictámenes únicos
+            if (!empty($todosDictamenes)) {
+                $dictamenesUnicos = array_unique($todosDictamenes);
+                $padecimientoDictamenData = new PadecimientoDictamenData();
+
+                foreach ($dictamenesUnicos as $dictamenId) {
+                    $dictamenId = intval($dictamenId);
+                    if ($dictamenId > 0) {
+                        $padecimientoDictamenData->eliminarTBPadecimientoDictamen($dictamenId);
+                    }
+                }
+            }
+
+            // Ahora eliminamos todos los registros del cliente
             $queryDelete = "DELETE FROM tbclientepadecimiento WHERE tbclienteid=?";
             $stmt = mysqli_prepare($conn, $queryDelete);
 
@@ -139,7 +199,6 @@
             mysqli_close($conn);
             return $result;
         }
-
         public function obtenerTBClientePadecimiento() {
             $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
             if (!$conn) {

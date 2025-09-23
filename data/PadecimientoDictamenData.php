@@ -1,5 +1,6 @@
 <?php
 include_once 'data.php';
+include_once __DIR__ . '/../logic/ImageManager.php';
 
 class PadecimientoDictamenData extends Data
 {
@@ -20,12 +21,16 @@ class PadecimientoDictamenData extends Data
         ) VALUES (?, ?, ?);";
 
         $stmt = mysqli_prepare($conn, $queryInsert);
+        $fechaemision = $padecimientodictamen->getPadecimientodictamenfechaemision();
+        $entidademision = $padecimientodictamen->getPadecimientodictamenentidademision();
+        $imagenid = $padecimientodictamen->getPadecimientodictamenimagenid();
+
         mysqli_stmt_bind_param(
             $stmt,
             'sss',
-            $padecimientodictamen->getPadecimientodictamenfechaemision(),
-            $padecimientodictamen->getPadecimientodictamenentidademision(),
-            $padecimientodictamen->getPadecimientodictamenimagenid()
+            $fechaemision,
+            $entidademision,
+            $imagenid
         );
 
         $result = mysqli_stmt_execute($stmt);
@@ -58,13 +63,18 @@ class PadecimientoDictamenData extends Data
             WHERE tbpadecimientodictamenid = ?;";
 
         $stmt = mysqli_prepare($conn, $queryUpdate);
+        $fechaemision = $padecimientodictamen->getPadecimientodictamenfechaemision();
+        $entidademision = $padecimientodictamen->getPadecimientodictamenentidademision();
+        $imagenid = $padecimientodictamen->getPadecimientodictamenimagenid();
+        $id = $padecimientodictamen->getPadecimientodictamenid();
+
         mysqli_stmt_bind_param(
             $stmt,
             'sssi',
-            $padecimientodictamen->getPadecimientodictamenfechaemision(),
-            $padecimientodictamen->getPadecimientodictamenentidademision(),
-            $padecimientodictamen->getPadecimientodictamenimagenid(),
-            $padecimientodictamen->getPadecimientodictamenid()
+            $fechaemision,
+            $entidademision,
+            $imagenid,
+            $id
         );
 
         $result = mysqli_stmt_execute($stmt);
@@ -81,7 +91,34 @@ class PadecimientoDictamenData extends Data
         }
         $conn->set_charset('utf8');
 
-        $queryDelete = "DELETE FROM tbpadecimientodictamen WHERE tbpadecimientodictamenid=?;";
+        // Primero obtenemos la información del registro para saber qué imagen eliminar
+        $querySelect = "SELECT tbpadecimientodictamenimagenid FROM tbpadecimientodictamen WHERE tbpadecimientodictamenid=?";
+        $stmtSelect = mysqli_prepare($conn, $querySelect);
+        mysqli_stmt_bind_param($stmtSelect, 'i', $id);
+        mysqli_stmt_execute($stmtSelect);
+        $result = mysqli_stmt_get_result($stmtSelect);
+
+        $imagenId = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $imagenId = $row['tbpadecimientodictamenimagenid'];
+        }
+        mysqli_stmt_close($stmtSelect);
+
+        // Si hay una imagen asociada, la eliminamos usando ImageManager
+        if (!empty($imagenId)) {
+            $imageManager = new ImageManager();
+
+            // Si el imagenId es una cadena con múltiples IDs separados por '$'
+            if (strpos($imagenId, '$') !== false) {
+                $imageManager->deleteImagesFromString($imagenId);
+            } else {
+                // Si es un solo ID
+                $imageManager->deleteImage($imagenId);
+            }
+        }
+
+        // Ahora eliminamos el registro de padecimientodictamen
+        $queryDelete = "DELETE FROM tbpadecimientodictamen WHERE tbpadecimientodictamenid=?";
         $stmt = mysqli_prepare($conn, $queryDelete);
 
         mysqli_stmt_bind_param($stmt, 'i', $id);

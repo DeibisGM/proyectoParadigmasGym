@@ -2,7 +2,9 @@
 session_start();
 include_once '../business/PadecimientoDictamenBusiness.php';
 include_once '../utility/ImageManager.php';
-include_once '../business/clientePadecimientoBusiness.php'; // Incluir para obtener la lista completa de clientes
+include_once '../business/clientePadecimientoBusiness.php';
+include_once '../utility/Validation.php'; // AGREGADO
+Validation::start(); // AGREGADO
 
 if (!isset($_SESSION['tipo_usuario'])) {
     header("location: ../view/loginView.php");
@@ -29,6 +31,16 @@ if ($esAdminOInstructor) {
     $clientes = $clientePadecimientoBusiness->obtenerTodosLosClientes();
 }
 
+// AGREGADO: Manejo de mensajes de éxito
+$successMessage = null;
+if (isset($_GET['success'])) {
+    switch ($_GET['success']) {
+        case 'created': $successMessage = 'Padecimiento dictamen creado con éxito.'; break;
+        case 'updated': $successMessage = 'Padecimiento dictamen actualizado con éxito.'; break;
+        case 'deleted': $successMessage = 'Padecimiento dictamen eliminado con éxito.'; break;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -38,7 +50,46 @@ if ($esAdminOInstructor) {
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
-
+        .error-message {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            display: block;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .error-general {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .error-general ul {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1.5rem;
+        }
+        .error-general li {
+            margin-bottom: 0.25rem;
+        }
+        .form-field {
+            margin-bottom: 1rem;
+        }
+        .input-error {
+            border-color: #dc3545 !important;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+        }
     </style>
 </head>
 <body>
@@ -54,18 +105,51 @@ if ($esAdminOInstructor) {
 
     <div id="mensaje" style="display:none;"></div>
 
+    <!-- AGREGADO: Mostrar mensaje de éxito -->
+    <?php if ($successMessage): ?>
+        <div class="success"><?php echo htmlspecialchars($successMessage); ?></div>
+    <?php endif; ?>
+
+    <!-- AGREGADO: Mostrar mensaje de error general -->
+    <?php if (Validation::hasErrors()): ?>
+        <div class="error-general">
+            <strong>Por favor corrija los siguientes errores:</strong>
+            <ul>
+                <?php if ($esAdminOInstructor && Validation::getError('clienteId')): ?>
+                    <li>Debe seleccionar un cliente</li>
+                <?php endif; ?>
+                <?php if (Validation::getError('fechaemision')): ?>
+                    <li>Debe seleccionar una fecha de emisión válida</li>
+                <?php endif; ?>
+                <?php if (Validation::getError('entidademision')): ?>
+                    <li>Debe ingresar la entidad de emisión</li>
+                <?php endif; ?>
+                <?php if (Validation::getError('imagenes')): ?>
+                    <li>Hay un problema con las imágenes seleccionadas</li>
+                <?php endif; ?>
+                <?php if ($generalError = Validation::getError('general')): ?>
+                    <li><?= htmlspecialchars($generalError); ?></li>
+                <?php endif; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+
     <main>
         <section>
             <h3><i class="ph ph-plus-circle"></i> Crear Nuevo Padecimiento Dictamen</h3>
-            <form id="crearPadecimientoForm">
+            <form id="crearPadecimientoForm" action="../action/PadecimientoDictamenAction.php" method="POST" enctype="multipart/form-data">
                 <div class="form-grid">
                     <?php if ($esAdminOInstructor): ?>
-                        <div class="form-group">
+                        <div class="form-field">
+                            <?php if ($error = Validation::getError('clienteId')): ?>
+                                <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
+                            <?php endif; ?>
                             <label for="clienteId">Cliente:</label>
-                            <select name="clienteId" id="clienteId" required>
+                            <select name="clienteId" id="clienteId" <?= Validation::getError('clienteId') ? 'class="input-error"' : '' ?>>
                                 <option value="">Seleccione un cliente</option>
                                 <?php foreach ($clientes as $cliente): ?>
-                                    <option value="<?= htmlspecialchars($cliente['id']) ?>">
+                                    <option value="<?= htmlspecialchars($cliente['id']) ?>"
+                                            <?= Validation::getOldInput('clienteId') == $cliente['id'] ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($cliente['carnet'] . ' - ' . $cliente['nombre']) ?>
                                     </option>
                                 <?php endforeach; ?>
@@ -73,15 +157,30 @@ if ($esAdminOInstructor) {
                         </div>
                     <?php endif; ?>
 
-                    <div class="form-group">
+                    <div class="form-field">
+                        <?php if ($error = Validation::getError('fechaemision')): ?>
+                            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
+                        <?php endif; ?>
                         <label for="fechaemision">Fecha de Emisión:</label>
-                        <input type="date" name="fechaemision" id="fechaemision" required max="<?= date('Y-m-d') ?>">
+                        <input type="date" name="fechaemision" id="fechaemision" max="<?= date('Y-m-d') ?>"
+                               value="<?= htmlspecialchars(Validation::getOldInput('fechaemision')); ?>"
+                               <?= Validation::getError('fechaemision') ? 'class="input-error"' : '' ?>>
                     </div>
-                    <div class="form-group">
+
+                    <div class="form-field">
+                        <?php if ($error = Validation::getError('entidademision')): ?>
+                            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
+                        <?php endif; ?>
                         <label for="entidademision">Entidad de Emisión:</label>
-                        <input type="text" name="entidademision" id="entidademision" placeholder="Nombre de la entidad" required>
+                        <input type="text" name="entidademision" id="entidademision" placeholder="Nombre de la entidad"
+                               value="<?= htmlspecialchars(Validation::getOldInput('entidademision')); ?>"
+                               <?= Validation::getError('entidademision') ? 'class="input-error"' : '' ?>>
                     </div>
-                    <div class="form-group full-width">
+
+                    <div class="form-field full-width">
+                        <?php if ($error = Validation::getError('imagenes')): ?>
+                            <div class="error-message"><?php echo htmlspecialchars($error); ?></div>
+                        <?php endif; ?>
                         <label for="imagenes">Imágenes del Dictamen:</label>
                         <input type="file" name="imagenes[]" id="imagenes" multiple accept="image/*">
                         <small>Formatos aceptados: JPG, PNG, WebP. Máximo 5MB por imagen.</small>
@@ -112,12 +211,11 @@ if ($esAdminOInstructor) {
                                 <td>
                                     <input type="date" name="fechaemision"
                                            value="<?= htmlspecialchars($padecimiento->getPadecimientodictamenfechaemision()) ?>"
-                                           required max="<?= date('Y-m-d') ?>">
+                                           max="<?= date('Y-m-d') ?>">
                                 </td>
                                 <td>
                                     <input type="text" name="entidademision"
-                                           value="<?= htmlspecialchars($padecimiento->getPadecimientodictamenentidademision()) ?>"
-                                           required>
+                                           value="<?= htmlspecialchars($padecimiento->getPadecimientodictamenentidademision()) ?>">
                                 </td>
                                 <td>
                                     <div class="image-gallery">
@@ -206,10 +304,10 @@ if ($esAdminOInstructor) {
         row.dataset.id = padecimiento.id;
         row.innerHTML = `
             <td>
-                <input type="date" name="fechaemision" value="${padecimiento.fechaemision}" required max="<?= date('Y-m-d') ?>">
+                <input type="date" name="fechaemision" value="${padecimiento.fechaemision}" max="<?= date('Y-m-d') ?>">
             </td>
             <td>
-                <input type="text" name="entidademision" value="${padecimiento.entidademision}" required>
+                <input type="text" name="entidademision" value="${padecimiento.entidademision}">
             </td>
             <td>
                 <div class="image-gallery">
@@ -239,38 +337,21 @@ if ($esAdminOInstructor) {
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('crearPadecimientoForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.getElementById('crearPadecimientoForm').addEventListener('submit', (e) => {
+            // No prevenir el comportamiento por defecto para permitir envío normal del formulario
             const form = e.target;
-            const formData = new FormData(form);
-            formData.append('accion', 'guardar');
 
-            // Obtener el ID del cliente del combobox
-            const clienteId = document.getElementById('clienteId');
-            if (clienteId) {
-                formData.append('clienteId', clienteId.value);
+            // Crear un input hidden para la acción
+            let accionInput = form.querySelector('input[name="accion"]');
+            if (!accionInput) {
+                accionInput = document.createElement('input');
+                accionInput.type = 'hidden';
+                accionInput.name = 'accion';
+                accionInput.value = 'guardar';
+                form.appendChild(accionInput);
             }
 
-            try {
-                const response = await fetch(ACTION_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await manejarRespuesta(response);
-
-                if (data.success) {
-                    form.reset();
-                    const tablaBody = document.querySelector('#padecimientoTabla tbody');
-                    if (tablaBody.querySelector('tr[data-id]')) {
-                         tablaBody.prepend(crearFilaTabla(data.padecimiento));
-                    } else {
-                        tablaBody.innerHTML = '';
-                        tablaBody.appendChild(crearFilaTabla(data.padecimiento));
-                    }
-                }
-            } catch (error) {
-                mostrarMensaje('Error al conectar con el servidor: ' + error.message, 'error');
-            }
+            // El formulario se enviará normalmente a la acción y redirigirá de vuelta con los errores o éxito
         });
 
         document.getElementById('padecimientoTabla').addEventListener('click', async (e) => {
@@ -280,11 +361,6 @@ if ($esAdminOInstructor) {
                 const fechaemision = row.querySelector('input[name="fechaemision"]').value;
                 const entidademision = row.querySelector('input[name="entidademision"]').value;
                 const imagenes = row.querySelector('input[name="imagenes[]"]').files;
-
-                if (!fechaemision || !entidademision) {
-                    mostrarMensaje('Faltan datos obligatorios para actualizar.', 'error');
-                    return;
-                }
 
                 const formData = new FormData();
                 formData.append('accion', 'actualizar');
@@ -301,18 +377,25 @@ if ($esAdminOInstructor) {
                 try {
                     const response = await fetch(ACTION_URL, {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
                     });
                     const data = await manejarRespuesta(response);
 
                     if (data.success && data.padecimiento) {
                          const imageGallery = row.querySelector('.image-gallery');
+                         const esAdminOInstructor = <?= $esAdminOInstructor ? 'true' : 'false' ?>;
                          imageGallery.innerHTML = data.padecimiento.imagenes.map(img => `
                             <div class="image-container">
                                 <img src="${img.ruta}?t=${Date.now()}" alt="Imagen del dictamen">
-                                <button type="button" class="delete-image-btn" data-image-id="${img.id}">X</button>
+                                ${esAdminOInstructor ? `<button type="button" class="delete-image-btn" data-image-id="${img.id}">X</button>` : ''}
                             </div>
                          `).join('') + (data.padecimiento.imagenes.length === 0 ? '<span style="color: #6c757d;">Sin imágenes</span>' : '');
+
+                         // Limpiar el input de archivos después de actualizar
+                         row.querySelector('input[name="imagenes[]"]').value = '';
                     }
 
                 } catch (error) {
@@ -332,12 +415,27 @@ if ($esAdminOInstructor) {
                     try {
                         const response = await fetch(ACTION_URL, {
                             method: 'POST',
-                            body: formData
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
                         });
                         const data = await manejarRespuesta(response);
 
                         if (data.success) {
                             row.remove();
+
+                            // Verificar si la tabla está vacía y mostrar mensaje
+                            const tablaBody = document.querySelector('#padecimientoTabla tbody');
+                            if (!tablaBody.querySelector('tr[data-id]')) {
+                                tablaBody.innerHTML = `
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: #6c757d; font-style: italic;">
+                                            No hay padecimientos dictamen registrados
+                                        </td>
+                                    </tr>
+                                `;
+                            }
                         }
                     } catch (error) {
                         mostrarMensaje('Error al conectar con el servidor: ' + error.message, 'error');
@@ -360,13 +458,17 @@ if ($esAdminOInstructor) {
                     try {
                         const response = await fetch(ACTION_URL, {
                             method: 'POST',
-                            body: formData
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
                         });
                         const data = await manejarRespuesta(response);
                         if (data.success) {
                             button.closest('.image-container').remove();
-                            if (row.querySelector('.image-gallery').childElementCount === 0) {
-                                row.querySelector('.image-gallery').innerHTML = '<span style="color: #6c757d;">Sin imágenes</span>';
+                            const imageGallery = row.querySelector('.image-gallery');
+                            if (imageGallery.children.length === 0) {
+                                imageGallery.innerHTML = '<span style="color: #6c757d;">Sin imágenes</span>';
                             }
                         }
                     } catch (error) {

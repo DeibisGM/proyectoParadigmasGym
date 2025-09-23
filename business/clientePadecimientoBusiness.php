@@ -4,6 +4,8 @@ if (!class_exists('ClientePadecimientoData')) {
     include_once '../data/clientePadecimientoData.php';
 }
 include_once '../business/PadecimientoDictamenBusiness.php';
+include_once '../utility/Validation.php';
+
 class ClientePadecimientoBusiness {
 
     private $clientePadecimientoData;
@@ -23,6 +25,7 @@ class ClientePadecimientoBusiness {
     public function eliminarTBClientePadecimiento($tbclientepadecimientoid) {
         return $this->clientePadecimientoData->eliminarTBClientePadecimiento($tbclientepadecimientoid);
     }
+
     public function eliminarRelacionPorDictamenId($dictamenId) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         if (!$conn) {
@@ -119,22 +122,8 @@ class ClientePadecimientoBusiness {
         return $datos !== null;
     }
 
-    public function validarClientePadecimiento($tbclienteid, $tbpadecimientoid) {
-        $errores = array();
-
-        if (empty($tbclienteid) || $tbclienteid <= 0) {
-            $errores[] = "Debe seleccionar un cliente válido";
-        }
-
-        if (empty($tbpadecimientoid)) {
-            $errores[] = "Debe seleccionar al menos un padecimiento";
-        } else {
-            if (!$this->clientePadecimientoData->validarPadecimientosExisten($tbpadecimientoid)) {
-                $errores[] = "Uno o más padecimientos seleccionados no son válidos";
-            }
-        }
-
-        return $errores;
+    public function validarPadecimientosExisten($tbpadecimientoid) {
+        return $this->clientePadecimientoData->validarPadecimientosExisten($tbpadecimientoid);
     }
 
     public function obtenerTBClientePadecimientoPorId($registroId) {
@@ -464,6 +453,7 @@ class ClientePadecimientoBusiness {
             return $this->clientePadecimientoData->insertarTBClientePadecimiento($nuevoRegistro);
         }
     }
+
     public function eliminarTBClientePadecimientoConDictamenes($tbclientepadecimientoid) {
 
         $registro = $this->obtenerTBClientePadecimientoPorId($tbclientepadecimientoid);
