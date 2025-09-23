@@ -7,11 +7,11 @@ class ReservaLibre
     private $horarioLibreId;
     private $activo;
 
-    // Properties to hold joined data
     private $clienteNombre;
     private $fecha;
     private $hora;
     private $salaNombre;
+    private $instructorNombre;
 
     public function __construct($id, $clienteId, $horarioLibreId, $activo)
     {
@@ -21,13 +21,11 @@ class ReservaLibre
         $this->activo = $activo;
     }
 
-    // --- Getters for main properties ---
     public function getId() { return $this->id; }
     public function getClienteId() { return $this->clienteId; }
     public function getHorarioLibreId() { return $this->horarioLibreId; }
     public function isActivo() { return $this->activo; }
 
-    // --- Getters and Setters for joined data ---
     public function getClienteNombre() { return $this->clienteNombre; }
     public function setClienteNombre($nombre) { $this->clienteNombre = $nombre; }
 
@@ -39,5 +37,7 @@ class ReservaLibre
 
     public function getSalaNombre() { return $this->salaNombre; }
     public function setSalaNombre($salaNombre) { $this->salaNombre = $salaNombre; }
+
+    public function getInstructorNombre() { return $this->instructorNombre; }
+    public function setInstructorNombre($nombre) { $this->instructorNombre = $nombre; }
 }
-?>

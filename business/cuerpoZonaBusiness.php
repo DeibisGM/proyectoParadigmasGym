@@ -47,7 +47,7 @@ class CuerpoZonaBusiness
 
     public function eliminarTBCuerpoZona($id)
     {
-        $partes = getCuerpoZonaParteZonaId($id);
+        $partes = $this->getCuerpoZonaParteZonaId($id);
 
         if($partes !== null){
             $this->parteZonaBusiness->desactivarParteZonaLista($partes);
@@ -81,5 +81,3 @@ class CuerpoZonaBusiness
         return $this->cuerpoZonaData->getCuerpoZonaParteZonaId($id);
     }
 }
-
-?>

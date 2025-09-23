@@ -1,8 +1,10 @@
 <?php
 session_start();
+ob_start();
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
+    ob_clean();
     echo json_encode(['success' => false, 'message' => 'Error de autenticación.']);
     exit();
 }
@@ -15,6 +17,7 @@ $reservaBusiness = new ReservaBusiness();
 
 if (isset($_POST['action']) && $_POST['action'] === 'create') {
     if ($tipoUsuario !== 'cliente') {
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Solo los clientes pueden reservar.']);
         exit();
     }
@@ -23,9 +26,9 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
     $horarioLibreId = $_POST['horarioLibreId'] ?? null;
     $horarioLibreIds = $_POST['horarioLibreIds'] ?? null;
 
-    // --- Case 1: Single Event Reservation (from form submission) ---
     if ($eventoId) {
         $resultado = $reservaBusiness->crearReserva($usuarioId, $eventoId, null);
+        ob_end_clean();
         if ($resultado === true) {
             header("Location: ../view/eventoClienteView.php?success=true");
         } else {
@@ -35,9 +38,9 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
         exit();
     }
 
-    // --- Case 2: Single Free Slot Reservation (from old AJAX call) ---
     if ($horarioLibreId) {
         $resultado = $reservaBusiness->crearReserva($usuarioId, null, $horarioLibreId);
+        ob_clean();
         if ($resultado === true) {
             echo json_encode(['success' => true, 'message' => 'Reserva creada con éxito.']);
         } else {
@@ -46,7 +49,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
         exit();
     }
 
-    // --- Case 3: Multiple Free Slot Reservation (new AJAX call) ---
     if ($horarioLibreIds && is_array($horarioLibreIds)) {
         $resultados = $reservaBusiness->crearMultiplesReservasLibre($usuarioId, $horarioLibreIds);
 
@@ -60,14 +62,13 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
             $message .= "Detalles de los fallos:\n";
             foreach($resultados['details'] as $detail) {
                 if ($detail['status'] === 'failure') {
-                    // Use the method from the already instantiated $reservaBusiness
                     $horario = $reservaBusiness->getHorarioLibrePorId($detail['id']);
                     $fechaHora = $horario ? $horario->getFecha() . ' a las ' . $horario->getHora() : 'ID ' . $detail['id'];
                     $message .= "- Horario (" . $fechaHora . "): " . $detail['reason'] . "\n";
                 }
             }
         }
-
+        ob_clean();
         echo json_encode([
             'success' => $successCount > 0,
             'message' => $message
@@ -76,21 +77,22 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
     }
 }
 
-// Default response if no case is matched
 if (isset($_POST['action']) && $_POST['action'] === 'cancel_libre') {
     if ($tipoUsuario !== 'cliente') {
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Acción no permitida.']);
         exit();
     }
 
     $reservaId = $_POST['reservaId'] ?? null;
     if (!$reservaId) {
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'ID de reserva no proporcionado.']);
         exit();
     }
 
     $resultado = $reservaBusiness->cancelarReservaLibre($reservaId, $usuarioId);
-
+    ob_clean();
     if ($resultado === true) {
         echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
     } else {
@@ -99,5 +101,5 @@ if (isset($_POST['action']) && $_POST['action'] === 'cancel_libre') {
     exit();
 }
 
+ob_clean();
 echo json_encode(['success' => false, 'message' => 'Acción no reconocida o datos insuficientes.']);
-?>

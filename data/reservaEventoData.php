@@ -23,9 +23,10 @@ class ReservaEventoData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $query = "SELECT re.*, e.tbeventonombre 
+        $query = "SELECT re.*, e.tbeventonombre, i.tbinstructornombre
                   FROM tbreservaevento re
                   JOIN tbevento e ON re.tbreservaeventoeventoid = e.tbeventoid
+                  LEFT JOIN tbinstructor i ON e.tbinstructorid = i.tbinstructorid
                   WHERE re.tbreservaeventoclienteid = ? ORDER BY re.tbreservaeventofecha DESC";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "i", $clienteId);
@@ -35,6 +36,7 @@ class ReservaEventoData extends Data
         while ($row = mysqli_fetch_assoc($result)) {
             $reserva = new ReservaEvento($row['tbreservaeventoid'], $row['tbreservaeventoclienteid'], $row['tbreservaeventoeventoid'], $row['tbreservaeventofecha'], $row['tbreservaeventohorainicio'], $row['tbreservaeventohorafin'], $row['tbreservaeventoestado']);
             $reserva->setEventoNombre($row['tbeventonombre']);
+            $reserva->setInstructorNombre($row['tbinstructornombre'] ?? 'N/A');
             $reservas[] = $reserva;
         }
         mysqli_close($conn);
@@ -65,29 +67,25 @@ class ReservaEventoData extends Data
         $query = "SELECT
                     re.*,
                     e.tbeventonombre,
-                    c.tbclientenombre
+                    c.tbclientenombre,
+                    i.tbinstructornombre
                   FROM tbreservaevento re
                   JOIN tbevento e ON re.tbreservaeventoeventoid = e.tbeventoid
                   JOIN tbcliente c ON re.tbreservaeventoclienteid = c.tbclienteid
+                  LEFT JOIN tbinstructor i ON e.tbinstructorid = i.tbinstructorid
                   ORDER BY re.tbreservaeventofecha DESC, re.tbreservaeventohorainicio DESC";
         $result = mysqli_query($conn, $query);
         $reservas = [];
         while ($row = mysqli_fetch_assoc($result)) {
             $reserva = new ReservaEvento(
-                $row['tbreservaeventoid'],
-                $row['tbreservaeventoclienteid'],
-                $row['tbreservaeventoeventoid'],
-                $row['tbreservaeventofecha'],
-                $row['tbreservaeventohorainicio'],
-                $row['tbreservaeventohorafin'],
-                $row['tbreservaeventoestado']
+                $row['tbreservaeventoid'], $row['tbreservaeventoclienteid'], $row['tbreservaeventoeventoid'], $row['tbreservaeventofecha'], $row['tbreservaeventohorainicio'], $row['tbreservaeventohorafin'], $row['tbreservaeventoestado']
             );
             $reserva->setClienteNombre($row['tbclientenombre']);
             $reserva->setEventoNombre($row['tbeventonombre']);
+            $reserva->setInstructorNombre($row['tbinstructornombre'] ?? 'N/A');
             $reservas[] = $reserva;
         }
         mysqli_close($conn);
         return $reservas;
     }
 }
-?>

@@ -11,6 +11,7 @@ class ReservaEvento
     private $tbreservaeventoestado;
     private $clienteNombre;
     private $eventoNombre;
+    private $instructorNombre;
 
     public function __construct($id, $clienteid, $eventoid, $fecha, $horaInicio, $horaFin, $estado)
     {
@@ -32,8 +33,9 @@ class ReservaEvento
     public function getEstado() { return $this->tbreservaeventoestado; }
     public function getClienteNombre() { return $this->clienteNombre; }
     public function getEventoNombre() { return $this->eventoNombre; }
+    public function getInstructorNombre() { return $this->instructorNombre; }
 
     public function setClienteNombre($nombre) { $this->clienteNombre = $nombre; }
     public function setEventoNombre($nombre) { $this->eventoNombre = $nombre; }
+    public function setInstructorNombre($nombre) { $this->instructorNombre = $nombre; }
 }
-?>

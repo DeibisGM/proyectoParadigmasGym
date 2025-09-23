@@ -9,17 +9,17 @@ if (!isset($_SESSION['usuario_id'])) {
 include_once '../business/horarioBusiness.php';
 include_once '../business/horarioLibreBusiness.php';
 include_once '../business/instructorBusiness.php';
-include_once '../business/reservaBusiness.php'; // For getting user's reservations
+include_once '../business/reservaBusiness.php';
 
 $tipoUsuario = $_SESSION['tipo_usuario'];
 $esAdmin = ($tipoUsuario === 'admin');
+$clienteId = $_SESSION['usuario_id'];
 
-// --- Lógica de Fechas para la Semana ---
+// --- Lógica de Fechas ---
 $timestamp = isset($_GET['semana']) ? strtotime($_GET['semana']) : time();
 $diaSemanaActual = date('N', $timestamp);
 $inicioSemana = (new DateTime(date('Y-m-d', $timestamp)))->modify('-' . ($diaSemanaActual - 1) . ' days');
 $finSemana = (clone $inicioSemana)->modify('+6 days');
-
 $semanaAnterior = (clone $inicioSemana)->modify('-7 days')->format('Y-m-d');
 $semanaSiguiente = (clone $inicioSemana)->modify('+7 days')->format('Y-m-d');
 $semanaActual = $inicioSemana->format('d/m/Y') . ' - ' . $finSemana->format('d/m/Y');
@@ -27,42 +27,37 @@ $semanaActual = $inicioSemana->format('d/m/Y') . ' - ' . $finSemana->format('d/m
 // --- Carga de Datos ---
 $horarioBusiness = new HorarioBusiness();
 $horariosSemanales = $horarioBusiness->getAllHorarios();
-
 $horarioLibreBusiness = new HorarioLibreBusiness();
 $horariosLibresCreados = $horarioLibreBusiness->getHorariosPorRangoDeFechas($inicioSemana->format('Y-m-d'), $finSemana->format('Y-m-d'));
-
 $instructorBusiness = new InstructorBusiness();
 $instructores = $instructorBusiness->getAllTBInstructor(true);
 
-// --- Procesar Datos para la Vista ---
+// --- Procesamiento de Datos ---
 $mapaHorariosSemanales = [];
-foreach($horariosSemanales as $h) {
-    $mapaHorariosSemanales[$h->getId()] = $h;
-}
+foreach($horariosSemanales as $h) { $mapaHorariosSemanales[$h->getId()] = $h; }
 
 $mapaHorariosLibres = [];
 $mapaInstructores = [];
-foreach($instructores as $i) {
-    $mapaInstructores[$i->getInstructorId()] = $i->getInstructorNombre();
-}
+foreach($instructores as $i) { $mapaInstructores[$i->getInstructorId()] = $i->getInstructorNombre(); }
 foreach($horariosLibresCreados as $hl) {
     $key = $hl->getFecha() . '_' . date('H', strtotime($hl->getHora()));
     $mapaHorariosLibres[$key] = $hl;
 }
 
-// --- Fetch user's reservations for visual feedback ---
+// --- Lógica de Reservas del Cliente ---
 $misReservasLookup = [];
 if ($tipoUsuario === 'cliente') {
     $reservaBusiness = new ReservaBusiness();
-    $misReservas = $reservaBusiness->getReservasLibrePorCliente($_SESSION['usuario_id']);
-    foreach ($misReservas as $reserva) {
-        $misReservasLookup[$reserva->getHorarioLibreId()] = $reserva->getId();
+    $misReservas = $reservaBusiness->getReservasLibrePorCliente($clienteId);
+    if(!empty($misReservas)){
+        foreach ($misReservas as $reserva) {
+            $misReservasLookup[$reserva->getHorarioLibreId()] = $reserva->getId();
+        }
     }
 }
 
-// Lógica para Determinar Rango de Horas Dinámico
-$horaMinima = 24;
-$horaMaxima = 0;
+// --- Lógica para el Rango de Horas Dinámico ---
+$horaMinima = 24; $horaMaxima = 0;
 foreach ($horariosSemanales as $horario) {
     if ($horario->isActivo()) {
         $apertura = (int)date('H', strtotime($horario->getApertura()));
@@ -71,10 +66,7 @@ foreach ($horariosSemanales as $horario) {
         if ($cierre > $horaMaxima) $horaMaxima = $cierre;
     }
 }
-if ($horaMinima >= $horaMaxima) { // Fallback por si no hay horarios definidos
-    $horaMinima = 8;
-    $horaMaxima = 20;
-}
+if ($horaMinima >= $horaMaxima) { $horaMinima = 8; $horaMaxima = 20; }
 
 $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 ?>
@@ -85,44 +77,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
     <title>Gestión de Horario de Uso Libre</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        .grid-container { overflow-x: auto; }
-        .grid-horario { border-collapse: collapse; width: 100%; table-layout: fixed; }
-        .grid-horario th, .grid-horario td { border: 1px solid #dee2e6; padding: 8px; text-align: center; height: 70px; }
-        .hora-label { font-weight: bold; vertical-align: middle; background-color: #f8f9fa;}
-        .celda-horario { vertical-align: middle; font-size: 0.85em; position: relative; }
-        .reservado-por-mi { background-color: #d4edda !important; border-color: #c3e6cb !important; }
-        .reservado-por-mi span { color: #155724; font-weight: bold; }
-        .btn-cancelar-slot { cursor: pointer; background-color: #ffc107; color: #212529; border: 1px solid #e0a800; padding: 2px 5px; font-size: 0.9em; border-radius: 3px; }
-        .btn-delete-slot {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            width: 22px;
-            height: 22px;
-            padding: 0;
-            background-color: #dc3545;
-            color: white;
-            border: 1px solid #c82333;
-            font-size: 14px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .btn-delete-slot:hover { background-color: #c82333; }
-        #btn-limpiar-seleccion {
-            background-color: #6c757d;
-            color: white;
-            border-color: #5a6268;
-        }
-        #btn-limpiar-seleccion:hover {
-            background-color: #5a6268;
-            border-color: #545b62;
-        }
-    </style>
 </head>
 <body>
 <div class="container">
@@ -137,12 +91,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
             <h3><?php echo $semanaActual; ?></h3>
             <a href="?semana=<?php echo $semanaSiguiente; ?>"><button>Semana Siguiente <i class="ph ph-caret-right"></i></button></a>
         </div>
-
-        <?php if (isset($_GET['success'])): ?>
-            <p class="success">Acción realizada con éxito.</p>
-        <?php elseif (isset($_GET['error'])): ?>
-            <p class="error">Error: <?= htmlspecialchars(urldecode($_GET['error'])) ?></p>
-        <?php endif; ?>
 
         <div class="grid-container">
             <table class="grid-horario">
@@ -175,9 +123,7 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                             $estaBloqueado = false;
                             if ($estaAbierto) {
                                 foreach ($horarioDelDia->getBloqueos() as $bloqueo) {
-                                    $inicioBloqueo = date('H', strtotime($bloqueo['inicio']));
-                                    $finBloqueo = date('H', strtotime($bloqueo['fin']));
-                                    if ($hora >= $inicioBloqueo && $hora < $finBloqueo) {
+                                    if ($hora >= date('H', strtotime($bloqueo['inicio'])) && $hora < date('H', strtotime($bloqueo['fin']))) {
                                         $estaBloqueado = true;
                                         break;
                                     }
@@ -190,35 +136,45 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
 
                                 if (isset($mapaHorariosLibres[$fechaHoraKey])) {
                                     $slot = $mapaHorariosLibres[$fechaHoraKey];
-                                    $instructorNombre = $mapaInstructores[$slot->getInstructorId()] ?? 'N/A';
                                     $disponibles = $slot->getCupos() - $slot->getMatriculados();
-
                                     $esMiReserva = ($tipoUsuario === 'cliente' && isset($misReservasLookup[$slot->getId()]));
+                                    $dataAttr .= ' data-id="' . $slot->getId() . '"';
 
                                     if ($esMiReserva) {
                                         $clase = 'reservado-por-mi';
                                         $reservaId = $misReservasLookup[$slot->getId()];
-                                        $contenido = '<span>RESERVADO</span><br><button class="btn-cancelar-slot" data-reserva-id="' . $reservaId . '">Cancelar</button>';
+                                        // Contenido consistente para reservas del cliente
+                                        $contenido = '<div class="slot-content">';
+                                        $contenido .= '<span class="slot-info">RESERVADO</span>';
+                                        $contenido .= '<button type="button" class="btn-cancelar-slot-icon" data-reserva-id="' . $reservaId . '" title="Cancelar mi reserva">';
+                                        $contenido .= '<i class="ph ph-x"></i>';
+                                        $contenido .= '</button>';
+                                        $contenido .= '</div>';
                                     } else {
-                                        $clase = 'creado';
-                                        if ($disponibles <= 0) {
-                                            $clase .= ' lleno';
-                                        } elseif ($tipoUsuario == 'cliente') {
-                                            $clase .= ' disponible-cliente';
+                                        if ($disponibles > 0) {
+                                            $clase = 'creado disponible-cliente';
+                                        } else {
+                                            $clase = 'creado lleno';
                                         }
-                                        $contenido = "<span>{$instructorNombre}<br>Cupos: {$disponibles}/{$slot->getCupos()}</span>";
+                                        $instructorNombre = $mapaInstructores[$slot->getInstructorId()] ?? 'N/A';
+                                        // Contenido consistente para slots disponibles y llenos
+                                        $contenido = '<div class="slot-content">';
+                                        $contenido .= '<span class="slot-info">' . $instructorNombre . '<br>Cupos: ' . $disponibles . '/' . $slot->getCupos() . '</span>';
+                                        if ($esAdmin) {
+                                            $contenido .= '<form method="POST" action="../action/horarioLibreAction.php" class="delete-form" onsubmit="return confirm(\'¿Eliminar este espacio y sus reservas asociadas?\');">';
+                                            $contenido .= '<input type="hidden" name="accion" value="eliminar">';
+                                            $contenido .= '<input type="hidden" name="id" value="' . $slot->getId() . '">';
+                                            $contenido .= '<button type="submit" title="Eliminar Espacio" class="btn-delete-slot">';
+                                            $contenido .= '<i class="ph ph-x"></i>';
+                                            $contenido .= '</button>';
+                                            $contenido .= '</form>';
+                                        }
+                                        $contenido .= '</div>';
                                     }
-
-                                    if ($esAdmin) {
-                                        $contenido .= '<form method="POST" action="../action/horarioLibreAction.php" style="display:inline;">
-                                                         <input type="hidden" name="accion" value="eliminar">
-                                                         <input type="hidden" name="id" value="' . $slot->getId() . '">
-                                                         <button type="submit" title="Eliminar Espacio" onclick="return confirm(\'¿Eliminar este espacio y sus reservas asociadas?\');" class="btn-delete-slot">X</button>
-                                                       </form>';
-                                    }
-                                    $dataAttr .= ' data-id="' . $slot->getId() . '"';
                                 } else {
-                                    if ($esAdmin) $clase = 'disponible-admin';
+                                    if ($esAdmin) {
+                                        $clase = 'disponible-admin';
+                                    }
                                 }
                             }
 
@@ -233,13 +189,12 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         </div>
 
         <?php if ($esAdmin): ?>
-            <section id="panel-admin-creacion">
+            <section id="panel-admin-creacion" style="display:none;">
                 <h3><i class="ph ph-plus-circle"></i> Crear Nuevos Espacios</h3>
                 <p>Se crearán <strong id="contador-seleccion">0</strong> espacios en las celdas seleccionadas.</p>
                 <form id="form-crear-slots" method="POST" action="../action/horarioLibreAction.php">
                     <input type="hidden" name="accion" value="crear">
                     <div id="slots-seleccionados-container"></div>
-
                     <label for="instructorId">Seleccionar Instructor:</label>
                     <select id="instructorId" name="instructorId" required>
                         <option value="">-- Elige un instructor --</option>
@@ -247,10 +202,8 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                             <option value="<?php echo $instructor->getInstructorId(); ?>"><?php echo htmlspecialchars($instructor->getInstructorNombre()); ?></option>
                         <?php endforeach; ?>
                     </select>
-
                     <label for="cupos">Cantidad de Cupos por Hora:</label>
                     <input type="number" id="cupos" name="cupos" min="1" required>
-
                     <button type="submit"><i class="ph ph-check-circle"></i> Confirmar Creación</button>
                     <button type="button" id="btn-limpiar-seleccion">Limpiar Selección</button>
                 </form>
@@ -302,7 +255,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         function updateAdminPanel() {
             const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
             contador.textContent = seleccionados.length;
-
             container.innerHTML = '';
             seleccionados.forEach(cell => {
                 const input = document.createElement('input');
@@ -311,7 +263,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                 input.value = cell.dataset.fechaHora;
                 container.appendChild(input);
             });
-
             panel.style.display = seleccionados.length > 0 ? 'block' : 'none';
         }
     }
@@ -324,18 +275,16 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         const btnLimpiar = document.getElementById('btn-limpiar-seleccion-cliente');
 
         grid.addEventListener('click', function(e) {
-            // Handle selection of available slots
             const cell = e.target.closest('.celda-horario.disponible-cliente');
             if (cell) {
                 cell.classList.toggle('seleccionado');
                 updateClientPanel();
-                return; // Stop processing if it's a selection click
+                return;
             }
 
-            // Handle cancellation click
-            const cancelButton = e.target.closest('.btn-cancelar-slot');
+            const cancelButton = e.target.closest('.btn-cancelar-slot-icon');
             if (cancelButton) {
-                e.stopPropagation(); // Prevent the cell selection logic from firing
+                e.stopPropagation();
                 const reservaId = cancelButton.dataset.reservaId;
                 if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
                     const formData = new FormData();
@@ -378,7 +327,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
             fetch('../action/reservaAction.php', { method: 'POST', body: formData })
                 .then(res => res.json())
                 .then(data => {
-                    // This will be improved in the next step to show detailed results
                     alert(data.message);
                     if(data.success) window.location.reload();
                 })
