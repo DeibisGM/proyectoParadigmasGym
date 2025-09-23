@@ -26,13 +26,13 @@ class EventoData extends Data
             $nuevoEventoId = ($rowId['max_id'] ?? 0) + 1;
             $evento->setId($nuevoEventoId);
 
-            $queryEvento = "INSERT INTO tbevento (tbeventoid, tbeventonombre, tbeventodescripcion, tbeventofecha, tbeventohorainicio, tbeventohorafin, tbeventoaforo, tbinstructorid, tbeventoestado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $queryEvento = "INSERT INTO tbevento (tbeventoid, tbinstructorid, tbeventonombre, tbeventodescripcion, tbeventofecha, tbeventohorainicio, tbeventohorafin, tbeventoaforo, tbeventoactivo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmtEvento = mysqli_prepare($conn, $queryEvento);
             mysqli_stmt_bind_param(
                 $stmtEvento, "isssssiii",
                 $evento->getId(), $evento->getNombre(), $evento->getDescripcion(), $evento->getFecha(),
                 $evento->getHoraInicio(), $evento->getHoraFin(), $evento->getAforo(),
-                $evento->getInstructorId(), $evento->getEstado()
+                $evento->getInstructorId(), $evento->getActivo()
             );
             if (!mysqli_stmt_execute($stmtEvento)) throw new Exception("Error al insertar el evento: " . mysqli_stmt_error($stmtEvento));
 
@@ -58,13 +58,13 @@ class EventoData extends Data
         mysqli_autocommit($conn, false);
 
         try {
-            $queryEvento = "UPDATE tbevento SET tbeventonombre=?, tbeventodescripcion=?, tbeventofecha=?, tbeventohorainicio=?, tbeventohorafin=?, tbeventoaforo=?, tbinstructorid=?, tbeventoestado=? WHERE tbeventoid=?";
+            $queryEvento = "UPDATE tbevento SET  tbinstructorid=?, tbeventonombre=?, tbeventodescripcion=?, tbeventofecha=?, tbeventohorainicio=?, tbeventohorafin=?, tbeventoaforo=?, tbeventoactivo=? WHERE tbeventoid=?";
             $stmtEvento = mysqli_prepare($conn, $queryEvento);
             mysqli_stmt_bind_param(
                 $stmtEvento, "sssssiiii",
                 $evento->getNombre(), $evento->getDescripcion(), $evento->getFecha(), $evento->getHoraInicio(),
                 $evento->getHoraFin(), $evento->getAforo(), $evento->getInstructorId(),
-                $evento->getEstado(), $evento->getId()
+                $evento->getActivo(), $evento->getId()
             );
             if (!mysqli_stmt_execute($stmtEvento)) throw new Exception("Error al actualizar el evento: " . mysqli_stmt_error($stmtEvento));
 
@@ -123,7 +123,7 @@ class EventoData extends Data
         $result = mysqli_query($conn, $query);
         $eventos = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $evento = new Evento($row['tbeventoid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'], $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'], $row['tbinstructorid'], $row['tbeventoestado']);
+            $evento = new Evento($row['tbeventoid'],  $row['tbinstructorid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'], $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'], $row['tbeventoactivo']);
             $evento->setInstructorNombre($row['tbinstructornombre'] ?? 'No asignado');
             $salaIds = $this->salaReservasData->getSalaIdsPorEventoId($evento->getId());
             if (!empty($salaIds)) {
@@ -155,7 +155,7 @@ class EventoData extends Data
             mysqli_close($conn);
             return null;
         }
-        $evento = new Evento($row['tbeventoid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'], $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'], $row['tbinstructorid'], $row['tbeventoestado']);
+        $evento = new Evento($row['tbeventoid'],  $row['tbinstructorid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'], $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'], $row['tbeventoactivo']);
         $evento->setInstructorNombre($row['tbinstructornombre'] ?? 'No asignado');
         $salaIds = $this->salaReservasData->getSalaIdsPorEventoId($id);
         if (!empty($salaIds)) {
@@ -179,12 +179,12 @@ class EventoData extends Data
                          (SELECT COUNT(*) FROM tbreservaevento WHERE tbreservaeventoeventoid = e.tbeventoid) as reservas_count
                   FROM tbevento e
                   LEFT JOIN tbinstructor i ON e.tbinstructorid = i.tbinstructorid
-                  WHERE e.tbeventoestado = 1 AND e.tbeventofecha >= CURDATE()
+                  WHERE e.tbeventoactivo = 1 AND e.tbeventofecha >= CURDATE()
                   ORDER BY e.tbeventofecha, e.tbeventohorainicio";
         $result = mysqli_query($conn, $query);
         $eventos = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $evento = new Evento($row['tbeventoid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'], $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'], $row['tbinstructorid'], $row['tbeventoestado']);
+            $evento = new Evento($row['tbeventoid'], $row['tbinstructorid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'], $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'],  $row['tbeventoactivo']);
             $evento->setInstructorNombre($row['tbinstructornombre'] ?? 'No asignado');
             $evento->setReservasCount($row['reservas_count']);
             $eventos[] = $evento;

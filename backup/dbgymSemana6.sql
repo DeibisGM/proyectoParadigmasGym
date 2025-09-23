@@ -138,7 +138,7 @@ CREATE TABLE `tbevento` (
 -- Volcado de datos para la tabla `tbevento`
 --
 
-INSERT INTO `tbevento` (`tbeventoid`, `tbeventonombre`, `tbeventodescripcion`, `tbeventofecha`, `tbeventohorainicio`, `tbeventohorafin`, `tbeventoaforo`, `tbinstructorid`, `tbeventoestado`) VALUES
+INSERT INTO `tbevento` (`tbeventoid`,  `tbinstructorid`, `tbeventonombre`, `tbeventodescripcion`, `tbeventofecha`, `tbeventohorainicio`, `tbeventohorafin`, `tbeventoaforo`, `tbeventoactivo`) VALUES
 (2, 'Zumba grupal', '', '2025-08-26', '14:00:00', '15:00:00', 2, 2, 1);
 
 -- --------------------------------------------------------

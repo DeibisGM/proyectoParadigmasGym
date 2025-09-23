@@ -191,8 +191,8 @@ if ($tipoUsuario === 'admin') {
                                     </td>
                                     <td>
                                         <select name="estado">
-                                            <option value="1" <?= (Validation::getOldInput('estado', $evento->getEstado()) == 1) ? 'selected' : '' ?>>Activo</option>
-                                            <option value="0" <?= (Validation::getOldInput('estado', $evento->getEstado()) == 0) ? 'selected' : '' ?>>Inactivo</option>
+                                            <option value="1" <?= (Validation::getOldInput('estado', $evento->getactivo()) == 1) ? 'selected' : '' ?>>Activo</option>
+                                            <option value="0" <?= (Validation::getOldInput('estado', $evento->getactivo()) == 0) ? 'selected' : '' ?>>Inactivo</option>
                                         </select>
                                     </td>
                                     <td class="actions-cell">

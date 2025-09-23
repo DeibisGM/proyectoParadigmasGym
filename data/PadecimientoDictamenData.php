@@ -1,6 +1,6 @@
 <?php
 include_once 'data.php';
-include_once __DIR__ . '/../logic/ImageManager.php';
+include_once dirname(__FILE__) . '/../utility/ImageManager.php';
 
 class PadecimientoDictamenData extends Data
 {

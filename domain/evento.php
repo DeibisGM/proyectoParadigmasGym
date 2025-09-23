@@ -10,14 +10,14 @@ class Evento
     private $horaFin;
     private $aforo;
     private $instructorId;
-    private $estado;
+    private $activo;
 
     // Propiedades adicionales
     private $instructorNombre;
     private $salasNombre;
     private $reservasCount;
 
-    public function __construct($id, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $instructorId, $estado)
+    public function __construct($id,  $instructorId,  $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $activo)
     {
         $this->id = $id;
         $this->nombre = $nombre;
@@ -27,7 +27,7 @@ class Evento
         $this->horaFin = $horaFin;
         $this->aforo = $aforo;
         $this->instructorId = $instructorId;
-        $this->estado = $estado;
+        $this->activo = $activo;
         $this->instructorNombre = '';
         $this->salasNombre = '';
         $this->reservasCount = 0;
@@ -74,9 +74,9 @@ class Evento
         return $this->instructorId;
     }
 
-    public function getEstado()
+    public function getActivo()
     {
-        return $this->estado;
+        return $this->activo;
     }
 
     public function getInstructorNombre()
