@@ -23,7 +23,7 @@ class HorarioData extends Data
                 $row['tbhorarioactivo'],
                 $row['tbhorarioapertura'],
                 $row['tbhorariocierre'],
-                $row['tbhorariobloqueos']
+                $row['tbhorariobloqueo']
             );
         }
         return $horarios;
@@ -34,7 +34,7 @@ class HorarioData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbhorario SET tbhorarioactivo=?, tbhorarioapertura=?, tbhorariocierre=?, tbhorariobloqueos=? WHERE tbhorarioid=?;";
+        $queryUpdate = "UPDATE tbhorario SET tbhorarioactivo=?, tbhorarioapertura=?, tbhorariocierre=?, tbhorariobloqueo=? WHERE tbhorarioid=?;";
 
         $stmt = mysqli_prepare($conn, $queryUpdate);
 
@@ -76,7 +76,7 @@ class HorarioData extends Data
                 $row['tbhorarioactivo'],
                 $row['tbhorarioapertura'],
                 $row['tbhorariocierre'],
-                $row['tbhorariobloqueos']
+                $row['tbhorariobloqueo']
             );
         }
         return null;

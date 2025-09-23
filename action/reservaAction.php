@@ -1,67 +1,105 @@
 <?php
 session_start();
+ob_start();
 header('Content-Type: application/json');
 
-// 1. Verificación de seguridad: el usuario debe haber iniciado sesión
 if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
-    echo json_encode(['success' => false, 'message' => 'Error de autenticación: No ha iniciado sesión.']);
+    ob_clean();
+    echo json_encode(['success' => false, 'message' => 'Error de autenticación.']);
     exit();
 }
 
 include_once '../business/reservaBusiness.php';
 
-$response = ['success' => false, 'message' => 'Acción no reconocida o datos incorrectos.'];
 $usuarioId = $_SESSION['usuario_id'];
 $tipoUsuario = $_SESSION['tipo_usuario'];
+$reservaBusiness = new ReservaBusiness();
 
-// 2. Procesar la acción solicitada (crear o cancelar)
-if (isset($_POST['action'])) {
-    $reservaBusiness = new ReservaBusiness();
+if (isset($_POST['action']) && $_POST['action'] === 'create') {
+    if ($tipoUsuario !== 'cliente') {
+        ob_clean();
+        echo json_encode(['success' => false, 'message' => 'Solo los clientes pueden reservar.']);
+        exit();
+    }
 
-    // Acción para CREAR una nueva reserva
-    if ($_POST['action'] === 'create') {
-        if ($tipoUsuario !== 'cliente') {
-            $response['message'] = 'Solo los clientes pueden realizar reservas.';
+    $eventoId = $_POST['eventoId'] ?? null;
+    $horarioLibreId = $_POST['horarioLibreId'] ?? null;
+    $horarioLibreIds = $_POST['horarioLibreIds'] ?? null;
+
+    if ($eventoId) {
+        $resultado = $reservaBusiness->crearReserva($usuarioId, $eventoId, null);
+        ob_end_clean();
+        if ($resultado === true) {
+            header("Location: ../view/eventoClienteView.php?success=true");
         } else {
-            $fecha = $_POST['fecha'] ?? null;
-            $hora = $_POST['hora'] ?? null;
-            // Maneja correctamente si el eventoId es null (para uso libre)
-            $eventoId = isset($_POST['eventoId']) && $_POST['eventoId'] !== 'null' ? $_POST['eventoId'] : null;
+            $errorMessage = urlencode(is_string($resultado) ? $resultado : 'Error al procesar la reserva.');
+            header("Location: ../view/eventoClienteView.php?error=" . $errorMessage);
+        }
+        exit();
+    }
 
-            if ($fecha && $hora) {
-                $resultado = $reservaBusiness->crearReserva($usuarioId, $eventoId, $fecha, $hora);
+    if ($horarioLibreId) {
+        $resultado = $reservaBusiness->crearReserva($usuarioId, null, $horarioLibreId);
+        ob_clean();
+        if ($resultado === true) {
+            echo json_encode(['success' => true, 'message' => 'Reserva creada con éxito.']);
+        } else {
+            echo json_encode(['success' => false, 'message' => is_string($resultado) ? $resultado : 'Error al procesar la reserva.']);
+        }
+        exit();
+    }
 
-                if ($resultado === true) {
-                    $response['success'] = true;
-                    $response['message'] = '¡Reserva creada con éxito!';
-                } else {
-                    // Si el negocio devuelve un string, es un mensaje de error específico
-                    $response['message'] = is_string($resultado) ? $resultado : 'Error desconocido al crear la reserva.';
+    if ($horarioLibreIds && is_array($horarioLibreIds)) {
+        $resultados = $reservaBusiness->crearMultiplesReservasLibre($usuarioId, $horarioLibreIds);
+
+        $successCount = $resultados['success_count'];
+        $failureCount = $resultados['failure_count'];
+        $message = "Resumen de la operación:\n";
+        $message .= "Reservas exitosas: " . $successCount . "\n";
+        $message .= "Reservas fallidas: " . $failureCount . "\n\n";
+
+        if ($failureCount > 0) {
+            $message .= "Detalles de los fallos:\n";
+            foreach($resultados['details'] as $detail) {
+                if ($detail['status'] === 'failure') {
+                    $horario = $reservaBusiness->getHorarioLibrePorId($detail['id']);
+                    $fechaHora = $horario ? $horario->getFecha() . ' a las ' . $horario->getHora() : 'ID ' . $detail['id'];
+                    $message .= "- Horario (" . $fechaHora . "): " . $detail['reason'] . "\n";
                 }
-            } else {
-                $response['message'] = 'Faltan datos para procesar la reserva (fecha u hora).';
             }
         }
-    } // Acción para CANCELAR una reserva existente
-    elseif ($_POST['action'] === 'cancel') {
-        $reservaId = $_POST['reservaId'] ?? null;
-        if ($reservaId) {
-            $resultado = $reservaBusiness->cancelarReserva($reservaId, $usuarioId, $tipoUsuario);
-
-            // La capa de negocio puede devolver true o 1 en caso de éxito
-            if ($resultado === true || $resultado == 1) {
-                $response['success'] = true;
-                $response['message'] = 'Reserva cancelada correctamente.';
-            } else {
-                $response['message'] = is_string($resultado) ? $resultado : 'Error al cancelar la reserva.';
-            }
-        } else {
-            $response['message'] = 'No se especificó qué reserva cancelar.';
-        }
+        ob_clean();
+        echo json_encode([
+            'success' => $successCount > 0,
+            'message' => $message
+        ]);
+        exit();
     }
 }
 
-// 3. Devolver la respuesta final en formato JSON
+if (isset($_POST['action']) && $_POST['action'] === 'cancel_libre') {
+    if ($tipoUsuario !== 'cliente') {
+        ob_clean();
+        echo json_encode(['success' => false, 'message' => 'Acción no permitida.']);
+        exit();
+    }
+
+    $reservaId = $_POST['reservaId'] ?? null;
+    if (!$reservaId) {
+        ob_clean();
+        echo json_encode(['success' => false, 'message' => 'ID de reserva no proporcionado.']);
+        exit();
+    }
+
+    $resultado = $reservaBusiness->cancelarReservaLibre($reservaId, $usuarioId);
+    ob_clean();
+    if ($resultado === true) {
+        echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
+    } else {
+        echo json_encode(['success' => false, 'message' => is_string($resultado) ? $resultado : 'Error al cancelar la reserva.']);
+    }
+    exit();
+}
+
 ob_clean();
-echo json_encode($response);
-?>
+echo json_encode(['success' => false, 'message' => 'Acción no reconocida o datos insuficientes.']);

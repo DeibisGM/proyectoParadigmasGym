@@ -1,4 +1,6 @@
-
+/* =================================================================
+   ESTILOS BASE Y GENERALES
+   ================================================================= */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f8f9fa;
@@ -36,75 +38,14 @@ a {
 }
 
 a:hover {
-    text-decoration: none;
+    text-decoration: underline;
 }
 
-form {
-    margin-bottom: 2rem;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="date"],
-input[type="time"],
-input[type="number"],
-select,
-textarea {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 1rem;
-}
-
-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-button,
-input[type="submit"] {
-    background-color: #f8f9fa;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    padding: 0.75rem 0.75rem;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5em;
-    margin: 0;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-.button-icon-only {
-    padding: 0.5rem;
-    width: 2.5em;
-    height: 2.5em;
-    flex-shrink: 0;
-}
-
-button i.ph,
-input[type="submit"] i.ph {
-    margin-right: 0;
-}
-
-button:hover,
-input[type="submit"]:hover {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-}
-
-
-.menu-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #dee2e6;
+    margin: 2rem 0;
 }
 
 main section {
@@ -119,6 +60,128 @@ main section:last-child {
     padding-bottom: 0;
 }
 
+/* =================================================================
+   FORMULARIOS Y BOTONES (Estilos generales)
+   ================================================================= */
+.container form {
+    margin-bottom: 2rem;
+}
+
+.container input[type="text"],
+.container input[type="email"],
+.container input[type="password"],
+.container input[type="date"],
+.container input[type="time"],
+.container input[type="number"],
+.container select,
+.container textarea {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.container textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.container button,
+.container input[type="submit"] {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5em;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.container button:hover,
+.container input[type="submit"]:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+
+/* =================================================================
+   VISTA DE LOGIN (Estilos específicos)
+   ================================================================= */
+.login-container {
+    max-width: 400px;
+    margin: 4rem auto;
+    padding: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #fff;
+    text-align: center;
+}
+
+.login-container h1 {
+    margin-bottom: 2rem;
+}
+
+.login-container .form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.login-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.login-container input[type="email"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.login-container input[type="submit"] {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    color: #212529;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.login-container input[type="submit"]:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.nota-credenciales {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    text-align: left;
+}
+
+/* =================================================================
+   COMPONENTES REUTILIZABLES (Tablas, etc.)
+   ================================================================= */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -138,224 +201,186 @@ th {
     font-weight: 600;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
-}
+/* =================================================================
+   VISTAS ESPECÍFICAS
+   ================================================================= */
 
-.form-group {
+/* --- Horario Libre View --- */
+.navegacion-semana {
     display: flex;
-    flex-direction: column;
-}
-
-.form-group label {
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-}
-
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
-
-.actions-cell {
-    display: flex;
-    gap: 0.5rem;
+    justify-content: space-between;
     align-items: center;
-}
-
-.actions-cell button {
-    padding: 0.6rem;
-}
-
-td .image-gallery {
-    display: flex;
+    margin-bottom: 20px;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.image-container img {
-    border-radius: 4px;
-    object-fit: cover;
-    width: 60px;
-    height: 60px;
-}
-
-.delete-image-btn {
-    width: 20px;
-    height: 20px;
-    font-size: 12px;
-    line-height: 20px;
-    padding: 0 !important;
-}
-
-td textarea, td input[type="text"] {
-    width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-}
-
-.login-container {
-    max-width: 400px;
-    margin: 4rem auto;
-    padding: 2rem;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    background-color: #fff;
-}
-
-td input[type="text"],
-td input[type="email"],
-td input[type="password"],
-td input[type="date"],
-td input[type="time"],
-td input[type="number"],
-td select {
-    min-width: 200px;
-}
-
-td {
-    min-width: 160px;
-}
-
-.image-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-}
-
-.image-container {
-    position: relative;
-    display: inline-block;
-}
-
-.image-container img {
-    max-width: 100px;
-    max-height: 100px;
-    border: 1px solid #ddd;
-}
-
-.delete-image-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: red;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 12px;
-    line-height: 1;
-    padding: 2px 5px;
-}
-
-.profile-pic {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.day-container {
-    border: 1px solid #dee2e6;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    border-radius: 8px;
-}
-
-.day-header {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-.time-inputs {
-    margin-left: 20px;
-}
-
-.bloqueo-item {
-    margin-bottom: 10px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.bloqueos-container h4 {
-    margin-top: 1.5rem;
-}
-
-.error {
-    color: #721c24;
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 1rem;
-    margin-top: 1rem;
-    border-radius: 4px;
-}
-
-.success {
-    color: #155724;
-    background-color: #d4edda;
-    border: 1px solid #c3e6cb;
-    padding: 1rem;
-    margin-top: 1rem;
-    border-radius: 4px;
-}
-
-.page-layout {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-}
-
-@media (max-width: 900px) {
-    .page-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-.disponibilidad-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 1rem;
 }
 
-.slot {
-    border: 1px solid #dee2e6;
-    padding: 1rem;
-    border-radius: 4px;
+.grid-container {
+    overflow-x: auto;
+    padding-bottom: 1rem;
 }
 
-.slot.lleno {
+.grid-horario {
+    width: 100%;
+    min-width: 800px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.grid-horario th, .grid-horario td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: center;
+    height: 70px;
+}
+
+.grid-horario th {
     background-color: #f8f9fa;
-    color: #6c757d;
+    font-weight: 600;
 }
 
-.nota-credenciales {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+.hora-label {
+    font-weight: bold;
+    vertical-align: middle;
+    background-color: #f8f9fa;
+}
+
+.celda-horario {
+    vertical-align: middle;
+    font-size: 0.85em;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.celda-horario.deshabilitado {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.celda-horario.seleccionado {
+    background-color: #b8daff !important;
+    border: 2px solid #007bff;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+}
+
+.celda-horario.creado.disponible-cliente {
+    background-color: #d4edda; /* Verde - Disponible */
+    color: #155724;
+    cursor: pointer;
+}
+.celda-horario.creado.disponible-cliente:hover {
+    background-color: #c3e6cb;
+    border: 2px solid #28a745;
+}
+
+.celda-horario.creado.lleno {
+    background-color: #f8d7da; /* Rojo - Ocupado */
+    color: #721c24;
+    cursor: not-allowed;
+}
+
+.celda-horario.reservado-por-mi {
+    background-color: #fff3cd !important; /* Amarillo - Reservado por mí */
+    border-color: #ffeeba !important;
+    color: #856404;
+    font-weight: bold;
+    cursor: default;
+}
+
+#panel-cliente-reserva {
+    border: 1px solid #ced4da;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.container .btn-cancelar-slot-icon {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    background-color: #e53e3e;
+    color: white;
+    border: none;
     border-radius: 4px;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: background-color 0.2s;
+}
+.container .btn-cancelar-slot-icon:hover {
+    background-color: #c53030;
+}
+.container .btn-cancelar-slot-icon i {
+    margin: 0;
+    font-size: 16px;
+}
+/* =================================================================
+   ESTILOS PARA CONTENIDO Y SLOTS EN CELDAS DE HORARIO
+   ================================================================= */
+
+/* Contenedor principal para el contenido de las celdas */
+.slot-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    box-sizing: border-box;
 }
 
-.error-message {
-    color: red;
-    margin-top: 1rem;
+/* Información del slot */
+.slot-info {
+    flex: 1;
+    font-size: 0.85em;
+    line-height: 1.2;
+    text-align: left;
 }
 
-.success-message {
-    color: green;
+/* Botones de eliminar/cancelar consistentes */
+.btn-delete-slot,
+.btn-cancelar-slot-icon {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    margin-left: 4px;
+    flex-shrink: 0;
 }
 
-#mensaje {
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid;
-    border-radius: 5px;
+.btn-delete-slot:hover, 
+.btn-cancelar-slot-icon:hover {
+    background: #ff4444;
+    color: white;
+    border-color: #ff4444;
+}
+
+/* Forms de eliminación */
+.delete-form {
+    margin: 0;
+    padding: 0;
+    display: inline;
+}
+
+/* Ajustes para celdas */
+.celda-horario {
+    position: relative;
+    min-height: 60px;
+    vertical-align: top;
 }
