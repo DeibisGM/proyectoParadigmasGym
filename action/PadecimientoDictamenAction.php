@@ -8,6 +8,9 @@ ob_start();
 try {
     include_once '../business/PadecimientoDictamenBusiness.php';
     include_once '../utility/ImageManager.php';
+    include_once '../utility/Validation.php';
+
+    Validation::start();
 
     header('Content-Type: application/json');
 
@@ -19,6 +22,7 @@ try {
 
     if (!isset($_SESSION['tipo_usuario'])) {
         $response['message'] = 'No autorizado. Por favor, inicie sesión.';
+        ob_clean();
         echo json_encode($response);
         exit();
     }
@@ -41,29 +45,35 @@ try {
             $clienteId = null;
 
             if ($esAdminOInstructor) {
-
                 $clienteId = $_POST['clienteId'] ?? '';
                 if (empty($clienteId) || !is_numeric($clienteId)) {
                     $response['message'] = 'Debe seleccionar un cliente válido.';
-                    break;
+                    echo json_encode($response);
+                    exit();
                 }
             } else if ($esCliente) {
                 $clienteId = $_SESSION['usuario_id'];
-
                 if (empty($clienteId)) {
                     $response['message'] = 'No se pudo identificar el cliente. Inicie sesión nuevamente.';
-                    break;
+                    echo json_encode($response);
+                    exit();
                 }
             }
 
-            if (empty($fechaemision) || empty($entidademision)) {
-                $response['message'] = 'La fecha y entidad de emisión son obligatorias.';
-                break;
+            if (empty($fechaemision)) {
+                $response['message'] = 'La fecha de emisión es obligatoria.';
+                echo json_encode($response);
+                exit();
+            } elseif (strtotime($fechaemision) > time()) {
+                $response['message'] = 'La fecha de emisión no puede ser futura.';
+                echo json_encode($response);
+                exit();
             }
 
-            if (strtotime($fechaemision) > time()) {
-                $response['message'] = 'La fecha de emisión no puede ser futura.';
-                break;
+            if (empty($entidademision)) {
+                $response['message'] = 'La entidad de emisión es obligatoria.';
+                echo json_encode($response);
+                exit();
             }
 
             include_once '../business/clientePadecimientoBusiness.php';
@@ -72,7 +82,8 @@ try {
 
             if (!empty($dictamenesExistentes)) {
                 $response['message'] = 'Este cliente ya posee un dictamen registrado. No es posible registrar múltiples dictámenes para el mismo cliente.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             $padecimiento = new PadecimientoDictamen(0, $fechaemision, $entidademision, '');
@@ -106,7 +117,6 @@ try {
                         'imagenes' => $imageManager->getImagesByIds($imagenIdLista)
                     ];
                 } else {
-
                     $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($nuevoId);
                     $response['message'] = 'Error al asociar el dictamen con el cliente.';
                 }
@@ -125,23 +135,27 @@ try {
 
             if (empty($id) || empty($fechaemision) || empty($entidademision)) {
                 $response['message'] = 'Faltan datos obligatorios para actualizar.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             if (!is_numeric($id)) {
                 $response['message'] = 'ID de padecimiento inválido.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             if (strtotime($fechaemision) > time()) {
                 $response['message'] = 'La fecha de emisión no puede ser futura.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             $padecimientoActual = $padecimientoDictamenBusiness->getPadecimientoDictamenPorId($id);
             if (!$padecimientoActual) {
                 $response['message'] = 'Padecimiento no encontrado.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             $padecimientoActual->setPadecimientodictamenfechaemision($fechaemision);
@@ -175,19 +189,22 @@ try {
 
             if (!$esAdminOInstructor) {
                 $response['message'] = 'No tiene permisos para eliminar padecimientos.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             $id = $_POST['id'] ?? null;
             if (empty($id) || !is_numeric($id)) {
                 $response['message'] = 'ID de padecimiento inválido.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             $padecimientoExistente = $padecimientoDictamenBusiness->getPadecimientoDictamenPorId($id);
             if (!$padecimientoExistente) {
                 $response['message'] = 'El padecimiento no existe en la base de datos.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             $eliminacionExitosa = $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($id);
@@ -205,7 +222,8 @@ try {
 
             if (!$esAdminOInstructor) {
                 $response['message'] = 'No tiene permisos para eliminar imágenes.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             $padecimientoId = $_POST['padecimiento_id'] ?? null;
@@ -213,12 +231,14 @@ try {
 
             if (empty($padecimientoId) || empty($imagenId)) {
                 $response['message'] = 'ID de padecimiento o imagen faltante.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             if (!is_numeric($padecimientoId) || !is_numeric($imagenId)) {
                 $response['message'] = 'IDs deben ser numéricos.';
-                break;
+                echo json_encode($response);
+                exit();
             }
 
             if ($padecimientoDictamenBusiness->eliminarImagenDePadecimiento($padecimientoId, $imagenId)) {

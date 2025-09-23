@@ -21,12 +21,16 @@ class PadecimientoDictamenData extends Data
         ) VALUES (?, ?, ?);";
 
         $stmt = mysqli_prepare($conn, $queryInsert);
+        $fechaemision = $padecimientodictamen->getPadecimientodictamenfechaemision();
+        $entidademision = $padecimientodictamen->getPadecimientodictamenentidademision();
+        $imagenid = $padecimientodictamen->getPadecimientodictamenimagenid();
+
         mysqli_stmt_bind_param(
             $stmt,
             'sss',
-            $padecimientodictamen->getPadecimientodictamenfechaemision(),
-            $padecimientodictamen->getPadecimientodictamenentidademision(),
-            $padecimientodictamen->getPadecimientodictamenimagenid()
+            $fechaemision,
+            $entidademision,
+            $imagenid
         );
 
         $result = mysqli_stmt_execute($stmt);
@@ -59,13 +63,18 @@ class PadecimientoDictamenData extends Data
             WHERE tbpadecimientodictamenid = ?;";
 
         $stmt = mysqli_prepare($conn, $queryUpdate);
+        $fechaemision = $padecimientodictamen->getPadecimientodictamenfechaemision();
+        $entidademision = $padecimientodictamen->getPadecimientodictamenentidademision();
+        $imagenid = $padecimientodictamen->getPadecimientodictamenimagenid();
+        $id = $padecimientodictamen->getPadecimientodictamenid();
+
         mysqli_stmt_bind_param(
             $stmt,
             'sssi',
-            $padecimientodictamen->getPadecimientodictamenfechaemision(),
-            $padecimientodictamen->getPadecimientodictamenentidademision(),
-            $padecimientodictamen->getPadecimientodictamenimagenid(),
-            $padecimientodictamen->getPadecimientodictamenid()
+            $fechaemision,
+            $entidademision,
+            $imagenid,
+            $id
         );
 
         $result = mysqli_stmt_execute($stmt);
