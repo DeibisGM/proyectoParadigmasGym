@@ -63,12 +63,9 @@ class ReservaEventoData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
         $query = "SELECT
-                    re.tbreservaeventofecha as fecha,
-                    re.tbreservaeventohorainicio as hora,
-                    'Evento' as tipo,
-                    e.tbeventonombre as nombre,
-                    c.tbclientenombre as cliente,
-                    re.tbreservaeventoestado as estado
+                    re.*,
+                    e.tbeventonombre,
+                    c.tbclientenombre
                   FROM tbreservaevento re
                   JOIN tbevento e ON re.tbreservaeventoeventoid = e.tbeventoid
                   JOIN tbcliente c ON re.tbreservaeventoclienteid = c.tbclienteid
@@ -76,7 +73,18 @@ class ReservaEventoData extends Data
         $result = mysqli_query($conn, $query);
         $reservas = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $reservas[] = $row;
+            $reserva = new ReservaEvento(
+                $row['tbreservaeventoid'],
+                $row['tbreservaeventoclienteid'],
+                $row['tbreservaeventoeventoid'],
+                $row['tbreservaeventofecha'],
+                $row['tbreservaeventohorainicio'],
+                $row['tbreservaeventohorafin'],
+                $row['tbreservaeventoestado']
+            );
+            $reserva->setClienteNombre($row['tbclientenombre']);
+            $reserva->setEventoNombre($row['tbeventonombre']);
+            $reservas[] = $reserva;
         }
         mysqli_close($conn);
         return $reservas;

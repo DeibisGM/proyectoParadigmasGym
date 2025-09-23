@@ -8,12 +8,10 @@ if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
 }
 
 include_once '../business/reservaBusiness.php';
-include_once '../business/horarioLibreBusiness.php'; // Use business layer instead of data
 
 $usuarioId = $_SESSION['usuario_id'];
 $tipoUsuario = $_SESSION['tipo_usuario'];
 $reservaBusiness = new ReservaBusiness();
-$horarioLibreBusiness = new HorarioLibreBusiness(); // Instantiate the business class
 
 if (isset($_POST['action']) && $_POST['action'] === 'create') {
     if ($tipoUsuario !== 'cliente') {
@@ -62,8 +60,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
             $message .= "Detalles de los fallos:\n";
             foreach($resultados['details'] as $detail) {
                 if ($detail['status'] === 'failure') {
-                    // We need to get the date/time for the failed ID to show a useful message
-                    $horario = $horarioLibreBusiness->getHorarioLibrePorId($detail['id']);
+                    // Use the method from the already instantiated $reservaBusiness
+                    $horario = $reservaBusiness->getHorarioLibrePorId($detail['id']);
                     $fechaHora = $horario ? $horario->getFecha() . ' a las ' . $horario->getHora() : 'ID ' . $detail['id'];
                     $message .= "- Horario (" . $fechaHora . "): " . $detail['reason'] . "\n";
                 }

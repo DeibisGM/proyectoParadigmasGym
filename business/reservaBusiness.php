@@ -70,29 +70,44 @@ class ReservaBusiness
         return "Error al crear la reserva de uso libre.";
     }
 
+    private function _procesarListasDeReservas($reservasEventos, $reservasLibres, $incluirClienteNombre = false)
+    {
+        $todas = [];
+        foreach ($reservasEventos as $r) {
+            $reserva = [
+                'fecha' => $r->getFecha(),
+                'hora' => date('H:i', strtotime($r->getHoraInicio())),
+                'tipo' => 'Evento',
+                'nombre' => $r->getEventoNombre(),
+                'estado' => $r->getEstado(),
+            ];
+            if ($incluirClienteNombre) {
+                $reserva['cliente'] = $r->getClienteNombre();
+            }
+            $todas[] = $reserva;
+        }
+
+        foreach ($reservasLibres as $r) {
+            $reserva = [
+                'fecha' => $r->getFecha(),
+                'hora' => date('H:i', strtotime($r->getHora())),
+                'tipo' => 'Uso Libre',
+                'nombre' => 'Uso de ' . $r->getSalaNombre(),
+                'estado' => $r->isActivo() ? 'Activa' : 'Inactiva',
+            ];
+            if ($incluirClienteNombre) {
+                $reserva['cliente'] = $r->getClienteNombre();
+            }
+            $todas[] = $reserva;
+        }
+        return $todas;
+    }
+
     public function getTodasMisReservas($clienteId) {
         $reservasEventos = $this->reservaEventoData->getReservasEventoPorCliente($clienteId);
         $reservasLibres = $this->reservaLibreData->getReservasLibrePorCliente($clienteId);
 
-        $todas = [];
-        foreach($reservasEventos as $r) {
-            $todas[] = [
-                'tipo' => 'Evento',
-                'nombre' => $r->getEventoNombre(),
-                'fecha' => $r->getFecha(),
-                'hora' => date('H:i', strtotime($r->getHoraInicio())),
-                'estado' => $r->getEstado()
-            ];
-        }
-        foreach($reservasLibres as $r) {
-            $todas[] = [
-                'tipo' => 'Uso Libre',
-                'nombre' => 'Uso de ' . $r->getSalaNombre(),
-                'fecha' => $r->getFecha(),
-                'hora' => date('H:i', strtotime($r->getHora())),
-                'estado' => $r->isActivo() ? 'Activa' : 'Inactiva'
-            ];
-        }
+        $todas = $this->_procesarListasDeReservas($reservasEventos, $reservasLibres, false);
 
         usort($todas, function($a, $b) {
             return strtotime($b['fecha'] . ' ' . $b['hora']) - strtotime($a['fecha'] . ' ' . $a['hora']);
@@ -106,31 +121,7 @@ class ReservaBusiness
         $reservasEventos = $this->reservaEventoData->getAllReservasEvento();
         $reservasLibres = $this->reservaLibreData->getAllReservasLibre();
 
-        $todas = [];
-
-        // Process event reservations
-        foreach ($reservasEventos as $r) {
-            $todas[] = [
-                'fecha' => $r['fecha'],
-                'hora' => date('H:i', strtotime($r['hora'])),
-                'cliente' => $r['cliente'],
-                'tipo' => 'Evento',
-                'nombre' => $r['nombre'],
-                'estado' => $r['estado'],
-            ];
-        }
-
-        // Process free space reservations
-        foreach ($reservasLibres as $r) {
-            $todas[] = [
-                'fecha' => $r->getFecha(),
-                'hora' => date('H:i', strtotime($r->getHora())),
-                'cliente' => $r->getClienteNombre(),
-                'tipo' => 'Uso Libre',
-                'nombre' => 'Uso de ' . $r->getSalaNombre(),
-                'estado' => $r->isActivo() ? 'Activa' : 'Inactiva',
-            ];
-        }
+        $todas = $this->_procesarListasDeReservas($reservasEventos, $reservasLibres, true);
 
         // Sort all reservations by date and time, descending
         usort($todas, function ($a, $b) {
@@ -189,6 +180,11 @@ class ReservaBusiness
         }
 
         return "Error al cancelar la reserva.";
+    }
+
+    public function getHorarioLibrePorId($id)
+    {
+        return $this->horarioLibreData->getHorarioLibrePorId($id);
     }
 }
 ?>
