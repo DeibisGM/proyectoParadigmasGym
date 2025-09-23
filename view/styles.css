@@ -1,4 +1,53 @@
 /* =================================================================
+   ESTILOS PARA IMAGENES EN TABLAS
+   ================================================================= */
+.image-container {
+    width: 80px; /* Ancho fijo para el contenedor de la imagen */
+    height: 80px; /* Alto fijo para el contenedor de la imagen */
+    overflow: hidden; /* Ocultar cualquier parte de la imagen que se desborde */
+    border-radius: 8px; /* Bordes redondeados para la imagen */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* Para posicionar el botón de eliminar */
+    margin: 0 auto; /* Centrar el contenedor */
+    border: 1px solid #dee2e6;
+}
+
+.image-container img {
+    max-width: 100%; /* Asegura que la imagen no exceda el ancho del contenedor */
+    max-height: 100%; /* Asegura que la imagen no exceda el alto del contenedor */
+    height: auto; /* Mantiene la proporción de la imagen */
+    display: block; /* Elimina espacio extra debajo de la imagen */
+    object-fit: cover; /* Cubre el área del contenedor, recortando si es necesario */
+}
+
+.image-container button[name="delete_image"] {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease;
+}
+
+.image-container button[name="delete_image"]:hover {
+    background-color: #c82333;
+}
+
+/* =================================================================
    ESTILOS BASE Y GENERALES
    ================================================================= */
 body {
@@ -194,6 +243,11 @@ th, td {
     text-align: left;
     border-bottom: 1px solid #dee2e6;
     vertical-align: top;
+}
+
+td select {
+    width: auto; /* Permite que el select se ajuste a su contenido */
+    min-width: 120px; /* Asegura un ancho mínimo */
 }
 
 th {

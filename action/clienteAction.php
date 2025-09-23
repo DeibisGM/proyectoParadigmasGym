@@ -98,7 +98,7 @@ if (isset($_POST['delete_image'])) {
         }
 
         if (Validation::hasErrors()) {
-            header($redirect_path);
+            header("Location: " . $redirect_path);
             exit();
         }
 
