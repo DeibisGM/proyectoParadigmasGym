@@ -15,6 +15,7 @@ class Evento
     // Propiedades adicionales
     private $instructorNombre;
     private $salasNombre;
+    private $reservasCount;
 
     public function __construct($id, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $instructorId, $estado)
     {
@@ -29,6 +30,7 @@ class Evento
         $this->estado = $estado;
         $this->instructorNombre = '';
         $this->salasNombre = '';
+        $this->reservasCount = 0;
     }
 
     // Getters
@@ -101,6 +103,16 @@ class Evento
     public function setSalasNombre($salasNombre)
     {
         $this->salasNombre = $salasNombre;
+    }
+
+    public function getReservasCount()
+    {
+        return $this->reservasCount;
+    }
+
+    public function setReservasCount($count)
+    {
+        $this->reservasCount = $count;
     }
 }
 

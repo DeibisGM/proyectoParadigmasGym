@@ -231,7 +231,13 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                 </form>
             </section>
         <?php else: ?>
-            <p style="margin-top: 20px;"><strong>Instrucciones:</strong> Haz clic en un espacio verde disponible para realizar tu reserva.</p>
+            <section id="panel-cliente-reserva" style="display: none; margin-top: 20px;">
+                <h3><i class="ph ph-check-square"></i> Confirmar Reservas</h3>
+                <p>Se van a reservar <strong id="contador-seleccion-cliente">0</strong> espacios de tiempo.</p>
+                <button id="btn-confirmar-reserva"><i class="ph ph-calendar-plus"></i> Reservar Seleccionados</button>
+                <button type="button" id="btn-limpiar-seleccion-cliente">Limpiar Selección</button>
+            </section>
+            <p style="margin-top: 10px;"><strong>Instrucciones:</strong> Haz clic en los espacios verdes para seleccionarlos. Luego, haz clic en "Reservar Seleccionados".</p>
         <?php endif; ?>
 
     </main>
@@ -286,27 +292,55 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
     }
 
     function setupClientInteractions() {
-        document.querySelector('.grid-horario').addEventListener('click', function(e) {
+        const grid = document.querySelector('.grid-horario');
+        const panel = document.getElementById('panel-cliente-reserva');
+        const contador = document.getElementById('contador-seleccion-cliente');
+        const btnConfirmar = document.getElementById('btn-confirmar-reserva');
+        const btnLimpiar = document.getElementById('btn-limpiar-seleccion-cliente');
+
+        grid.addEventListener('click', function(e) {
             const cell = e.target.closest('.celda-horario.disponible-cliente');
-            if (!cell) return;
-
-            const horarioLibreId = cell.dataset.id;
-            const [fecha, hora] = cell.dataset.fechaHora.split(' ');
-
-            if (confirm(`¿Desea reservar un espacio para el ${fecha} a las ${hora}:00?`)) {
-                const formData = new FormData();
-                formData.append('action', 'create');
-                formData.append('horarioLibreId', horarioLibreId);
-
-                fetch('../action/reservaAction.php', { method: 'POST', body: formData })
-                    .then(res => res.json())
-                    .then(data => {
-                        alert(data.message);
-                        if(data.success) window.location.reload();
-                    })
-                    .catch(err => alert("Error de conexión."));
+            if (cell) {
+                cell.classList.toggle('seleccionado');
+                updateClientPanel();
             }
         });
+
+        btnLimpiar.addEventListener('click', function() {
+            document.querySelectorAll('.celda-horario.seleccionado').forEach(cell => {
+                cell.classList.remove('seleccionado');
+            });
+            updateClientPanel();
+        });
+
+        btnConfirmar.addEventListener('click', function() {
+            const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
+            if (seleccionados.length === 0) {
+                alert("Por favor, selecciona al menos un horario.");
+                return;
+            }
+
+            const ids = Array.from(seleccionados).map(cell => cell.dataset.id);
+
+            const formData = new FormData();
+            formData.append('action', 'create');
+            ids.forEach(id => formData.append('horarioLibreIds[]', id));
+
+            fetch('../action/reservaAction.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    // This will be improved in the next step to show detailed results
+                    alert(data.message);
+                    if(data.success) window.location.reload();
+                })
+                .catch(err => alert("Error de conexión."));
+        });
+
+        function updateClientPanel() {
+            const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
+            contador.textContent = seleccionados.length;
+            panel.style.display = seleccionados.length > 0 ? 'block' : 'none';
+        }
     }
 </script>
 </body>

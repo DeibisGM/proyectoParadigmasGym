@@ -63,5 +63,10 @@ class EventoBusiness
     {
         return $this->salaReservasData->getSalaIdsPorEventoId($eventoId);
     }
+
+    public function getAllEventosActivos()
+    {
+        return $this->eventoData->getAllEventosActivos();
+    }
 }
 ?>

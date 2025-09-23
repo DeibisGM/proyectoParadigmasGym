@@ -169,5 +169,28 @@ class EventoData extends Data
         mysqli_close($conn);
         return $evento;
     }
+
+    public function getAllEventosActivos()
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) return [];
+        $conn->set_charset('utf8');
+        $query = "SELECT e.*, i.tbinstructornombre,
+                         (SELECT COUNT(*) FROM tbreservaevento WHERE tbreservaeventoeventoid = e.tbeventoid) as reservas_count
+                  FROM tbevento e
+                  LEFT JOIN tbinstructor i ON e.tbinstructorid = i.tbinstructorid
+                  WHERE e.tbeventoestado = 1 AND e.tbeventofecha >= CURDATE()
+                  ORDER BY e.tbeventofecha, e.tbeventohorainicio";
+        $result = mysqli_query($conn, $query);
+        $eventos = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $evento = new Evento($row['tbeventoid'], $row['tbeventonombre'], $row['tbeventodescripcion'], $row['tbeventofecha'], $row['tbeventohorainicio'], $row['tbeventohorafin'], $row['tbeventoaforo'], $row['tbinstructorid'], $row['tbeventoestado']);
+            $evento->setInstructorNombre($row['tbinstructornombre'] ?? 'No asignado');
+            $evento->setReservasCount($row['reservas_count']);
+            $eventos[] = $evento;
+        }
+        mysqli_close($conn);
+        return $eventos;
+    }
 }
 ?>

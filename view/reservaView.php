@@ -13,11 +13,11 @@ include_once '../business/reservaBusiness.php';
 $reservaBusiness = new ReservaBusiness();
 
 $misReservas = [];
-$todosLosClientes = [];
+$todasLasReservas = [];
 if ($tipoUsuario === 'cliente') {
     $misReservas = $reservaBusiness->getTodasMisReservas($usuarioId);
 } else {
-    // Lógica futura para admin/instructor para ver todas las reservas
+    $todasLasReservas = $reservaBusiness->getAllReservas();
 }
 ?>
 <!DOCTYPE html>
@@ -43,7 +43,7 @@ if ($tipoUsuario === 'cliente') {
                 <h3><i class="ph ph-plus-circle"></i>Realizar una nueva reserva</h3>
                 <p>Para reservar un evento especial o un espacio de uso libre, por favor dirígete a las secciones correspondientes desde el menú principal:</p>
                 <div class="menu-grid">
-                    <a href="eventoGestionView.php"><button><i class="ph ph-sparkle"></i> Ver y Reservar Eventos</button></a>
+                    <a href="eventoClienteView.php"><button><i class="ph ph-sparkle"></i> Ver y Reservar Eventos</button></a>
                     <a href="horarioLibreView.php"><button><i class="ph ph-barbell"></i> Reservar Uso Libre</button></a>
                 </div>
             </section>
@@ -82,7 +82,41 @@ if ($tipoUsuario === 'cliente') {
                 </div>
             </section>
         <?php else: ?>
-            <p>La vista general de reservas para administradores e instructores se mostrará aquí.</p>
+            <section>
+                <h3><i class="ph ph-list-checks"></i>Historial de Todas las Reservas</h3>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php if (empty($todasLasReservas)): ?>
+                            <tr>
+                                <td colspan="6">No hay ninguna reserva registrada en el sistema.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($todasLasReservas as $reserva): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($reserva['fecha']); ?></td>
+                                    <td><?php echo htmlspecialchars($reserva['hora']); ?></td>
+                                    <td><?php echo htmlspecialchars($reserva['cliente']); ?></td>
+                                    <td><?php echo htmlspecialchars($reserva['tipo']); ?></td>
+                                    <td><?php echo htmlspecialchars($reserva['nombre']); ?></td>
+                                    <td><?php echo htmlspecialchars($reserva['estado']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         <?php endif; ?>
     </main>
     <footer>

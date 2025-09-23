@@ -57,5 +57,29 @@ class ReservaEventoData extends Data
         mysqli_close($conn);
         return $reservas;
     }
+
+    public function getAllReservasEvento()
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $query = "SELECT
+                    re.tbreservaeventofecha as fecha,
+                    re.tbreservaeventohorainicio as hora,
+                    'Evento' as tipo,
+                    e.tbeventonombre as nombre,
+                    c.tbclientenombre as cliente,
+                    re.tbreservaeventoestado as estado
+                  FROM tbreservaevento re
+                  JOIN tbevento e ON re.tbreservaeventoeventoid = e.tbeventoid
+                  JOIN tbcliente c ON re.tbreservaeventoclienteid = c.tbclienteid
+                  ORDER BY re.tbreservaeventofecha DESC, re.tbreservaeventohorainicio DESC";
+        $result = mysqli_query($conn, $query);
+        $reservas = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $reservas[] = $row;
+        }
+        mysqli_close($conn);
+        return $reservas;
+    }
 }
 ?>

@@ -54,14 +54,15 @@ class ReservaBusiness
 
     private function crearReservaLibre($clienteId, $horarioLibreId)
     {
-        $horario = $this->horarioLibreData->getHorarioLibrePorId($horariolibreId);
+        $horario = $this->horarioLibreData->getHorarioLibrePorId($horarioLibreId);
         if (!$horario) return "Horario no disponible.";
 
         if ($horario->getMatriculados() >= $horario->getCupos()) {
             return "No hay cupos disponibles para este horario.";
         }
 
-        $reserva = new ReservaLibre(0, $clienteId, $horarioLibreId, $horario->getFecha(), $horario->getHora(), 'activa');
+        // The constructor now only needs the active status (1 for active)
+        $reserva = new ReservaLibre(0, $clienteId, $horarioLibreId, 1);
         if ($this->reservaLibreData->insertarReservaLibre($reserva)) {
             $this->horarioLibreData->incrementarMatriculados($horarioLibreId);
             return true;
@@ -86,10 +87,10 @@ class ReservaBusiness
         foreach($reservasLibres as $r) {
             $todas[] = [
                 'tipo' => 'Uso Libre',
-                'nombre' => 'Acceso General Gimnasio',
+                'nombre' => 'Uso de ' . $r->getSalaNombre(),
                 'fecha' => $r->getFecha(),
                 'hora' => date('H:i', strtotime($r->getHora())),
-                'estado' => $r->getEstado()
+                'estado' => $r->isActivo() ? 'Activa' : 'Inactiva'
             ];
         }
 
@@ -98,6 +99,71 @@ class ReservaBusiness
         });
 
         return $todas;
+    }
+
+    public function getAllReservas()
+    {
+        $reservasEventos = $this->reservaEventoData->getAllReservasEvento();
+        $reservasLibres = $this->reservaLibreData->getAllReservasLibre();
+
+        $todas = [];
+
+        // Process event reservations
+        foreach ($reservasEventos as $r) {
+            $todas[] = [
+                'fecha' => $r['fecha'],
+                'hora' => date('H:i', strtotime($r['hora'])),
+                'cliente' => $r['cliente'],
+                'tipo' => 'Evento',
+                'nombre' => $r['nombre'],
+                'estado' => $r['estado'],
+            ];
+        }
+
+        // Process free space reservations
+        foreach ($reservasLibres as $r) {
+            $todas[] = [
+                'fecha' => $r->getFecha(),
+                'hora' => date('H:i', strtotime($r->getHora())),
+                'cliente' => $r->getClienteNombre(),
+                'tipo' => 'Uso Libre',
+                'nombre' => 'Uso de ' . $r->getSalaNombre(),
+                'estado' => $r->isActivo() ? 'Activa' : 'Inactiva',
+            ];
+        }
+
+        // Sort all reservations by date and time, descending
+        usort($todas, function ($a, $b) {
+            $dateComparison = strcmp($b['fecha'], $a['fecha']);
+            if ($dateComparison === 0) {
+                return strcmp($b['hora'], $a['hora']);
+            }
+            return $dateComparison;
+        });
+
+        return $todas;
+    }
+
+    public function crearMultiplesReservasLibre($clienteId, $horarioLibreIds)
+    {
+        $resultados = [
+            'success_count' => 0,
+            'failure_count' => 0,
+            'details' => []
+        ];
+
+        foreach ($horarioLibreIds as $id) {
+            $resultado = $this->crearReservaLibre($clienteId, $id);
+            if ($resultado === true) {
+                $resultados['success_count']++;
+                $resultados['details'][] = ['id' => $id, 'status' => 'success'];
+            } else {
+                $resultados['failure_count']++;
+                $resultados['details'][] = ['id' => $id, 'status' => 'failure', 'reason' => $resultado];
+            }
+        }
+
+        return $resultados;
     }
 }
 ?>
