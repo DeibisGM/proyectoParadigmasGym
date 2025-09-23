@@ -165,5 +165,30 @@ class ReservaBusiness
 
         return $resultados;
     }
+
+    public function getReservasLibrePorCliente($clienteId)
+    {
+        return $this->reservaLibreData->getReservasLibrePorCliente($clienteId);
+    }
+
+    public function cancelarReservaLibre($reservaId, $clienteId)
+    {
+        $reserva = $this->reservaLibreData->getReservaLibreById($reservaId);
+
+        if (!$reserva) {
+            return "Reserva no encontrada.";
+        }
+        if ($reserva->getClienteId() != $clienteId) {
+            return "No tienes permiso para cancelar esta reserva.";
+        }
+
+        if ($this->reservaLibreData->eliminarReservaLibre($reservaId)) {
+            // Decrement the count in the schedule table
+            $this->horarioLibreData->decrementarMatriculados($reserva->getHorarioLibreId());
+            return true;
+        }
+
+        return "Error al cancelar la reserva.";
+    }
 }
 ?>

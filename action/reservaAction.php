@@ -8,12 +8,12 @@ if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
 }
 
 include_once '../business/reservaBusiness.php';
-include_once '../data/horarioLibreData.php'; // Include the missing data file
+include_once '../business/horarioLibreBusiness.php'; // Use business layer instead of data
 
 $usuarioId = $_SESSION['usuario_id'];
 $tipoUsuario = $_SESSION['tipo_usuario'];
 $reservaBusiness = new ReservaBusiness();
-$horarioLibreData = new HorarioLibreData(); // Instantiate the data class
+$horarioLibreBusiness = new HorarioLibreBusiness(); // Instantiate the business class
 
 if (isset($_POST['action']) && $_POST['action'] === 'create') {
     if ($tipoUsuario !== 'cliente') {
@@ -63,7 +63,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
             foreach($resultados['details'] as $detail) {
                 if ($detail['status'] === 'failure') {
                     // We need to get the date/time for the failed ID to show a useful message
-                    $horario = $horarioLibreData->getHorarioLibrePorId($detail['id']);
+                    $horario = $horarioLibreBusiness->getHorarioLibrePorId($detail['id']);
                     $fechaHora = $horario ? $horario->getFecha() . ' a las ' . $horario->getHora() : 'ID ' . $detail['id'];
                     $message .= "- Horario (" . $fechaHora . "): " . $detail['reason'] . "\n";
                 }
@@ -79,5 +79,27 @@ if (isset($_POST['action']) && $_POST['action'] === 'create') {
 }
 
 // Default response if no case is matched
+if (isset($_POST['action']) && $_POST['action'] === 'cancel_libre') {
+    if ($tipoUsuario !== 'cliente') {
+        echo json_encode(['success' => false, 'message' => 'Acción no permitida.']);
+        exit();
+    }
+
+    $reservaId = $_POST['reservaId'] ?? null;
+    if (!$reservaId) {
+        echo json_encode(['success' => false, 'message' => 'ID de reserva no proporcionado.']);
+        exit();
+    }
+
+    $resultado = $reservaBusiness->cancelarReservaLibre($reservaId, $usuarioId);
+
+    if ($resultado === true) {
+        echo json_encode(['success' => true, 'message' => 'Reserva cancelada con éxito.']);
+    } else {
+        echo json_encode(['success' => false, 'message' => is_string($resultado) ? $resultado : 'Error al cancelar la reserva.']);
+    }
+    exit();
+}
+
 echo json_encode(['success' => false, 'message' => 'Acción no reconocida o datos insuficientes.']);
 ?>

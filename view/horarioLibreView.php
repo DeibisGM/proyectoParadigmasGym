@@ -9,6 +9,7 @@ if (!isset($_SESSION['usuario_id'])) {
 include_once '../business/horarioBusiness.php';
 include_once '../business/horarioLibreBusiness.php';
 include_once '../business/instructorBusiness.php';
+include_once '../business/reservaBusiness.php'; // For getting user's reservations
 
 $tipoUsuario = $_SESSION['tipo_usuario'];
 $esAdmin = ($tipoUsuario === 'admin');
@@ -49,6 +50,16 @@ foreach($horariosLibresCreados as $hl) {
     $mapaHorariosLibres[$key] = $hl;
 }
 
+// --- Fetch user's reservations for visual feedback ---
+$misReservasLookup = [];
+if ($tipoUsuario === 'cliente') {
+    $reservaBusiness = new ReservaBusiness();
+    $misReservas = $reservaBusiness->getReservasLibrePorCliente($_SESSION['usuario_id']);
+    foreach ($misReservas as $reserva) {
+        $misReservasLookup[$reserva->getHorarioLibreId()] = $reserva->getId();
+    }
+}
+
 // Lógica para Determinar Rango de Horas Dinámico
 $horaMinima = 24;
 $horaMaxima = 0;
@@ -80,6 +91,9 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         .grid-horario th, .grid-horario td { border: 1px solid #dee2e6; padding: 8px; text-align: center; height: 70px; }
         .hora-label { font-weight: bold; vertical-align: middle; background-color: #f8f9fa;}
         .celda-horario { vertical-align: middle; font-size: 0.85em; position: relative; }
+        .reservado-por-mi { background-color: #d4edda !important; border-color: #c3e6cb !important; }
+        .reservado-por-mi span { color: #155724; font-weight: bold; }
+        .btn-cancelar-slot { cursor: pointer; background-color: #ffc107; color: #212529; border: 1px solid #e0a800; padding: 2px 5px; font-size: 0.9em; border-radius: 3px; }
         .btn-delete-slot {
             position: absolute;
             top: 2px;
@@ -178,12 +192,23 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                                     $slot = $mapaHorariosLibres[$fechaHoraKey];
                                     $instructorNombre = $mapaInstructores[$slot->getInstructorId()] ?? 'N/A';
                                     $disponibles = $slot->getCupos() - $slot->getMatriculados();
-                                    $clase = 'creado';
 
-                                    if ($disponibles <= 0) $clase .= ' lleno';
-                                    elseif ($tipoUsuario == 'cliente') $clase .= ' disponible-cliente';
+                                    $esMiReserva = ($tipoUsuario === 'cliente' && isset($misReservasLookup[$slot->getId()]));
 
-                                    $contenido = "<span>{$instructorNombre}<br>Cupos: {$disponibles}/{$slot->getCupos()}</span>";
+                                    if ($esMiReserva) {
+                                        $clase = 'reservado-por-mi';
+                                        $reservaId = $misReservasLookup[$slot->getId()];
+                                        $contenido = '<span>RESERVADO</span><br><button class="btn-cancelar-slot" data-reserva-id="' . $reservaId . '">Cancelar</button>';
+                                    } else {
+                                        $clase = 'creado';
+                                        if ($disponibles <= 0) {
+                                            $clase .= ' lleno';
+                                        } elseif ($tipoUsuario == 'cliente') {
+                                            $clase .= ' disponible-cliente';
+                                        }
+                                        $contenido = "<span>{$instructorNombre}<br>Cupos: {$disponibles}/{$slot->getCupos()}</span>";
+                                    }
+
                                     if ($esAdmin) {
                                         $contenido .= '<form method="POST" action="../action/horarioLibreAction.php" style="display:inline;">
                                                          <input type="hidden" name="accion" value="eliminar">
@@ -299,10 +324,34 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         const btnLimpiar = document.getElementById('btn-limpiar-seleccion-cliente');
 
         grid.addEventListener('click', function(e) {
+            // Handle selection of available slots
             const cell = e.target.closest('.celda-horario.disponible-cliente');
             if (cell) {
                 cell.classList.toggle('seleccionado');
                 updateClientPanel();
+                return; // Stop processing if it's a selection click
+            }
+
+            // Handle cancellation click
+            const cancelButton = e.target.closest('.btn-cancelar-slot');
+            if (cancelButton) {
+                e.stopPropagation(); // Prevent the cell selection logic from firing
+                const reservaId = cancelButton.dataset.reservaId;
+                if (confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
+                    const formData = new FormData();
+                    formData.append('action', 'cancel_libre');
+                    formData.append('reservaId', reservaId);
+
+                    fetch('../action/reservaAction.php', { method: 'POST', body: formData })
+                        .then(res => res.json())
+                        .then(data => {
+                            alert(data.message);
+                            if (data.success) {
+                                window.location.reload();
+                            }
+                        })
+                        .catch(err => alert("Error de conexión al cancelar."));
+                }
             }
         });
 
