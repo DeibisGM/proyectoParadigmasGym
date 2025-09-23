@@ -34,7 +34,7 @@ class ReservaBusiness
                 'tipo' => 'Evento',
                 'descripcion' => $r->getEventoNombre(),
                 'instructor' => $r->getInstructorNombre(),
-                'estado' => $r->getEstado(),
+                'estado' => $r->getEstado() ? 'Activa' : 'Inactiva',
             ];
             if ($incluirClienteNombre) $reserva['cliente'] = $r->getClienteNombre();
             $todas[] = $reserva;

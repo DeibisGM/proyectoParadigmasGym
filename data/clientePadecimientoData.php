@@ -4,7 +4,7 @@
         include_once '../domain/clientePadecimiento.php';
     }
     if (!class_exists('PadecimientoDictamenData')) {
-        include_once 'padecimientoDictamenData.php';
+        include_once 'PadecimientoDictamenData.php';
     }
     class ClientePadecimientoData extends Data {
 

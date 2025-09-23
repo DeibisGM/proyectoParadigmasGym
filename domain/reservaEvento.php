@@ -30,7 +30,7 @@ class ReservaEvento
     public function getFecha() { return $this->tbreservaeventofecha; }
     public function getHoraInicio() { return $this->tbreservaeventohorainicio; }
     public function getHoraFin() { return $this->tbreservaeventohorafin; }
-    public function getEvento() { return $this->tbreservaeventoactivo; }
+    public function getEstado() { return $this->tbreservaeventoactivo; }
     public function getClienteNombre() { return $this->clienteNombre; }
     public function getEventoNombre() { return $this->eventoNombre; }
     public function getInstructorNombre() { return $this->instructorNombre; }
