@@ -41,8 +41,9 @@ if ($tipoUsuario === 'cliente') {
         <?php if ($tipoUsuario === 'cliente'): ?>
             <section>
                 <h3><i class="ph ph-plus-circle"></i>Realizar una nueva reserva</h3>
-                <p>Para reservar un evento especial o un espacio de uso libre, por favor dirígete a las secciones correspondientes desde el menú principal:</p>
+                <p>Para reservar un evento especial, un espacio de uso libre o una sesión con instructor personal, por favor dirígete a las secciones correspondientes:</p>
                 <div class="menu-grid">
+                    <a href="horarioPersonalView.php"><button><i class="ph ph-user-plus"></i> Instructor Personal</button></a>
                     <a href="eventoClienteView.php"><button><i class="ph ph-sparkle"></i> Ver y Reservar Eventos</button></a>
                     <a href="horarioLibreView.php"><button><i class="ph ph-barbell"></i> Reservar Uso Libre</button></a>
                 </div>
@@ -86,6 +87,15 @@ if ($tipoUsuario === 'cliente') {
         <?php else: ?>
             <section>
                 <h3><i class="ph ph-list-checks"></i>Historial de Todas las Reservas</h3>
+
+                <?php if ($tipoUsuario === 'admin'): ?>
+                    <div class="menu-grid" style="margin-bottom: 20px;">
+                        <a href='horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Gestionar Instructor Personal</button></a>
+                        <a href='eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Eventos</button></a>
+                        <a href='horarioLibreView.php'><button><i class="ph ph-clock-afternoon"></i>Gestionar Horario Libre</button></a>
+                    </div>
+                <?php endif; ?>
+
                 <div style="overflow-x:auto;">
                     <table>
                         <thead>

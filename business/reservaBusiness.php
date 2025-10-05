@@ -6,6 +6,7 @@ include_once '../data/eventoData.php';
 include_once '../data/horarioLibreData.php';
 include_once '../domain/reservaEvento.php';
 include_once '../domain/reservaLibre.php';
+include_once 'horarioPersonalBusiness.php';
 
 class ReservaBusiness
 {
@@ -55,18 +56,42 @@ class ReservaBusiness
         return $todas;
     }
 
-    public function getTodasMisReservas($clienteId) {
-        $reservasEventos = $this->reservaEventoData->getReservasEventoPorCliente($clienteId);
-        $reservasLibres = $this->reservaLibreData->getReservasLibrePorCliente($clienteId);
+   public function getReservasInstructorPersonalPorCliente($clienteId)
+   {
+       $horarioPersonalBusiness = new HorarioPersonalBusiness();
+       $reservasPersonales = $horarioPersonalBusiness->getMisReservasPersonales($clienteId);
 
-        $todas = $this->_procesarListasDeReservas($reservasEventos, $reservasLibres, false);
+       $reservasFormateadas = [];
+       foreach ($reservasPersonales as $reserva) {
+           $reservasFormateadas[] = [
+               'fecha' => $reserva->getFecha(),
+               'hora' => date('H:i', strtotime($reserva->getHora())),
+               'tipo' => 'Instructor Personal',
+               'descripcion' => 'Sesión personalizada',
+               'instructor' => 'Instructor ID: ' . $reserva->getInstructorId(), // Puedes mejorar esto
+               'estado' => ucfirst($reserva->getEstado())
+           ];
+       }
 
-        usort($todas, function($a, $b) {
-            return strtotime($b['fecha'] . ' ' . $b['hora']) - strtotime($a['fecha'] . ' ' . $a['hora']);
-        });
+       return $reservasFormateadas;
+   }
 
-        return $todas;
-    }
+   public function getTodasMisReservas($clienteId) {
+       $reservasEventos = $this->reservaEventoData->getReservasEventoPorCliente($clienteId);
+       $reservasLibres = $this->reservaLibreData->getReservasLibrePorCliente($clienteId);
+       $reservasPersonales = $this->getReservasInstructorPersonalPorCliente($clienteId);
+
+       $todas = array_merge(
+           $this->_procesarListasDeReservas($reservasEventos, $reservasLibres, false),
+           $reservasPersonales
+       );
+
+       usort($todas, function($a, $b) {
+           return strtotime($b['fecha'] . ' ' . $b['hora']) - strtotime($a['fecha'] . ' ' . $a['hora']);
+       });
+
+       return $todas;
+   }
 
     public function getAllReservas()
     {

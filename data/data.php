@@ -40,14 +40,15 @@ class Data
                 $this->db = "dbgym";
                 break;
 */
-            default:
-                $this->isActive = false;
-                $this->server = "localhost";
-                $this->user = "root";
-                $this->password = "";
-                $this->db = "bdgym";
+           default:
+               $this->isActive = true;
+               $this->server = "127.0.0.1";
+               $this->user = "root";
+               $this->password = "Gym2025*";
+               $this->db = "dbgym";
+               $this->port = 3306;
+               break;
 
-                break;
         }
     }
 }
