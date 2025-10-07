@@ -139,8 +139,8 @@ class ClienteData extends Data
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
                 $row['tbclienteactivo'],
-                isset($row['tbclientecontrasena']) ? $row['tbclientecontrasena'] : '',
-                isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
+                $row['tbclientecontrasena'],
+                $row['tbclienteimagenid']
             );
         }
 

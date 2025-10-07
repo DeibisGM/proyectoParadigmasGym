@@ -151,73 +151,72 @@ if ($tipoUsuario == 'cliente') {
                         <tbody>
                         <?php
 
-                        foreach ($clienteBusiness->getAllTBCliente() as $c):
+                        foreach ($clienteBusiness->getAllTBCliente() as $c): 
                             $rowId = $c->getId();
                             ?>
                             <tr>
-                                <form method="post" action="../action/clienteAction.php" enctype="multipart/form-data">
-                                    <input type="hidden" name="id" value="<?= $rowId ?>">
-                                    <input type="hidden" name="carnet" value="<?= htmlspecialchars($c->getCarnet()) ?>">
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('nombre_'.$rowId) ?></span>
-                                        <input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$rowId, $c->getNombre())) ?>">
-                                    </td>
-                                    <td><?= htmlspecialchars($c->getCarnet()) ?></td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('fechaNacimiento_'.$rowId) ?></span>
-                                        <input type="date" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento_'.$rowId, $c->getFechaNacimiento()) ?>">
-                                    </td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('telefono_'.$rowId) ?></span>
-                                        <input type="text" name="telefono" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('telefono_'.$rowId, $c->getTelefono())) ?>">
-                                    </td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('correo_'.$rowId) ?></span>
-                                        <input type="email" name="correo" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('correo_'.$rowId, $c->getCorreo())) ?>">
-                                    </td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('contrasena_'.$rowId) ?></span>
-                                        <input type="password" name="contrasena" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('contrasena_'.$rowId, $c->getContrasena())) ?>">
-                                    </td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('direccion_'.$rowId) ?></span>
-                                        <input type="text" name="direccion" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('direccion_'.$rowId, $c->getDireccion())) ?>">
-                                    </td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('genero_'.$rowId) ?></span>
-                                        <select name="genero">
-                                            <option value="M" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='M'?'selected':'' ?>>Masculino</option>
-                                            <option value="F" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='F'?'selected':'' ?>>Femenino</option>
-                                            <option value="Otro" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='Otro'?'selected':'' ?>>Otro</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('fechaInscripcion_'.$rowId) ?></span>
-                                        <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion_'.$rowId, $c->getInscripcion()) ?>">
-                                    </td>
-                                    <td>
-                                        <span class="error-message"><?= Validation::getError('estado_'.$rowId) ?></span>
-                                        <select name="estado">
-                                            <option value="1" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==1?'selected':'' ?>>Activo</option>
-                                            <option value="0" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==0?'selected':'' ?>>Inactivo</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        $img = $imageManager->getImagesByIds($c->getTbclienteImagenId());
-                                        if (!empty($img)) {
-                                            $src = '..' . htmlspecialchars($img[0]['tbimagenruta']) . '?t=' . time();
-                                            echo '<div class="image-container"><img src="'.$src.'" alt="Imagen"><button type="submit" name="delete_image" value="'.$c->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button></div>';
-                                        } else {
-                                            echo '<input type="file" name="tbclienteimagenid[]">';
-                                        }
-                                        ?>
-                                    </td>
-                                    <td>
-                                        <button type="submit" name="actualizar"><i class="ph ph-pencil-simple"></i>Actualizar</button>
-                                        <button type="submit" name="eliminar" onclick="return confirm('¿Estás seguro de eliminar este cliente?');"><i class="ph ph-trash"></i>Eliminar</button>
-                                    </td>
-                                </form>
+                                <form id="form-<?= $rowId ?>" method="post" action="../action/clienteAction.php" enctype="multipart/form-data"></form>
+                                <input type="hidden" name="id" value="<?= $rowId ?>" form="form-<?= $rowId ?>">
+                                <input type="hidden" name="carnet" value="<?= htmlspecialchars($c->getCarnet()) ?>" form="form-<?= $rowId ?>">
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('nombre_'.$rowId) ?></span>
+                                    <input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$rowId, $c->getNombre())) ?>" form="form-<?= $rowId ?>">
+                                </td>
+                                <td><?= htmlspecialchars($c->getCarnet()) ?></td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('fechaNacimiento_'.$rowId) ?></span>
+                                    <input type="date" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento_'.$rowId, $c->getFechaNacimiento()) ?>" form="form-<?= $rowId ?>">
+                                </td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('telefono_'.$rowId) ?></span>
+                                    <input type="text" name="telefono" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('telefono_'.$rowId, $c->getTelefono())) ?>" form="form-<?= $rowId ?>">
+                                </td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('correo_'.$rowId) ?></span>
+                                    <input type="email" name="correo" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('correo_'.$rowId, $c->getCorreo())) ?>" form="form-<?= $rowId ?>">
+                                </td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('contrasena_'.$rowId) ?></span>
+                                    <input type="password" name="contrasena" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('contrasena_'.$rowId, $c->getContrasena())) ?>" form="form-<?= $rowId ?>">
+                                </td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('direccion_'.$rowId) ?></span>
+                                    <input type="text" name="direccion" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('direccion_'.$rowId, $c->getDireccion())) ?>" form="form-<?= $rowId ?>">
+                                </td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('genero_'.$rowId) ?></span>
+                                    <select name="genero" form="form-<?= $rowId ?>">
+                                        <option value="M" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='M'?'selected':'' ?>>Masculino</option>
+                                        <option value="F" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='F'?'selected':'' ?>>Femenino</option>
+                                        <option value="Otro" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='Otro'?'selected':'' ?>>Otro</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('fechaInscripcion_'.$rowId) ?></span>
+                                    <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion_'.$rowId, $c->getInscripcion()) ?>" form="form-<?= $rowId ?>">
+                                </td>
+                                <td>
+                                    <span class="error-message"><?= Validation::getError('estado_'.$rowId) ?></span>
+                                    <select name="estado" form="form-<?= $rowId ?>">
+                                        <option value="1" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==1?'selected':'' ?>>Activo</option>
+                                        <option value="0" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==0?'selected':'' ?>>Inactivo</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <?php
+                                    $img = $imageManager->getImagesByIds($c->getTbclienteImagenId());
+                                    if (!empty($img)) {
+                                        $src = '..' . htmlspecialchars($img[0]['tbimagenruta']) . '?t=' . time();
+                                        echo '<div class="image-container"><img src="'.$src.'" alt="Imagen"><button type="submit" name="delete_image" value="'.$c->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');" form="form-'.$rowId.'">X</button></div>';
+                                    } else {
+                                        echo '<input type="file" name="tbclienteimagenid[]" form="form-'.$rowId.'">';
+                                    }
+                                    ?>
+                                </td>
+                                <td>
+                                    <button type="submit" name="actualizar" form="form-<?= $rowId ?>"><i class="ph ph-pencil-simple"></i>Actualizar</button>
+                                    <button type="submit" name="eliminar" onclick="return confirm('¿Estás seguro de eliminar este cliente?');" form="form-<?= $rowId ?>"><i class="ph ph-trash"></i>Eliminar</button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
