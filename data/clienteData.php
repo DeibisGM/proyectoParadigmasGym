@@ -129,18 +129,18 @@ class ClienteData extends Data
         $clientes = [];
         while ($row = mysqli_fetch_assoc($result)) {
             $clientes[] = new Cliente(
-                $row['tbclienteid'] ?? 0,
-                $row['tbclientecarnet'] ?? '',
-                $row['tbclientenombre'] ?? '',
-                $row['tbclientefechanacimiento'] ?? '',
-                $row['tbclientetelefono'] ?? '',
-                $row['tbclientecorreo'] ?? '',
-                $row['tbclientedireccion'] ?? '',
-                $row['tbclientegenero'] ?? '',
-                $row['tbclienteinscripcion'] ?? '',
-                $row['tbclienteactivo'] ?? 0,
-                $row['tbclientecontrasena'] ?? '',
-                $row['tbclienteimagenid'] ?? ''
+                $row['tbclienteid'],
+                $row['tbclientecarnet'],
+                $row['tbclientenombre'],
+                $row['tbclientefechanacimiento'],
+                $row['tbclientetelefono'],
+                $row['tbclientecorreo'],
+                $row['tbclientedireccion'],
+                $row['tbclientegenero'],
+                $row['tbclienteinscripcion'],
+                $row['tbclienteactivo'],
+                $row['tbclientecontrasena'],
+                $row['tbclienteimagenid']
             );
         }
 
