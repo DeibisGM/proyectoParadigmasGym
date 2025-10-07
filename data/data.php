@@ -48,7 +48,6 @@ class Data
                                 $this->db = "railway";
                                 $this->port = 20786;
 
-                break;
         }
     }
 }
