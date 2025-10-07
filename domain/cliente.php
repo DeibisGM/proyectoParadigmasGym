@@ -11,11 +11,11 @@ class Cliente
     private $direccion;
     private $genero;
     private $inscripcion;
-    private $estado;
+    private $activo;
     private $contrasena;
     private $tbclienteimagenid;
 
-    public function __construct($id, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $inscripcion, $estado, $contrasena = '', $tbclienteimagenid = '')
+    public function __construct($id, $carnet, $nombre, $fechaNacimiento, $telefono, $correo, $direccion, $genero, $inscripcion, $activo, $contrasena = '', $tbclienteimagenid = '')
     {
         $this->id = $id;
         $this->carnet = $carnet;
@@ -26,7 +26,7 @@ class Cliente
         $this->direccion = $direccion;
         $this->genero = $genero;
         $this->inscripcion = $inscripcion;
-        $this->estado = $estado;
+        $this->activo = $activo;
         $this->contrasena = $contrasena;
         $this->tbclienteimagenid = $tbclienteimagenid;
     }
@@ -121,14 +121,14 @@ class Cliente
         $this->inscripcion = $inscripcion;
     }
 
-    public function getEstado()
+    public function getActivo()
     {
-        return $this->estado;
+        return $this->activo;
     }
 
-    public function setEstado($estado)
+    public function setActivo($activo)
     {
-        $this->estado = $estado;
+        $this->activo = $activo;
     }
 
     public function getContrasena()
