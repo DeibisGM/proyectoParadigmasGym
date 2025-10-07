@@ -705,26 +705,39 @@ if (isset($_GET['success'])) {
         formData.append('accion', 'guardar');
         formData.append('ajax_request', '1');
 
-        fetch('../action/PadecimientoDictamenAction.php', {
+         fetch('../action/PadecimientoDictamenAction.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+
         })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json();
+            return response.text(); // Primero obtener como texto
         })
-        .then(data => {
+        .then(text => {
             loading.style.display = 'none';
             btnGuardar.disabled = false;
+
+            // Intentar parsear como JSON
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('Respuesta del servidor no es JSON válido:', text);
+                mostrarMensajeModal('Error: El servidor no devolvió una respuesta válida. Revise la consola para más detalles.', 'error');
+                return;
+            }
+
             if (data.success) {
                 document.getElementById('dictamenIdHidden').value = data.dictamenId;
                 document.getElementById('dictamenDisplay').value = entidad;
                 document.getElementById('btnLimpiarDictamen').style.display = 'inline-flex';
                 mostrarMensajeModal(data.message, 'success');
                 setTimeout(() => {
-                    cerrarModalDictamen(false);
+                    document.getElementById('modalDictamen').style.display = 'none';
+                    modalDictamenAbierto = false;
                 }, 1500);
             } else {
                 mostrarMensajeModal(data.message, 'error');

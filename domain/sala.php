@@ -4,13 +4,13 @@ class Sala{
     private $tbsalaid;
     private $tbsalanombre;
     private $tbsalacapacidad;
-    private $tbsalaestado;
+    private $tbsalaactivo;
 
-    public function __construct($tbsalaid, $tbsalanombre, $tbsalacapacidad, $tbsalaestado){
+    public function __construct($tbsalaid, $tbsalanombre, $tbsalacapacidad, $tbsalaactivo){
         $this->tbsalaid = $tbsalaid;
         $this->tbsalanombre = $tbsalanombre;
         $this->tbsalacapacidad = $tbsalacapacidad;
-        $this->tbsalaestado = $tbsalaestado;
+        $this->tbsalaactivo = $tbsalaactivo;
     }
 
     public function getTbsalaid(){
@@ -38,11 +38,11 @@ class Sala{
     }
 
     public function getTbsalaestado(){
-        return $this->tbsalaestado;
+        return $this->tbsalaactivo;
     }
 
-    public function setTbsalaestado($tbsalaestado){
-        $this->tbsalaestado = $tbsalaestado;
+    public function setTbsalaestado($tbsalaactivo){
+        $this->tbsalaactivo = $tbsalaactivo;
     }
 
 }
