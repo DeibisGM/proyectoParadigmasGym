@@ -16,37 +16,13 @@ class Data
         $hostName = gethostname();
 
         switch ($hostName) {
-            case "deibisgm-HP-ENVY-x360-Convertible-15-ee1xxxa":
-                $this->isActive = false;
-                $this->server = "127.0.0.1";
-                $this->user = "root";
-                $this->password = "6453";
-                $this->db = "dbgym";
-                break;
 
-            case "yei-Inspiron-3501j":
-                $this->isActive = false;
-                $this->server = "127.0.0.1";
-                $this->user = "yei";
-                $this->password = "6453";
-                $this->db = "dbgym";
-                break;
-
-            /*case "ciany-Inspiron-15-3515":
-                $this->isActive = false;
-                $this->server = "127.0.0.1";
-                $this->user = "ciany";
-                $this->password = "1223";
-                $this->db = "dbgym";
-                break;
-*/
             default:
                  $this->isActive = false;
-                                $this->server = "mainline.proxy.rlwy.net";
+                                $this->server = "localhost";
                                 $this->user = "root";
-                                $this->password = "qZGxyvjECfahHipFJrnmbZUfjYakmNSq";
-                                $this->db = "railway";
-                                $this->port = 20786;
+                                $this->password = "";
+                                $this->db = "bdgym";
 
         }
     }

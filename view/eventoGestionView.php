@@ -46,8 +46,8 @@ if ($tipoUsuario === 'admin') {
 <body>
 <div class="container">
     <header>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
         <h2><i class="ph ph-calendar-plus"></i>Gestión de Eventos</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
     </header>
 
     <main>
@@ -55,9 +55,9 @@ if ($tipoUsuario === 'admin') {
             <p class="success">¡Acción completada con éxito!</p>
         <?php endif; ?>
         <?php
-            $generalError = Validation::getError('general');
-            if ($generalError):
-        ?>
+        $generalError = Validation::getError('general');
+        if ($generalError):
+            ?>
             <p class="error">Error: <?= htmlspecialchars($generalError) ?></p>
         <?php endif; ?>
 
@@ -67,6 +67,15 @@ if ($tipoUsuario === 'admin') {
                 <div class="form-group">
                     <span class="error-message"><?= Validation::getError('nombre') ?></span>
                     <input type="text" name="nombre" placeholder="Nombre del Evento" value="<?= htmlspecialchars(Validation::getOldInput('nombre', '')) ?>">
+                </div>
+                <!-- NUEVO: Campo de tipo de evento -->
+                <div class="form-group">
+                    <label for="tipo">Tipo de Evento:</label>
+                    <span class="error-message"><?= Validation::getError('tipo') ?></span>
+                    <select name="tipo" id="tipo">
+                        <option value="abierto" <?= (Validation::getOldInput('tipo') == 'abierto') ? 'selected' : '' ?>>Abierto (Público General)</option>
+                        <option value="privado" <?= (Validation::getOldInput('tipo') == 'privado') ? 'selected' : '' ?>>Privado (Solo Miembros)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label>Fecha del evento:</label>
@@ -134,6 +143,7 @@ if ($tipoUsuario === 'admin') {
                     <thead>
                     <tr>
                         <th>Nombre</th>
+                        <th>Tipo</th> <!-- NUEVO -->
                         <th>Fecha</th>
                         <th>Horario</th>
                         <th>Aforo</th>
@@ -146,16 +156,24 @@ if ($tipoUsuario === 'admin') {
                     <tbody>
                     <?php if (empty($misEventos)): ?>
                         <tr>
-                            <td colspan="8">No hay eventos para mostrar.</td>
+                            <td colspan="9">No hay eventos para mostrar.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($misEventos as $evento): ?>
-                             <tr>
+                            <tr>
                                 <form action="../action/eventoAction.php" method="POST" id="form-evento-<?= $evento->getId() ?>" style="display: contents;">
                                     <input type="hidden" name="id" value="<?= $evento->getId() ?>">
                                     <td>
                                         <span class="error-message"><?= Validation::getError('nombre_'.$evento->getId()) ?></span>
                                         <input type="text" name="nombre" value="<?= htmlspecialchars(Validation::getOldInput('nombre', $evento->getNombre())) ?>" >
+                                    </td>
+                                    <!-- NUEVO: Campo de tipo en la tabla -->
+                                    <td>
+                                        <span class="error-message"><?= Validation::getError('tipo_'.$evento->getId()) ?></span>
+                                        <select name="tipo">
+                                            <option value="abierto" <?= (Validation::getOldInput('tipo', $evento->getTipo()) == 'abierto') ? 'selected' : '' ?>>Abierto</option>
+                                            <option value="privado" <?= (Validation::getOldInput('tipo', $evento->getTipo()) == 'privado') ? 'selected' : '' ?>>Privado</option>
+                                        </select>
                                     </td>
                                     <td>
                                         <span class="error-message"><?= Validation::getError('fecha_'.$evento->getId()) ?></span>
@@ -213,40 +231,5 @@ if ($tipoUsuario === 'admin') {
     </main>
 </div>
 <?php Validation::clear(); ?>
-<script>
-    function validarFormulario(formId) {
-        const form = document.getElementById(formId);
-        const fechaInput = form.querySelector('input[name="fecha"]');
-        const horaInicioInput = form.querySelector('input[name="hora_inicio"], input[name="horaInicio"]');
-        const horaFinInput = form.querySelector('input[name="hora_fin"], input[name="horaFin"]');
-        const salasSelect = form.querySelector('select[name="salas[]"]');
-
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-
-        if (fechaInput) {
-            const fechaSeleccionada = new Date(fechaInput.value + 'T00:00:00');
-            if (fechaSeleccionada < hoy) {
-                alert('Error: La fecha del evento no puede ser anterior a la fecha actual.');
-                fechaInput.focus();
-                return false;
-            }
-        }
-
-        if (horaInicioInput && horaFinInput && horaInicioInput.value >= horaFinInput.value) {
-            alert('Error: La hora de inicio debe ser anterior a la hora de fin.');
-            horaInicioInput.focus();
-            return false;
-        }
-
-        if (salasSelect && salasSelect.selectedOptions.length === 0) {
-            alert('Error: Debe seleccionar al menos una sala para el evento.');
-            salasSelect.focus();
-            return false;
-        }
-
-        return true;
-    }
-</script>
 </body>
 </html>

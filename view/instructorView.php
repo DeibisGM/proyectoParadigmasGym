@@ -149,8 +149,8 @@ $instructores = $business->getAllTBInstructor($esAdmin);
 <body>
 
 <header>
+    <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
     <h2>Gimnasio - Instructores</h2>
-    <a href="../index.php">Volver al Inicio</a>
 </header>
 
 <hr>

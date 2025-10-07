@@ -110,13 +110,9 @@ if (isset($_GET['instructor_id'])) {
 </head>
 <body>
 <header>
-    <h2>Gestión de Certificados</h2>
-    <?php if (isset($_GET['instructor_id'])): ?>
-        <a href="instructorView.php">← Volver a Instructores</a>
-    <?php else: ?>
-        <a href="../index.php">← Volver al Inicio</a>
-    <?php endif; ?>
-</header>
+        <a href="instructorView.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2>Gestión de Certificados para el Instructor: <strong><?php echo htmlspecialchars($instructor_nombre); ?></strong></h2>
+    </header>
 <hr>
 
 <main>

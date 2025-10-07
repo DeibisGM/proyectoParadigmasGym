@@ -24,11 +24,15 @@ if (isset($_POST['crear_evento'])) {
     $aforo = $_POST['aforo'];
     $instructorId = $_POST['instructor_id'] ?: null;
     $salas = isset($_POST['salas']) ? $_POST['salas'] : [];
+    $tipo = $_POST['tipo']; // NUEVO
 
     if (empty($nombre)) {
         Validation::setError('nombre', 'El nombre es obligatorio.');
     }
-
+    // NUEVO: Validación de tipo
+    if (empty($tipo) || !in_array($tipo, ['abierto', 'privado'])) {
+        Validation::setError('tipo', 'Debe seleccionar un tipo de evento válido.');
+    }
     if (empty($fecha)) {
         Validation::setError('fecha', 'La fecha es obligatoria.');
     } elseif ($fecha < date('Y-m-d')) {
@@ -58,7 +62,8 @@ if (isset($_POST['crear_evento'])) {
         exit();
     }
 
-    $evento = new Evento(0, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $instructorId, 1);
+    // MODIFICADO: Se añade el tipo al constructor
+    $evento = new Evento(0, $instructorId, $tipo, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, 1);
     $resultado = $eventoBusiness->insertarEvento($evento, $salas);
 
     if ($resultado === true) {
@@ -80,12 +85,17 @@ if (isset($_POST['crear_evento'])) {
     $aforo = $_POST['aforo'];
     $instructorId = $_POST['instructorId'] ?: null;
     $estado = $_POST['estado'];
+    $tipo = $_POST['tipo']; // NUEVO
 
     // Salas no son editables, así que las obtenemos de la BD
     $salas = $eventoBusiness->getSalaIdsPorEvento($id);
 
     if (empty($nombre)) {
         Validation::setError('nombre_'.$id, 'El nombre es obligatorio.');
+    }
+    // NUEVO: Validación de tipo
+    if (empty($tipo) || !in_array($tipo, ['abierto', 'privado'])) {
+        Validation::setError('tipo_'.$id, 'Debe seleccionar un tipo de evento válido.');
     }
     if (empty($fecha)) {
         Validation::setError('fecha_'.$id, 'La fecha es obligatoria.');
@@ -107,8 +117,8 @@ if (isset($_POST['crear_evento'])) {
         header($redirect);
         exit();
     }
-
-    $evento = new Evento($id, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $instructorId, $estado);
+    // MODIFICADO: Se añade el tipo al constructor
+    $evento = new Evento($id, $instructorId, $tipo, $nombre, $descripcion, $fecha, $horaInicio, $horaFin, $aforo, $estado);
     $resultado = $eventoBusiness->actualizarEvento($evento, $salas);
 
     if ($resultado === true) {

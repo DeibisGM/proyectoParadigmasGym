@@ -24,10 +24,9 @@ $imageManager = new ImageManager();
 <body>
 
 <div class="container">
-    <header>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
-        <h2><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</h2>
-
+<header>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2>Gestión de Zonas del Cuerpo</h2>
     </header>
     <hr>
     <main>

@@ -95,11 +95,8 @@ if (isset($_GET['success'])) {
 <body>
 <div class="container">
     <header>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i> Volver al Inicio</a><br><br>
-        <h2><i class="ph ph-file-text"></i> Padecimientos Dictamen</h2>
-        <?php if ($esCliente): ?>
-            <p><small>Gestione sus padecimientos dictamen</small></p>
-        <?php endif; ?>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2><i class="ph ph-file-text"></i>Gestión de Dictamen Médico</h2>
     </header>
     <hr>
 

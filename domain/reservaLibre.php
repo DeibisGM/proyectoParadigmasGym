@@ -5,29 +5,38 @@ class ReservaLibre
     private $id;
     private $clienteId;
     private $horarioLibreId;
+    private $clienteResponsableId; // NUEVO
     private $activo;
 
+    // Propiedades Adicionales
     private $clienteNombre;
+    private $clienteResponsableNombre; // NUEVO
     private $fecha;
     private $hora;
     private $salaNombre;
     private $instructorNombre;
 
-    public function __construct($id, $clienteId, $horarioLibreId, $activo)
+    // MODIFICADO: Añadido $clienteResponsableId al constructor
+    public function __construct($id, $clienteId, $horarioLibreId, $clienteResponsableId, $activo)
     {
         $this->id = $id;
         $this->clienteId = $clienteId;
         $this->horarioLibreId = $horarioLibreId;
+        $this->clienteResponsableId = $clienteResponsableId; // NUEVO
         $this->activo = $activo;
     }
 
     public function getId() { return $this->id; }
     public function getClienteId() { return $this->clienteId; }
     public function getHorarioLibreId() { return $this->horarioLibreId; }
+    public function getClienteResponsableId() { return $this->clienteResponsableId; } // NUEVO
     public function isActivo() { return $this->activo; }
 
     public function getClienteNombre() { return $this->clienteNombre; }
     public function setClienteNombre($nombre) { $this->clienteNombre = $nombre; }
+
+    public function getClienteResponsableNombre() { return $this->clienteResponsableNombre; } // NUEVO
+    public function setClienteResponsableNombre($nombre) { $this->clienteResponsableNombre = $nombre; } // NUEVO
 
     public function getFecha() { return $this->fecha; }
     public function setFecha($fecha) { $this->fecha = $fecha; }
