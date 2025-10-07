@@ -12,7 +12,7 @@ class SalaData extends Data{
         $queryInsert = "INSERT INTO tbsala (
             tbsalanombre,
             tbsalacapacidad,
-            tbsalaestado
+            tbsalaactivo
 
         ) VALUES (
             '" . $sala->getTbsalanombre() . "',
@@ -33,7 +33,7 @@ class SalaData extends Data{
         $queryUpdate = "UPDATE tbsala SET
             tbsalanombre='" . $sala->getTbsalanombre() . "',
             tbsalacapacidad='" . $sala->getTbsalacapacidad() . "',
-            tbsalaestado='" . $sala->getTbsalaestado() . "'
+            tbsalaactivo='" . $sala->getTbsalaestado() . "'
             WHERE tbsalaid=" . $sala->getTbsalaid() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
@@ -64,7 +64,7 @@ class SalaData extends Data{
                 $row['tbsalaid'],
                 $row['tbsalanombre'],
                 $row['tbsalacapacidad'],
-                $row['tbsalaestado']
+                $row['tbsalaactivo']
             );
         }
 

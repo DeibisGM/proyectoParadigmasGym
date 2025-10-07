@@ -3,6 +3,7 @@ session_start();
 
 include_once '../business/padecimientoBusiness.php';
 include_once '../business/clientePadecimientoBusiness.php';
+include_once '../utility/Validation.php';
 if (!class_exists('Padecimiento')) {
     include_once '../domain/padecimiento.php';
 }
@@ -27,27 +28,57 @@ try {
 
     if (!$esAdmin && !$esInstructor) {
         $response['success'] = false;
-        $response['message'] = 'Error: Solo los administradores pueden gestionar padecimientos.';
+        $response['message'] = 'Error: Solo los administradores e instructores pueden gestionar padecimientos.';
         echo json_encode($response);
         exit();
     }
 
     if (isset($_POST['create'])) {
+        Validation::setOldInput($_POST);
+
         $tipo = isset($_POST['tipo']) ? trim($_POST['tipo']) : '';
         $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
         $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
         $formaDeActuar = isset($_POST['formaDeActuar']) ? trim($_POST['formaDeActuar']) : '';
 
-        $errores = $padecimientoBusiness->validarPadecimiento($tipo, $nombre, $descripcion, $formaDeActuar);
+        // Validaciones
+        if (empty($tipo)) {
+            Validation::setError('tipo', 'El tipo de padecimiento es obligatorio.');
+        }
 
-        if (!empty($errores)) {
+        if (empty($nombre)) {
+            Validation::setError('nombre', 'El nombre es obligatorio.');
+        } elseif (strlen($nombre) < 3) {
+            Validation::setError('nombre', 'El nombre debe tener al menos 3 caracteres.');
+        }
+
+        if (empty($descripcion)) {
+            Validation::setError('descripcion', 'La descripción es obligatoria.');
+        } elseif (strlen($descripcion) < 10) {
+            Validation::setError('descripcion', 'La descripción debe tener al menos 10 caracteres.');
+        }
+
+        if (empty($formaDeActuar)) {
+            Validation::setError('formaDeActuar', 'La forma de actuar es obligatoria.');
+        } elseif (strlen($formaDeActuar) < 10) {
+            Validation::setError('formaDeActuar', 'La forma de actuar debe tener al menos 10 caracteres.');
+        }
+
+        if (Validation::hasErrors()) {
             $response['success'] = false;
-            $response['message'] = 'Error de validación: ' . implode(', ', $errores);
+            $response['message'] = 'Error de validación. Por favor revise los campos.';
+            $response['errors'] = [
+                'tipo' => Validation::getError('tipo'),
+                'nombre' => Validation::getError('nombre'),
+                'descripcion' => Validation::getError('descripcion'),
+                'formaDeActuar' => Validation::getError('formaDeActuar')
+            ];
         } else {
             $padecimiento = new Padecimiento(0, $tipo, $nombre, $descripcion, $formaDeActuar);
             $resultado = $padecimientoBusiness->insertarTbpadecimiento($padecimiento);
 
             if ($resultado) {
+                Validation::clear();
                 $response['success'] = true;
                 $response['message'] = 'Éxito: Padecimiento registrado correctamente.';
             } else {
@@ -57,21 +88,50 @@ try {
         }
     } else if (isset($_POST['update'])) {
         $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
-        $tipo = isset($_POST['tipo']) ? trim($_POST['tipo']) : '';
-        $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
-        $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
-        $formaDeActuar = isset($_POST['formaDeActuar']) ? trim($_POST['formaDeActuar']) : '';
 
         if ($id <= 0) {
             $response['success'] = false;
             $response['message'] = 'Error: ID de padecimiento inválido.';
         } else {
+            Validation::setOldInput($_POST);
 
-            $errores = $padecimientoBusiness->validarPadecimiento($tipo, $nombre, $descripcion, $formaDeActuar);
+            $tipo = isset($_POST['tipo']) ? trim($_POST['tipo']) : '';
+            $nombre = isset($_POST['nombre']) ? trim($_POST['nombre']) : '';
+            $descripcion = isset($_POST['descripcion']) ? trim($_POST['descripcion']) : '';
+            $formaDeActuar = isset($_POST['formaDeActuar']) ? trim($_POST['formaDeActuar']) : '';
 
-            if (!empty($errores)) {
+            // Validaciones con sufijo del ID
+            if (empty($tipo)) {
+                Validation::setError('tipo_'.$id, 'El tipo de padecimiento es obligatorio.');
+            }
+
+            if (empty($nombre)) {
+                Validation::setError('nombre_'.$id, 'El nombre es obligatorio.');
+            } elseif (strlen($nombre) < 3) {
+                Validation::setError('nombre_'.$id, 'El nombre debe tener al menos 3 caracteres.');
+            }
+
+            if (empty($descripcion)) {
+                Validation::setError('descripcion_'.$id, 'La descripción es obligatoria.');
+            } elseif (strlen($descripcion) < 10) {
+                Validation::setError('descripcion_'.$id, 'La descripción debe tener al menos 10 caracteres.');
+            }
+
+            if (empty($formaDeActuar)) {
+                Validation::setError('formaDeActuar_'.$id, 'La forma de actuar es obligatoria.');
+            } elseif (strlen($formaDeActuar) < 10) {
+                Validation::setError('formaDeActuar_'.$id, 'La forma de actuar debe tener al menos 10 caracteres.');
+            }
+
+            if (Validation::hasErrors()) {
                 $response['success'] = false;
-                $response['message'] = 'Error de validación: ' . implode(', ', $errores);
+                $response['message'] = 'Error de validación. Por favor revise los campos.';
+                $response['errors'] = [
+                    'tipo_'.$id => Validation::getError('tipo_'.$id),
+                    'nombre_'.$id => Validation::getError('nombre_'.$id),
+                    'descripcion_'.$id => Validation::getError('descripcion_'.$id),
+                    'formaDeActuar_'.$id => Validation::getError('formaDeActuar_'.$id)
+                ];
             } else {
                 $clientesAfectados = $clientePadecimientoBusiness->padecimientoEnUso($id);
 
@@ -79,6 +139,7 @@ try {
                 $resultado = $padecimientoBusiness->actualizarTbpadecimiento($padecimiento);
 
                 if ($resultado) {
+                    Validation::clear();
                     $mensaje = 'Éxito: Padecimiento actualizado correctamente.';
 
                     if (!empty($clientesAfectados)) {
@@ -227,14 +288,6 @@ try {
     } else {
         $response['success'] = false;
         $response['message'] = 'Error: Acción no válida.';
-        $response['debug'] = [
-            'POST_data' => $_POST,
-            'GET_data' => $_GET,
-            'session_data' => [
-                'usuario_id' => isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 'no_set',
-                'tipo_usuario' => isset($_SESSION['tipo_usuario']) ? $_SESSION['tipo_usuario'] : 'no_set'
-            ]
-        ];
     }
 
 } catch (Exception $e) {

@@ -198,8 +198,8 @@ if ($tipoUsuario == 'cliente') {
                                     <td>
                                         <span class="error-message"><?= Validation::getError('estado_'.$rowId) ?></span>
                                         <select name="estado">
-                                            <option value="1" <?= Validation::getOldInput('estado_'.$rowId, $c->getEstado())==1?'selected':'' ?>>Activo</option>
-                                            <option value="0" <?= Validation::getOldInput('estado_'.$rowId, $c->getEstado())==0?'selected':'' ?>>Inactivo</option>
+                                            <option value="1" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==1?'selected':'' ?>>Activo</option>
+                                            <option value="0" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==0?'selected':'' ?>>Inactivo</option>
                                         </select>
                                     </td>
                                     <td>
@@ -280,7 +280,7 @@ if ($tipoUsuario == 'cliente') {
                             <label>Fecha de inscripción:</label>
                             <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion', $cliente->getInscripcion()) ?>">
                         </div>
-                        <input type="hidden" name="estado" value="<?= $cliente->getEstado() ?>">
+                        <input type="hidden" name="estado" value="<?= $cliente->getActivo() ?>">
 
                         <div class="form-group">
                             <label>Foto de perfil:</label>

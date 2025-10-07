@@ -1,5 +1,8 @@
 <?php
 session_start();
+include_once '../utility/Validation.php';
+
+Validation::start();
 
 if (!isset($_SESSION['usuario_id'])) {
     header('Location: ../view/login.php');
@@ -8,7 +11,6 @@ if (!isset($_SESSION['usuario_id'])) {
 
 $esAdmin = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'admin';
 $esInstruct = isset($_SESSION['tipo_usuario']) && $_SESSION['tipo_usuario'] === 'instructor';
-
 
 if (!$esAdmin && !$esInstruct) {
     header("Location: ../index.php?error=unauthorized");
@@ -31,37 +33,51 @@ if (!$esAdmin && !$esInstruct) {
     <header>
         <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
         <h2><i class="ph ph-bandaids"></i>Gestión de Padecimientos</h2>
-
     </header>
 
     <main>
         <div id="mensaje" class="" style="display: none;"></div>
+
         <section>
             <h3 id="tituloFormulario"><i class="ph ph-plus-circle"></i>Registrar nuevo padecimiento</h3>
             <form id="formPadecimiento">
                 <input type="hidden" id="accion" name="accion" value="create">
                 <input type="hidden" id="padecimientoId" name="id" value="">
 
-                <label>Tipo de Padecimiento:</label>
-                <select id="tipo" name="tipo" required>
-                    <option value="">Seleccione un tipo</option>
-                    <option value="Enfermedad">Enfermedad</option>
-                    <option value="Lesión">Lesión</option>
-                    <option value="Discapacidad">Discapacidad</option>
-                    <option value="Trastorno">Trastorno</option>
-                    <option value="Síndrome">Síndrome</option>
-                    <option value="Otro">Otro</option>
-                </select>
+                <div class="form-group">
+                    <label>Tipo de Padecimiento:</label>
+                    <span class="error-message" id="error-tipo"></span>
+                    <select id="tipo" name="tipo">
+                        <option value="">Seleccione un tipo</option>
+                        <option value="Enfermedad">Enfermedad</option>
+                        <option value="Lesión">Lesión</option>
+                        <option value="Discapacidad">Discapacidad</option>
+                        <option value="Trastorno">Trastorno</option>
+                        <option value="Síndrome">Síndrome</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
 
-                <label>Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required maxlength="100"
-                       placeholder="Nombre del padecimiento">
-                <label>Descripción:</label>
-                <textarea id="descripcion" name="descripcion" required maxlength="500"
-                          placeholder="Descripción detallada"></textarea>
-                <label>Forma de Actuar:</label>
-                <textarea id="formaDeActuar" name="formaDeActuar" required maxlength="1000"
-                          placeholder="Instrucciones sobre cómo actuar"></textarea>
+                <div class="form-group">
+                    <label>Nombre:</label>
+                    <span class="error-message" id="error-nombre"></span>
+                    <input type="text" id="nombre" name="nombre" maxlength="100"
+                           placeholder="Nombre del padecimiento">
+                </div>
+
+                <div class="form-group">
+                    <label>Descripción:</label>
+                    <span class="error-message" id="error-descripcion"></span>
+                    <textarea id="descripcion" name="descripcion" maxlength="500"
+                              placeholder="Descripción detallada"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Forma de Actuar:</label>
+                    <span class="error-message" id="error-formaDeActuar"></span>
+                    <textarea id="formaDeActuar" name="formaDeActuar" maxlength="1000"
+                              placeholder="Instrucciones sobre cómo actuar"></textarea>
+                </div>
 
                 <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
                 <button type="button" onclick="limpiarFormulario()" id="btnCancelar" style="display: none;"><i
@@ -92,27 +108,39 @@ if (!$esAdmin && !$esInstruct) {
         <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
     </footer>
 </div>
+<?php Validation::clear(); ?>
 <script>
     let padecimientos = [];
     document.addEventListener('DOMContentLoaded', () => cargarPadecimientos());
 
     document.getElementById('formPadecimiento').addEventListener('submit', function (e) {
         e.preventDefault();
-        if (!validarFormulario()) return;
+        limpiarErrores();
         const formData = new FormData(this);
         const accion = document.getElementById('accion').value;
         formData.append(accion, '1');
         fetch('../action/padecimientoAction.php', {method: 'POST', body: formData})
-            .then(response => response.json())
-            .then(data => {
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.text();
+            })
+            .then(text => {
+                console.log('Response text:', text);
+                const data = JSON.parse(text);
                 if (data.success) {
                     mostrarMensaje(data.message, 'success');
                     limpiarFormulario();
                     setTimeout(() => cargarPadecimientos(), 1500);
                 } else {
+                    if (data.errors) {
+                        mostrarErroresValidacion(data.errors);
+                    }
                     mostrarMensaje(data.message, 'error');
                 }
-            }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
+            }).catch(error => {
+                console.error('Error completo:', error);
+                mostrarMensaje('Error de conexión.', 'error');
+            });
     });
 
     function cargarPadecimientos() {
@@ -139,10 +167,42 @@ if (!$esAdmin && !$esInstruct) {
             const row = tbody.insertRow();
             row.dataset.id = p.id;
             row.innerHTML = `
-                <td><div class="display">${p.tipo}</div><div class="edit" style="display: none;"><select><option value="Enfermedad">Enfermedad</option><option value="Lesión">Lesión</option><option value="Discapacidad">Discapacidad</option><option value="Trastorno">Trastorno</option><option value="Síndrome">Síndrome</option><option value="Otro">Otro</option></select></div></td>
-                <td><div class="display">${p.nombre}</div><div class="edit" style="display: none;"><input type="text" value="${p.nombre}" placeholder="Nombre" maxlength="100"></div></td>
-                <td><div class="display">${p.descripcion}</div><div class="edit" style="display: none;"><textarea placeholder="Descripción" maxlength="500">${p.descripcion}</textarea></div></td>
-                <td><div class="display">${p.formaDeActuar}</div><div class="edit" style="display: none;"><textarea placeholder="Forma de Actuar" maxlength="1000">${p.formaDeActuar}</textarea></div></td>
+                <td>
+                    <div class="display">${p.tipo}</div>
+                    <div class="edit" style="display: none;">
+                        <select>
+                            <option value="">Seleccione un tipo</option>
+                            <option value="Enfermedad">Enfermedad</option>
+                            <option value="Lesión">Lesión</option>
+                            <option value="Discapacidad">Discapacidad</option>
+                            <option value="Trastorno">Trastorno</option>
+                            <option value="Síndrome">Síndrome</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                        <span class="error-message" id="error-tipo_${p.id}"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="display">${p.nombre}</div>
+                    <div class="edit" style="display: none;">
+                        <input type="text" value="${p.nombre}" placeholder="Nombre" maxlength="100">
+                        <span class="error-message" id="error-nombre_${p.id}"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="display">${p.descripcion}</div>
+                    <div class="edit" style="display: none;">
+                        <textarea placeholder="Descripción" maxlength="500">${p.descripcion}</textarea>
+                        <span class="error-message" id="error-descripcion_${p.id}"></span>
+                    </div>
+                </td>
+                <td>
+                    <div class="display">${p.formaDeActuar}</div>
+                    <div class="edit" style="display: none;">
+                        <textarea placeholder="Forma de Actuar" maxlength="1000">${p.formaDeActuar}</textarea>
+                        <span class="error-message" id="error-formaDeActuar_${p.id}"></span>
+                    </div>
+                </td>
                 <td class="actions-cell">
                     <button class="btn-edit" onclick="editarRegistro(${p.id})"><i class="ph ph-pencil-simple"></i> Editar</button>
                     <button class="btn-delete" onclick="eliminarRegistro(${p.id})"><i class="ph ph-trash"></i> Eliminar</button>
@@ -161,6 +221,10 @@ if (!$esAdmin && !$esInstruct) {
         row.querySelector('.btn-delete').style.display = isEditing ? 'none' : 'inline-flex';
         row.querySelector('.btn-cancel').style.display = isEditing ? 'inline-flex' : 'none';
         row.querySelector('.btn-save').style.display = isEditing ? 'inline-flex' : 'none';
+
+        if (!isEditing) {
+            limpiarErroresInline(id);
+        }
     }
 
     function editarRegistro(id) {
@@ -173,16 +237,12 @@ if (!$esAdmin && !$esInstruct) {
     }
 
     function guardarEdicion(id) {
+        limpiarErroresInline(id);
         const row = document.querySelector(`tr[data-id='${id}']`);
         const tipo = row.cells[0].querySelector('select').value;
         const nombre = row.cells[1].querySelector('input').value.trim();
         const descripcion = row.cells[2].querySelector('textarea').value.trim();
         const formaDeActuar = row.cells[3].querySelector('textarea').value.trim();
-
-        if (!tipo || !nombre || !descripcion || !formaDeActuar || nombre.length < 3 || descripcion.length < 10 || formaDeActuar.length < 10) {
-            mostrarMensaje('Datos inválidos. Verifique la información.', 'error');
-            return;
-        }
 
         const formData = new FormData();
         formData.append('update', '1');
@@ -193,15 +253,27 @@ if (!$esAdmin && !$esInstruct) {
         formData.append('formaDeActuar', formaDeActuar);
 
         fetch('../action/padecimientoAction.php', {method: 'POST', body: formData})
-            .then(response => response.json())
-            .then(data => {
+            .then(response => {
+                console.log('Update response status:', response.status);
+                return response.text();
+            })
+            .then(text => {
+                console.log('Update response text:', text);
+                const data = JSON.parse(text);
                 if (data.success) {
                     mostrarMensaje(data.message, 'success');
+                    toggleEdit(id, false);
                     setTimeout(() => cargarPadecimientos(), 1500);
                 } else {
+                    if (data.errors) {
+                        mostrarErroresInline(data.errors, id);
+                    }
                     mostrarMensaje(data.message, 'error');
                 }
-            }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
+            }).catch(error => {
+                console.error('Update error completo:', error);
+                mostrarMensaje('Error de conexión.', 'error');
+            });
     }
 
     function eliminarRegistro(id) {
@@ -232,6 +304,32 @@ if (!$esAdmin && !$esInstruct) {
             }).catch(error => mostrarMensaje('Error de conexión.', 'error'));
     }
 
+    function limpiarErrores() {
+        document.querySelectorAll('#formPadecimiento .error-message').forEach(el => el.textContent = '');
+    }
+
+    function limpiarErroresInline(id) {
+        document.querySelectorAll(`[id^="error-"][id$="_${id}"]`).forEach(el => el.textContent = '');
+    }
+
+    function mostrarErroresValidacion(errors) {
+        Object.keys(errors).forEach(field => {
+            const errorElement = document.getElementById('error-' + field);
+            if (errorElement) {
+                errorElement.textContent = errors[field];
+            }
+        });
+    }
+
+    function mostrarErroresInline(errors, id) {
+        Object.keys(errors).forEach(field => {
+            const errorElement = document.getElementById('error-' + field);
+            if (errorElement) {
+                errorElement.textContent = errors[field];
+            }
+        });
+    }
+
     function limpiarFormulario() {
         document.getElementById('formPadecimiento').reset();
         document.getElementById('accion').value = 'create';
@@ -239,36 +337,17 @@ if (!$esAdmin && !$esInstruct) {
         document.getElementById('tituloFormulario').innerHTML = '<i class="ph ph-plus-circle"></i>Registrar nuevo padecimiento';
         document.getElementById('btnSubmit').innerHTML = '<i class="ph ph-plus"></i>Registrar';
         document.getElementById('btnCancelar').style.display = 'none';
+        limpiarErrores();
     }
 
     function mostrarMensaje(mensaje, tipo) {
         const div = document.getElementById('mensaje');
         div.textContent = mensaje;
         div.style.display = 'block';
-        div.className = tipo === 'success' ? 'success' : 'error';
+        div.className = tipo === 'success' ? 'success-message flash-msg' : 'error-message flash-msg';
         setTimeout(() => {
             div.style.display = 'none';
         }, 5000);
-    }
-
-    function validarFormulario() {
-        if (!document.getElementById('tipo').value.trim()) {
-            mostrarMensaje('Seleccione un tipo', 'error');
-            return false;
-        }
-        if (document.getElementById('nombre').value.trim().length < 3) {
-            mostrarMensaje('El nombre debe tener al menos 3 caracteres', 'error');
-            return false;
-        }
-        if (document.getElementById('descripcion').value.trim().length < 10) {
-            mostrarMensaje('La descripción debe tener al menos 10 caracteres', 'error');
-            return false;
-        }
-        if (document.getElementById('formaDeActuar').value.trim().length < 10) {
-            mostrarMensaje('La forma de actuar debe tener al menos 10 caracteres', 'error');
-            return false;
-        }
-        return true;
     }
 </script>
 </body>

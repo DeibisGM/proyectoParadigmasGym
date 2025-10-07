@@ -12,7 +12,7 @@ class ClienteData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "INSERT INTO tbcliente (tbclientecarnet, tbclientenombre, tbclientefechanacimiento, tbclientetelefono, tbclientecorreo, tbclientedireccion, tbclientegenero, tbclienteinscripcion, tbclienteestado, tbclientecontrasena) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO tbcliente (tbclientecarnet, tbclientenombre, tbclientefechanacimiento, tbclientetelefono, tbclientecorreo, tbclientedireccion, tbclientegenero, tbclienteinscripcion, tbclienteactivo, tbclientecontrasena) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "sssissssss",
             $cliente->getCarnet(),
@@ -23,7 +23,7 @@ class ClienteData extends Data
             $cliente->getDireccion(),
             $cliente->getGenero(),
             $cliente->getInscripcion(),
-            $cliente->getEstado(),
+            $cliente->getActivo(),
             $cliente->getContrasena()
         );
 
@@ -51,7 +51,7 @@ class ClienteData extends Data
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "UPDATE tbcliente SET tbclientecarnet=?, tbclientenombre=?, tbclientefechanacimiento=?, tbclientetelefono=?, tbclientecorreo=?, tbclientedireccion=?, tbclientegenero=?, tbclienteinscripcion=?, tbclienteestado=?, tbclientecontrasena=? WHERE tbclienteid=?";
+        $query = "UPDATE tbcliente SET tbclientecarnet=?, tbclientenombre=?, tbclientefechanacimiento=?, tbclientetelefono=?, tbclientecorreo=?, tbclientedireccion=?, tbclientegenero=?, tbclienteinscripcion=?, tbclienteactivo=?, tbclientecontrasena=? WHERE tbclienteid=?";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "sssissssssi",
             $cliente->getCarnet(),
@@ -62,7 +62,7 @@ class ClienteData extends Data
             $cliente->getDireccion(),
             $cliente->getGenero(),
             $cliente->getInscripcion(),
-            $cliente->getEstado(),
+            $cliente->getActivo(),
             $cliente->getContrasena(),
             $cliente->getId()
         );
@@ -138,7 +138,7 @@ class ClienteData extends Data
                 $row['tbclientedireccion'],
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
-                $row['tbclienteestado'],
+                $row['tbclienteactivo'],
                 isset($row['tbclientecontrasena']) ? $row['tbclientecontrasena'] : '',
                 isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
@@ -187,7 +187,7 @@ class ClienteData extends Data
                 $row['tbclientedireccion'],
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
-                $row['tbclienteestado'],
+                $row['tbclienteactivo'],
                 $row['tbclientecontrasena'],
                 isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
@@ -220,7 +220,7 @@ class ClienteData extends Data
                 $row['tbclientedireccion'],
                 $row['tbclientegenero'],
                 $row['tbclienteinscripcion'],
-                $row['tbclienteestado'],
+                $row['tbclienteactivo'],
                 $row['tbclientecontrasena'],
                 isset($row['tbclienteimagenid']) ? $row['tbclienteimagenid'] : ''
             );
