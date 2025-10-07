@@ -1,9 +1,10 @@
 <?php
 session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-
 ob_start();
+
+error_reporting(0);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
 try {
     include_once '../business/PadecimientoDictamenBusiness.php';
@@ -12,18 +13,8 @@ try {
 
     Validation::start();
 
-    header('Content-Type: application/json');
-
-    $response = [
-        'success' => false,
-        'message' => 'Ha ocurrido un error.',
-        'padecimiento' => null
-    ];
-
     if (!isset($_SESSION['tipo_usuario'])) {
-        $response['message'] = 'No autorizado. Por favor, inicie sesión.';
-        ob_clean();
-        echo json_encode($response);
+        header("location: ../view/loginView.php");
         exit();
     }
 
@@ -33,11 +24,16 @@ try {
     $padecimientoDictamenBusiness = new PadecimientoDictamenBusiness();
     $imageManager = new ImageManager();
 
+    $redirect = "location: ../view/padecimientoDictamenView.php";
+
     $accion = $_POST['accion'] ?? '';
 
     switch ($accion) {
         case 'guardar':
-            ob_clean();
+            // Detectar si es AJAX
+            $isAjax = isset($_POST['ajax_request']) && $_POST['ajax_request'] == '1';
+
+            Validation::setOldInput($_POST);
 
             $fechaemision = $_POST['fechaemision'] ?? '';
             $entidademision = $_POST['entidademision'] ?? '';
@@ -47,32 +43,40 @@ try {
             if ($esAdminOInstructor) {
                 $clienteId = $_POST['clienteId'] ?? '';
                 if (empty($clienteId) || !is_numeric($clienteId)) {
-                    $response['message'] = 'Debe seleccionar un cliente válido.';
-                    echo json_encode($response);
-                    exit();
+                    Validation::setError('clienteId', 'Debe seleccionar un cliente válido.');
                 }
             } else if ($esCliente) {
                 $clienteId = $_SESSION['usuario_id'];
                 if (empty($clienteId)) {
-                    $response['message'] = 'No se pudo identificar el cliente. Inicie sesión nuevamente.';
-                    echo json_encode($response);
-                    exit();
+                    Validation::setError('general', 'No se pudo identificar el cliente. Inicie sesión nuevamente.');
                 }
             }
 
             if (empty($fechaemision)) {
-                $response['message'] = 'La fecha de emisión es obligatoria.';
-                echo json_encode($response);
-                exit();
+                Validation::setError('fechaemision', 'La fecha de emisión es obligatoria.');
             } elseif (strtotime($fechaemision) > time()) {
-                $response['message'] = 'La fecha de emisión no puede ser futura.';
-                echo json_encode($response);
-                exit();
+                Validation::setError('fechaemision', 'La fecha de emisión no puede ser futura.');
             }
 
             if (empty($entidademision)) {
-                $response['message'] = 'La entidad de emisión es obligatoria.';
-                echo json_encode($response);
+                Validation::setError('entidademision', 'La entidad de emisión es obligatoria.');
+            }
+
+            // Si hay errores
+            if (Validation::hasErrors()) {
+                if ($isAjax) {
+                    ob_clean();
+                    header('Content-Type: application/json');
+                    $errores = Validation::getErrors();
+                    $mensajeError = implode(', ', array_values($errores));
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Error de validación: ' . $mensajeError,
+                        'errors' => $errores
+                    ]);
+                    exit();
+                }
+                header($redirect);
                 exit();
             }
 
@@ -81,16 +85,27 @@ try {
             $dictamenesExistentes = $clientePadecimientoBusiness->obtenerDictamenesPorCliente($clienteId);
 
             if (!empty($dictamenesExistentes)) {
-                $response['message'] = 'Este cliente ya posee un dictamen registrado. No es posible registrar múltiples dictámenes para el mismo cliente.';
-                echo json_encode($response);
+                if ($isAjax) {
+                    ob_clean();
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Este cliente ya posee un dictamen registrado. No es posible registrar múltiples dictámenes para el mismo cliente.'
+                    ]);
+                    exit();
+                }
+                Validation::setError('general', 'Este cliente ya posee un dictamen registrado. No es posible registrar múltiples dictámenes para el mismo cliente.');
+                header($redirect);
                 exit();
             }
 
             $padecimiento = new PadecimientoDictamen(0, $fechaemision, $entidademision, '');
+
+            ob_start();
             $nuevoId = $padecimientoDictamenBusiness->insertarTBPadecimientoDictamen($padecimiento);
+            ob_end_clean();
 
             if ($nuevoId > 0) {
-
                 $imagenIdLista = '';
                 if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
                     $imageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'pad');
@@ -103,30 +118,64 @@ try {
                     }
                 }
 
+                ob_start();
                 $asociacionExitosa = $padecimientoDictamenBusiness->asociarDictamenACliente($clienteId, $nuevoId);
+                ob_end_clean();
 
                 if ($asociacionExitosa) {
-                    $response['success'] = true;
-                    $response['message'] = 'Padecimiento dictamen creado exitosamente.';
-                    $response['dictamenId'] = $nuevoId;
-                    $response['entidadEmision'] = $entidademision;
-                    $response['padecimiento'] = [
-                        'id' => $nuevoId,
-                        'fechaemision' => $fechaemision,
-                        'entidademision' => $entidademision,
-                        'imagenes' => $imageManager->getImagesByIds($imagenIdLista)
-                    ];
+                    Validation::clear();
+                    if ($isAjax) {
+                        ob_clean();
+                        header('Content-Type: application/json');
+                        echo json_encode([
+                            'success' => true,
+                            'message' => 'Dictamen registrado exitosamente',
+                            'dictamenId' => $nuevoId
+                        ]);
+                        exit();
+                    }
+                    header($redirect . "?success=created");
+                    exit();
                 } else {
                     $padecimientoDictamenBusiness->eliminarTBPadecimientoDictamen($nuevoId);
-                    $response['message'] = 'Error al asociar el dictamen con el cliente.';
+                    if ($isAjax) {
+                        ob_clean();
+                        header('Content-Type: application/json');
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'Error al asociar el dictamen con el cliente.'
+                        ]);
+                        exit();
+                    }
+                    Validation::setError('general', 'Error al asociar el dictamen con el cliente.');
+                    header($redirect);
+                    exit();
                 }
             } else {
-                $response['message'] = 'Error al crear el padecimiento dictamen en la base de datos.';
+                if ($isAjax) {
+                    ob_clean();
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Error al crear el padecimiento dictamen en la base de datos.'
+                    ]);
+                    exit();
+                }
+                Validation::setError('general', 'Error al crear el padecimiento dictamen en la base de datos.');
+                header($redirect);
+                exit();
             }
             break;
 
         case 'actualizar':
             ob_clean();
+            header('Content-Type: application/json');
+
+            $response = [
+                'success' => false,
+                'message' => 'Ha ocurrido un error.',
+                'padecimiento' => null
+            ];
 
             $id = $_POST['id'] ?? null;
             $fechaemision = $_POST['fechaemision'] ?? null;
@@ -182,10 +231,18 @@ try {
             } else {
                 $response['message'] = 'Error al actualizar el padecimiento en la base de datos.';
             }
-            break;
+
+            echo json_encode($response);
+            exit();
 
         case 'eliminar':
             ob_clean();
+            header('Content-Type: application/json');
+
+            $response = [
+                'success' => false,
+                'message' => 'Ha ocurrido un error.'
+            ];
 
             if (!$esAdminOInstructor) {
                 $response['message'] = 'No tiene permisos para eliminar padecimientos.';
@@ -215,10 +272,18 @@ try {
             } else {
                 $response['message'] = 'Error al eliminar el padecimiento de la base de datos.';
             }
-            break;
+
+            echo json_encode($response);
+            exit();
 
         case 'borrar_imagen':
             ob_clean();
+            header('Content-Type: application/json');
+
+            $response = [
+                'success' => false,
+                'message' => 'Ha ocurrido un error.'
+            ];
 
             if (!$esAdminOInstructor) {
                 $response['message'] = 'No tiene permisos para eliminar imágenes.';
@@ -247,23 +312,22 @@ try {
             } else {
                 $response['message'] = 'Error al eliminar la imagen.';
             }
-            break;
+
+            echo json_encode($response);
+            exit();
 
         default:
-            $response['message'] = 'Acción no válida. Acciones disponibles: guardar, actualizar, eliminar, borrar_imagen';
+            header($redirect);
             break;
     }
 
 } catch (Exception $e) {
     ob_clean();
     error_log("Exception en PadecimientoDictamenAction: " . $e->getMessage() . "\nTrace: " . $e->getTraceAsString());
-    $response = [
-        'success' => false,
-        'message' => 'Error del sistema. Por favor, revise los logs del servidor.'
-    ];
+    Validation::setError('general', 'Error del sistema. Por favor, intente nuevamente.');
+    header("location: ../view/padecimientoDictamenView.php");
+    exit();
 }
 
-ob_clean();
-echo json_encode($response);
 exit();
 ?>

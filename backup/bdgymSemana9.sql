@@ -240,10 +240,10 @@ CREATE TABLE `tbsala` (
   `tbsalaid` int(11) NOT NULL,
   `tbsalanombre` varchar(150) DEFAULT NULL,
   `tbsalacapacidad` int(11) DEFAULT NULL,
-  `tbsalaestado` tinyint(1) DEFAULT NULL
+  `tbsalaactivo` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `tbsala` (`tbsalaid`, `tbsalanombre`, `tbsalacapacidad`, `tbsalaestado`) VALUES
+INSERT INTO `tbsala` (`tbsalaid`, `tbsalanombre`, `tbsalacapacidad`, `tbsalaactivo`) VALUES
 (2, 'Sala de Recepción', 14, 1),
 (4, 'Sala de Yoga', 25, 1),
 (5, 'Sala baile', 40, 0),

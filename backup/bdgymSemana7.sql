@@ -312,14 +312,14 @@ CREATE TABLE `tbsala` (
   `tbsalaid` int NOT NULL,
   `tbsalanombre` varchar(150) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tbsalacapacidad` int DEFAULT NULL,
-  `tbsalaestado` tinyint(1) DEFAULT NULL
+  `tbsalaactivo` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `tbsala`
 --
 
-INSERT INTO `tbsala` (`tbsalaid`, `tbsalanombre`, `tbsalacapacidad`, `tbsalaestado`) VALUES
+INSERT INTO `tbsala` (`tbsalaid`, `tbsalanombre`, `tbsalacapacidad`, `tbsalaactivo`) VALUES
 (2, 'Sala de Recepción', 14, 1),
 (4, 'Sala de Yoga', 25, 1),
 (5, 'Sala baile', 40, 0),

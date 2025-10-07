@@ -32,20 +32,21 @@ class Data
                 $this->db = "dbgym";
                 break;
 
-            /*case "ciany-Inspiron-15-3515":
+            case "ciany-Inspiron-15-3515":
                 $this->isActive = false;
                 $this->server = "127.0.0.1";
                 $this->user = "ciany";
                 $this->password = "1223";
                 $this->db = "dbgym";
                 break;
-*/
+
             default:
-                $this->isActive = false;
-                $this->server = "localhost";
-                $this->user = "root";
-                $this->password = "";
-                $this->db = "bdgym";
+                 $this->isActive = false;
+                                $this->server = "shortline.proxy.rlwy.net";
+                                $this->user = "root";
+                                $this->password = "GobisQryHUevnFguFcxHzoFjRMBoxAuv";
+                                $this->db = "railway";
+                                $this->port = 53962;
 
                 break;
         }
