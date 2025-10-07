@@ -34,8 +34,8 @@ foreach ($todasLasSalas as $sala) {
 <body>
 <div class="container">
     <header>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
         <h2><i class="ph ph-calendar-check"></i>Ocupación de Salas por Eventos</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
     </header>
 
     <main>

@@ -50,8 +50,8 @@ $eventos = $eventoBusiness->getAllEventosActivos();
 <body>
 <div class="container">
     <header>
-        <h2><i class="ph ph-sparkle"></i> Eventos Especiales</h2>
-        <a href="reservaView.php"><i class="ph ph-arrow-left"></i> Volver a Mis Reservas</a>
+        <a href="reservaView.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2><i class="ph ph-sparkle"></i> Eventos Disponibles</h2>
     </header>
 
     <main>

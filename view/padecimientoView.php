@@ -30,9 +30,9 @@ if (!$esAdmin && !$esInstruct) {
 </head>
 <body>
 <div class="container">
-    <header>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a><br><br>
-        <h2><i class="ph ph-bandaids"></i>Gestión de Padecimientos</h2>
+<header>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2>Gestión de Padecimientos</h2>
     </header>
 
     <main>

@@ -81,8 +81,8 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
 <body>
 <div class="container">
     <header>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i> Volver al Inicio</a><br><br>
-        <h2><i class="ph ph-calendar-grid"></i> Horario de Uso Libre</h2>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2><i class="ph ph-clock-afternoon"></i> Gestión de Horario Libre</h2>
     </header>
     <hr>
     <main>

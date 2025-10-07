@@ -17,7 +17,7 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
 </head>
 <body>
 <div class="login-container">
-    <h1>Iniciar Sesión</h1>
+    <h2>Iniciar Sesión</h2><br>
     <form action="../action/loginAction.php" method="post">
         <div class="form-group">
             <label for="correo"><i class="ph ph-envelope"></i>Correo electrónico:</label>
@@ -34,10 +34,10 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
 
 
     <div class="nota-credenciales">
-        <strong><i class="ph ph-info"></i>Credenciales de Prueba:</strong><br><br>
-        • <strong>Cliente:</strong> cliente@gmail.com / 12345678<br>
-        • <strong>Instructor:</strong> instructor@gmail.com / 12345678<br>
-        • <strong>Admin:</strong> admin@gmail.com / admin
+        <strong>Credenciales de Prueba:</strong><br><br>
+        <strong>• Cliente:</strong> cliente@gmail.com / 12345678<br>
+        <strong>• Instructor:</strong> instructor@gmail.com / 12345678<br>
+        <strong>• Admin:</strong> admin@gmail.com / admin
     </div>
 
     <?php if (isset($_GET['error'])) : ?>

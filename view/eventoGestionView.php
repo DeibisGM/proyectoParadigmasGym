@@ -46,8 +46,8 @@ if ($tipoUsuario === 'admin') {
 <body>
 <div class="container">
     <header>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
         <h2><i class="ph ph-calendar-plus"></i>Gestión de Eventos</h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
     </header>
 
     <main>

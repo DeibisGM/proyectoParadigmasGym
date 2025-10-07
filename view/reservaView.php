@@ -31,10 +31,10 @@ if ($tipoUsuario === 'cliente') {
 <body>
 <div class="container">
     <header>
-        <h2><i class="ph ph-calendar-check"></i>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2>
             <?php echo ($tipoUsuario === 'cliente') ? "Mis Reservas" : "Gestión de Reservas"; ?>
         </h2>
-        <a href="../index.php"><i class="ph ph-arrow-left"></i>Volver al Inicio</a>
     </header>
 
     <main>
