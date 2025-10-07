@@ -143,7 +143,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                                     if ($esMiReserva) {
                                         $clase = 'reservado-por-mi';
                                         $reservaId = $misReservasLookup[$slot->getId()];
-                                        // Contenido consistente para reservas del cliente
                                         $contenido = '<div class="slot-content">';
                                         $contenido .= '<span class="slot-info">RESERVADO</span>';
                                         $contenido .= '<button type="button" class="btn-cancelar-slot-icon" data-reserva-id="' . $reservaId . '" title="Cancelar mi reserva">';
@@ -157,7 +156,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                                             $clase = 'creado lleno';
                                         }
                                         $instructorNombre = $mapaInstructores[$slot->getInstructorId()] ?? 'N/A';
-                                        // Contenido consistente para slots disponibles y llenos
                                         $contenido = '<div class="slot-content">';
                                         $contenido .= '<span class="slot-info">' . $instructorNombre . '<br>Cupos: ' . $disponibles . '/' . $slot->getCupos() . '</span>';
                                         if ($esAdmin) {
@@ -209,13 +207,27 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                 </form>
             </section>
         <?php else: ?>
+            <!-- MODIFICADO: Panel del cliente ahora es un formulario -->
             <section id="panel-cliente-reserva" style="display: none; margin-top: 20px;">
-                <h3><i class="ph ph-check-square"></i> Confirmar Reservas</h3>
+                <h3><i class="ph ph-check-square"></i> Confirmar Reservas de Uso Libre</h3>
                 <p>Se van a reservar <strong id="contador-seleccion-cliente">0</strong> espacios de tiempo.</p>
-                <button id="btn-confirmar-reserva"><i class="ph ph-calendar-plus"></i> Reservar Seleccionados</button>
-                <button type="button" id="btn-limpiar-seleccion-cliente">Limpiar Selección</button>
+                <form id="form-reservar-libre">
+                    <div id="slots-seleccionados-cliente-container"></div>
+
+                    <div class="form-group">
+                        <label><input type="checkbox" name="incluirme" checked> Incluirme en la reserva</label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ids_invitados">Reservar para otros miembros (ingrese IDs de cliente separados por coma):</label>
+                        <input type="text" name="ids_invitados" id="ids_invitados" placeholder="Ej: 2, 8, 15">
+                    </div>
+
+                    <button type="submit" id="btn-confirmar-reserva"><i class="ph ph-calendar-plus"></i> Reservar Seleccionados</button>
+                    <button type="button" id="btn-limpiar-seleccion-cliente">Limpiar Selección</button>
+                </form>
             </section>
-            <p style="margin-top: 10px;"><strong>Instrucciones:</strong> Haz clic en los espacios verdes para seleccionarlos. Luego, haz clic en "Reservar Seleccionados".</p>
+            <p style="margin-top: 10px;"><strong>Instrucciones:</strong> Haz clic en los espacios verdes para seleccionarlos. Luego, completa el formulario de reserva y haz clic en "Reservar Seleccionados".</p>
         <?php endif; ?>
 
     </main>
@@ -271,7 +283,8 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         const grid = document.querySelector('.grid-horario');
         const panel = document.getElementById('panel-cliente-reserva');
         const contador = document.getElementById('contador-seleccion-cliente');
-        const btnConfirmar = document.getElementById('btn-confirmar-reserva');
+        const formReserva = document.getElementById('form-reservar-libre');
+        const container = document.getElementById('slots-seleccionados-cliente-container');
         const btnLimpiar = document.getElementById('btn-limpiar-seleccion-cliente');
 
         grid.addEventListener('click', function(e) {
@@ -311,18 +324,19 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
             updateClientPanel();
         });
 
-        btnConfirmar.addEventListener('click', function() {
+        // MODIFICADO: Evento submit para el formulario de reserva
+        formReserva.addEventListener('submit', function(e) {
+            e.preventDefault();
             const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
             if (seleccionados.length === 0) {
                 alert("Por favor, selecciona al menos un horario.");
                 return;
             }
 
-            const ids = Array.from(seleccionados).map(cell => cell.dataset.id);
+            const formData = new FormData(formReserva);
+            formData.append('action', 'create_libre');
 
-            const formData = new FormData();
-            formData.append('action', 'create');
-            ids.forEach(id => formData.append('horarioLibreIds[]', id));
+            // Los slot IDs ya están en el 'container'
 
             fetch('../action/reservaAction.php', { method: 'POST', body: formData })
                 .then(res => res.json())
@@ -336,6 +350,17 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
         function updateClientPanel() {
             const seleccionados = document.querySelectorAll('.celda-horario.seleccionado');
             contador.textContent = seleccionados.length;
+
+            // Limpiar y re-poblar los inputs ocultos de los slots
+            container.innerHTML = '';
+            seleccionados.forEach(cell => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'horarioLibreIds[]';
+                input.value = cell.dataset.id;
+                container.appendChild(input);
+            });
+
             panel.style.display = seleccionados.length > 0 ? 'block' : 'none';
         }
     }

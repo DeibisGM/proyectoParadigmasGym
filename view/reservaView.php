@@ -102,7 +102,8 @@ if ($tipoUsuario === 'cliente') {
                         <tr>
                             <th>Fecha</th>
                             <th>Hora</th>
-                            <th>Cliente</th>
+                            <th>Cliente Asistente</th>
+                            <th>Reservado Por</th> <!-- NUEVO -->
                             <th>Tipo</th>
                             <th>Descripción</th>
                             <th>Instructor</th>
@@ -112,7 +113,7 @@ if ($tipoUsuario === 'cliente') {
                         <tbody>
                         <?php if (empty($todasLasReservas)): ?>
                             <tr>
-                                <td colspan="7">No hay ninguna reserva registrada en el sistema.</td>
+                                <td colspan="8">No hay ninguna reserva registrada en el sistema.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($todasLasReservas as $reserva): ?>
@@ -120,6 +121,8 @@ if ($tipoUsuario === 'cliente') {
                                     <td><?php echo htmlspecialchars($reserva['fecha']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['hora']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['cliente']); ?></td>
+                                    <!-- NUEVO: Mostrar responsable -->
+                                    <td><?php echo htmlspecialchars($reserva['responsable'] ?? $reserva['cliente']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['tipo']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['descripcion']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['instructor']); ?></td>

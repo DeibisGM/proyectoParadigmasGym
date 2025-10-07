@@ -89,7 +89,6 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                 <div class="menu-grid">
                     <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Mis Reservas</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Instructor Personal</button></a>
-                    <a href='view/eventoClienteView.php'><button><i class="ph ph-sparkle"></i>Eventos Grupales</button></a>
                     <a href='view/horarioLibreView.php'><button><i class="ph ph-barbell"></i>Uso Libre</button></a>
                     <a href='view/instructorClienteView.php'><button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
