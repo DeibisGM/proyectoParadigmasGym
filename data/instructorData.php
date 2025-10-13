@@ -1,4 +1,3 @@
-
 <?php
 include_once 'data.php';
 include '../domain/instructor.php';
@@ -59,7 +58,7 @@ public function actualizarTBInstructor($instructor)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $queryDelete = "UPDATE tbinstructor SET tbinstructoractivo = 0 WHERE tbinstructorid=" . $instructorId . ";";
+        $queryDelete = "UPDATE tbinstructor SET tbinstructoractivo = 0 WHERE tbinstructorid='" . mysqli_real_escape_string($conn, $instructorId) . "';";
         $result = mysqli_query($conn, $queryDelete);
         mysqli_close($conn);
         return $result;
@@ -69,16 +68,20 @@ public function actualizarTBInstructor($instructor)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $queryUpdate = "UPDATE tbinstructor SET tbinstructoractivo = 1 WHERE tbinstructorid=" . $instructorId . ";";
+        $queryUpdate = "UPDATE tbinstructor SET tbinstructoractivo = 1 WHERE tbinstructorid='" . mysqli_real_escape_string($conn, $instructorId) . "';";
         $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
         return $result;
     }
 
-    // En el método getAllTBInstructor
+    // CORREGIDO: Método getAllTBInstructor
     public function getAllTBInstructor($esAdmin = false)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        if (!$conn) {
+            error_log("Error de conexión en getAllTBInstructor");
+            return [];
+        }
         $conn->set_charset('utf8');
 
         $querySelect = "SELECT * FROM tbinstructor";
@@ -88,7 +91,12 @@ public function actualizarTBInstructor($instructor)
         $querySelect .= " ORDER BY LPAD(tbinstructorid, 3, '0') ASC";
 
         $result = mysqli_query($conn, $querySelect);
-        mysqli_close($conn);
+
+        if (!$result) {
+            error_log("Error en query getAllTBInstructor: " . mysqli_error($conn));
+            mysqli_close($conn);
+            return [];
+        }
 
         $instructors = [];
         while ($row = mysqli_fetch_assoc($result)) {
@@ -105,6 +113,8 @@ public function actualizarTBInstructor($instructor)
                 isset($row['tbinstructorimagenid']) ? $row['tbinstructorimagenid'] : ''
             );
         }
+
+        mysqli_close($conn);
         return $instructors;
     }
 
@@ -187,7 +197,7 @@ public function actualizarTBInstructor($instructor)
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "SELECT MAX(tbinstructorid) as max_id FROM tbinstructor";
+        $query = "SELECT MAX(CAST(tbinstructorid AS UNSIGNED)) as max_id FROM tbinstructor";
         $result = mysqli_query($conn, $query);
         $row = mysqli_fetch_assoc($result);
         mysqli_close($conn);

@@ -12,17 +12,17 @@ class HorarioPersonal
     private $instructorNombre;
     private $clienteNombre;
 
-    public function __construct($id, $fecha, $hora, $instructorId, $clienteId = null, $estado = 'disponible', $duracion = 60, $tipo = 'personal')
-    {
-        $this->horarioPersonalId = $id;
-        $this->fecha = $fecha;
-        $this->hora = $hora;
-        $this->instructorId = $instructorId;
-        $this->clienteId = $clienteId;
-        $this->estado = $estado;
-        $this->duracion = $duracion;
-        $this->tipo = $tipo;
-    }
+   public function __construct($id, $fecha, $hora, $instructorId, $clienteId = null, $estado = 'disponible', $duracion = 60, $tipo = 'personal')
+   {
+       $this->horarioPersonalId = $id;
+       $this->fecha = $fecha;
+       $this->hora = $hora;
+       $this->instructorId = $instructorId;
+       $this->clienteId = $clienteId;
+       $this->estado = $estado ?: 'disponible'; // Valor por defecto
+       $this->duracion = $duracion ?: 60; // Valor por defecto
+       $this->tipo = $tipo ?: 'personal'; // Valor por defecto
+   }
 
     // Getters
     public function getId() { return $this->horarioPersonalId; }
