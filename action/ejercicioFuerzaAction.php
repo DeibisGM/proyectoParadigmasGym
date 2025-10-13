@@ -15,7 +15,7 @@ if(isset($_POST['insertar'])){
         $descripcion = trim($_POST['descripcion']);
         $repeticion = trim($_POST['repeticion']);
         $serie = trim($_POST['serie']);
-        $peso = trim($_POST['peso']);
+        $peso = !empty(trim($_POST['peso'])) ? trim($_POST['peso']) : 0;
         $descanso = trim($_POST['descanso']);
 
         // Validaciones
@@ -43,11 +43,11 @@ if(isset($_POST['insertar'])){
             Validation::setError('serie', 'Las series deben ser un número entero positivo.');
         }
 
-        if (empty($peso)) {
+        /*if (empty($peso)) {
             Validation::setError('peso', 'El peso es obligatorio.');
         } elseif (!is_numeric($peso) || $peso < 0) {
             Validation::setError('peso', 'El peso debe ser un número positivo.');
-        }
+        }*/
 
         if (empty($descanso)) {
             Validation::setError('descanso', 'El tiempo de descanso es obligatorio.');
@@ -92,7 +92,7 @@ else if(isset($_POST['actualizar'])){
         $descripcion = trim($_POST['descripcion']);
         $repeticion = $_POST['repeticion'];
         $serie = $_POST['serie'];
-        $peso = $_POST['peso'];
+        $peso = !empty($_POST['peso']) ? $_POST['peso'] : 0;
         $descanso = $_POST['descanso'];
 
         // Validaciones
@@ -120,11 +120,11 @@ else if(isset($_POST['actualizar'])){
             Validation::setError('serie_'.$id, 'Las series deben ser un número entero positivo.');
         }
 
-        if (empty($peso)) {
+        /*if (empty($peso)) {
             Validation::setError('peso_'.$id, 'El peso es obligatorio.');
         } elseif (!is_numeric($peso) || $peso < 0) {
             Validation::setError('peso_'.$id, 'El peso debe ser un número positivo.');
-        }
+        }*/
 
         if (empty($descanso)) {
             Validation::setError('descanso_'.$id, 'El tiempo de descanso es obligatorio.');

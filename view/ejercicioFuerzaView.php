@@ -143,8 +143,7 @@ $ejercicios = $ejercicioBusiness->obtenerTbejerciciofuerza();
                     </div>
 
                     <div class="form-group">
-                        <label>Peso (kg):</label>
-                        <span class="error-message"><?= Validation::getError('peso') ?></span>
+                        <label>Peso (lb):</label>
                         <input type="number" step="0.01" name="peso" placeholder="Ej: 50.5" min="0"
                                value="<?= htmlspecialchars(Validation::getOldInput('peso')) ?>"/>
                     </div>
@@ -210,7 +209,6 @@ $ejercicios = $ejercicioBusiness->obtenerTbejerciciofuerza();
                                     <td>
                                         <input type="number" step="0.01" name="peso" min="0"
                                                value="<?php echo htmlspecialchars(Validation::getOldInput('peso_'.$ejercicio->getTbejerciciofuerzaid(), $ejercicio->getTbejerciciofuerzapeso())); ?>">
-                                        <span class="error-message"><?= Validation::getError('peso_'.$ejercicio->getTbejerciciofuerzaid()) ?></span>
                                     </td>
 
                                     <td>
