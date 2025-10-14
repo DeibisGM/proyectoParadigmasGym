@@ -47,6 +47,8 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-plus"></i>Números Emergencia</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Salas</button></a>
                     <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zona</button></a>
+                    <!-- NUEVO: Horarios de Instructores para Admin -->
+                    <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios Instructores</button></a>
                     <a href='view/ejercicioFuerzaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de fuerza</button></a>
                 </div>
             </section>
@@ -57,7 +59,6 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Eventos</button></a>
                     <a href='view/salaReservasView.php'><button><i class="ph ph-presentation-chart"></i>Ocupación de Salas</button></a>
                     <a href='view/horarioLibreView.php'><button><i class="ph ph-clock-afternoon"></i>Gestionar Horario Libre</button></a>
-                    <!-- NUEVO: Instructor Personal para Admin -->
                     <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Instructor Personal</button></a>
                 </div>
             </section>
@@ -69,6 +70,8 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Ver Reservas</button></a>
                     <a href='view/eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Mis Eventos</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Mis Horarios Personales</button></a>
+                    <!-- NUEVO: Horarios de Instructores para Instructor -->
+                    <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Mis Horarios de Trabajo</button></a>
                     <a href='view/clienteView.php'><button><i class="ph ph-users"></i>Ver Clientes</button></a>
                     <a href='view/instructorView.php'><button><i class="ph ph-user-rectangle"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
@@ -93,6 +96,8 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Mis Reservas</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Instructor Personal</button></a>
                     <a href='view/horarioLibreView.php'><button><i class="ph ph-barbell"></i>Uso Libre</button></a>
+                    <!-- NUEVO: Horarios de Instructores para Cliente -->
+                    <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios de Instructores</button></a>
                     <a href='view/instructorClienteView.php'><button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zonas</button></a>
