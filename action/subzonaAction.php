@@ -89,8 +89,10 @@ if (isset($_POST['borrar_imagen'])) {
 
             $partes = $cuerpoZonaBusiness->getCuerpoZonaSubZonaId($zonaId);
 
-            if($partes !== null){
+            if($partes !== null && $partes !== ''){
                 $partes .= "$" . $nuevoId;
+            }else {
+                $partes = $nuevoId;
             }
 
             $cuerpoZonaBusiness->actualizarSubZonaTBCuerpoZona($zonaId, $partes);
