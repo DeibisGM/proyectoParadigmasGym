@@ -1,6 +1,6 @@
 <?php
 session_start();
-include_once '../business/parteZonaBusiness.php';
+include_once '../business/subZonaBusiness.php';
 include_once '../business/cuerpoZonaBusiness.php';
 include_once '../utility/ImageManager.php';
 include_once '../utility/Validation.php';
@@ -14,7 +14,7 @@ if (!isset($_SESSION['tipo_usuario'])) {
 
 $esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor');
 
-$parteZonaBusiness = new ParteZonaBusiness();
+$parteZonaBusiness = new subZonaBusiness();
 $cuerpoZonaBusiness = new CuerpoZonaBusiness();
 $imageManager = new ImageManager();
 
@@ -25,19 +25,19 @@ $zonasCuerpo = $cuerpoZonaBusiness->getAllTBCuerpoZona();
 $zonaFiltro = isset($_GET['zonaFiltro']) ? intval($_GET['zonaFiltro']) : 0;
 
 if ($zonaFiltro > 0) {
-    $idsParte = $cuerpoZonaBusiness->getCuerpoZonaParteZonaId($zonaFiltro);
+    $idsParte = $cuerpoZonaBusiness->getCuerpoZonaSubZonaId($zonaFiltro);
     if ($idsParte !== null) {
-        $partesZona = $parteZonaBusiness->getAllTBParteZonaPorId($idsParte);
+        $partesZona = $parteZonaBusiness->getAllTBSubZonaPorId($idsParte);
     } else {
         $partesZona = [];
     }
 } else {
-    $partesZona = $parteZonaBusiness->getAllTBParteZona();
+    $partesZona = $parteZonaBusiness->getAllTBSubZona();
 }
 
 if (!$esAdminOInstructor) {
     $partesZona = array_filter($partesZona, function ($parte) {
-        return $parte->getPartezonaactivo() == 1;
+        return $parte->getSubzonaactivo() == 1;
     });
 }
 ?>
@@ -45,7 +45,7 @@ if (!$esAdminOInstructor) {
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Partes de Zona</title>
+    <title>Gestión de Sub Zonas del cuerpo</title>
     <link rel="stylesheet" href="styles.css">
     <script src="../utility/Events.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -54,9 +54,8 @@ if (!$esAdminOInstructor) {
 <div class="container">
 <header>
         <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-        <h2>Gestión de Partes de Zona</h2>
+        <h2>Gestión de Sub Zonas</h2>
     </header>
-    <hr>
 
     <main>
         <?php
@@ -76,9 +75,9 @@ if (!$esAdminOInstructor) {
         } else if (isset($_GET['success'])) {
             $success = $_GET['success'];
             echo '<p class="success-message flash-msg"><b>Éxito: ';
-            if ($success == "inserted") echo 'Parte de zona creada correctamente.';
-            else if ($success == "updated") echo 'Parte de zona actualizada correctamente.';
-            else if ($success == "eliminado") echo 'Parte de zona eliminada correctamente.';
+            if ($success == "inserted") echo 'Subzona creada correctamente.';
+            else if ($success == "updated") echo 'Subzona actualizada correctamente.';
+            else if ($success == "eliminado") echo 'Subzona eliminada correctamente.';
             else if ($success == "image_deleted") echo 'Imagen eliminada correctamente.';
             echo '</b></p>';
         }
@@ -87,8 +86,8 @@ if (!$esAdminOInstructor) {
         <!-- Crear nueva parte de zona -->
         <?php if ($esAdminOInstructor): ?>
             <section>
-                <h3><i class="ph ph-plus-circle"></i> Crear Nueva Parte de Zona</h3>
-                <form method="post" action="../action/parteZonaAction.php" enctype="multipart/form-data">
+                <h3><i class="ph ph-plus-circle"></i> Crear Nueva Sub Zona</h3>
+                <form method="post" action="../action/subzonaAction.php" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Nombre:</label>
                         <span class="error-message"><?= Validation::getError('nombre') ?></span>
@@ -138,7 +137,7 @@ if (!$esAdminOInstructor) {
                 </select>
             </form>
 
-            <h3><i class="ph ph-list-bullets"></i> Partes Registradas</h3>
+            <h3><i class="ph ph-list-bullets"></i> Sub Zonas Registradas</h3>
             <div style="overflow-x:auto;">
                 <table>
                     <thead>
@@ -156,21 +155,21 @@ if (!$esAdminOInstructor) {
                     <?php foreach ($partesZona as $parte): ?>
                         <tr>
                             <?php if ($esAdminOInstructor): ?>
-                                <form method="post" action="../action/parteZonaAction.php" enctype="multipart/form-data">
-                                    <input type="hidden" name="id" value="<?= $parte->getPartezonaid() ?>">
+                                <form method="post" action="../action/subzonaAction.php" enctype="multipart/form-data">
+                                    <input type="hidden" name="id" value="<?= $parte->getSubzonaid() ?>">
                                     <td>
                                         <input type="text" name="nombre" maxlength="50"
-                                               value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$parte->getPartezonaid(), $parte->getPartezonanombre())) ?>">
-                                        <span class="error-message"><?= Validation::getError('nombre_'.$parte->getPartezonaid()) ?></span>
+                                               value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$parte->getSubzonaid(), $parte->getSubzonanombre())) ?>">
+                                        <span class="error-message"><?= Validation::getError('nombre_'.$parte->getSubzonaid()) ?></span>
                                     </td>
                                     <td>
                                         <input type="text" name="descripcion" maxlength="100"
-                                               value="<?= htmlspecialchars(Validation::getOldInput('descripcion_'.$parte->getPartezonaid(), $parte->getPartezonadescripcion())) ?>">
+                                               value="<?= htmlspecialchars(Validation::getOldInput('descripcion_'.$parte->getSubzonaid(), $parte->getSubzonadescripcion())) ?>">
                                     </td>
                                     <td>
                                         <div class="image-gallery">
                                             <?php
-                                            $imagenes = $imageManager->getImagesByIds($parte->getPartezonaimaenid());
+                                            $imagenes = $imageManager->getImagesByIds($parte->getSubzonaimaenid());
                                             foreach ($imagenes as $img) {
                                                 echo '<div class="image-container">
                                                         <img src="..'.htmlspecialchars($img['tbimagenruta'] ?? '').'?t='.time().'" alt="Imagen">
@@ -185,8 +184,8 @@ if (!$esAdminOInstructor) {
                                     </td>
                                     <td>
                                         <select name="activo">
-                                            <option value="1" <?= Validation::getOldInput('activo_'.$parte->getPartezonaid(), $parte->getPartezonaactivo()) == 1 ? 'selected' : '' ?>>Activo</option>
-                                            <option value="0" <?= Validation::getOldInput('activo_'.$parte->getPartezonaid(), $parte->getPartezonaactivo()) == 0 ? 'selected' : '' ?>>Inactivo</option>
+                                            <option value="1" <?= Validation::getOldInput('activo_'.$parte->getSubzonaid(), $parte->getSubzonaactivo()) == 1 ? 'selected' : '' ?>>Activo</option>
+                                            <option value="0" <?= Validation::getOldInput('activo_'.$parte->getSubzonaid(), $parte->getSubzonaactivo()) == 0 ? 'selected' : '' ?>>Inactivo</option>
                                         </select>
                                     </td>
                                     <td>
@@ -197,12 +196,12 @@ if (!$esAdminOInstructor) {
                                     </td>
                                 </form>
                             <?php else: ?>
-                                <td><?= htmlspecialchars($parte->getPartezonanombre()) ?></td>
-                                <td><?= htmlspecialchars($parte->getPartezonadescripcion()) ?></td>
+                                <td><?= htmlspecialchars($parte->getSubzonanombre()) ?></td>
+                                <td><?= htmlspecialchars($parte->getSubzonadescripcion()) ?></td>
                                 <td>
                                     <div class="image-gallery">
                                         <?php
-                                        $imagenes = $imageManager->getImagesByIds($parte->getPartezonaimaenid());
+                                        $imagenes = $imageManager->getImagesByIds($parte->getSubzonaimaenid());
                                         if (empty($imagenes)) {
                                             echo 'Sin imagen';
                                         } else {

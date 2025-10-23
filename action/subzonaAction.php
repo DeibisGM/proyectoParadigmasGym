@@ -1,11 +1,11 @@
 <?php
 session_start();
-include '../business/parteZonaBusiness.php';
+include '../business/subZonaBusiness.php';
 include '../business/cuerpoZonaBusiness.php';
 include_once '../utility/ImageManager.php';
 include_once '../utility/Validation.php';
 
-$redirect_path = '../view/parteZonaView.php';
+$redirect_path = '../view/subzonaView.php';
 
 if (!isset($_SESSION['tipo_usuario'])) {
     header("location: ../view/loginView.php");
@@ -19,7 +19,7 @@ if (!$esAdminOInstructor) {
     exit();
 }
 
-$parteZonaBusiness = new parteZonaBusiness();
+$subZonaBusiness = new subZonaBusiness();
 $cuerpoZonaBusiness = new cuerpoZonaBusiness();
 $imageManager = new ImageManager();
 
@@ -28,13 +28,13 @@ if (isset($_POST['borrar_imagen'])) {
         $parteId = $_POST['id'];
         $imagenId = $_POST['borrar_imagen'];
 
-        $parte = $parteZonaBusiness->getParteZonaPorId($parteId);
-        if ($parte) {
+        $subZona = $subZonaBusiness->getSubZonaPorId($parteId);
+        if ($subZona) {
             $imageManager->deleteImage($imagenId);
-            $currentIds = $parte->getPartezonaimaenid();
+            $currentIds = $subZona->getSubzonaimaenid();
             $newIds = ImageManager::removeIdFromString($imagenId, $currentIds);
-            $parte->setPartezonaimaenid($newIds);
-            $parteZonaBusiness->actualizarTBParteZona($parte);
+            $subZona->setSubzonaimaenid($newIds);
+            $subZonaBusiness->actualizarTBSubZona($subZona);
             header("location: " . $redirect_path . "?success=image_deleted");
         } else {
             header("location: " . $redirect_path . "?error=notFound");
@@ -58,7 +58,7 @@ if (isset($_POST['borrar_imagen'])) {
             Validation::setError('nombre', 'El nombre es obligatorio.');
         } elseif (preg_match('/[0-9]/', $nombre)) {
             Validation::setError('nombre', 'El nombre no puede contener números.');
-        } elseif ($parteZonaBusiness->existeParteZonaNombre($nombre)) {
+        } elseif ($subZonaBusiness->existeSubZonaNombre($nombre)) {
             Validation::setError('nombre', 'El nombre ya está asociado a una zona del cuerpo.');
         }
 
@@ -71,29 +71,29 @@ if (isset($_POST['borrar_imagen'])) {
             exit();
         }
 
-        $parte = new partezona(0, '', $nombre, $descripcion, $activo);
+        $subZona = new subzona(0, '', $nombre, $descripcion, $activo);
 
-        $nuevoId = $parteZonaBusiness->insertarTBParteZona($parte);
+        $nuevoId = $subZonaBusiness->insertarTBSubZona($subZona);
 
         if ($nuevoId > 0) {
             if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
                 $newImageIds = $imageManager->addImages($_FILES['imagenes'], $nuevoId, 'par');
                 if (!empty($newImageIds)) {
 
-                    $parteAgregada = $parteZonaBusiness->getParteZonaPorId($nuevoId);
+                    $parteAgregada = $subZonaBusiness->getSubZonaPorId($nuevoId);
                     $idString = ImageManager::addIdsToString($newImageIds, '');
-                    $parteAgregada->setPartezonaimaenid($idString);
-                    $parteZonaBusiness->actualizarTBParteZona($parteAgregada);
+                    $parteAgregada->setSubzonaimaenid($idString);
+                    $subZonaBusiness->actualizarTBSubZona($parteAgregada);
                 }
             }
 
-            $partes = $cuerpoZonaBusiness->getCuerpoZonaParteZonaId($zonaId);
+            $partes = $cuerpoZonaBusiness->getCuerpoZonaSubZonaId($zonaId);
 
             if($partes !== null){
                 $partes .= "$" . $nuevoId;
             }
 
-            $cuerpoZonaBusiness->actualizarParteZonaTBCuerpoZona($zonaId, $partes);
+            $cuerpoZonaBusiness->actualizarSubZonaTBCuerpoZona($zonaId, $partes);
 
             Validation::clear();
             header("location: " . $redirect_path . "?success=inserted");
@@ -109,7 +109,7 @@ if (isset($_POST['borrar_imagen'])) {
     if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['descripcion']) && isset($_POST['activo'])) {
 
         $id = $_POST['id'];
-        $parteActual = $parteZonaBusiness->getParteZonaPorId($id);
+        $parteActual = $subZonaBusiness->getSubZonaPorId($id);
 
         if ($parteActual) {
 
@@ -127,7 +127,7 @@ if (isset($_POST['borrar_imagen'])) {
                 Validation::setError('nombre_'.$id, 'El nombre es obligatorio.');
             } elseif (preg_match('/[0-9]/', $nombre)) {
                 Validation::setError('nombre_'.$id, 'El nombre no puede contener números.');
-            } elseif ($parteActual->getPartezonanombre() != $nombre && $parteZonaBusiness->existeParteZonaNombre($nombre)) {
+            } elseif ($parteActual->getSubzonanombre() != $nombre && $subZonaBusiness->existeSubZonaNombre($nombre)) {
                 Validation::setError('nombre_'.$id, 'El nombre ya está asociado a una zona del cuerpo.');
             }
 
@@ -140,18 +140,18 @@ if (isset($_POST['borrar_imagen'])) {
                 exit();
             }
 
-            $parteActual->setPartezonanombre($nombre);
-            $parteActual->setPartezonadescripcion($descripcion);
-            $parteActual->setPartezonaactivo($activo);
+            $parteActual->setSubzonanombre($nombre);
+            $parteActual->setSubzonadescripcion($descripcion);
+            $parteActual->setSubzonaactivo($activo);
 
             if (isset($_FILES['imagenes']) && !empty($_FILES['imagenes']['name'][0])) {
                 $newImageIds = $imageManager->addImages($_FILES['imagenes'], $id, 'par');
-                $currentIdString = $parteActual->getPartezonaimaenid();
+                $currentIdString = $parteActual->getSubzonaimaenid();
                 $newIdString = ImageManager::addIdsToString($newImageIds, $currentIdString);
-                $parteActual->setPartezonaimaenid($newIdString);
+                $parteActual->setSubzonaimaenid($newIdString);
             }
 
-            if ($parteZonaBusiness->actualizarTBParteZona($parteActual)) {
+            if ($subZonaBusiness->actualizarTBSubZona($parteActual)) {
                 Validation::clear();
                 header("location: " . $redirect_path . "?success=updated");
             } else {
@@ -168,7 +168,7 @@ if (isset($_POST['borrar_imagen'])) {
     if (isset($_POST['id'])) {
         $id = $_POST['id'];
 
-        $result = $parteZonaBusiness->eliminarTBParteZona($id);
+        $result = $subZonaBusiness->eliminarTBSubZona($id);
 
         if ($result == 1) {
             header("location: " . $redirect_path . "?success=eliminado");

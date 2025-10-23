@@ -76,19 +76,19 @@ class CuerpoZonaData extends Data
         return $result;
     }
 
-    public function actualizarParteZonaTBCuerpoZona($idCuerpoZona, $parteZona)
+    public function actualizarSubZonaTBCuerpoZona($idCuerpoZona, $subZona)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $queryUpdate = "UPDATE tbcuerpozona SET tbcuerpozonapartezonaid=? WHERE tbcuerpozonaid=?";
+        $queryUpdate = "UPDATE tbcuerpozona SET tbcuerpozonasubzonaid=? WHERE tbcuerpozonaid=?";
         $stmt = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmt, "ii", $parteZona, $idCuerpoZona);
+        mysqli_stmt_bind_param($stmt, "ii", $subZona, $idCuerpoZona);
         $result = mysqli_stmt_execute($stmt);
         mysqli_close($conn);
         return $result;
     }
 
-    public function getCuerpoZonaParteZonaId($id)
+    public function getCuerpoZonaSubZonaId($id)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
@@ -101,7 +101,7 @@ class CuerpoZonaData extends Data
 
         if ($row = mysqli_fetch_assoc($result)) {
 
-            return $row['tbcuerpozonapartezonaid'];
+            return $row['tbcuerpozonasubzonaid'];
         }
 
         return null;

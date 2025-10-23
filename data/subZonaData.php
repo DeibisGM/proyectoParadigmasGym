@@ -1,23 +1,23 @@
 <?php
 include_once 'data.php';
-include '../domain/partezona.php';
+include '../domain/subzona.php';
 
-class parteZonaData extends Data
+class subZonaData extends Data
 {
 
-    public function insertarTBParteZona($partezona)
+    public function insertarTBSubZona($subzona)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryInsert = "INSERT INTO tbpartezona (
-        tbpartezonaimagenid,
-        tbpartezonanombre,
-        tbpartezonadescripcion
+        $queryInsert = "INSERT INTO tbsubzona (
+        tbsubzonaimagenid,
+        tbsubzonanombre,
+        tbsubzonadescripcion
     ) VALUES (
-        '" . $partezona->getPartezonaimaenid() . "',
-        '" . $partezona->getPartezonanombre() . "',
-        '" . $partezona->getPartezonadescripcion() . "'
+        '" . $subzona->getSubzonaimaenid() . "',
+        '" . $subzona->getSubzonanombre() . "',
+        '" . $subzona->getSubzonadescripcion() . "'
     );";
 
         $result = mysqli_query($conn, $queryInsert);
@@ -32,29 +32,29 @@ class parteZonaData extends Data
         }
     }
 
-    public function actualizarTBParteZona($partezona)
+    public function actualizarTBSubZona($partezona)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryUpdate = "UPDATE tbpartezona SET
-            tbpartezonaimagenid='" . $partezona->getPartezonaimaenid() . "',
-            tbpartezonanombre='" . $partezona->getPartezonanombre() . "',
-            tbpartezonadescripcion='" . $partezona->getPartezonadescripcion() . "',
-            tbpartezonaactivo='" . $partezona->getPartezonaactivo() . "'
-            WHERE tbpartezonaid=" . $partezona->getPartezonaid() . ";";
+        $queryUpdate = "UPDATE tbsubzona SET
+            tbsubzonaimagenid='" . $partezona->getSubzonaimaenid() . "',
+            tbsubzonanombre='" . $partezona->getSubzonanombre() . "',
+            tbsubzonadescripcion='" . $partezona->getSubzonadescripcion() . "',
+            tbsubzonaactivo='" . $partezona->getSubzonaactivo() . "'
+            WHERE tbsubzonaid=" . $partezona->getSubzonaid() . ";";
 
         $result = mysqli_query($conn, $queryUpdate);
         mysqli_close($conn);
         return $result;
     }
 
-    public function eliminarTBParteZona2($id)
+    public function eliminarTBSubZonaLogical($id)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryDelete = "UPDATE tbpartezona SET tbpartezonaactivo = 0 WHERE tbpartezonaid = ?;";
+        $queryDelete = "UPDATE tbsubzona SET tbsubzonaactivo = 0 WHERE tbsubzonaid = ?;";
         $stmt = mysqli_prepare($conn, $queryDelete);
 
         mysqli_stmt_bind_param($stmt, 'i', $id);
@@ -66,12 +66,12 @@ class parteZonaData extends Data
         return $result;
     }
 
-    public function eliminarTBParteZona($id)
+    public function eliminarTBSubZona($id)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryDelete = "DELETE FROM tbpartezona WHERE tbpartezonaid = ?;";
+        $queryDelete = "DELETE FROM tbsubzona WHERE tbsubzonaid = ?;";
         $stmt = mysqli_prepare($conn, $queryDelete);
 
         mysqli_stmt_bind_param($stmt, 'i', $id);
@@ -83,22 +83,22 @@ class parteZonaData extends Data
         return $result;
     }
 
-    public function getAllTBParteZona()
+    public function getAllTBSubZona()
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $querySelect = "SELECT * FROM tbpartezona;";
+        $querySelect = "SELECT * FROM tbsubzona;";
         $result = mysqli_query($conn, $querySelect);
 
         $lista = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $lista[] = new partezona(
-                $row['tbpartezonaid'],
-                isset($row['tbpartezonaimagenid']) ? $row['tbpartezonaimagenid'] : '',
-                $row['tbpartezonanombre'],
-                $row['tbpartezonadescripcion'],
-                $row['tbpartezonaactivo']
+            $lista[] = new subzona(
+                $row['tbsubzonaid'],
+                isset($row['tbsubzonaimagenid']) ? $row['tbsubzonaimagenid'] : '',
+                $row['tbsubzonanombre'],
+                $row['tbsubzonadescripcion'],
+                $row['tbsubzonaactivo']
             );
         }
 
@@ -106,7 +106,7 @@ class parteZonaData extends Data
         return $lista;
     }
 
-    public function getAllTBParteZonaPorId($parteLista)
+    public function getAllTBSubZonaPorId($parteLista)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
@@ -123,18 +123,18 @@ class parteZonaData extends Data
             return [];
         }
 
-        $querySelect = "SELECT * FROM tbpartezona WHERE tbpartezonaid IN ($idLista);";
+        $querySelect = "SELECT * FROM tbsubzona WHERE tbsubzonaid IN ($idLista);";
 
         $result = mysqli_query($conn, $querySelect);
 
         $lista = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $lista[] = new partezona(
-                $row['tbpartezonaid'],
-                isset($row['tbpartezonaimagenid']) ? $row['tbpartezonaimagenid'] : '',
-                $row['tbpartezonanombre'],
-                $row['tbpartezonadescripcion'],
-                $row['tbpartezonaactivo']
+            $lista[] = new subzona(
+                $row['tbsubzonaid'],
+                isset($row['tbsubzonaimagenid']) ? $row['tbsubzonaimagenid'] : '',
+                $row['tbsubzonanombre'],
+                $row['tbsubzonadescripcion'],
+                $row['tbsubzonaactivo']
             );
         }
 
@@ -143,12 +143,12 @@ class parteZonaData extends Data
     }
 
 
-    public function existeParteZonaNombre($nombre)
+    public function existeSubZonaNombre($nombre)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $query = "SELECT tbpartezonanombre FROM tbpartezona WHERE tbpartezonanombre='" . $nombre . "' LIMIT 1;";
+        $query = "SELECT tbsubzonanombre FROM tbsubzona WHERE tbsubzonanombre='" . $nombre . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
         $existe = mysqli_num_rows($result) > 0;
 
@@ -156,31 +156,31 @@ class parteZonaData extends Data
         return $existe;
     }
 
-    public function getParteZonaPorId($id)
+    public function getSubZonaPorId($id)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
         $id = mysqli_real_escape_string($conn, $id);
-        $query = "SELECT * FROM tbpartezona WHERE tbpartezonaid='" . $id . "' LIMIT 1;";
+        $query = "SELECT * FROM tbsubzona WHERE tbsubzonaid='" . $id . "' LIMIT 1;";
         $result = mysqli_query($conn, $query);
 
-        $partezona = null;
+        $subzona = null;
         if ($row = mysqli_fetch_assoc($result)) {
-            $partezona = new partezona(
-                $row['tbpartezonaid'],
-                isset($row['tbpartezonaimagenid']) ? $row['tbpartezonaimagenid'] : '',
-                $row['tbpartezonanombre'],
-                $row['tbpartezonadescripcion'],
-                $row['tbpartezonaactivo']
+            $subzona = new subzona(
+                $row['tbsubzonaid'],
+                isset($row['tbsubzonaimagenid']) ? $row['tbsubzonaimagenid'] : '',
+                $row['tbsubzonanombre'],
+                $row['tbsubzonadescripcion'],
+                $row['tbsubzonaactivo']
             );
         }
 
         mysqli_close($conn);
-        return $partezona;
+        return $subzona;
     }
 
-    public function desactivarParteZonaLista($parteLista)
+    public function desactivarSubZonaLista($parteLista)
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
@@ -197,7 +197,7 @@ class parteZonaData extends Data
             return false;
         }
 
-        $queryUpdate = "UPDATE tbpartezona SET tbpartezonaactivo = 0 WHERE tbpartezonaid IN ($idsStr);";
+        $queryUpdate = "UPDATE tbsubzona SET tbsubzonaactivo = 0 WHERE tbsubzonaid IN ($idsStr);";
         $result = mysqli_query($conn, $queryUpdate);
 
         $filasAfectadas = mysqli_affected_rows($conn);
