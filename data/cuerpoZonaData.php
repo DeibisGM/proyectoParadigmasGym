@@ -82,7 +82,7 @@ class CuerpoZonaData extends Data
         $conn->set_charset('utf8');
         $queryUpdate = "UPDATE tbcuerpozona SET tbcuerpozonasubzonaid=? WHERE tbcuerpozonaid=?";
         $stmt = mysqli_prepare($conn, $queryUpdate);
-        mysqli_stmt_bind_param($stmt, "ii", $subZona, $idCuerpoZona);
+        mysqli_stmt_bind_param($stmt, "si", $subZona, $idCuerpoZona);
         $result = mysqli_stmt_execute($stmt);
         mysqli_close($conn);
         return $result;
