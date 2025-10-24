@@ -212,6 +212,13 @@ if (isset($_POST['delete_image'])) {
             $clienteActual->setInscripcion($fechaInscripcion);
             $clienteActual->setActivo($estado);
 
+            if (isset($_FILES['tbclienteimagenid']) && !empty($_FILES['tbclienteimagenid']['name'][0])) {
+                $newImageIds = $imageManager->addImages($_FILES['tbclienteimagenid'], $id, 'cli');
+                $currentIdString = $clienteActual->getTbclienteImagenId();
+                $newIdString = ImageManager::addIdsToString($newImageIds, $currentIdString);
+                $clienteActual->setTbclienteImagenId($newIdString);
+            }
+
             $resultado = $clienteBusiness->actualizarTBCliente($clienteActual);
 
             if($resultado){
