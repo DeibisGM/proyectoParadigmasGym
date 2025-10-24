@@ -1,10 +1,19 @@
 <style>
+    .body-viewer-wrapper {
+        text-align: center;
+    }
+    .body-view {
+        display: inline-block;
+        vertical-align: top;
+        margin: 0 20px;
+    }
     .body-container {
         position: relative;
-        width: 20vw;
+        width: 15vw;
         max-width: 250px;
         margin: auto;
         aspect-ratio: 414 / 847;
+        display: inline-block;
     }
 
     .body-container > svg {
@@ -118,10 +127,79 @@
         top: 21.3%;
         left: 35.8%;
     }
+
+    #gluteo {
+        width: 28%;
+        top: 50%;
+        left: 36%;
+    }
+
+    #Braquiorradialtrasero {
+        width: 15%;
+        top: 42%;
+        left: 18%;
+    }
+
+    #deltoidetrasero {
+        width: 40%;
+        top: 26%;
+        left: 30%;
+    }
+
+    #dorsalancho {
+        width: 30%;
+        top: 35%;
+        left: 35%;
+    }
+
+    #extensordedos {
+        width: 15%;
+        top: 45%;
+        left: 18%;
+    }
+
+    #gemelostrasero {
+        width: 18%;
+        top: 75%;
+        left: 41%;
+    }
+
+    #Infraespinoso {
+        width: 25%;
+        top: 30%;
+        left: 37.5%;
+    }
+
+    #Isquiotibiales {
+        width: 25%;
+        top: 60%;
+        left: 37.5%;
+    }
+
+    #oblicuoexternotrasero {
+        width: 15%;
+        top: 42%;
+        left: 67%;
+    }
+
+    #trapeciotrasero {
+        width: 30%;
+        top: 22%;
+        left: 35%;
+    }
+
+    #tricepstraseros {
+        width: 15%;
+        top: 35%;
+        left: 18%;
+    }
+
 </style>
 
 <section>
-    <h3><i class="ph ph-person"></i>Cuerpo Humano</h3>
+<div class="body-viewer-wrapper">
+    <div class="body-view">
+    <h3>Vista Frontal</h3>
     <div class="body-container">
         <div class="tooltip"></div>
         <?php echo file_get_contents('view/bodyParts/Cuerpo.svg'); ?>
@@ -165,6 +243,48 @@
             <?php echo file_get_contents('view/bodyParts/frontal/trapeciofrontal.svg'); ?>
         </div>
     </div>
+    </div>
+    <div class="body-view">
+    <h3>Vista Trasera</h3>
+    <div class="body-container">
+        <div class="tooltip"></div>
+        <?php echo file_get_contents('view/bodyParts/Cuerpo.svg'); ?>
+        <div id="gluteo" class="body-part" data-name="Gluteos">
+            <?php echo file_get_contents('view/bodyParts/trasera/gluteo.svg'); ?>
+        </div>
+        <div id="Braquiorradialtrasero" class="body-part" data-name="Braquiorradial">
+            <?php echo file_get_contents('view/bodyParts/trasera/Braquiorradialtrasero.svg'); ?>
+        </div>
+        <div id="deltoidetrasero" class="body-part" data-name="Deltoides">
+            <?php echo file_get_contents('view/bodyParts/trasera/deltoidetrasero.svg'); ?>
+        </div>
+        <div id="dorsalancho" class="body-part" data-name="Dorsal Ancho">
+            <?php echo file_get_contents('view/bodyParts/trasera/dorsalancho.svg'); ?>
+        </div>
+        <div id="extensordedos" class="body-part" data-name="Extensor de los dedos">
+            <?php echo file_get_contents('view/bodyParts/trasera/extensordedos.svg'); ?>
+        </div>
+        <div id="gemelostrasero" class="body-part" data-name="Gemelos">
+            <?php echo file_get_contents('view/bodyParts/trasera/gemelostrasero.svg'); ?>
+        </div>
+        <div id="Infraespinoso" class="body-part" data-name="Infraespinoso">
+            <?php echo file_get_contents('view/bodyParts/trasera/Infraespinoso.svg'); ?>
+        </div>
+        <div id="Isquiotibiales" class="body-part" data-name="Isquiotibiales">
+            <?php echo file_get_contents('view/bodyParts/trasera/Isquiotibiales.svg'); ?>
+        </div>
+        <div id="oblicuoexternotrasero" class="body-part" data-name="Oblicuo Externo">
+            <?php echo file_get_contents('view/bodyParts/trasera/oblicuoexternotrasero.svg'); ?>
+        </div>
+        <div id="trapeciotrasero" class="body-part" data-name="Trapecio">
+            <?php echo file_get_contents('view/bodyParts/trasera/trapeciotrasero.svg'); ?>
+        </div>
+        <div id="tricepstraseros" class="body-part" data-name="Triceps">
+            <?php echo file_get_contents('view/bodyParts/trasera/tricepstraseros.svg'); ?>
+        </div>
+    </div>
+    </div>
+</div>
 </section>
 
 <script>
