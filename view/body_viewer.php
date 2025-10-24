@@ -6,14 +6,14 @@
         display: inline-block;
         vertical-align: top;
         margin: 0 20px;
+        width: 40%;
+        max-width: 300px;
     }
     .body-container {
         position: relative;
-        width: 15vw;
-        max-width: 250px;
+        width: 100%;
         margin: auto;
         aspect-ratio: 414 / 847;
-        display: inline-block;
     }
 
     .body-container > svg {
