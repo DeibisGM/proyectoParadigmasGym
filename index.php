@@ -50,6 +50,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <!-- NUEVO: Horarios de Instructores para Admin -->
                     <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios Instructores</button></a>
                     <a href='view/ejercicioFuerzaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de fuerza</button></a>
+                    <a href='view/ejercicioResistenciaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de resistencia</button></a>
                 </div>
             </section>
             <section>
@@ -101,6 +102,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/instructorClienteView.php'><button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub Zonas del cuerpo</button></a>
+                    <a href='view/ejercicioResistenciaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de resistencia</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
                 </div>
             </section>

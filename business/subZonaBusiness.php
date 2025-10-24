@@ -1,5 +1,6 @@
 <?php
 include '../data/subZonaData.php';
+include_once '../utility/ImageManager.php';
 
 class subZonaBusiness
 {
