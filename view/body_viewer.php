@@ -129,69 +129,69 @@
     }
 
     #gluteo {
-        width: 28%;
-        top: 50%;
-        left: 36%;
+        width: 30%;
+        top: 48%;
+        left: 35%;
     }
 
     #Braquiorradialtrasero {
-        width: 15%;
-        top: 42%;
-        left: 18%;
+        width: 75%;
+        top: 43%;
+        left: 12.5%;
     }
 
     #deltoidetrasero {
-        width: 40%;
-        top: 26%;
-        left: 30%;
+        width: 55%;
+        top: 27%;
+        left: 23%;
     }
 
     #dorsalancho {
-        width: 30%;
-        top: 35%;
-        left: 35%;
+        width: 38%;
+        top: 33%;
+        left: 31%;
     }
 
     #extensordedos {
-        width: 15%;
+        width: 70%;
         top: 45%;
-        left: 18%;
+        left: 15.2%;
     }
 
     #gemelostrasero {
-        width: 18%;
-        top: 75%;
-        left: 41%;
+        width: 28%;
+        top: 76.5%;
+        left: 36%;
     }
 
     #Infraespinoso {
-        width: 25%;
-        top: 30%;
-        left: 37.5%;
+        width: 42%;
+        top: 28.5%;
+        left: 29%;
     }
 
     #Isquiotibiales {
-        width: 25%;
-        top: 60%;
-        left: 37.5%;
-    }
-
-    #oblicuoexternotrasero {
-        width: 15%;
-        top: 42%;
-        left: 67%;
-    }
-
-    #trapeciotrasero {
         width: 30%;
-        top: 22%;
+        top: 58%;
         left: 35%;
     }
 
+    #oblicuoexternotrasero {
+        width: 32%;
+        top: 42.5%;
+        left: 34.2%;
+    }
+
+    #trapeciotrasero {
+        width: 36%;
+        top: 19.3%;
+        left: 32.3%;
+    }
+
     #tricepstraseros {
-        width: 15%;
-        top: 35%;
-        left: 18%;
+        width: 66%;
+        top: 33%;
+        left: 17%;
     }
 
 </style>
@@ -255,7 +255,7 @@
         <div id="Braquiorradialtrasero" class="body-part" data-name="Braquiorradial">
             <?php echo file_get_contents('view/bodyParts/trasera/Braquiorradialtrasero.svg'); ?>
         </div>
-        <div id="deltoidetrasero" class="body-part" data-name="Deltoides">
+        <div id="deltoidetrasero" class="body-part" data-name="Hombros">
             <?php echo file_get_contents('view/bodyParts/trasera/deltoidetrasero.svg'); ?>
         </div>
         <div id="dorsalancho" class="body-part" data-name="Dorsal Ancho">
