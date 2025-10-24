@@ -16,6 +16,11 @@
         position: absolute;
         transition: all 0.3s ease-in-out;
         z-index: 10;
+        pointer-events: none;
+    }
+
+    .body-part svg path {
+        pointer-events: all;
     }
 
     .body-part:hover {
@@ -110,7 +115,7 @@
 
     #trapeciofrontal {
         width: 28%;
-        top: 21%;
+        top: 21.3%;
         left: 35.8%;
     }
 </style>
@@ -168,21 +173,26 @@
         const tooltip = document.querySelector('.tooltip');
 
         bodyParts.forEach(part => {
-            part.addEventListener('mouseover', function (e) {
-                const name = this.dataset.name;
-                tooltip.textContent = name;
-                tooltip.style.opacity = '1';
-            });
+            const paths = part.querySelectorAll('path');
+            paths.forEach(path => {
+                path.addEventListener('mouseover', function (e) {
+                    part.classList.add('highlight');
+                    const name = part.dataset.name;
+                    tooltip.textContent = name;
+                    tooltip.style.opacity = '1';
+                });
 
-            part.addEventListener('mouseout', function () {
-                tooltip.style.opacity = '0';
-            });
+                path.addEventListener('mouseout', function () {
+                    part.classList.remove('highlight');
+                    tooltip.style.opacity = '0';
+                });
 
-            part.addEventListener('mousemove', function (e) {
-                const x = e.clientX;
-                const y = e.clientY;
-                tooltip.style.left = (x + 10) + 'px';
-                tooltip.style.top = (y + 10) + 'px';
+                path.addEventListener('mousemove', function (e) {
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    tooltip.style.left = (x + 10) + 'px';
+                    tooltip.style.top = (y + 10) + 'px';
+                });
             });
         });
     });
