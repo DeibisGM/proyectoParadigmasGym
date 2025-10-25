@@ -14,6 +14,7 @@
         }
 
         .main-wrapper {
+            padding: 30px 0 0 0;
             max-width: 1000px;
             margin: auto;
             text-align: center;

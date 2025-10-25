@@ -117,9 +117,6 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
 
     <?php include 'view/body_viewer.php'; ?>
 
-    <footer>
-        <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
-    </footer>
 </div>
 </body>
 </html>
