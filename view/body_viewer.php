@@ -123,34 +123,55 @@
         }
 
         function aplicarProgresoVisual(data) {
-            let maxPorcentaje = 0;
-            if (data && Object.keys(data).length > 0) {
-                maxPorcentaje = Math.max(...Object.values(data));
-            }
+            // --- INICIO DE LA CORRECCIÓN DE OPACIDAD ---
 
-            if (maxPorcentaje === 0) {
+            // Si no hay datos, se resetea el visor.
+            if (!data || Object.keys(data).length === 0) {
                 bodyParts.forEach(part => {
                     part.style.opacity = 0.25;
                     part.style.fill = '#E8A883';
+                    delete part.dataset.porcentaje;
                 });
                 return;
             };
 
+            // CORRECCIÓN: Encontrar el porcentaje máximo para calcular opacidades relativas
+            const porcentajes = Object.values(data);
+            const maxPorcentaje = Math.max(...porcentajes);
+
+            // Si el máximo es 0, no hay nada que mostrar
+            if (maxPorcentaje === 0) {
+                bodyParts.forEach(part => {
+                    part.style.opacity = 0.25;
+                    part.style.fill = '#E8A883';
+                    delete part.dataset.porcentaje;
+                });
+                return;
+            }
+
+            // Aplicar opacidades y colores relativos al máximo porcentaje
             for (const parteId in data) {
                 const porcentaje = data[parteId];
                 const elementos = document.querySelectorAll(`#${parteId}`);
+
                 if (elementos.length > 0) {
-                    const normalizedPercent = (porcentaje / maxPorcentaje) * 100;
-                    const opacidad = 0.30 + (normalizedPercent / 100) * 0.70;
-                    const color = getHslFromPercentage(100 - normalizedPercent);
+                    // CORRECCIÓN: La opacidad ahora es relativa al máximo porcentaje
+                    // La zona con mayor porcentaje tendrá opacidad 1.0 (100%)
+                    const opacidadRelativa = porcentaje / maxPorcentaje;
+                    const opacidad = 0.30 + opacidadRelativa * 0.70;
+                    
+                    // El color se basa en el porcentaje relativo también
+                    const color = getHslFromPercentage(100 - opacidadRelativa * 100);
 
                     elementos.forEach(el => {
                         el.style.opacity = opacidad;
                         el.style.fill = color;
-                        el.dataset.porcentaje = Math.round(normalizedPercent);
+                        // El tooltip muestra el porcentaje real
+                        el.dataset.porcentaje = Math.round(porcentaje);
                     });
                 }
             }
+            // --- FIN DE LA CORRECCIÓN DE OPACIDAD ---
         }
 
         if (typeof progresoData !== 'undefined') {

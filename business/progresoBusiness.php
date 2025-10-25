@@ -25,7 +25,9 @@ class ProgresoBusiness {
         }
 
         $subzonaCounts = [];
-        $totalEjerciciosContados = 0;
+        // CAMBIO CORREGIDO: Ahora contamos el total de "instancias de trabajo" de subzonas
+        // no solo ejercicios, para obtener porcentajes proporcionales reales
+        $totalInstanciasSubzonas = 0;
 
         foreach ($rutinas as $rutina) {
             $ejercicios = $this->rutinaData->getEjerciciosPorRutinaId($rutina->getId());
@@ -37,27 +39,28 @@ class ProgresoBusiness {
                         $szId = trim($szId);
                         if (empty($szId)) continue;
 
+                        // CAMBIO: Incrementamos tanto el contador de la subzona como el total de instancias
                         if (!isset($subzonaCounts[$szId])) {
                             $subzonaCounts[$szId] = 0;
                         }
                         $subzonaCounts[$szId]++;
-                        $totalEjerciciosContados++;
+                        $totalInstanciasSubzonas++;
                     }
                 }
             }
         }
 
-        if ($totalEjerciciosContados === 0) {
+        // CAMBIO CORREGIDO: Si no hay instancias de subzonas, no hay nada que calcular.
+        if ($totalInstanciasSubzonas === 0) {
             return [];
         }
 
         $porcentajes = [];
-        $totalHits = array_sum($subzonaCounts);
-        if ($totalHits > 0) {
-            foreach ($subzonaCounts as $subzonaId => $count) {
-                // Se calcula el porcentaje y se multiplica por el número de subzonas distintas para magnificar la diferencia visual
-                $porcentajes[$subzonaId] = ($count / $totalHits) * 100 * count($subzonaCounts);
-            }
+        // CAMBIO CORREGIDO: Ahora calculamos el porcentaje basado en el total de instancias de subzonas
+        // Esto da un porcentaje real de cuánto se trabajó cada zona en relación al total de trabajo realizado
+        foreach ($subzonaCounts as $subzonaId => $count) {
+            // Fórmula corregida: (veces que se trabajó la zona / total de instancias de subzonas) * 100
+            $porcentajes[$subzonaId] = ($count / $totalInstanciasSubzonas) * 100;
         }
 
         return $this->mapearSubzonasASVG($porcentajes);
@@ -95,6 +98,8 @@ class ProgresoBusiness {
             }
         }
 
+        // CAMBIO: Ahora no es necesario normalizar a 100, pero se mantiene como seguridad.
+        // La normalización real ocurre en el Javascript del visor para ajustar la escala de colores.
         foreach ($resultadoSVG as $key => $value) {
             if ($value > 100) {
                 $resultadoSVG[$key] = 100;
