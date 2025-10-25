@@ -22,6 +22,10 @@ class numeroEmergenciaBusiness
         return $this->numeroEmergenciaData->eliminarTBNumeroEmergencia($numeroEmergenciaId);
     }
 
+    public function eliminarTBNumeroEmergenciaByCliente($clienteId) {
+        return $this->numeroEmergenciaData->eliminarTBNumeroEmergenciaByCliente($clienteId);
+    }
+
     public function getAllTBNumeroEmergencia() {
         return $this->numeroEmergenciaData->getAllTBNumeroEmergencia();
     }

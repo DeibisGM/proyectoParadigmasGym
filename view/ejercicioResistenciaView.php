@@ -16,7 +16,6 @@ $esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_
 $ejercicioResistenciaBusiness = new ejercicioResistenciaBusiness();
 $subZonaBusiness = new subZonaBusiness();
 
-// Si es cliente, solo ve los activos
 if (!$esAdminOInstructor) {
     $ejercicios = $ejercicioResistenciaBusiness->getTBEjercicioResisteciaByActivo();
 } else {
@@ -31,6 +30,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
     <meta charset="UTF-8">
     <title>Gestión de Ejercicios de Resistencia</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="../utility/Events.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
         .toggle-btn {
@@ -94,7 +94,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                     <div class="form-group">
                         <label>Nombre:</label>
                         <span class="error-message"><?= Validation::getError('nombre') ?></span>
-                        <input type="text" name="nombre" maxlength="100"
+                        <input type="text" name="nombre" maxlength="50"
                                value="<?= Validation::getOldInput('nombre') ?>" placeholder="Nombre del ejercicio">
                     </div>
 
@@ -114,7 +114,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
 
                     <div class="form-group">
                         <label>Tiempo (segundos):</label>
-                        <input type="text" name="tiempo" min="1" value="<?= Validation::getOldInput('tiempo') ?>">
+                        <input type="text" name="tiempo" maxlength="50" value="<?= Validation::getOldInput('tiempo') ?>">
                     </div>
 
                     <div class="form-group">
@@ -124,7 +124,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
 
                     <div class="form-group">
                         <label>Descripción:</label>
-                        <textarea name="descripcion" maxlength="255" placeholder="Descripción"><?= Validation::getOldInput('descripcion') ?></textarea>
+                        <textarea name="descripcion" maxlength="500" placeholder="Descripción"><?= Validation::getOldInput('descripcion') ?></textarea>
                     </div>
 
                     <button type="submit" name="guardar"><i class="ph ph-floppy-disk"></i> Guardar</button>
@@ -153,10 +153,9 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                     <tbody>
                     <?php foreach ($ejercicios as $ejer): ?>
                         <?php
-                        // Obtener lista de IDs de subzonas separadas por $
                         $subzonaIds = [];
                         if (!empty($ejer->getSubzonaIds())) {
-                            // Si es algo como "26$5$7", convertirlo en array
+
                             $idsStr = implode('$', $ejer->getSubzonaIds());
                             $subzonaIds = array_map('intval', explode('$', $idsStr));
                         }
@@ -164,37 +163,89 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                         <tr>
                             <?php if ($esAdminOInstructor): ?>
                                 <form method="post" action="../action/ejercicioResistenciaAction.php">
-                                    <input type="hidden" name="id" value="<?= $ejer->getId() ?>">
+                                    <?php
+                                    $idFila = $ejer->getId();
+
+                                    $oldNombre = Validation::getOldInput('nombre_'.$idFila);
+                                    $oldSubzona = Validation::getOldInput('subzona_'.$idFila);
+                                    $oldTiempo = Validation::getOldInput('tiempo_'.$idFila);
+                                    $oldPeso   = Validation::getOldInput('peso_'.$idFila);
+                                    $oldDesc   = Validation::getOldInput('descripcion_'.$idFila);
+                                    $oldActivo = Validation::getOldInput('activo_'.$idFila);
+
+                                    $subzonaIdsMarcadas = [];
+                                    if ($oldSubzona !== '' && $oldSubzona !== null) {
+                                        $subzonaIdsMarcadas = array_map('intval', explode('$', $oldSubzona));
+                                    } else {
+                                        $subzonaIdsMarcadas = [];
+                                        if (!empty($ejer->getSubzonaIds())) {
+                                            $idsStr = implode('$', $ejer->getSubzonaIds());
+                                            $subzonaIdsMarcadas = array_map('intval', explode('$', $idsStr));
+                                        }
+                                    }
+
+                                    $valNombre = ($oldNombre !== '' && $oldNombre !== null) ? $oldNombre : $ejer->getNombre();
+                                    $valTiempo = ($oldTiempo !== '' && $oldTiempo !== null) ? $oldTiempo : $ejer->getTiempo();
+                                    $valPeso   = ($oldPeso   !== '' && $oldPeso   !== null) ? (int)$oldPeso : (int)$ejer->getPeso();
+                                    $valDesc   = ($oldDesc   !== '' && $oldDesc   !== null) ? $oldDesc   : $ejer->getDescripcion();
+                                    $valActivo = ($oldActivo !== '' && $oldActivo !== null) ? $oldActivo : (string)$ejer->getActivo();
+
+                                    $errNombre = Validation::getError('nombre_'.$idFila);
+                                    $errSubzona= Validation::getError('subzona_'.$idFila);
+                                    $errTiempo = Validation::getError('tiempo_'.$idFila);
+                                    $errActivo = Validation::getError('activo_'.$idFila);
+                                    ?>
+                                    <input type="hidden" name="id" value="<?= $idFila ?>">
 
                                     <td>
-                                        <input type="text" name="nombre" value="<?= htmlspecialchars($ejer->getNombre()) ?>">
+                                        <input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars($valNombre) ?>">
+                                        <?php if ($errNombre): ?>
+                                            <div class="error-message"><?= $errNombre ?></div>
+                                        <?php endif; ?>
                                     </td>
 
                                     <td>
-                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(this)">Ver subzonas ▼</button>
+                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(this)">Ver subzonas    ▼</button>
                                         <div class="checkbox-group subzonas">
                                             <?php foreach ($subzonas as $subzona): ?>
+                                                <?php $sid = (int)$subzona->getSubzonaid(); ?>
                                                 <label>
-                                                    <input type="checkbox" name="subzona[]"
-                                                           value="<?= $subzona->getSubzonaid() ?>"
-                                                            <?= in_array((int)$subzona->getSubzonaid(), $subzonaIds) ? 'checked' : '' ?>>
+                                                    <input type="checkbox" name="subzona[]" value="<?= $sid ?>"
+                                                            <?= in_array($sid, $subzonaIdsMarcadas, true) ? 'checked' : '' ?>>
                                                     <?= htmlspecialchars($subzona->getSubzonanombre()) ?>
                                                 </label>
                                             <?php endforeach; ?>
                                         </div>
+                                        <?php if ($errSubzona): ?>
+                                            <div class="error-message"><?= $errSubzona ?></div>
+                                        <?php endif; ?>
                                     </td>
 
-                                    <td><input type="text" name="tiempo" value="<?= $ejer->getTiempo() ?>"></td>
+                                    <td>
+                                        <input type="text" name="tiempo" maxlength="50" value="<?= htmlspecialchars($valTiempo) ?>">
+                                        <?php if ($errTiempo): ?>
+                                            <div class="error-message"><?= $errTiempo ?></div>
+                                        <?php endif; ?>
+                                    </td>
 
-                                    <td><input type="checkbox" name="peso" <?= $ejer->getPeso() ? 'checked' : '' ?>></td>
+                                    <td>
+                                        <input type="checkbox" name="peso" <?= $valPeso ? 'checked' : '' ?>>
 
-                                    <td><textarea name="descripcion"><?= htmlspecialchars($ejer->getDescripcion()) ?></textarea></td>
+                                    </td>
+
+                                    <td>
+                                        <textarea name="descripcion" maxlength="500"><?= htmlspecialchars($valDesc) ?></textarea>
+
+                                    </td>
 
                                     <td>
                                         <select name="activo">
-                                            <option value="1" <?= $ejer->getActivo() == 1 ? 'selected' : '' ?>>Sí</option>
-                                            <option value="0" <?= $ejer->getActivo() == 0 ? 'selected' : '' ?>>No</option>
+                                            <option value="1" <?= ($valActivo === '1') ? 'selected' : '' ?>>Sí</option>
+                                            <option value="0" <?= ($valActivo === '0') ? 'selected' : '' ?>>No</option>
                                         </select>
+                                        <?php if ($errActivo): ?>
+                                            <div class="error-message"><?= $errActivo ?></div>
+                                        <?php endif; ?>
                                     </td>
 
                                     <td>

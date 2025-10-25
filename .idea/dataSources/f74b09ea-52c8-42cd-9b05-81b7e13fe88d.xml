@@ -1480,7 +1480,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="375" parent="304" name="tbejercicioresistenciaid">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>7</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
@@ -1502,7 +1502,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     </column>
     <column id="379" parent="304" name="tbejercicioresistenciadescripcion">
       <Position>5</Position>
-      <StoredType>varchar(100)|0s</StoredType>
+      <StoredType>varchar(500)|0s</StoredType>
     </column>
     <column id="380" parent="304" name="tbejercicioresistenciaactivo">
       <DefaultExpression>1</DefaultExpression>
