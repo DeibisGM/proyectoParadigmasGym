@@ -512,3 +512,71 @@ table td input[type="email"],
 table td input[type="password"] {
     min-width: 150px;
 }
+
+
+
+
+
+/* =================================================================
+   ESTILOS PARA RUTINA VIEW
+   ================================================================= */
+.rutina-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.rutina-card h4 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.rutina-card p {
+    margin: 0 0 1rem 0;
+}
+
+.rutina-card ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.rutina-card li {
+    padding: 0.5rem;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.rutina-card li:last-child {
+    border-bottom: none;
+}
+
+#panel-agregar-ejercicio {
+    background-color: #f8f9fa;
+}
+
+.ejercicio-campos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    align-items: end;
+    margin-top: 1rem;
+}
+
+.ejercicio-campos-grid .form-group {
+    margin-bottom: 0;
+}
+
+/* Botones específicos con colores consistentes */
+.container button.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+.container button.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
