@@ -8,6 +8,15 @@ if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
 
 $tipoUsuario = $_SESSION['tipo_usuario'];
 $nombreUsuario = $_SESSION['usuario_nombre'];
+$usuarioId = $_SESSION['usuario_id']; // Necesitamos el ID para la lógica de progreso
+
+$progresoData = [];
+if ($tipoUsuario == 'cliente') {
+    include_once 'business/progresoBusiness.php';
+    $progresoBusiness = new ProgresoBusiness();
+    $progresoData = $progresoBusiness->getProgresoVisual($usuarioId, 30); // 30 días
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -113,6 +122,10 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
             </section>
         <?php endif; ?>
     </main>
+
+    <script>
+        const progresoData = <?php echo json_encode($progresoData); ?>;
+    </script>
 
     <?php include 'view/body_viewer.php'; ?>
 

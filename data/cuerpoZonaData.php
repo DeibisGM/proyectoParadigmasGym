@@ -1,7 +1,7 @@
 <?php
 
-include_once 'data.php';
-include '../domain/cuerpoZona.php';
+include_once __DIR__ . '/data.php';
+include_once __DIR__ . '/../domain/cuerpoZona.php';
 
 class CuerpoZonaData extends Data
 {
@@ -184,5 +184,4 @@ class CuerpoZonaData extends Data
         return $result;
     }
 }
-
 ?>

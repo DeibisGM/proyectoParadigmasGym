@@ -1,7 +1,7 @@
 <?php
-include_once 'data.php';
-include_once '../domain/rutina.php';
-include_once '../domain/rutinaEjercicio.php';
+include_once __DIR__ . '/data.php';
+include_once __DIR__ . '/../domain/rutina.php';
+include_once __DIR__ . '/../domain/rutinaEjercicio.php';
 
 class RutinaData extends Data
 {
@@ -100,6 +100,23 @@ class RutinaData extends Data
         }
         mysqli_close($conn);
         return $success;
+    }
+
+    public function getRutinasPorClienteEnRangoFechas($clienteId, $fechaInicio, $fechaFin)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $query = "SELECT * FROM tbrutina WHERE tbclienteid = ? AND tbrutinafecha BETWEEN ? AND ? ORDER BY tbrutinafecha DESC";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "iss", $clienteId, $fechaInicio, $fechaFin);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $rutinas = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $rutinas[] = new Rutina($row['tbrutinaid'], $row['tbclienteid'], $row['tbrutinafecha'], $row['tbrutinaobservacion']);
+        }
+        mysqli_close($conn);
+        return $rutinas;
     }
 }
 ?>

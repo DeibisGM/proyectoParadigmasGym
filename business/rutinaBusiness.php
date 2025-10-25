@@ -1,23 +1,19 @@
 <?php
-include_once '../data/rutinaData.php';
-include_once '../business/ejercicioFuerzaBusiness.php';
-include_once '../business/ejercicioResistenciaBusiness.php';
-// Nota: Cuando crees el business de Equilibrio, inclúyelo aquí.
-// include_once '../business/ejercicioEquilibrioBusiness.php';
+include_once __DIR__ . '/../data/rutinaData.php';
+include_once __DIR__ . '/ejercicioFuerzaBusiness.php';
+include_once __DIR__ . '/ejercicioResistenciaBusiness.php';
 
 class RutinaBusiness
 {
     private $rutinaData;
     private $ejercicioFuerzaBusiness;
     private $ejercicioResistenciaBusiness;
-    // private $ejercicioEquilibrioBusiness;
 
     public function __construct()
     {
         $this->rutinaData = new RutinaData();
         $this->ejercicioFuerzaBusiness = new EjercicioFuerzaBusiness();
         $this->ejercicioResistenciaBusiness = new ejercicioResistenciaBusiness();
-        // $this->ejercicioEquilibrioBusiness = new EjercicioEquilibrioBusiness();
     }
 
     public function crearRutinaCompleta($rutina)
@@ -66,9 +62,6 @@ class RutinaBusiness
                     }
                 }
                 break;
-            case 'equilibrio':
-                // Implementar cuando tengas el business de Equilibrio
-                break;
         }
         return 'Ejercicio Desconocido';
     }
@@ -94,11 +87,6 @@ class RutinaBusiness
                         $ejercicios[] = ['id' => $ej->getId(), 'nombre' => $ej->getNombre()];
                     }
                 }
-                break;
-            case 'equilibrio':
-                // Aquí iría la lógica para cargar ejercicios de equilibrio
-                // $ejerciciosData = $this->ejercicioEquilibrioBusiness->getAll...();
-                // foreach ($ejerciciosData as $ej) { ... }
                 break;
         }
         return $ejercicios;

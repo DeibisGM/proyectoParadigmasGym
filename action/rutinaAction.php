@@ -1,8 +1,8 @@
 <?php
 session_start();
-include_once '../business/rutinaBusiness.php';
-include_once '../domain/rutina.php';
-include_once '../domain/rutinaEjercicio.php';
+include_once __DIR__ . '/../business/rutinaBusiness.php';
+include_once __DIR__ . '/../domain/rutina.php';
+include_once __DIR__ . '/../domain/rutinaEjercicio.php';
 
 if (!isset($_SESSION['usuario_id']) || $_SESSION['tipo_usuario'] !== 'cliente') {
     header('Location: ../view/loginView.php');
