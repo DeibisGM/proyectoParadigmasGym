@@ -2,15 +2,18 @@
 
 include '../data/clienteData.php';
 include_once '../utility/ImageManager.php';
+include_once '../business/numeroEmergenciaBusiness.php';
 
 class ClienteBusiness {
 
     private $clienteData;
+    private $numeroBusiness;
     private $imageManager;
 
     public function __construct() {
         $this->clienteData = new ClienteData();
         $this->imageManager = new ImageManager();
+        $this->numeroBusiness = new numeroEmergenciaBusiness();
     }
 
     public function insertarTBCliente($cliente) {
@@ -29,6 +32,7 @@ class ClienteBusiness {
         $cliente = $this->clienteData->getClientePorId($idCliente);
         if ($cliente && $cliente->getTbclienteImagenId() != '' && $cliente->getTbclienteImagenId() != '0') {
             $this->imageManager->deleteImage($cliente->getTbclienteImagenId());
+            $this->numeroBusiness->eliminarTBNumeroEmergenciaByCliente($idCliente);
         }
         return $this->clienteData->eliminarTBCliente($idCliente);
     }

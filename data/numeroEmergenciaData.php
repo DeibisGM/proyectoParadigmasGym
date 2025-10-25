@@ -47,6 +47,17 @@ class numeroEmergenciaData extends Data
         return $result;
     }
 
+    public function eliminarTBNumeroEmergenciaByCliente($clienteId) {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+
+        $queryDelete = "DELETE FROM tbnumeroemergencia WHERE tbnumeroemergenciaclienteid=" . $clienteId . ";";
+
+        $result = mysqli_query($conn, $queryDelete);
+        mysqli_close($conn);
+        return $result;
+    }
+
     public function eliminarTBNumeroEmergencia($numeroEmergenciaId) {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
@@ -57,6 +68,7 @@ class numeroEmergenciaData extends Data
         mysqli_close($conn);
         return $result;
     }
+
 
     public function getNumeroPorId($id)
     {
