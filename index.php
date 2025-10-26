@@ -59,6 +59,7 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios Instructores</button></a>
                     <a href='view/ejercicioFuerzaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de fuerza</button></a>
                     <a href='view/ejercicioResistenciaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de resistencia</button></a>
+                    <a href='view/ejercicioFlexibilidadView.php'><button><i class="ph ph-barbell"></i>Ejercicios de Flexibilidad</button></a>
                 </div>
             </section>
             <section>
