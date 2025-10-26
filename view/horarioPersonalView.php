@@ -84,7 +84,7 @@ if ($esAdmin || $esInstructor) {
 <body>
 <div class="container">
     <header>
-        <a href="../index.php">← Volver al Inicio</a><br><br>
+            <a href="../index.php" class="back-button">← </a>
         <h2>Instructor Personal - Reservas</h2>
         <?php if ($esInstructor): ?>
             <p><strong>Vista de Instructor:</strong> Visualizando solo sus horarios</p>

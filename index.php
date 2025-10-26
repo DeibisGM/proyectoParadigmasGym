@@ -58,6 +58,8 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub zonas del cuerpo</button></a>
                     <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios Instructores</button></a>
                     <a href='view/ejercicioFuerzaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de fuerza</button></a>
+                    <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
+                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
                     <a href='view/ejercicioResistenciaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de resistencia</button></a>
                     <a href='view/ejercicioFlexibilidadView.php'><button><i class="ph ph-barbell"></i>Ejercicios de Flexibilidad</button></a>
                 </div>
@@ -86,6 +88,8 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub Zonas del cuerpo</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
+                    <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
+                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
                 </div>
             </section>
             <section>

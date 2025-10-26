@@ -22,14 +22,30 @@ $instructorBusiness = new InstructorBusiness();
 $imageManager = new ImageManager();
 
 $certificados = $certificadoBusiness->getCertificados();
-$instructores = $instructorBusiness->getAllTBInstructor(true); // Obtener todos los instructores
+$instructores = $instructorBusiness->getAllTBInstructor(true);
 
-// FILTRAR POR INSTRUCTOR SI SE ESPECIFICA
-if (isset($_GET['instructor_id'])) {
+// Obtener nombre del instructor si se filtra
+$instructor_nombre = "Todos los instructores";
+$instructorIdFiltro = null;
+
+if (isset($_GET['instructor_id']) && !empty($_GET['instructor_id'])) {
     $instructorIdFiltro = $_GET['instructor_id'];
     $certificados = array_filter($certificados, function ($cert) use ($instructorIdFiltro) {
         return $cert->getIdInstructor() == $instructorIdFiltro;
     });
+
+    // Obtener nombre del instructor
+    foreach ($instructores as $instructor) {
+        if ($instructor->getInstructorId() == $instructorIdFiltro) {
+            $instructor_nombre = $instructor->getInstructorNombre();
+            break;
+        }
+    }
+
+    // Si no se encontró el instructor, usar valor por defecto
+    if ($instructor_nombre === "Todos los instructores") {
+        $instructor_nombre = "Instructor ID: " . htmlspecialchars($instructorIdFiltro);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -38,6 +54,7 @@ if (isset($_GET['instructor_id'])) {
     <meta charset="UTF-8">
     <title>Gestión de Certificados</title>
     <style>
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -110,9 +127,9 @@ if (isset($_GET['instructor_id'])) {
 </head>
 <body>
 <header>
-        <a href="instructorView.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-        <h2>Gestión de Certificados para el Instructor: <strong><?php echo htmlspecialchars($instructor_nombre); ?></strong></h2>
-    </header>
+    <a href="instructorView.php" class="back-button">←</a>
+    <h2>Gestión de Certificados: <strong><?php echo htmlspecialchars($instructor_nombre); ?></strong></h2>
+</header>
 <hr>
 
 <main>
@@ -127,8 +144,9 @@ if (isset($_GET['instructor_id'])) {
             <select name="idInstructor" id="idInstructor" required>
                 <option value="">Seleccione un instructor</option>
                 <?php foreach ($instructores as $instructor): ?>
-                    <option value="<?php echo $instructor->getInstructorId(); ?>">
-                        <?php echo htmlspecialchars($instructor->getInstructorNombre() . ' (' . $instructor->getInstructorId() . ')'); ?>
+                    <option value="<?php echo $instructor->getInstructorId(); ?>"
+                        <?php echo ($instructorIdFiltro && $instructor->getInstructorId() == $instructorIdFiltro) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($instructor->getInstructorNombre() . ' (' . str_pad($instructor->getInstructorId(), 3, '0', STR_PAD_LEFT) . ')'); ?>
                     </option>
                 <?php endforeach; ?>
             </select><br>
@@ -142,87 +160,90 @@ if (isset($_GET['instructor_id'])) {
     <?php endif; ?>
 
     <h2>Lista de Certificados</h2>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Entidad</th>
-            <th>Instructor</th>
-            <th>Imagen</th>
-            <?php if ($puedeCrearCertificados): ?>
-                <th>Acciones</th>
-            <?php endif; ?>
-        </tr>
-        <?php foreach ($certificados as $cert):
-            // Obtener el nombre del instructor para este certificado
-            $instructorCert = null;
-            foreach ($instructores as $instructor) {
-                if ($instructor->getInstructorId() == $cert->getIdInstructor()) {
-                    $instructorCert = $instructor;
-                    break;
-                }
-            }
-
-            // Obtener la imagen del certificado
-        $imagenCertificado = null;
-        $imageId = $cert->getTbcertificadoImagenId();
-
-        if (!empty($imageId)) {
-            $imagen = $imageManager->getImagesByIds($imageId);
-
-            // EXACTAMENTE IGUAL QUE EN INSTRUCTOR
-            if (!empty($imagen) && !empty($imagen[0]['tbimagenruta'])) {
-                $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
-                $imagenCertificado = $imagePath . '?t=' . time();
-            }
-        }
-            ?>
+    <?php if (empty($certificados)): ?>
+        <p>No hay certificados registrados<?php echo $instructorIdFiltro ? ' para este instructor' : ''; ?>.</p>
+    <?php else: ?>
+        <table>
             <tr>
-                <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data" onsubmit="return validateCertificadoEditForm(this)">
-                    <td>
-                        <input type="hidden" name="id" value="<?php echo $cert->getId(); ?>">
-                        <?php echo str_pad($cert->getId(), 3, '0', STR_PAD_LEFT); ?>
-                    </td>
-                    <td><input type="text" name="nombre" value="<?php echo htmlspecialchars($cert->getNombre()); ?>" required></td>
-                    <td><input type="text" name="descripcion" value="<?php echo htmlspecialchars($cert->getDescripcion()); ?>" required></td>
-                    <td><input type="text" name="entidad" value="<?php echo htmlspecialchars($cert->getEntidad()); ?>" required></td>
-                    <td>
-                        <select name="idInstructor" required>
-                            <option value="">Seleccione un instructor</option>
-                            <?php foreach ($instructores as $instructor): ?>
-                                <option value="<?php echo $instructor->getInstructorId(); ?>" <?php echo $instructor->getInstructorId() == $cert->getIdInstructor() ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($instructor->getInstructorNombre() . ' (' . $instructor->getInstructorId() . ')'); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                    <td>
-                        <?php if ($imagenCertificado): ?>
-                          <div class="image-container">
-                                 <img src="<?php echo $imagenCertificado; ?>" alt="Imagen certificado">
-                                <?php if ($puedeCrearCertificados): ?>
-                                    <button type="button" data-certificado-id="<?php echo $cert->getId(); ?>" data-image-id="<?php echo $cert->getTbcertificadoImagenId(); ?>" class="delete-image-btn" onclick="confirmImageDeleteCert(this)">X</button>
-                                <?php endif; ?>
-                            </div>
-                        <?php else: ?>
-                            <?php if ($puedeCrearCertificados): ?>
-                                <input type="file" name="tbcertificadoimagenid[]" accept="image/png, image/jpeg, image/webp">
-                            <?php else: ?>
-                                Sin imagen
-                            <?php endif; ?>
-                        <?php endif; ?>
-                    </td>
-                    <?php if ($puedeCrearCertificados): ?>
-                        <td>
-                            <button type="submit" name="update">Actualizar</button>
-                            <button type="submit" name="delete" onclick="return confirm('¿Eliminar este certificado?');">Eliminar</button>
-                        </td>
-                    <?php endif; ?>
-                </form>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Entidad</th>
+                <th>Instructor</th>
+                <th>Imagen</th>
+                <?php if ($puedeCrearCertificados): ?>
+                    <th>Acciones</th>
+                <?php endif; ?>
             </tr>
-        <?php endforeach; ?>
-    </table>
+            <?php foreach ($certificados as $cert):
+                // Obtener el nombre del instructor para este certificado
+                $instructorCert = null;
+                foreach ($instructores as $instructor) {
+                    if ($instructor->getInstructorId() == $cert->getIdInstructor()) {
+                        $instructorCert = $instructor;
+                        break;
+                    }
+                }
+
+                // Obtener la imagen del certificado
+                $imagenCertificado = null;
+                $imageId = $cert->getTbcertificadoImagenId();
+
+                if (!empty($imageId)) {
+                    $imagen = $imageManager->getImagesByIds($imageId);
+
+                    if (!empty($imagen) && !empty($imagen[0]['tbimagenruta'])) {
+                        $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
+                        $imagenCertificado = $imagePath . '?t=' . time();
+                    }
+                }
+            ?>
+                <tr>
+                    <form method="post" action="../action/certificadoAction.php" enctype="multipart/form-data" onsubmit="return validateCertificadoEditForm(this)">
+                        <td>
+                            <input type="hidden" name="id" value="<?php echo $cert->getId(); ?>">
+                            <?php echo str_pad($cert->getId(), 3, '0', STR_PAD_LEFT); ?>
+                        </td>
+                        <td><input type="text" name="nombre" value="<?php echo htmlspecialchars($cert->getNombre()); ?>" required></td>
+                        <td><input type="text" name="descripcion" value="<?php echo htmlspecialchars($cert->getDescripcion()); ?>" required></td>
+                        <td><input type="text" name="entidad" value="<?php echo htmlspecialchars($cert->getEntidad()); ?>" required></td>
+                        <td>
+                            <select name="idInstructor" required>
+                                <option value="">Seleccione un instructor</option>
+                                <?php foreach ($instructores as $instructor): ?>
+                                    <option value="<?php echo $instructor->getInstructorId(); ?>" <?php echo $instructor->getInstructorId() == $cert->getIdInstructor() ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($instructor->getInstructorNombre() . ' (' . str_pad($instructor->getInstructorId(), 3, '0', STR_PAD_LEFT) . ')'); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td>
+                            <?php if ($imagenCertificado): ?>
+                                <div class="image-container">
+                                    <img src="<?php echo $imagenCertificado; ?>" alt="Imagen certificado">
+                                    <?php if ($puedeCrearCertificados): ?>
+                                        <button type="button" data-certificado-id="<?php echo $cert->getId(); ?>" data-image-id="<?php echo $cert->getTbcertificadoImagenId(); ?>" class="delete-image-btn" onclick="confirmImageDeleteCert(this)">X</button>
+                                    <?php endif; ?>
+                                </div>
+                            <?php else: ?>
+                                <?php if ($puedeCrearCertificados): ?>
+                                    <input type="file" name="tbcertificadoimagenid[]" accept="image/png, image/jpeg, image/webp">
+                                <?php else: ?>
+                                    Sin imagen
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </td>
+                        <?php if ($puedeCrearCertificados): ?>
+                            <td>
+                                <button type="submit" name="update">Actualizar</button>
+                                <button type="submit" name="delete" onclick="return confirm('¿Eliminar este certificado?');">Eliminar</button>
+                            </td>
+                        <?php endif; ?>
+                    </form>
+                </tr>
+            <?php endforeach; ?>
+        </table>
+    <?php endif; ?>
 
     <?php if (isset($_GET['success'])): ?>
         <p style="color:green;">
