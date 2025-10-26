@@ -1,6 +1,6 @@
 <?php
 session_start();
-include_once '../business/ejercicioFuerzaBusiness.php';
+include_once '../business/ejercicioResistenciaBusiness.php';
 include_once '../business/subZonaBusiness.php';
 include_once '../utility/Validation.php';
 
@@ -13,15 +13,13 @@ if (!isset($_SESSION['tipo_usuario'])) {
 
 $esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor');
 
-$ejercicioFuerzaBusiness = new EjercicioFuerzaBusiness();
+$ejercicioResistenciaBusiness = new ejercicioResistenciaBusiness();
 $subZonaBusiness = new subZonaBusiness();
 
 if (!$esAdminOInstructor) {
-    // Si no es admin/instructor, solo ejercicios activos
-    $ejercicios = $ejercicioFuerzaBusiness->getTBEjercicioFuerzaByActivo();
+    $ejercicios = $ejercicioResistenciaBusiness->getTBEjercicioResisteciaByActivo();
 } else {
-    // Si es admin/instructor, todos los ejercicios
-    $ejercicios = $ejercicioFuerzaBusiness->obtenerTbejerciciofuerza();
+    $ejercicios = $ejercicioResistenciaBusiness->getAllTBEjercicioResistecia();
 }
 
 $subzonas = $subZonaBusiness->getAllTBSubZona();
@@ -30,7 +28,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Ejercicios de Fuerza</title>
+    <title>Gestión de Ejercicios de Resistencia</title>
     <link rel="stylesheet" href="styles.css">
     <script src="../utility/Events.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -64,12 +62,11 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
 <div class="container">
     <header>
         <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-        <h2>Gestión de Ejercicios de Fuerza</h2>
+        <h2>Gestión de Ejercicios de Resistencia</h2>
     </header>
 
     <main>
         <?php
-        // Mensajes de error y éxito
         if (isset($_GET['error'])) {
             $error = $_GET['error'];
             echo '<p class="error-message flash-msg"><b>Error: ';
@@ -89,10 +86,11 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
         }
         ?>
 
+        <!-- Formulario de nuevo ejercicio -->
         <?php if ($esAdminOInstructor): ?>
             <section>
-                <h3><i class="ph ph-plus-circle"></i> Crear Nuevo Ejercicio de Fuerza</h3>
-                <form method="post" action="../action/ejercicioFuerzaAction.php">
+                <h3><i class="ph ph-plus-circle"></i> Crear Nuevo Ejercicio de Resistencia</h3>
+                <form method="post" action="../action/ejercicioResistenciaAction.php">
                     <div class="form-group">
                         <label>Nombre:</label>
                         <span class="error-message"><?= Validation::getError('nombre') ?></span>
@@ -107,8 +105,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                             <?php foreach ($subzonas as $subzona): ?>
                                 <label>
                                     <input type="checkbox" name="subzona[]"
-                                           value="<?= $subzona->getSubzonaid() ?>"
-                                           <?= (is_array(Validation::getOldInput('subzona')) && in_array($subzona->getSubzonaid(), Validation::getOldInput('subzona'))) ? 'checked' : '' ?>>
+                                           value="<?= $subzona->getSubzonaid() ?>">
                                     <?= htmlspecialchars($subzona->getSubzonanombre()) ?>
                                 </label>
                             <?php endforeach; ?>
@@ -116,32 +113,18 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                     </div>
 
                     <div class="form-group">
+                        <label>Tiempo (segundos):</label>
+                        <input type="text" name="tiempo" maxlength="50" value="<?= Validation::getOldInput('tiempo') ?>">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Peso:</label>
+                        <input type="checkbox" name="peso" <?= Validation::getOldInput('peso') ? 'checked' : '' ?>>
+                    </div>
+
+                    <div class="form-group">
                         <label>Descripción:</label>
-                        <span class="error-message"><?= Validation::getError('descripcion') ?></span>
                         <textarea name="descripcion" maxlength="500" placeholder="Descripción"><?= Validation::getOldInput('descripcion') ?></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Repeticiones:</label>
-                        <span class="error-message"><?= Validation::getError('repeticion') ?></span>
-                        <input type="number" name="repeticion" min="1" value="<?= Validation::getOldInput('repeticion') ?>" placeholder="Ej: 10">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Series:</label>
-                        <span class="error-message"><?= Validation::getError('serie') ?></span>
-                        <input type="number" name="serie" min="1" value="<?= Validation::getOldInput('serie') ?>" placeholder="Ej: 3">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Peso (requerido):</label>
-                        <input type="checkbox" name="peso" value="1" <?= Validation::getOldInput('peso') == 1 ? 'checked' : '' ?>>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Descanso (segundos):</label>
-                        <span class="error-message"><?= Validation::getError('descanso') ?></span>
-                        <input type="number" name="descanso" min="0" value="<?= Validation::getOldInput('descanso') ?>" placeholder="Ej: 60">
                     </div>
 
                     <button type="submit" name="guardar"><i class="ph ph-floppy-disk"></i> Guardar</button>
@@ -149,7 +132,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
             </section>
         <?php endif; ?>
 
-
+        <!-- Tabla de ejercicios -->
         <section>
             <h3><i class="ph ph-list-bullets"></i> Ejercicios Registrados</h3>
             <div style="overflow-x:auto;">
@@ -158,11 +141,9 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                     <tr>
                         <th>Nombre</th>
                         <th>Subzonas</th>
-                        <th>Descripción</th>
-                        <th>Repeticiones</th>
-                        <th>Series</th>
+                        <th>Tiempo</th>
                         <th>Peso</th>
-                        <th>Descanso</th>
+                        <th>Descripción</th>
                         <th>Activo</th>
                         <?php if ($esAdminOInstructor): ?>
                             <th>Acciones</th>
@@ -174,54 +155,44 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                         <?php
                         $subzonaIds = [];
                         if (!empty($ejer->getSubzonaIds())) {
-                            // Corrección de sintaxis: se asume que el separador es '$' en la BD
+
                             $idsStr = implode('$', $ejer->getSubzonaIds());
                             $subzonaIds = array_map('intval', explode('$', $idsStr));
                         }
                         ?>
                         <tr>
                             <?php if ($esAdminOInstructor): ?>
-                                <form method="post" action="../action/ejercicioFuerzaAction.php">
+                                <form method="post" action="../action/ejercicioResistenciaAction.php">
                                     <?php
                                     $idFila = $ejer->getId();
 
                                     $oldNombre = Validation::getOldInput('nombre_'.$idFila);
                                     $oldSubzona = Validation::getOldInput('subzona_'.$idFila);
-                                    $oldDescripcion = Validation::getOldInput('descripcion_'.$idFila);
-                                    $oldRepeticion = Validation::getOldInput('repeticion_'.$idFila);
-                                    $oldSerie = Validation::getOldInput('serie_'.$idFila);
+                                    $oldTiempo = Validation::getOldInput('tiempo_'.$idFila);
                                     $oldPeso   = Validation::getOldInput('peso_'.$idFila);
-                                    $oldDescanso = Validation::getOldInput('descanso_'.$idFila);
+                                    $oldDesc   = Validation::getOldInput('descripcion_'.$idFila);
                                     $oldActivo = Validation::getOldInput('activo_'.$idFila);
 
                                     $subzonaIdsMarcadas = [];
                                     if ($oldSubzona !== '' && $oldSubzona !== null) {
-                                        // Corrección de sintaxis: se asume que el separador es '$' en el oldInput
                                         $subzonaIdsMarcadas = array_map('intval', explode('$', $oldSubzona));
                                     } else {
                                         $subzonaIdsMarcadas = [];
                                         if (!empty($ejer->getSubzonaIds())) {
-                                            // Corrección de sintaxis: se asume que el separador es '$' en la BD
                                             $idsStr = implode('$', $ejer->getSubzonaIds());
                                             $subzonaIdsMarcadas = array_map('intval', explode('$', $idsStr));
                                         }
                                     }
 
                                     $valNombre = ($oldNombre !== '' && $oldNombre !== null) ? $oldNombre : $ejer->getNombre();
-                                    $valDescripcion = ($oldDescripcion !== '' && $oldDescripcion !== null) ? $oldDescripcion : $ejer->getDescripcion();
-                                    $valRepeticion = ($oldRepeticion !== '' && $oldRepeticion !== null) ? $oldRepeticion : $ejer->getRepeticion();
-                                    $valSerie = ($oldSerie !== '' && $oldSerie !== null) ? $oldSerie : $ejer->getSerie();
-                                    // Se asegura que 'peso' sea un entero (0 o 1) para el checkbox
+                                    $valTiempo = ($oldTiempo !== '' && $oldTiempo !== null) ? $oldTiempo : $ejer->getTiempo();
                                     $valPeso   = ($oldPeso   !== '' && $oldPeso   !== null) ? (int)$oldPeso : (int)$ejer->getPeso();
-                                    $valDescanso = ($oldDescanso !== '' && $oldDescanso !== null) ? $oldDescanso : $ejer->getDescanso();
+                                    $valDesc   = ($oldDesc   !== '' && $oldDesc   !== null) ? $oldDesc   : $ejer->getDescripcion();
                                     $valActivo = ($oldActivo !== '' && $oldActivo !== null) ? $oldActivo : (string)$ejer->getActivo();
 
                                     $errNombre = Validation::getError('nombre_'.$idFila);
                                     $errSubzona= Validation::getError('subzona_'.$idFila);
-                                    $errDescripcion = Validation::getError('descripcion_'.$idFila);
-                                    $errRepeticion = Validation::getError('repeticion_'.$idFila);
-                                    $errSerie = Validation::getError('serie_'.$idFila);
-                                    $errDescanso = Validation::getError('descanso_'.$idFila);
+                                    $errTiempo = Validation::getError('tiempo_'.$idFila);
                                     $errActivo = Validation::getError('activo_'.$idFila);
                                     ?>
                                     <input type="hidden" name="id" value="<?= $idFila ?>">
@@ -234,7 +205,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                     </td>
 
                                     <td>
-                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(this)">Ver subzonas ▼</button>
+                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(this)">Ver subzonas    ▼</button>
                                         <div class="checkbox-group subzonas">
                                             <?php foreach ($subzonas as $subzona): ?>
                                                 <?php $sid = (int)$subzona->getSubzonaid(); ?>
@@ -251,35 +222,20 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                     </td>
 
                                     <td>
-                                        <textarea name="descripcion" maxlength="500"><?= htmlspecialchars($valDescripcion) ?></textarea>
-                                        <?php if ($errDescripcion): ?>
-                                            <div class="error-message"><?= $errDescripcion ?></div>
+                                        <input type="text" name="tiempo" maxlength="50" value="<?= htmlspecialchars($valTiempo) ?>">
+                                        <?php if ($errTiempo): ?>
+                                            <div class="error-message"><?= $errTiempo ?></div>
                                         <?php endif; ?>
                                     </td>
 
                                     <td>
-                                        <input type="number" name="repeticion" min="1" value="<?= htmlspecialchars($valRepeticion) ?>">
-                                        <?php if ($errRepeticion): ?>
-                                            <div class="error-message"><?= $errRepeticion ?></div>
-                                        <?php endif; ?>
+                                        <input type="checkbox" name="peso" <?= $valPeso ? 'checked' : '' ?>>
+
                                     </td>
 
                                     <td>
-                                        <input type="number" name="serie" min="1" value="<?= htmlspecialchars($valSerie) ?>">
-                                        <?php if ($errSerie): ?>
-                                            <div class="error-message"><?= $errSerie ?></div>
-                                        <?php endif; ?>
-                                    </td>
+                                        <textarea name="descripcion" maxlength="500"><?= htmlspecialchars($valDesc) ?></textarea>
 
-                                    <td>
-                                        <input type="checkbox" name="peso" value="1" <?= $valPeso ? 'checked' : '' ?>>
-                                    </td>
-
-                                    <td>
-                                        <input type="number" name="descanso" min="0" value="<?= htmlspecialchars($valDescanso) ?>">
-                                        <?php if ($errDescanso): ?>
-                                            <div class="error-message"><?= $errDescanso ?></div>
-                                        <?php endif; ?>
                                     </td>
 
                                     <td>
@@ -316,11 +272,9 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                             ?>
                                         </div>
                                     </td>
-                                    <td><?= htmlspecialchars($ejer->getDescripcion()) ?></td>
-                                    <td><?= htmlspecialchars($ejer->getRepeticion()) ?></td>
-                                    <td><?= htmlspecialchars($ejer->getSerie()) ?></td>
+                                    <td><?= htmlspecialchars($ejer->getTiempo()) ?></td>
                                     <td><?= $ejer->getPeso() ? 'Sí' : 'No' ?></td>
-                                    <td><?= htmlspecialchars($ejer->getDescanso()) ?></td>
+                                    <td><?= htmlspecialchars($ejer->getDescripcion()) ?></td>
                                     <td>Sí</td>
                                 <?php endif; ?>
                             <?php endif; ?>

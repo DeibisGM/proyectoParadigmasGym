@@ -1,19 +1,19 @@
 <?php
 
 include_once '../data/cuerpoZonaData.php';
-include_once '../business/parteZonaBusiness.php';
+include_once '../business/subZonaBusiness.php';
 include_once '../utility/ImageManager.php';
 
 class CuerpoZonaBusiness
 {
     private $cuerpoZonaData;
-    private $parteZonaBusiness;
+    private $subZonaBusiness;
     private $imageManager;
 
     public function __construct()
     {
         $this->cuerpoZonaData = new CuerpoZonaData();
-        $this->parteZonaBusiness = new parteZonaBusiness();
+        $this->subZonaBusiness = new subZonaBusiness();
         $this->imageManager = new ImageManager();
     }
 
@@ -47,10 +47,10 @@ class CuerpoZonaBusiness
 
     public function eliminarTBCuerpoZona($id)
     {
-        $partes = $this->getCuerpoZonaParteZonaId($id);
+        $partes = $this->getCuerpoZonaSubZonaId($id);
 
         if($partes !== null){
-            $this->parteZonaBusiness->desactivarParteZonaLista($partes);
+            $this->subZonaBusiness->desactivarSubZonaLista($partes);
         }
 
         $zona = $this->cuerpoZonaData->getCuerpoZonaById($id);
@@ -71,13 +71,13 @@ class CuerpoZonaBusiness
         return $this->cuerpoZonaData->getActiveTBCuerpoZona();
     }
 
-    public function actualizarParteZonaTBCuerpoZona($id, $partesZona)
+    public function actualizarSubZonaTBCuerpoZona($id, $subZona)
     {
-        return $this->cuerpoZonaData->actualizarParteZonaTBCuerpoZona($id, $partesZona);
+        return $this->cuerpoZonaData->actualizarSubZonaTBCuerpoZona($id, $subZona);
     }
 
-    public function getCuerpoZonaParteZonaId($id)
+    public function getCuerpoZonaSubZonaId($id)
     {
-        return $this->cuerpoZonaData->getCuerpoZonaParteZonaId($id);
+        return $this->cuerpoZonaData->getCuerpoZonaSubZonaId($id);
     }
 }

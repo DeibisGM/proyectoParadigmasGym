@@ -1,10 +1,10 @@
 <?php
 session_start();
-include '../business/ejercicioFuerzaBusiness.php';
+include '../business/ejercicioResistenciaBusiness.php';
 include_once '../business/ejercicioSubzonaBusiness.php';
 include_once '../utility/Validation.php';
 
-$redirect_path = '../view/ejercicioFuerzaView.php';
+$redirect_path = '../view/ejercicioResistenciaView.php';
 
 if (!isset($_SESSION['tipo_usuario'])) {
     header("location: ../view/loginView.php");
@@ -18,30 +18,28 @@ if (!$esAdminOInstructor) {
     exit();
 }
 
-$ejercicioFuerzaBusiness = new EjercicioFuerzaBusiness();
+$ejercicioResistenciaBusiness = new ejercicioResistenciaBusiness();
 $ejercicioSubzonaBusiness = new ejercicioSubzonaBusiness();
 
 if (isset($_POST['guardar'])) {
 
-    if (isset($_POST['nombre']) && isset($_POST['subzona']) && isset($_POST['descripcion'])
-        && isset($_POST['repeticion']) && isset($_POST['serie']) && isset($_POST['descanso'])) {
+    if (isset($_POST['nombre']) && isset($_POST['subzona']) && isset($_POST['tiempo'])
+        && isset($_POST['descripcion'])) {
 
         Validation::setOldInput($_POST);
 
         $nombre = $_POST['nombre'];
         $subzona = $_POST['subzona'];
-        $descripcion = $_POST['descripcion'];
-        $repeticion = $_POST['repeticion'];
-        $serie = $_POST['serie'];
+        $tiempo = $_POST['tiempo'];
         $peso = isset($_POST['peso']) ? 1 : 0;
-        $descanso = $_POST['descanso'];
+        $descripcion = $_POST['descripcion'];
         $activo = 1;
 
         if (empty($nombre)) {
             Validation::setError('nombre', 'El nombre es obligatorio.');
         } elseif (preg_match('/[0-9]/', $nombre)) {
             Validation::setError('nombre', 'El nombre no puede contener números.');
-        } elseif ($ejercicioFuerzaBusiness->existeEjercicioPorNombre($nombre)) {
+        } elseif ($ejercicioResistenciaBusiness->existeEjercicioPorNombre($nombre)) {
             Validation::setError('nombre', 'El ejercicio ya está registrado.');
         }
 
@@ -49,26 +47,8 @@ if (isset($_POST['guardar'])) {
             Validation::setError('subzona', 'La zona es obligatoria.');
         }
 
-        if (empty($descripcion)) {
-            Validation::setError('descripcion', 'La descripción es obligatoria.');
-        }
-
-        if (empty($repeticion)) {
-            Validation::setError('repeticion', 'El número de repeticiones es obligatorio.');
-        } elseif (!is_numeric($repeticion) || $repeticion <= 0) {
-            Validation::setError('repeticion', 'Las repeticiones deben ser un número positivo.');
-        }
-
-        if (empty($serie)) {
-            Validation::setError('serie', 'El número de series es obligatorio.');
-        } elseif (!is_numeric($serie) || $serie <= 0) {
-            Validation::setError('serie', 'Las series deben ser un número positivo.');
-        }
-
-        if (empty($descanso)) {
-            Validation::setError('descanso', 'El tiempo de descanso es obligatorio.');
-        } elseif (!is_numeric($descanso) || $descanso < 0) {
-            Validation::setError('descanso', 'El descanso debe ser un número positivo.');
+        if (empty($tiempo)) {
+            Validation::setError('tiempo', 'La duración del ejercicio es obligatoria.');
         }
 
         if (Validation::hasErrors()) {
@@ -76,12 +56,12 @@ if (isset($_POST['guardar'])) {
             exit();
         }
 
-        $ejercicioFuerza = new EjercicioFuerza(0, $nombre, $descripcion, $repeticion, $serie, $peso, $descanso, $activo);
-        $nuevoId = $ejercicioFuerzaBusiness->insertarTbejerciciofuerza($ejercicioFuerza);
+        $ejercicioResistencia = new ejercicioResistencia(0, $nombre, $tiempo, $peso, $descripcion, $activo);
+        $nuevoId = $ejercicioResistenciaBusiness->insertarTBEjercicioResistencia($ejercicioResistencia);
 
         if ($nuevoId > 0) {
 
-            $subzonas = $ejercicioSubzonaBusiness->getEjercicioSubzonaPorEjercicioNombre($nuevoId, 'Fuerza');
+            $subzonas = $ejercicioSubzonaBusiness->getEjercicioSubzonaPorEjercicioNombre($nuevoId, 'Resistencia');
 
             if ($subzonas !== null) {
 
@@ -96,7 +76,7 @@ if (isset($_POST['guardar'])) {
                 $ejercicioSubzonaBusiness->actualizarTBEjercicioSubzona($subzonas);
             } else {
 
-                $nuevaSubzona = new ejercicioSubzona(0, $nuevoId, implode('$', $subzona), 'Fuerza');
+                $nuevaSubzona = new ejercicioSubzona(0, $nuevoId, implode('$', $subzona), 'Resistencia');
                 $ejercicioSubzonaBusiness->insertarTBEjercicioSubzona($nuevaSubzona);
             }
 
@@ -114,32 +94,29 @@ if (isset($_POST['guardar'])) {
     }
 } else if (isset($_POST['actualizar'])) {
 
-    if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['subzona']) && isset($_POST['descripcion'])
-        && isset($_POST['repeticion']) && isset($_POST['serie']) && isset($_POST['descanso']) && isset($_POST['activo'])) {
+    if (isset($_POST['id']) && isset($_POST['nombre']) && isset($_POST['subzona']) && isset($_POST['tiempo'])
+        && isset($_POST['descripcion']) && isset($_POST['activo'])) {
 
         $id = $_POST['id'];
-        $ejercicioActual = $ejercicioFuerzaBusiness->getEjercicioFuerza($id);
+        $ejercicioActual = $ejercicioResistenciaBusiness->getEjercicioResistencia($id);
 
         if ($ejercicioActual) {
 
             $nombre = trim($_POST['nombre']);
             $subzonaArray = is_array($_POST['subzona']) ? $_POST['subzona'] : [];
             $subzona = implode('$', $subzonaArray);
-            $descripcion = trim($_POST['descripcion']);
-            $repeticion = trim($_POST['repeticion']);
-            $serie = trim($_POST['serie']);
+            $tiempo = trim($_POST['tiempo']);
+            // Checkbox: si no viene, es 0
             $peso = isset($_POST['peso']) ? 1 : 0;
-            $descanso = trim($_POST['descanso']);
+            $descripcion = trim($_POST['descripcion']);
             $activo = $_POST['activo'];
 
             // Guardar old input por fila
             Validation::setOldInput('nombre_' . $id, $nombre);
             Validation::setOldInput('subzona_' . $id, $subzona);
-            Validation::setOldInput('descripcion_' . $id, $descripcion);
-            Validation::setOldInput('repeticion_' . $id, $repeticion);
-            Validation::setOldInput('serie_' . $id, $serie);
+            Validation::setOldInput('tiempo_' . $id, $tiempo);
             Validation::setOldInput('peso_' . $id, $peso);
-            Validation::setOldInput('descanso_' . $id, $descanso);
+            Validation::setOldInput('descripcion_' . $id, $descripcion);
             Validation::setOldInput('activo_' . $id, $activo);
 
             // Validaciones
@@ -147,7 +124,7 @@ if (isset($_POST['guardar'])) {
                 Validation::setError('nombre_' . $id, 'El nombre es obligatorio.');
             } elseif (preg_match('/[0-9]/', $nombre)) {
                 Validation::setError('nombre_' . $id, 'El nombre no puede contener números.');
-            } elseif ($ejercicioActual->getNombre() != $nombre && $ejercicioFuerzaBusiness->existeEjercicioPorNombre($nombre)) {
+            } elseif ($ejercicioActual->getNombre() != $nombre && $ejercicioResistenciaBusiness->existeEjercicioPorNombre($nombre)) {
                 Validation::setError('nombre_' . $id, 'El nombre ya está registrado.');
             }
 
@@ -155,26 +132,8 @@ if (isset($_POST['guardar'])) {
                 Validation::setError('subzona_' . $id, 'La subzona es obligatoria.');
             }
 
-            if ($descripcion === '') {
-                Validation::setError('descripcion_' . $id, 'La descripción es obligatoria.');
-            }
-
-            if ($repeticion === '') {
-                Validation::setError('repeticion_' . $id, 'Las repeticiones son obligatorias.');
-            } elseif (!is_numeric($repeticion) || $repeticion <= 0) {
-                Validation::setError('repeticion_' . $id, 'Las repeticiones deben ser un número positivo.');
-            }
-
-            if ($serie === '') {
-                Validation::setError('serie_' . $id, 'Las series son obligatorias.');
-            } elseif (!is_numeric($serie) || $serie <= 0) {
-                Validation::setError('serie_' . $id, 'Las series deben ser un número positivo.');
-            }
-
-            if ($descanso === '') {
-                Validation::setError('descanso_' . $id, 'El descanso es obligatorio.');
-            } elseif (!is_numeric($descanso) || $descanso < 0) {
-                Validation::setError('descanso_' . $id, 'El descanso debe ser un número positivo.');
+            if ($tiempo === '') {
+                Validation::setError('tiempo_' . $id, 'El tiempo es obligatorio.');
             }
 
             if (!in_array($activo, ['0', '1'], true)) {
@@ -187,25 +146,23 @@ if (isset($_POST['guardar'])) {
             }
 
             $ejercicioActual->setNombre($nombre);
-            $ejercicioActual->setDescripcion($descripcion);
-            $ejercicioActual->setRepeticion($repeticion);
-            $ejercicioActual->setSerie($serie);
+            $ejercicioActual->setTiempo($tiempo);
             $ejercicioActual->setPeso($peso);
-            $ejercicioActual->setDescanso($descanso);
+            $ejercicioActual->setDescripcion($descripcion);
             $ejercicioActual->setActivo((int)$activo);
 
-            $subzonaActual = $ejercicioSubzonaBusiness->getEjercicioSubzonaPorEjercicioNombre($id, 'Fuerza');
+            $subzonaActual = $ejercicioSubzonaBusiness->getEjercicioSubzonaPorEjercicioNombre($id, 'Resistencia');
 
             if ($subzonaActual) {
                 $subzonaActual->setSubzona($subzona);
                 $okSub = $ejercicioSubzonaBusiness->actualizarTBEjercicioSubzona($subzonaActual);
             } else {
 
-                $nuevaSubzona = new ejercicioSubzona(0, $id, $subzona, 'Fuerza');
+                $nuevaSubzona = new ejercicioSubzona(0, $id, $subzona, 'Resistencia');
                 $okSub = $ejercicioSubzonaBusiness->insertarTBEjercicioSubzona($nuevaSubzona) > 0;
             }
 
-            $okEjer = $ejercicioFuerzaBusiness->actualizarTbejerciciofuerza($ejercicioActual);
+            $okEjer = $ejercicioResistenciaBusiness->actualizarTBEjercicioResistencia($ejercicioActual);
 
             if ($okEjer && $okSub) {
                 Validation::clear();
@@ -230,7 +187,7 @@ if (isset($_POST['guardar'])) {
     if (isset($_POST['id'])) {
         $id = $_POST['id'];
 
-        $result = $ejercicioFuerzaBusiness->eliminarTbejerciciofuerza($id);
+        $result = $ejercicioResistenciaBusiness->eliminarTBEjercicioResistencia($id);
 
         if ($result == 1) {
             header("location: " . $redirect_path . "?success=eliminado");

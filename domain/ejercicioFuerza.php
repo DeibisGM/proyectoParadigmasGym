@@ -1,80 +1,127 @@
 <?php
+include_once '../business/ejercicioSubzonaBusiness.php';
 
-class EjercicioFuerza{
-    private $tbejerciciofuerzaid;
-    private $tbejerciciofuerzanombre;
-    private $tbejerciciofuerzadescripcion;
-    private $tbejerciciofuerzarepeticion;
-    private $tbejerciciofuerzaserie;
-    private $tbejerciciofuerzapeso;
-    private $tbejerciciofuerzadescanso;
+class EjercicioFuerza
+{
+    private $id;
+    private $nombre;
+    private $descripcion;
+    private $repeticion;
+    private $serie;
+    private $peso;
+    private $descanso;
+    private $activo;
+    private $subzonaIds;
 
-    public function __construct($tbejerciciofuerzaid, $tbejerciciofuerzanombre, $tbejerciciofuerzadescripcion,
-                                $tbejerciciofuerzarepeticion, $tbejerciciofuerzaserie, $tbejerciciofuerzapeso,
-                                $tbejerciciofuerzadescanso){
-        $this->tbejerciciofuerzaid = $tbejerciciofuerzaid;
-        $this->tbejerciciofuerzanombre = $tbejerciciofuerzanombre;
-        $this->tbejerciciofuerzadescripcion = $tbejerciciofuerzadescripcion;
-        $this->tbejerciciofuerzarepeticion = $tbejerciciofuerzarepeticion;
-        $this->tbejerciciofuerzaserie = $tbejerciciofuerzaserie;
-        $this->tbejerciciofuerzapeso = $tbejerciciofuerzapeso;
-        $this->tbejerciciofuerzadescanso = $tbejerciciofuerzadescanso;
+    public function __construct($id, $nombre, $descripcion, $repeticion, $serie, $peso, $descanso, $activo)
+    {
+        $this->id = $id;
+        $this->nombre = $nombre;
+        $this->descripcion = $descripcion;
+        $this->repeticion = $repeticion;
+        $this->serie = $serie;
+        $this->peso = $peso;
+        $this->descanso = $descanso;
+        $this->activo = $activo;
     }
 
-    public function getTbejerciciofuerzaid(){
-        return $this->tbejerciciofuerzaid;
+    public function getId()
+    {
+        return $this->id;
     }
 
-    public function setTbejerciciofuerzaid($tbejerciciofuerzaid){
-        $this->tbejerciciofuerzaid = $tbejerciciofuerzaid;
+    public function setId($id): void
+    {
+        $this->id = $id;
     }
 
-    public function getTbejerciciofuerzanombre(){
-        return $this->tbejerciciofuerzanombre;
+    public function getNombre()
+    {
+        return $this->nombre;
     }
 
-    public function setTbejerciciofuerzanombre($tbejerciciofuerzanombre){
-        $this->tbejerciciofuerzanombre = $tbejerciciofuerzanombre;
+    public function setNombre($nombre): void
+    {
+        $this->nombre = $nombre;
     }
 
-    public function getTbejerciciofuerzadescripcion(){
-        return $this->tbejerciciofuerzadescripcion;
+    public function getDescripcion()
+    {
+        return $this->descripcion;
     }
 
-    public function setTbejerciciofuerzadescripcion($tbejerciciofuerzadescripcion){
-        $this->tbejerciciofuerzadescripcion = $tbejerciciofuerzadescripcion;
+    public function setDescripcion($descripcion): void
+    {
+        $this->descripcion = $descripcion;
     }
 
-    public function getTbejerciciofuerzarepeticion(){
-        return $this->tbejerciciofuerzarepeticion;
+    public function getRepeticion()
+    {
+        return $this->repeticion;
     }
 
-    public function setTbejerciciofuerzarepeticion($tbejerciciofuerzarepeticion){
-        $this->tbejerciciofuerzarepeticion = $tbejerciciofuerzarepeticion;
+    public function setRepeticion($repeticion): void
+    {
+        $this->repeticion = $repeticion;
     }
 
-    public function getTbejerciciofuerzaserie(){
-        return $this->tbejerciciofuerzaserie;
+    public function getSerie()
+    {
+        return $this->serie;
     }
 
-    public function setTbejerciciofuerzaserie($tbejerciciofuerzaserie){
-        $this->tbejerciciofuerzaserie = $tbejerciciofuerzaserie;
+    public function setSerie($serie): void
+    {
+        $this->serie = $serie;
     }
 
-    public function getTbejerciciofuerzapeso(){
-        return $this->tbejerciciofuerzapeso;
+    public function getPeso()
+    {
+        return $this->peso;
     }
 
-    public function setTbejerciciofuerzapeso($tbejerciciofuerzapeso){
-        $this->tbejerciciofuerzapeso = $tbejerciciofuerzapeso;
+    public function setPeso($peso): void
+    {
+        $this->peso = $peso;
     }
 
-    public function getTbejerciciofuerzadescanso(){
-        return $this->tbejerciciofuerzadescanso;
+    public function getDescanso()
+    {
+        return $this->descanso;
     }
 
-    public function setTbejerciciofuerzadescanso($tbejerciciofuerzadescanso){
-        $this->tbejerciciofuerzadescanso = $tbejerciciofuerzadescanso;
+    public function setDescanso($descanso): void
+    {
+        $this->descanso = $descanso;
     }
+
+    public function getActivo()
+    {
+        return $this->activo;
+    }
+
+    public function setActivo($activo): void
+    {
+        $this->activo = $activo;
+    }
+
+    public function getSubzonaIds()
+    {
+        if ($this->subzonaIds === null) {
+            $ejercicioSubzonaBusiness = new ejercicioSubzonaBusiness();
+            $subzonas = $ejercicioSubzonaBusiness->getSubzonasPorEjercicio($this->id, 'Fuerza');
+            $this->subzonaIds = array_map(fn($s) => $s->getSubzona(), $subzonas);
+        }
+        return $this->subzonaIds;
+    }
+
+    // Métodos legacy para compatibilidad
+    public function getTbejerciciofuerzaid() { return $this->id; }
+    public function getTbejerciciofuerzanombre() { return $this->nombre; }
+    public function getTbejerciciofuerzadescripcion() { return $this->descripcion; }
+    public function getTbejerciciofuerzarepeticion() { return $this->repeticion; }
+    public function getTbejerciciofuerzaserie() { return $this->serie; }
+    public function getTbejerciciofuerzapeso() { return $this->peso; }
+    public function getTbejerciciofuerzadescanso() { return $this->descanso; }
 }
 ?>

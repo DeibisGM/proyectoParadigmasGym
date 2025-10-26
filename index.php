@@ -8,6 +8,15 @@ if (!isset($_SESSION['usuario_id']) || !isset($_SESSION['tipo_usuario'])) {
 
 $tipoUsuario = $_SESSION['tipo_usuario'];
 $nombreUsuario = $_SESSION['usuario_nombre'];
+$usuarioId = $_SESSION['usuario_id']; // Necesitamos el ID para la lógica de progreso
+
+$progresoData = [];
+if ($tipoUsuario == 'cliente') {
+    include_once 'business/progresoBusiness.php';
+    $progresoBusiness = new ProgresoBusiness();
+    $progresoData = $progresoBusiness->getProgresoVisual($usuarioId, 30); // 30 días
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -24,7 +33,7 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
         <div>
             <h2>Gimnasio</h2>
             <p>Bienvenido,&nbsp;<strong><?php echo htmlspecialchars($nombreUsuario); ?></strong>&nbsp
-            (<?php echo htmlspecialchars(ucfirst($tipoUsuario)); ?>)</p>
+                (<?php echo htmlspecialchars(ucfirst($tipoUsuario)); ?>)</p>
         </div>
         <a href="action/logoutAction.php">
             <button><i class="ph ph-sign-out"></i>Cerrar Sesión</button>
@@ -46,12 +55,13 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/padecimientoDictamenView.php'><button><i class="ph ph-file-text"></i> Dictamen Médico</button></a>
                     <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-plus"></i>Números Emergencia</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Salas</button></a>
-                    <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zona</button></a>
-                    <!-- NUEVO: Horarios de Instructores para Admin -->
+                    <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub zonas del cuerpo</button></a>
                     <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios Instructores</button></a>
                     <a href='view/ejercicioFuerzaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de fuerza</button></a>
                     <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
                     <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
+                    <a href='view/ejercicioResistenciaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de resistencia</button></a>
+                    <a href='view/ejercicioFlexibilidadView.php'><button><i class="ph ph-barbell"></i>Ejercicios de Flexibilidad</button></a>
                 </div>
             </section>
             <section>
@@ -72,12 +82,11 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                     <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Ver Reservas</button></a>
                     <a href='view/eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Mis Eventos</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Mis Horarios Personales</button></a>
-                    <!-- NUEVO: Horarios de Instructores para Instructor -->
                     <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Mis Horarios de Trabajo</button></a>
                     <a href='view/clienteView.php'><button><i class="ph ph-users"></i>Ver Clientes</button></a>
                     <a href='view/instructorView.php'><button><i class="ph ph-user-rectangle"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
-                    <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zona</button></a>
+                    <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub Zonas del cuerpo</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
                     <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
                     <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
@@ -98,13 +107,13 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
                 <h3><i class="ph ph-barbell"></i>Actividad en el Gimnasio</h3>
                 <div class="menu-grid">
                     <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Mis Reservas</button></a>
+                    <a href='view/rutinaView.php'><button><i class="ph ph-notebook"></i>Mis Rutinas</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Instructor Personal</button></a>
                     <a href='view/horarioLibreView.php'><button><i class="ph ph-barbell"></i>Uso Libre</button></a>
-                    <!-- NUEVO: Horarios de Instructores para Cliente -->
                     <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios de Instructores</button></a>
                     <a href='view/instructorClienteView.php'><button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
-                    <a href='view/parteZonaView.php'><button><i class="ph ph-hand"></i>Partes de Zonas</button></a>
+                    <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub Zonas del cuerpo</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
                 </div>
             </section>
@@ -119,9 +128,12 @@ $nombreUsuario = $_SESSION['usuario_nombre'];
         <?php endif; ?>
     </main>
 
-    <footer>
-        <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
-    </footer>
+    <script>
+        const progresoData = <?php echo json_encode($progresoData); ?>;
+    </script>
+
+    <?php include 'view/body_viewer.php'; ?>
+
 </div>
 </body>
 </html>
