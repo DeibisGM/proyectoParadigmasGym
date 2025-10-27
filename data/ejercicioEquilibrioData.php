@@ -16,18 +16,22 @@ class EjercicioEquilibrioData extends Data{
             tbejercicioequilibrioduracion,
             tbejercicioequilibriomateriales,
             tbejercicioequilibriopostura
-        ) VALUES (
-            '" . $ejercicio->getTbejercicioequilibrionombre() . "',
-            '" . $ejercicio->getTbejercicioequilibriodescripcion() . "',
-            '" . $ejercicio->getTbejercicioequilibriodificultad() . "',
-            '" . $ejercicio->getTbejercicioequilibrioduracion() . "',
-            '" . $ejercicio->getTbejercicioequilibriomateriales() . "',
-            '" . $ejercicio->getTbejercicioequilibriopostura() . "'
-        );";
+        ) VALUES (?, ?, ?, ?, ?, ?);";
 
-        $result = mysqli_query($conn, $queryInsert);
+        $stmt = mysqli_prepare($conn, $queryInsert);
+        $nombre = $ejercicio->getTbejercicioequilibrionombre();
+        $descripcion = $ejercicio->getTbejercicioequilibriodescripcion();
+        $dificultad = $ejercicio->getTbejercicioequilibriodificultad();
+        $duracion = $ejercicio->getTbejercicioequilibrioduracion();
+        $materiales = $ejercicio->getTbejercicioequilibriomateriales();
+        $postura = $ejercicio->getTbejercicioequilibriopostura();
+
+        mysqli_stmt_bind_param($stmt, "sssiss", $nombre, $descripcion, $dificultad, $duracion, $materiales, $postura);
+
+        $result = mysqli_stmt_execute($stmt);
+        $id = mysqli_insert_id($conn);
         mysqli_close($conn);
-        return $result;
+        return $result ? $id : 0;
     }
 
     public function actualizarTbejercicioequilibrio($ejercicio){
@@ -35,15 +39,26 @@ class EjercicioEquilibrioData extends Data{
         $conn->set_charset('utf8');
 
         $queryUpdate = "UPDATE tbejercicioequilibrio SET
-            tbejercicioequilibrionombre='" . $ejercicio->getTbejercicioequilibrionombre() . "',
-            tbejercicioequilibriodescripcion='" . $ejercicio->getTbejercicioequilibriodescripcion() . "',
-            tbejercicioequilibriodificultad='" . $ejercicio->getTbejercicioequilibriodificultad() . "',
-            tbejercicioequilibrioduracion='" . $ejercicio->getTbejercicioequilibrioduracion() . "',
-            tbejercicioequilibriomateriales='" . $ejercicio->getTbejercicioequilibriomateriales() . "',
-            tbejercicioequilibriopostura='" . $ejercicio->getTbejercicioequilibriopostura() . "'
-            WHERE tbejercicioequilibrioid=" . $ejercicio->getTbejercicioequilibrioid() . ";";
+            tbejercicioequilibrionombre=?,
+            tbejercicioequilibriodescripcion=?,
+            tbejercicioequilibriodificultad=?,
+            tbejercicioequilibrioduracion=?,
+            tbejercicioequilibriomateriales=?,
+            tbejercicioequilibriopostura=?
+            WHERE tbejercicioequilibrioid=?;";
 
-        $result = mysqli_query($conn, $queryUpdate);
+        $stmt = mysqli_prepare($conn, $queryUpdate);
+        $nombre = $ejercicio->getTbejercicioequilibrionombre();
+        $descripcion = $ejercicio->getTbejercicioequilibriodescripcion();
+        $dificultad = $ejercicio->getTbejercicioequilibriodificultad();
+        $duracion = $ejercicio->getTbejercicioequilibrioduracion();
+        $materiales = $ejercicio->getTbejercicioequilibriomateriales();
+        $postura = $ejercicio->getTbejercicioequilibriopostura();
+        $id = $ejercicio->getTbejercicioequilibrioid();
+
+        mysqli_stmt_bind_param($stmt, "sssissi", $nombre, $descripcion, $dificultad, $duracion, $materiales, $postura, $id);
+
+        $result = mysqli_stmt_execute($stmt);
         mysqli_close($conn);
         return $result;
     }
@@ -52,8 +67,10 @@ class EjercicioEquilibrioData extends Data{
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
 
-        $queryDelete = "DELETE FROM tbejercicioequilibrio WHERE tbejercicioequilibrioid=" . $id . ";";
-        $result = mysqli_query($conn, $queryDelete);
+        $queryDelete = "DELETE FROM tbejercicioequilibrio WHERE tbejercicioequilibrioid=?;";
+        $stmt = mysqli_prepare($conn, $queryDelete);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        $result = mysqli_stmt_execute($stmt);
         mysqli_close($conn);
         return $result;
     }
