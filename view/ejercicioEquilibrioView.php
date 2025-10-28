@@ -1,12 +1,29 @@
 <?php
 session_start();
 include_once '../business/ejercicioEquilibrioBusiness.php';
+include_once '../business/subZonaBusiness.php';
 include_once '../utility/Validation.php';
 
 Validation::start();
 
+if (!isset($_SESSION['tipo_usuario'])) {
+    header("location: ../view/loginView.php");
+    exit();
+}
+
+$esAdminOInstructor = ($_SESSION['tipo_usuario'] === 'admin' || $_SESSION['tipo_usuario'] === 'instructor');
+
 $ejercicioBusiness = new EjercicioEquilibrioBusiness();
-$ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
+$subZonaBusiness = new subZonaBusiness();
+
+if (!$esAdminOInstructor) {
+    // Si no es admin/instructor, mostrar solo ejercicios activos (si aplica)
+    $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
+} else {
+    $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
+}
+
+$subzonas = $subZonaBusiness->getAllTBSubZona();
 ?>
 
 <!DOCTYPE html>
@@ -71,6 +88,29 @@ $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
             vertical-align: top;
             padding: 0.75rem;
         }
+        .toggle-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .toggle-btn:hover {
+            background-color: #0056b3;
+        }
+        .subzonas {
+            display: none;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .checkbox-group label {
+            border:1px solid #ccc;
+            padding:5px 10px;
+            border-radius:5px;
+        }
     </style>
 </head>
 <body>
@@ -96,7 +136,9 @@ $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
                 echo '<p class="error-message flash-msg"><b>Error: ';
                 if ($error == "datos_faltantes") echo 'Datos incompletos.';
                 else if ($error == "insertar") echo 'No se pudo insertar el ejercicio.';
+                else if ($error == "insertar_subzona") echo 'Ejercicio insertado pero error al guardar subzonas.';
                 else if ($error == "actualizar") echo 'No se pudo actualizar el ejercicio.';
+                else if ($error == "actualizar_subzona") echo 'Ejercicio actualizado pero error al guardar subzonas.';
                 else if ($error == "eliminar") echo 'No se pudo eliminar el ejercicio.';
                 else if ($error == "id_faltante") echo 'ID no proporcionado.';
                 else if ($error == "accion_no_valida") echo 'Acción no válida.';
@@ -113,6 +155,7 @@ $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
             ?>
 
             <!-- Formulario de inserción -->
+            <?php if ($esAdminOInstructor): ?>
             <section>
                 <h3><i class="ph ph-plus-circle"></i> Registrar Ejercicio de Equilibrio/Coordinación</h3>
                 <form name="ejercicioForm" method="post" action="../action/ejercicioEquilibrioAction.php">
@@ -127,6 +170,20 @@ $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
                         <label>Descripción:</label>
                         <span class="error-message"><?= Validation::getError('descripcion') ?></span>
                         <textarea name="descripcion" placeholder="Descripción del ejercicio y cómo realizarlo" rows="3"><?= htmlspecialchars(Validation::getOldInput('descripcion')) ?></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Subzonas (seleccione una o varias):</label>
+                        <span class="error-message"><?= Validation::getError('subzona') ?></span>
+                        <div class="checkbox-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                            <?php foreach ($subzonas as $subzona): ?>
+                                <label>
+                                    <input type="checkbox" name="subzona[]"
+                                           value="<?= $subzona->getSubzonaid() ?>">
+                                    <?= htmlspecialchars($subzona->getSubzonanombre()) ?>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -170,6 +227,7 @@ $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
                     </button>
                 </form>
             </section>
+            <?php endif; ?>
 
             <!-- Tabla de ejercicios -->
             <section>
@@ -180,71 +238,135 @@ $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
                             <tr>
                                 <th>Nombre</th>
                                 <th>Descripción</th>
+                                <th>Subzonas</th>
                                 <th>Dificultad</th>
                                 <th>Duración (seg)</th>
                                 <th>Materiales</th>
                                 <th>Postura</th>
-                                <th>Acción</th>
+                                <?php if ($esAdminOInstructor): ?>
+                                    <th>Acción</th>
+                                <?php endif; ?>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach($ejercicios as $ejercicio): ?>
                             <tr>
+                                <?php if ($esAdminOInstructor): ?>
                                 <form method="post" action="../action/ejercicioEquilibrioAction.php">
-                                    <input type="hidden" name="id" value="<?php echo $ejercicio->getTbejercicioequilibrioid(); ?>">
+                                    <?php
+                                    $idFila = $ejercicio->getTbejercicioequilibrioid();
 
+                                    $oldNombre = Validation::getOldInput('nombre_'.$idFila);
+                                    $oldDescripcion = Validation::getOldInput('descripcion_'.$idFila);
+                                    $oldSubzona = Validation::getOldInput('subzona_'.$idFila);
+                                    $oldDificultad = Validation::getOldInput('dificultad_'.$idFila);
+                                    $oldDuracion = Validation::getOldInput('duracion_'.$idFila);
+                                    $oldMateriales = Validation::getOldInput('materiales_'.$idFila);
+                                    $oldPostura = Validation::getOldInput('postura_'.$idFila);
+
+                                    $subzonaIdsMarcadas = [];
+                                    if ($oldSubzona !== '' && $oldSubzona !== null) {
+                                        $subzonaIdsMarcadas = array_map('intval', explode('$', $oldSubzona));
+                                    } else {
+                                        $subzonaIdsMarcadas = [];
+                                        if (!empty($ejercicio->getSubzonaIds())) {
+                                            $idsStr = implode('$', $ejercicio->getSubzonaIds());
+                                            $subzonaIdsMarcadas = array_map('intval', explode('$', $idsStr));
+                                        }
+                                    }
+
+                                    $valNombre = ($oldNombre !== '' && $oldNombre !== null) ? $oldNombre : $ejercicio->getTbejercicioequilibrionombre();
+                                    $valDescripcion = ($oldDescripcion !== '' && $oldDescripcion !== null) ? $oldDescripcion : $ejercicio->getTbejercicioequilibriodescripcion();
+                                    $valDificultad = ($oldDificultad !== '' && $oldDificultad !== null) ? $oldDificultad : $ejercicio->getTbejercicioequilibriodificultad();
+                                    $valDuracion = ($oldDuracion !== '' && $oldDuracion !== null) ? $oldDuracion : $ejercicio->getTbejercicioequilibrioduracion();
+                                    $valMateriales = ($oldMateriales !== '' && $oldMateriales !== null) ? $oldMateriales : $ejercicio->getTbejercicioequilibriomateriales();
+                                    $valPostura = ($oldPostura !== '' && $oldPostura !== null) ? $oldPostura : $ejercicio->getTbejercicioequilibriopostura();
+
+                                    $errNombre = Validation::getError('nombre_'.$idFila);
+                                    $errDescripcion = Validation::getError('descripcion_'.$idFila);
+                                    $errSubzona = Validation::getError('subzona_'.$idFila);
+                                    $errDificultad = Validation::getError('dificultad_'.$idFila);
+                                    $errDuracion = Validation::getError('duracion_'.$idFila);
+                                    $errPostura = Validation::getError('postura_'.$idFila);
+                                    ?>
+                                    <input type="hidden" name="id" value="<?= $idFila ?>"/>
                                     <td>
-                                        <input type="text" name="nombre"
-                                               value="<?php echo htmlspecialchars(Validation::getOldInput('nombre_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibrionombre())); ?>">
-                                        <span class="error-message"><?= Validation::getError('nombre_'.$ejercicio->getTbejercicioequilibrioid()) ?></span>
+                                        <span class="error-message"><?= $errNombre ?></span>
+                                        <input type="text" name="nombre" value="<?= htmlspecialchars($valNombre) ?>"/>
                                     </td>
-
                                     <td>
-                                        <textarea name="descripcion" rows="2"><?php echo htmlspecialchars(Validation::getOldInput('descripcion_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriodescripcion())); ?></textarea>
-                                        <span class="error-message"><?= Validation::getError('descripcion_'.$ejercicio->getTbejercicioequilibrioid()) ?></span>
+                                        <span class="error-message"><?= $errDescripcion ?></span>
+                                        <textarea name="descripcion" rows="3"><?= htmlspecialchars($valDescripcion) ?></textarea>
                                     </td>
-
                                     <td>
-                                        <select name="dificultad">
-                                            <option value="Principiante" <?= Validation::getOldInput('dificultad_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriodificultad()) == 'Principiante' ? 'selected' : '' ?>>Principiante</option>
-                                            <option value="Intermedio" <?= Validation::getOldInput('dificultad_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriodificultad()) == 'Intermedio' ? 'selected' : '' ?>>Intermedio</option>
-                                            <option value="Avanzado" <?= Validation::getOldInput('dificultad_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriodificultad()) == 'Avanzado' ? 'selected' : '' ?>>Avanzado</option>
-                                        </select>
-                                        <span class="error-message"><?= Validation::getError('dificultad_'.$ejercicio->getTbejercicioequilibrioid()) ?></span>
-                                    </td>
-
-                                    <td>
-                                        <input type="number" name="duracion" min="1"
-                                               value="<?php echo htmlspecialchars(Validation::getOldInput('duracion_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibrioduracion())); ?>">
-                                        <span class="error-message"><?= Validation::getError('duracion_'.$ejercicio->getTbejercicioequilibrioid()) ?></span>
-                                    </td>
-
-                                    <td>
-                                        <input type="text" name="materiales"
-                                               value="<?php echo htmlspecialchars(Validation::getOldInput('materiales_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriomateriales())); ?>">
-                                    </td>
-
-                                    <td>
-                                        <select name="postura">
-                                            <option value="De pie" <?= Validation::getOldInput('postura_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriopostura()) == 'De pie' ? 'selected' : '' ?>>De pie</option>
-                                            <option value="Sentado" <?= Validation::getOldInput('postura_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriopostura()) == 'Sentado' ? 'selected' : '' ?>>Sentado</option>
-                                            <option value="En el suelo" <?= Validation::getOldInput('postura_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriopostura()) == 'En el suelo' ? 'selected' : '' ?>>En el suelo</option>
-                                            <option value="En movimiento" <?= Validation::getOldInput('postura_'.$ejercicio->getTbejercicioequilibrioid(), $ejercicio->getTbejercicioequilibriopostura()) == 'En movimiento' ? 'selected' : '' ?>>En movimiento</option>
-                                        </select>
-                                        <span class="error-message"><?= Validation::getError('postura_'.$ejercicio->getTbejercicioequilibrioid()) ?></span>
-                                    </td>
-
-                                    <td class="actions-cell">
-                                        <button type="submit" name="actualizar" title="Actualizar"
-                                                onclick="return confirm('¿Estás seguro de actualizar este ejercicio?');">
-                                            <i class="ph ph-pencil-simple"></i> Actualizar
+                                        <span class="error-message"><?= $errSubzona ?></span>
+                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(<?= $idFila ?>)">
+                                            Ver/Editar Subzonas
                                         </button>
-                                        <button type="submit" name="eliminar" title="Eliminar"
-                                                onclick="return confirm('¿Estás seguro de eliminar este ejercicio?');">
+                                        <div id="subzonas-<?= $idFila ?>" class="subzonas">
+                                            <?php foreach ($subzonas as $subzona): ?>
+                                                <label>
+                                                    <input type="checkbox" name="subzona[]"
+                                                           value="<?= $subzona->getSubzonaid() ?>"
+                                                           <?= in_array($subzona->getSubzonaid(), $subzonaIdsMarcadas) ? 'checked' : '' ?>>
+                                                    <?= htmlspecialchars($subzona->getSubzonanombre()) ?>
+                                                </label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= $errDificultad ?></span>
+                                        <select name="dificultad">
+                                            <option value="Principiante" <?= $valDificultad == 'Principiante' ? 'selected' : '' ?>>Principiante</option>
+                                            <option value="Intermedio" <?= $valDificultad == 'Intermedio' ? 'selected' : '' ?>>Intermedio</option>
+                                            <option value="Avanzado" <?= $valDificultad == 'Avanzado' ? 'selected' : '' ?>>Avanzado</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= $errDuracion ?></span>
+                                        <input type="number" name="duracion" value="<?= htmlspecialchars($valDuracion) ?>" min="1"/>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="materiales" value="<?= htmlspecialchars($valMateriales) ?>"/>
+                                    </td>
+                                    <td>
+                                        <span class="error-message"><?= $errPostura ?></span>
+                                        <select name="postura">
+                                            <option value="De pie" <?= $valPostura == 'De pie' ? 'selected' : '' ?>>De pie</option>
+                                            <option value="Sentado" <?= $valPostura == 'Sentado' ? 'selected' : '' ?>>Sentado</option>
+                                            <option value="En el suelo" <?= $valPostura == 'En el suelo' ? 'selected' : '' ?>>En el suelo</option>
+                                            <option value="En movimiento" <?= $valPostura == 'En movimiento' ? 'selected' : '' ?>>En movimiento</option>
+                                        </select>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <button type="submit" name="actualizar" class="btn-primary">
+                                            <i class="ph ph-check"></i> Actualizar
+                                        </button>
+                                        <button type="submit" name="eliminar" class="btn-danger" onclick="return confirm('¿Está seguro de eliminar este ejercicio?');">
                                             <i class="ph ph-trash"></i> Eliminar
                                         </button>
                                     </td>
                                 </form>
+                                <?php else: ?>
+                                    <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibrionombre()) ?></td>
+                                    <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibriodescripcion()) ?></td>
+                                    <td>
+                                        <?php
+                                        $subzonaIds = $ejercicio->getSubzonaIds();
+                                        $subzonaNombres = [];
+                                        foreach ($subzonas as $subzona) {
+                                            if (in_array($subzona->getSubzonaid(), $subzonaIds)) {
+                                                $subzonaNombres[] = $subzona->getSubzonanombre();
+                                            }
+                                        }
+                                        echo htmlspecialchars(implode(', ', $subzonaNombres));
+                                        ?>
+                                    </td>
+                                    <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibriodificultad()) ?></td>
+                                    <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibrioduracion()) ?></td>
+                                    <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibriomateriales()) ?></td>
+                                    <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibriopostura()) ?></td>
+                                <?php endif; ?>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -252,26 +374,17 @@ $ejercicios = $ejercicioBusiness->obtenerTbejercicioequilibrio();
                 </div>
             </section>
         </main>
-
-        <footer>
-            <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
-        </footer>
     </div>
 
-    <?php Validation::clear(); ?>
-
     <script>
-        // Auto-ocultar mensajes de error y éxito después de 5 segundos
-        document.addEventListener('DOMContentLoaded', function() {
-            const mensajes = document.querySelectorAll('.error-message.flash-msg, .success-message.flash-msg');
-            if (mensajes.length > 0) {
-                setTimeout(function() {
-                    mensajes.forEach(function(mensaje) {
-                        mensaje.style.display = 'none';
-                    });
-                }, 5000);
+        function toggleSubzonas(id) {
+            const subzonasDiv = document.getElementById('subzonas-' + id);
+            if (subzonasDiv.style.display === 'flex') {
+                subzonasDiv.style.display = 'none';
+            } else {
+                subzonasDiv.style.display = 'flex';
             }
-        });
+        }
     </script>
 </body>
 </html>

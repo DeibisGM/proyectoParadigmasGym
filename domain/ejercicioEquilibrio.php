@@ -1,4 +1,5 @@
 <?php
+include_once '../business/ejercicioSubzonaBusiness.php';
 
 class EjercicioEquilibrio{
     private $tbejercicioequilibrioid;
@@ -8,6 +9,8 @@ class EjercicioEquilibrio{
     private $tbejercicioequilibrioduracion;
     private $tbejercicioequilibriomateriales;
     private $tbejercicioequilibriopostura;
+
+    private $subzonaIds;
 
     public function __construct($tbejercicioequilibrioid, $tbejercicioequilibrionombre, $tbejercicioequilibriodescripcion,
                                 $tbejercicioequilibriodificultad, $tbejercicioequilibrioduracion, $tbejercicioequilibriomateriales,
@@ -75,6 +78,15 @@ class EjercicioEquilibrio{
 
     public function setTbejercicioequilibriopostura($tbejercicioequilibriopostura){
         $this->tbejercicioequilibriopostura = $tbejercicioequilibriopostura;
+    }
+
+    public function getSubzonaIds() {
+        if ($this->subzonaIds === null) {
+            $ejercicioSubzonaBusiness = new ejercicioSubzonaBusiness();
+            $subzonas = $ejercicioSubzonaBusiness->getSubzonasPorEjercicio($this->tbejercicioequilibrioid, 'Equilibrio');
+            $this->subzonaIds = array_map(fn($s) => $s->getSubzona(), $subzonas);
+        }
+        return $this->subzonaIds;
     }
 }
 ?>
