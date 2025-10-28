@@ -2,18 +2,24 @@
 include_once __DIR__ . '/../data/rutinaData.php';
 include_once __DIR__ . '/ejercicioFuerzaBusiness.php';
 include_once __DIR__ . '/ejercicioResistenciaBusiness.php';
+include_once __DIR__ . '/ejercicioEquilibrioBusiness.php';
+include_once __DIR__ . '/ejercicioFlexibilidadBusiness.php';
 
 class RutinaBusiness
 {
     private $rutinaData;
     private $ejercicioFuerzaBusiness;
     private $ejercicioResistenciaBusiness;
+    private $ejercicioEquilibrioBusiness;
+    private $ejercicioFlexibilidadBusiness;
 
     public function __construct()
     {
         $this->rutinaData = new RutinaData();
         $this->ejercicioFuerzaBusiness = new EjercicioFuerzaBusiness();
         $this->ejercicioResistenciaBusiness = new ejercicioResistenciaBusiness();
+        $this->ejercicioEquilibrioBusiness = new EjercicioEquilibrioBusiness();
+        $this->ejercicioFlexibilidadBusiness = new ejercicioFlexibilidadBusiness();
     }
 
     public function crearRutinaCompleta($rutina)
@@ -62,6 +68,22 @@ class RutinaBusiness
                     }
                 }
                 break;
+            case 'equilibrio':
+                $ejercicios = $this->ejercicioEquilibrioBusiness->obtenerTbejercicioequilibrio();
+                foreach($ejercicios as $ejer){
+                    if($ejer->getTbejercicioequilibrioid() == $id){
+                        return $ejer->getTbejercicioequilibrionombre();
+                    }
+                }
+                break;
+            case 'flexibilidad':
+                $ejercicios = $this->ejercicioFlexibilidadBusiness->getAllTBEjercicioFlexibilidad();
+                foreach($ejercicios as $ejer){
+                    if($ejer->getId() == $id){
+                        return $ejer->getNombre();
+                    }
+                }
+                break;
         }
         return 'Ejercicio Desconocido';
     }
@@ -82,6 +104,20 @@ class RutinaBusiness
                 break;
             case 'resistencia':
                 $ejerciciosData = $this->ejercicioResistenciaBusiness->getAllTBEjercicioResistecia();
+                foreach ($ejerciciosData as $ej) {
+                    if($ej->getActivo()){
+                        $ejercicios[] = ['id' => $ej->getId(), 'nombre' => $ej->getNombre()];
+                    }
+                }
+                break;
+            case 'equilibrio':
+                $ejerciciosData = $this->ejercicioEquilibrioBusiness->obtenerTbejercicioequilibrio();
+                foreach ($ejerciciosData as $ej) {
+                    $ejercicios[] = ['id' => $ej->getTbejercicioequilibrioid(), 'nombre' => $ej->getTbejercicioequilibrionombre()];
+                }
+                break;
+            case 'flexibilidad':
+                $ejerciciosData = $this->ejercicioFlexibilidadBusiness->getAllTBEjercicioFlexibilidad();
                 foreach ($ejerciciosData as $ej) {
                     if($ej->getActivo()){
                         $ejercicios[] = ['id' => $ej->getId(), 'nombre' => $ej->getNombre()];

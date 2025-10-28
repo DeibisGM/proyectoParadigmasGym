@@ -57,6 +57,11 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Salas</button></a>
                     <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub zonas del cuerpo</button></a>
                     <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios Instructores</button></a>
+                </div>
+            </section>
+            <section>
+                <h3><i class="ph ph-barbell"></i>Ejercicios</h3>
+                <div class="menu-grid">
                     <a href='view/ejercicioFuerzaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de fuerza</button></a>
                     <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
                     <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
@@ -88,6 +93,11 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub Zonas del cuerpo</button></a>
                     <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
+                </div>
+            </section>
+            <section>
+                <h3><i class="ph ph-barbell"></i>Ejercicios</h3>
+                <div class="menu-grid">
                     <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
                     <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
                 </div>
@@ -132,7 +142,9 @@ if ($tipoUsuario == 'cliente') {
         const progresoData = <?php echo json_encode($progresoData); ?>;
     </script>
 
-    <?php include 'view/body_viewer.php'; ?>
+    <?php if ($tipoUsuario !== 'admin') {
+        include 'view/body_viewer.php';
+    } ?>
 
 </div>
 </body>

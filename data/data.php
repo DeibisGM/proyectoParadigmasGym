@@ -42,11 +42,10 @@ class Data
 */
             default:
                  $this->isActive = false;
-                                $this->server = "mainline.proxy.rlwy.net";
+                                $this->server = "localhost";
                                 $this->user = "root";
-                                $this->password = "qZGxyvjECfahHipFJrnmbZUfjYakmNSq";
-                                $this->db = "railway";
-                                $this->port = 20786;
+                                $this->password = "";
+                                $this->db = "bdgym";
 
         }
     }

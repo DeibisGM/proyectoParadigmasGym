@@ -59,6 +59,7 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                             <option value="fuerza">Fuerza</option>
                             <option value="resistencia">Resistencia</option>
                             <option value="equilibrio">Equilibrio</option>
+                            <option value="flexibilidad">Flexibilidad</option>
                         </select>
                     </div>
                     <div class="form-group" id="container-ejercicio-select" style="display:none;">
@@ -187,6 +188,11 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                 fieldsHtml += `
                     <div class="form-group"><label>Duración (seg):</label><input type="number" id="temp-tiempo" min="1"></div>
                 `;
+            } else if (tipo === 'flexibilidad') {
+                fieldsHtml += `
+                    <div class="form-group"><label>Series:</label><input type="number" id="temp-series" min="1"></div>
+                    <div class="form-group"><label>Duración (seg):</label><input type="number" id="temp-tiempo" min="1"></div>
+                `;
             }
             fieldsHtml += '</div>';
             fieldsHtml += '<div class="form-group" style="margin-top: 1rem;"><label>Comentario:</label><input type="text" id="temp-comentario" placeholder="Opcional"></div>';
@@ -240,6 +246,15 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                 const tiempo = document.getElementById('temp-tiempo').value || 0;
                 if(tiempo > 0) detalles.push(`${tiempo} seg`);
                 hiddenInputs += `<input type="hidden" name="ejercicios[${ejercicioCounter}][tiempo]" value="${tiempo}">`;
+            } else if (tipo === 'flexibilidad') {
+                const series = document.getElementById('temp-series')?.value || 0;
+                const tiempo = document.getElementById('temp-tiempo').value || 0;
+                if(series > 0) detalles.push(`${series} series`);
+                if(tiempo > 0) detalles.push(`${tiempo} seg`);
+                hiddenInputs += `
+                    <input type="hidden" name="ejercicios[${ejercicioCounter}][series]" value="${series}">
+                    <input type="hidden" name="ejercicios[${ejercicioCounter}][tiempo]" value="${tiempo}">
+                `;
             }
 
             displayHtml += detalles.join(' &times; ');
