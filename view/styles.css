@@ -308,15 +308,18 @@ input[type="submit"]:active {
 header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
-    padding-bottom: 1.75rem;
-
+    padding: 0.8rem clamp(1.8rem, 3vw, 2.4rem);
+    background: linear-gradient(145deg, rgba(137, 194, 53, 0.05) 0%, rgba(0, 0, 0, 0.9) 100%);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(148, 163, 184, 0.10);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 1rem;
 }
 
 header h2 {
     margin: 0;
-    font-size: 1.6rem;
+    font-size: 1.35rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -367,14 +370,13 @@ header a button:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--color-surface-strong);
-    border: 1px solid var(--color-border);
+    background: none;
+    border: none;
     color: var(--color-text);
-    transition: all 0.2s ease;
+    font-size: 1.5rem;
+    cursor: pointer;
     text-decoration: none;
+    transition: all 0.2s ease;
 }
 
 .back-button:hover {
@@ -850,9 +852,9 @@ hr {
     position: relative;
 }
 
-#togglePassword {
+#togglePassword, #togglePasswordCliente {
     position: absolute;
-    top: 70%;
+    top: 50%;
     right: 1rem;
     transform: translateY(-50%);
     cursor: pointer;

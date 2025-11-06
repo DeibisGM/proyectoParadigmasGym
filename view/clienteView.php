@@ -328,5 +328,32 @@ if ($tipoUsuario == 'cliente') {
     </footer>
 </div>
 <?php Validation::clear(); ?>
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#contrasena');
+
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            // toggle the eye slash icon
+            this.classList.toggle('ph-eye-slash');
+        });
+    }
+
+    const togglePasswordCliente = document.querySelector('#togglePasswordCliente');
+    const passwordCliente = document.querySelector('#contrasena_cliente');
+
+    if (togglePasswordCliente) {
+        togglePasswordCliente.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = passwordCliente.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordCliente.setAttribute('type', type);
+            // toggle the eye slash icon
+            this.classList.toggle('ph-eye-slash');
+        });
+    }
+</script>
 </body>
 </html>
