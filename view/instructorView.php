@@ -33,116 +33,115 @@ $instructores = $business->getAllTBInstructor($esAdmin);
     <title>Gestión de Instructores</title>
     <style>
         .error {
-            color: red;
+            color: #fca5a5;
+            font-weight: 600;
         }
 
         .success {
-            color: green;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-
-        th, td {
-            padding: 8px;
-            text-align: left;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        input[type="text"], input[type="email"], input[type="password"] {
-            width: 95%;
+            color: #6ee7b7;
+            font-weight: 600;
         }
 
         .id-cell {
-            background-color: #f0f0f0;
-            font-weight: bold;
+            background: rgba(99, 102, 241, 0.12);
+            border-radius: 10px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .imagen-actual-container {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
         .imagen-actual-container img {
-            max-width: 100px;
-            max-height: 100px;
-            display: block;
-            margin-bottom: 5px;
+            max-width: 110px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 12px 24px rgba(8, 16, 31, 0.35);
         }
 
-        .eliminar-imagen-btn {
+        .eliminar-imagen-btn,
+        .delete-image-btn {
             cursor: pointer;
-            background: #ff4444;
-            color: white;
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            color: #0b1120;
             border: none;
-            padding: 3px 6px;
-            border-radius: 3px;
-        }
-
-        .certificado-badge {
-            margin: 2px;
-            padding: 2px 5px;
-            background: #007bff;
-            color: white;
-            border-radius: 3px;
-            display: inline-block;
-            font-size: 12px;
-        }
-
-        .btn-ver-certificados {
-            background: #007bff;
-            color: white;
-            padding: 5px 10px;
-            text-decoration: none;
-            border-radius: 3px;
-            display: inline-block;
-        }
-
-        .field-error {
-            color: red;
-            font-size: 12px;
-            margin-top: 5px;
-            font-weight: bold;
-        }
-
-        input.error {
-            border-color: red;
-            background-color: #ffe6e6;
-        }
-
-        .image-container {
-            position: relative;
-            display: inline-block;
+            padding: 0.4rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 600;
+            box-shadow: 0 14px 24px rgba(248, 113, 113, 0.4);
+            transition: filter 0.2s ease, transform 0.2s ease;
         }
 
         .delete-image-btn {
             position: absolute;
-            top: 0;
-            right: 0;
-            background: #ff4444;
-            color: white;
-            border: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 12px;
-            line-height: 1;
+            top: 6px;
+            right: 6px;
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .image-container img {
-            max-width: 100px;
-            max-height: 100px;
-            display: block;
+        .eliminar-imagen-btn:hover,
+        .delete-image-btn:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .certificado-badge {
+            margin: 2px;
+            padding: 0.35rem 0.7rem;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--color-text);
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .btn-ver-certificados {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(34, 211, 238, 0.35));
+            color: var(--color-text);
+            padding: 0.6rem 1rem;
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            box-shadow: 0 14px 26px rgba(14, 23, 42, 0.45);
+            transition: transform 0.2s ease, filter 0.2s ease;
+        }
+
+        .btn-ver-certificados:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        .field-error {
+            color: #fca5a5;
+            font-size: 0.82rem;
+            margin-top: 0.35rem;
+            font-weight: 600;
+        }
+
+        input.error {
+            border-color: rgba(248, 113, 113, 0.6);
+            background-color: rgba(248, 113, 113, 0.08);
         }
 
         .password-toggle {
             cursor: pointer;
-            color: #007bff;
-            font-size: 12px;
-            margin-top: 5px;
+            color: var(--color-accent-secondary);
+            font-size: 0.82rem;
+            margin-top: 0.35rem;
+            font-weight: 600;
         }
     </style>
 </head>

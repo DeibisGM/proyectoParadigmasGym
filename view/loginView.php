@@ -15,36 +15,55 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body>
-<div class="login-container">
-    <h2>Iniciar Sesión</h2><br>
-    <form action="../action/loginAction.php" method="post">
-        <div class="form-group">
-            <label for="correo"><i class="ph ph-envelope"></i>Correo electrónico:</label>
-            <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com" required>
-        </div>
-        <div class="form-group">
-            <label for="contrasena"><i class="ph ph-key"></i>Contraseña:</label>
-            <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required>
-        </div>
-        <div class="form-group">
-            <input type="submit" name="login" value="Iniciar Sesión">
-        </div>
-    </form>
+<body class="auth-body">
+    <div class="auth-layout">
+        <section class="auth-intro">
+            <span class="brand-badge"><i class="ph ph-lightning"></i>NovaGym Control</span>
+            <h1>Impulsa tu mejor versión</h1>
+            <p>Administra entrenamientos, reservas y seguimiento de clientes desde un panel diseñado para equipos de alto rendimiento.</p>
+            <ul class="auth-highlights">
+                <li><i class="ph ph-calendar-check"></i>Agenda inteligente de clases y eventos.</li>
+                <li><i class="ph ph-activity"></i>Monitoreo de progreso en tiempo real.</li>
+                <li><i class="ph ph-shield-check"></i>Datos seguros y siempre disponibles.</li>
+            </ul>
+        </section>
 
+        <section class="auth-card login-container">
+            <div class="auth-card-header">
+                <span class="badge-soft">Bienvenido de vuelta</span>
+                <h2>Iniciar Sesión</h2>
+                <p>Accede al panel para continuar gestionando el gimnasio.</p>
+            </div>
 
-    <div class="nota-credenciales">
-        <strong>Credenciales de Prueba:</strong><br><br>
-        <strong>• Cliente:</strong> cliente@gmail.com / 12345678<br>
-        <strong>• Instructor:</strong> instructor@gmail.com / 12345678<br>
-        <strong>• Admin:</strong> admin@gmail.com / admin
+            <form action="../action/loginAction.php" method="post" class="auth-form">
+                <div class="form-group">
+                    <label for="correo"><i class="ph ph-envelope"></i>Correo electrónico</label>
+                    <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="contrasena"><i class="ph ph-key"></i>Contraseña</label>
+                    <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" name="login" class="btn-primary"><i class="ph ph-sign-in"></i>Iniciar Sesión</button>
+                </div>
+            </form>
+
+            <div class="nota-credenciales">
+                <strong>Credenciales de Prueba</strong>
+                <ul>
+                    <li><span>Cliente:</span> cliente@gmail.com / 12345678</li>
+                    <li><span>Instructor:</span> instructor@gmail.com / 12345678</li>
+                    <li><span>Admin:</span> admin@gmail.com / admin</li>
+                </ul>
+            </div>
+
+            <?php if (isset($_GET['error'])) : ?>
+                <div class="error-message">
+                    <i class="ph ph-warning"></i>Credenciales incorrectas o campos vacíos.
+                </div>
+            <?php endif; ?>
+        </section>
     </div>
-
-    <?php if (isset($_GET['error'])) : ?>
-        <div class="error-message">
-            Error: Credenciales incorrectas o campos vacíos.
-        </div>
-    <?php endif; ?>
-</div>
 </body>
 </html>
