@@ -36,7 +36,7 @@ if ($tipoUsuario == 'cliente') {
                 (<?php echo htmlspecialchars(ucfirst($tipoUsuario)); ?>)</p>
         </div>
         <a href="action/logoutAction.php">
-            <button><i class="ph-fill ph-sign-out"></i>Cerrar Sesión</button>
+            <button class="btn-logout-subtle"><i class="ph-fill ph-sign-out"></i>Cerrar Sesión</button>
         </a>
     </header>
 
