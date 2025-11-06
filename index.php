@@ -36,103 +36,103 @@ if ($tipoUsuario == 'cliente') {
                 (<?php echo htmlspecialchars(ucfirst($tipoUsuario)); ?>)</p>
         </div>
         <a href="action/logoutAction.php">
-            <button><i class="ph ph-sign-out"></i>Cerrar Sesión</button>
+            <button><i class="ph-fill ph-sign-out"></i>Cerrar Sesión</button>
         </a>
     </header>
 
     <main>
         <?php if ($tipoUsuario == 'admin'): ?>
-            <section>
-                <h3><i class="ph ph-squares-four"></i>Gestión General</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-squares-four"></i>Gestión General</h3>
                 <div class="menu-grid">
-                    <a href='view/instructorView.php'><button><i class="ph ph-users-three"></i>Instructores</button></a>
-                    <a href='view/clienteView.php'><button><i class="ph ph-users"></i>Clientes</button></a>
-                    <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
-                    <a href='view/horarioView.php'><button><i class="ph ph-clock-clockwise"></i>Horario General</button></a>
-                    <a href='view/padecimientoView.php'><button><i class="ph ph-bandaids"></i>Padecimientos</button></a>
-                    <a href='view/certificadoView.php'><button><i class="ph ph-certificate"></i>Certificados</button></a>
-                    <a href='view/clientePadecimientoView.php'><button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button></a>
-                    <a href='view/padecimientoDictamenView.php'><button><i class="ph ph-file-text"></i> Dictamen Médico</button></a>
-                    <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-plus"></i>Números Emergencia</button></a>
-                    <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Salas</button></a>
-                    <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub zonas del cuerpo</button></a>
-                    <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios Instructores</button></a>
+                    <a href='view/instructorView.php'><button><i class="ph-fill ph-users-three"></i>Instructores</button></a>
+                    <a href='view/clienteView.php'><button><i class="ph-fill ph-users"></i>Clientes</button></a>
+                    <a href='view/cuerpoZonaView.php'><button><i class="ph-fill ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
+                    <a href='view/horarioView.php'><button><i class="ph-fill ph-clock-clockwise"></i>Horario General</button></a>
+                    <a href='view/padecimientoView.php'><button><i class="ph-fill ph-bandaids"></i>Padecimientos</button></a>
+                    <a href='view/certificadoView.php'><button><i class="ph-fill ph-certificate"></i>Certificados</button></a>
+                    <a href='view/clientePadecimientoView.php'><button><i class="ph-fill ph-first-aid-kit"></i>Datos Clínicos</button></a>
+                    <a href='view/padecimientoDictamenView.php'><button><i class="ph-fill ph-file-text"></i> Dictamen Médico</button></a>
+                    <a href='view/numeroEmergenciaView.php'><button><i class="ph-fill ph-phone-plus"></i>Números Emergencia</button></a>
+                    <a href='view/salaView.php'><button><i class="ph-fill ph-storefront"></i>Salas</button></a>
+                    <a href='view/subzonaView.php'><button><i class="ph-fill ph-hand"></i>Sub zonas del cuerpo</button></a>
+                    <a href='view/instructorHorarioView.php'><button><i class="ph-fill ph-calendar"></i>Horarios Instructores</button></a>
                 </div>
             </section>
-            <section>
-                <h3><i class="ph ph-barbell"></i>Ejercicios</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-barbell"></i>Ejercicios</h3>
                 <div class="menu-grid">
-                    <a href='view/ejercicioFuerzaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de fuerza</button></a>
+                    <a href='view/ejercicioFuerzaView.php'><button><i class="ph-fill ph-barbell"></i>Ejercicios de fuerza</button></a>
                     <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
-                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
-                    <a href='view/ejercicioResistenciaView.php'><button><i class="ph ph-barbell"></i>Ejercicios de resistencia</button></a>
-                    <a href='view/ejercicioFlexibilidadView.php'><button><i class="ph ph-barbell"></i>Ejercicios de Flexibilidad</button></a>
+                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph-fill ph-balance"></i>Ejercicios de Equilibrio</button></a>
+                    <a href='view/ejercicioResistenciaView.php'><button><i class="ph-fill ph-barbell"></i>Ejercicios de resistencia</button></a>
+                    <a href='view/ejercicioFlexibilidadView.php'><button><i class="ph-fill ph-barbell"></i>Ejercicios de Flexibilidad</button></a>
                 </div>
             </section>
-            <section>
-                <h3><i class="ph ph-calendar-blank"></i>Reservas y Eventos</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-calendar-blank"></i>Reservas y Eventos</h3>
                 <div class="menu-grid">
-                    <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Ver Reservas</button></a>
-                    <a href='view/eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Eventos</button></a>
-                    <a href='view/salaReservasView.php'><button><i class="ph ph-presentation-chart"></i>Ocupación de Salas</button></a>
-                    <a href='view/horarioLibreView.php'><button><i class="ph ph-clock-afternoon"></i>Gestionar Horario Libre</button></a>
-                    <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Instructor Personal</button></a>
+                    <a href='view/reservaView.php'><button><i class="ph-fill ph-calendar-check"></i>Ver Reservas</button></a>
+                    <a href='view/eventoGestionView.php'><button><i class="ph-fill ph-calendar-plus"></i>Gestionar Eventos</button></a>
+                    <a href='view/salaReservasView.php'><button><i class="ph-fill ph-presentation-chart"></i>Ocupación de Salas</button></a>
+                    <a href='view/horarioLibreView.php'><button><i class="ph-fill ph-clock-afternoon"></i>Gestionar Horario Libre</button></a>
+                    <a href='view/horarioPersonalView.php'><button><i class="ph-fill ph-user-plus"></i>Instructor Personal</button></a>
                 </div>
             </section>
 
         <?php elseif ($tipoUsuario == 'instructor'): ?>
-            <section>
-                <h3><i class="ph ph-chalkboard-teacher"></i>Panel de Instructor</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-chalkboard-teacher"></i>Panel de Instructor</h3>
                 <div class="menu-grid">
-                    <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Ver Reservas</button></a>
-                    <a href='view/eventoGestionView.php'><button><i class="ph ph-calendar-plus"></i>Gestionar Mis Eventos</button></a>
-                    <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Mis Horarios Personales</button></a>
-                    <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Mis Horarios de Trabajo</button></a>
-                    <a href='view/clienteView.php'><button><i class="ph ph-users"></i>Ver Clientes</button></a>
-                    <a href='view/instructorView.php'><button><i class="ph ph-user-rectangle"></i>Ver Instructores</button></a>
-                    <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
-                    <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub Zonas del cuerpo</button></a>
-                    <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
+                    <a href='view/reservaView.php'><button><i class="ph-fill ph-calendar-check"></i>Ver Reservas</button></a>
+                    <a href='view/eventoGestionView.php'><button><i class="ph-fill ph-calendar-plus"></i>Gestionar Mis Eventos</button></a>
+                    <a href='view/horarioPersonalView.php'><button><i class="ph-fill ph-user-plus"></i>Mis Horarios Personales</button></a>
+                    <a href='view/instructorHorarioView.php'><button><i class="ph-fill ph-calendar"></i>Mis Horarios de Trabajo</button></a>
+                    <a href='view/clienteView.php'><button><i class="ph-fill ph-users"></i>Ver Clientes</button></a>
+                    <a href='view/instructorView.php'><button><i class="ph-fill ph-user-rectangle"></i>Ver Instructores</button></a>
+                    <a href='view.php'><button><i class="ph-fill ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
+                    <a href='view/subzonaView.php'><button><i class="ph-fill ph-hand"></i>Sub Zonas del cuerpo</button></a>
+                    <a href='view/salaView.php'><button><i class="ph-fill ph-storefront"></i>Ver Salas</button></a>
                 </div>
             </section>
-            <section>
-                <h3><i class="ph ph-barbell"></i>Ejercicios</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-barbell"></i>Ejercicios</h3>
                 <div class="menu-grid">
                     <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
-                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph ph-balance"></i>Ejercicios de Equilibrio</button></a>
+                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph-fill ph-balance"></i>Ejercicios de Equilibrio</button></a>
                 </div>
             </section>
-            <section>
-                <h3><i class="ph ph-heartbeat"></i>Salud de Clientes</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-heartbeat"></i>Salud de Clientes</h3>
                 <div class="menu-grid">
-                    <a href='view/padecimientoView.php'><button><i class="ph ph-bandaids"></i>Padecimientos</button></a>
-                    <a href='view/clientePadecimientoView.php'><button><i class="ph ph-first-aid-kit"></i>Datos Clínicos</button></a>
-                    <a href='view/padecimientoDictamenView.php'><button><i class="ph ph-file-text"></i> Dictamen Médico</button></a>
-                    <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-plus"></i>Contactos Emergencia</button></a>
+                    <a href='view/padecimientoView.php'><button><i class="ph-fill ph-bandaids"></i>Padecimientos</button></a>
+                    <a href='view/clientePadecimientoView.php'><button><i class="ph-fill ph-first-aid-kit"></i>Datos Clínicos</button></a>
+                    <a href='view/padecimientoDictamenView.php'><button><i class="ph-fill ph-file-text"></i> Dictamen Médico</button></a>
+                    <a href='view/numeroEmergenciaView.php'><button><i class="ph-fill ph-phone-plus"></i>Contactos Emergencia</button></a>
                 </div>
             </section>
 
         <?php elseif ($tipoUsuario == 'cliente'): ?>
-            <section>
-                <h3><i class="ph ph-barbell"></i>Actividad en el Gimnasio</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-barbell"></i>Actividad en el Gimnasio</h3>
                 <div class="menu-grid">
-                    <a href='view/reservaView.php'><button><i class="ph ph-calendar-check"></i>Mis Reservas</button></a>
-                    <a href='view/rutinaView.php'><button><i class="ph ph-notebook"></i>Mis Rutinas</button></a>
-                    <a href='view/horarioPersonalView.php'><button><i class="ph ph-user-plus"></i>Instructor Personal</button></a>
-                    <a href='view/horarioLibreView.php'><button><i class="ph ph-barbell"></i>Uso Libre</button></a>
-                    <a href='view/instructorHorarioView.php'><button><i class="ph ph-calendar"></i>Horarios de Instructores</button></a>
-                    <a href='view/instructorClienteView.php'><button><i class="ph ph-chalkboard-teacher"></i>Ver Instructores</button></a>
-                    <a href='view/cuerpoZonaView.php'><button><i class="ph ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
-                    <a href='view/subzonaView.php'><button><i class="ph ph-hand"></i>Sub Zonas del cuerpo</button></a>
-                    <a href='view/salaView.php'><button><i class="ph ph-storefront"></i>Ver Salas</button></a>
+                    <a href='view/reservaView.php'><button><i class="ph-fill ph-calendar-check"></i>Mis Reservas</button></a>
+                    <a href='view/rutinaView.php'><button><i class="ph-fill ph-notebook"></i>Mis Rutinas</button></a>
+                    <a href='view/horarioPersonalView.php'><button><i class="ph-fill ph-user-plus"></i>Instructor Personal</button></a>
+                    <a href='view/horarioLibreView.php'><button><i class="ph-fill ph-barbell"></i>Uso Libre</button></a>
+                    <a href='view/instructorHorarioView.php'><button><i class="ph-fill ph-calendar"></i>Horarios de Instructores</button></a>
+                    <a href='view/instructorClienteView.php'><button><i class="ph-fill ph-chalkboard-teacher"></i>Ver Instructores</button></a>
+                    <a href='view/cuerpoZonaView.php'><button><i class="ph-fill ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
+                    <a href='view/subzonaView.php'><button><i class="ph-fill ph-hand"></i>Sub Zonas del cuerpo</button></a>
+                    <a href='view/salaView.php'><button><i class="ph-fill ph-storefront"></i>Ver Salas</button></a>
                 </div>
             </section>
-            <section>
-                <h3><i class="ph ph-user-focus"></i>Mi Perfil y Salud</h3>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-user-focus"></i>Mi Perfil y Salud</h3>
                 <div class="menu-grid">
-                    <a href='view/clienteView.php'><button><i class="ph ph-user-rectangle"></i>Ver mi Perfil</button></a>
-                    <a href='view/clientePadecimientoView.php'><button><i class="ph ph-clipboard-text"></i>Mis Datos Clínicos</button></a>
-                    <a href='view/numeroEmergenciaView.php'><button><i class="ph ph-phone-call"></i>Mis Números de Emergencia</button></a>
+                    <a href='view/clienteView.php'><button><i class="ph-fill ph-user-rectangle"></i>Ver mi Perfil</button></a>
+                    <a href='view/clientePadecimientoView.php'><button><i class="ph-fill ph-clipboard-text"></i>Mis Datos Clínicos</button></a>
+                    <a href='view/numeroEmergenciaView.php'><button><i class="ph-fill ph-phone-call"></i>Mis Números de Emergencia</button></a>
                 </div>
             </section>
         <?php endif; ?>

@@ -18,13 +18,13 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
 <body class="auth-body">
     <div class="auth-layout">
         <section class="auth-intro">
-            <span class="brand-badge"><i class="ph ph-lightning"></i>NovaGym Control</span>
+            <span class="brand-badge"><i class="ph-fill ph-lightning"></i>NovaGym Control</span>
             <h1>Impulsa tu mejor versión</h1>
             <p>Administra entrenamientos, reservas y seguimiento de clientes desde un panel diseñado para equipos de alto rendimiento.</p>
             <ul class="auth-highlights">
-                <li><i class="ph ph-calendar-check"></i>Agenda inteligente de clases y eventos.</li>
-                <li><i class="ph ph-activity"></i>Monitoreo de progreso en tiempo real.</li>
-                <li><i class="ph ph-shield-check"></i>Datos seguros y siempre disponibles.</li>
+                <li><i class="ph-fill ph-calendar-check"></i>Agenda inteligente de clases y eventos.</li>
+                <li><i class="ph-fill ph-activity"></i>Monitoreo de progreso en tiempo real.</li>
+                <li><i class="ph-fill ph-shield-check"></i>Datos seguros y siempre disponibles.</li>
             </ul>
         </section>
 
@@ -37,30 +37,33 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
 
             <form action="../action/loginAction.php" method="post" class="auth-form">
                 <div class="form-group">
-                    <label for="correo"><i class="ph ph-envelope"></i>Correo electrónico</label>
+                    <label for="correo"><i class="ph-fill ph-envelope"></i>Correo electrónico</label>
                     <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="contrasena"><i class="ph ph-key"></i>Contraseña</label>
+                    <label for="contrasena"><i class="ph-fill ph-key"></i>Contraseña</label>
                     <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required>
                 </div>
                 <div class="form-group">
-                    <button type="submit" name="login" class="btn-primary"><i class="ph ph-sign-in"></i>Iniciar Sesión</button>
+                    <button type="submit" name="login" class="btn-primary"><i class="ph-fill ph-sign-in"></i>Iniciar Sesión</button>
                 </div>
             </form>
 
-            <div class="nota-credenciales">
-                <strong>Credenciales de Prueba</strong>
-                <ul>
-                    <li><span>Cliente:</span> cliente@gmail.com / 12345678</li>
-                    <li><span>Instructor:</span> instructor@gmail.com / 12345678</li>
-                    <li><span>Admin:</span> admin@gmail.com / admin</li>
-                </ul>
-            </div>
+            <section class="menu-section">
+                <h3><i class="ph-fill ph-info"></i>Credenciales de Prueba</h3>
+                <div class="nota-credenciales">
+                    <strong>Credenciales de Prueba</strong>
+                    <ul>
+                        <li><span>Cliente:</span> cliente@gmail.com / 12345678</li>
+                        <li><span>Instructor:</span> instructor@gmail.com / 12345678</li>
+                        <li><span>Admin:</span> admin@gmail.com / admin</li>
+                    </ul>
+                </div>
+            </section>
 
             <?php if (isset($_GET['error'])) : ?>
                 <div class="error-message">
-                    <i class="ph ph-warning"></i>Credenciales incorrectas o campos vacíos.
+                    <i class="ph-fill ph-warning"></i>Credenciales incorrectas o campos vacíos.
                 </div>
             <?php endif; ?>
         </section>
