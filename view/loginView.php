@@ -30,7 +30,7 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
 
         <section class="auth-card login-container">
             <div class="auth-card-header">
-                <span class="badge-soft">Bienvenido de vuelta</span>
+
                 <h2>Iniciar Sesión</h2>
                 <p>Accede al panel para continuar gestionando el gimnasio.</p>
             </div>
@@ -40,9 +40,10 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
                     <label for="correo"><i class="ph-fill ph-envelope"></i>Correo electrónico</label>
                     <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com" required>
                 </div>
-                <div class="form-group">
+                <div class="form-group password-group">
                     <label for="contrasena"><i class="ph-fill ph-key"></i>Contraseña</label>
                     <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required>
+                    <i class="ph ph-eye" id="togglePassword"></i>
                 </div>
                 <div class="form-group">
                     <button type="submit" name="login" class="btn-primary"><i class="ph-fill ph-sign-in"></i>Iniciar Sesión</button>
@@ -50,9 +51,9 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
             </form>
 
             <section class="menu-section">
-                <h3><i class="ph-fill ph-info"></i>Credenciales de Prueba</h3>
+                <h3>Credenciales de Prueba</h3>
                 <div class="nota-credenciales">
-                    <strong>Credenciales de Prueba</strong>
+                    
                     <ul>
                         <li><span>Cliente:</span> cliente@gmail.com / 12345678</li>
                         <li><span>Instructor:</span> instructor@gmail.com / 12345678</li>
@@ -68,5 +69,18 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
             <?php endif; ?>
         </section>
     </div>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#contrasena');
+
+        togglePassword.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            // toggle the eye slash icon
+            this.classList.toggle('ph-eye-slash');
+        });
+    </script>
 </body>
 </html>
