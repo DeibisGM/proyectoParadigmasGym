@@ -280,8 +280,8 @@ if (isset($_GET['success'])) {
             <h3>
                 <i class="ph ph-list-bullets"></i><?php echo $esUsuarioCliente ? 'Mis cliente padecimientos' : 'Cliente padecimientos de todos los clientes'; ?>
             </h3>
-            <div style="overflow-x:auto;">
-                <table id="tablaClientePadecimientos">
+            <div class="table-responsive">
+                <table id="tablaClientePadecimientos" class="data-table">
                     <thead>
                     <tr>
                         <?php if (!$esUsuarioCliente): ?>

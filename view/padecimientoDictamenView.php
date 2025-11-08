@@ -191,8 +191,8 @@ if (isset($_GET['success'])) {
 
         <section>
             <h3><i class="ph ph-list-bullets"></i> Padecimientos Dictamen Registrados</h3>
-            <div style="overflow-x:auto;">
-                <table id="padecimientoTabla">
+            <div class="table-responsive">
+                <table id="padecimientoTabla" class="data-table">
                     <thead>
                     <tr>
                         <th>Fecha de Emisión</th>

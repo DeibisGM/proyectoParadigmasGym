@@ -111,8 +111,8 @@ if ($tipoUsuario == 'cliente') {
         <!-- Tabla de contactos -->
         <section>
             <h3><i class="ph ph-list-bullets"></i>Contactos Registrados</h3>
-            <div style="overflow-x:auto;">
-                <table>
+            <div class="table-responsive">
+                <table class="data-table">
                     <thead>
                     <tr>
                         <th>Cliente</th>

@@ -52,8 +52,8 @@ $imageManager = new ImageManager();
                     $cuerpoZonaBusiness->getAllTBCuerpoZona() :
                     $cuerpoZonaBusiness->getActiveTBCuerpoZona();
             ?>
-            <div style="overflow-x:auto;">
-                <table>
+            <div class="table-responsive">
+                <table class="data-table">
                     <thead>
                     <tr>
                         <th>Nombre</th>

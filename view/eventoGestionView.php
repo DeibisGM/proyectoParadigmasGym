@@ -138,8 +138,8 @@ if ($tipoUsuario === 'admin') {
             <h3>
                 <i class="ph ph-list-bullets"></i><?= ($tipoUsuario === 'admin') ? 'Todos los Eventos' : 'Mis Eventos Asignados' ?>
             </h3>
-            <div style="overflow-x:auto;">
-                <table>
+            <div class="table-responsive">
+                <table class="data-table">
                     <thead>
                     <tr>
                         <th>Nombre</th>

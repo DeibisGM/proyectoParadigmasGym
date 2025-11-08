@@ -88,8 +88,8 @@ if (!$esAdmin && !$esInstruct) {
 
         <section>
             <h3><i class="ph ph-list-bullets"></i>Padecimientos registrados</h3>
-            <div style="overflow-x:auto;">
-                <table id="tablaPadecimientos">
+            <div class="table-responsive">
+                <table id="tablaPadecimientos" class="data-table">
                     <thead>
                     <tr>
                         <th>Tipo</th>

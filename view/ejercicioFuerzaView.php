@@ -34,31 +34,6 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
     <link rel="stylesheet" href="styles.css">
     <script src="../utility/Events.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        .toggle-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 10px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .toggle-btn:hover {
-            background-color: #0056b3;
-        }
-        .subzonas {
-            display: none;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        .checkbox-group label {
-            border:1px solid #ccc;
-            padding:5px 10px;
-            border-radius:5px;
-        }
-    </style>
 </head>
 <body>
 <div class="container">
@@ -103,7 +78,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                     <div class="form-group">
                         <label>Subzonas (seleccione una o varias):</label>
                         <span class="error-message"><?= Validation::getError('subzona') ?></span>
-                        <div class="checkbox-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div class="checkbox-grid">
                             <?php foreach ($subzonas as $subzona): ?>
                                 <label>
                                     <input type="checkbox" name="subzona[]"
@@ -152,8 +127,8 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
 
         <section>
             <h3><i class="ph ph-list-bullets"></i> Ejercicios Registrados</h3>
-            <div style="overflow-x:auto;">
-                <table>
+            <div class="table-responsive">
+                <table class="data-table">
                     <thead>
                     <tr>
                         <th>Nombre</th>
@@ -234,8 +209,9 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                     </td>
 
                                     <td>
-                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(this)">Ver subzonas ▼</button>
-                                        <div class="checkbox-group subzonas">
+                                        <div class="subzona-toggle">
+                                            <button type="button" class="toggle-btn">Ver subzonas ▼</button>
+                                            <div class="checkbox-grid">
                                             <?php foreach ($subzonas as $subzona): ?>
                                                 <?php $sid = (int)$subzona->getSubzonaid(); ?>
                                                 <label>
@@ -244,6 +220,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                                     <?= htmlspecialchars($subzona->getSubzonanombre()) ?>
                                                 </label>
                                             <?php endforeach; ?>
+                                            </div>
                                         </div>
                                         <?php if ($errSubzona): ?>
                                             <div class="error-message"><?= $errSubzona ?></div>
@@ -303,16 +280,13 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                 <?php if ($ejer->getActivo() == 1): ?>
                                     <td><?= htmlspecialchars($ejer->getNombre()) ?></td>
                                     <td>
-                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(this)">Ver subzonas ▼</button>
-                                        <div class="subzonas">
+                                        <div class="tag-list">
                                             <?php
-                                            $nombres = [];
                                             foreach ($subzonas as $subzona) {
-                                                if (in_array((int)$subzona->getSubzonaid(), $subzonaIds)) {
-                                                    $nombres[] = htmlspecialchars($subzona->getSubzonanombre());
+                                                if (in_array((int)$subzona->getSubzonaid(), $subzonaIds, true)) {
+                                                    echo '<span class="tag">' . htmlspecialchars($subzona->getSubzonanombre()) . '</span>';
                                                 }
                                             }
-                                            echo implode(', ', $nombres);
                                             ?>
                                         </div>
                                     </td>
@@ -338,16 +312,27 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
 </div>
 
 <script>
-    function toggleSubzonas(btn) {
-        const div = btn.nextElementSibling;
-        if (div.style.display === "none" || div.style.display === "") {
-            div.style.display = "flex";
-            btn.textContent = "Ocultar subzonas ▲";
-        } else {
-            div.style.display = "none";
-            btn.textContent = "Ver subzonas ▼";
+    document.querySelectorAll('.subzona-toggle').forEach(function (container) {
+        const button = container.querySelector('.toggle-btn');
+        const list = container.querySelector('.checkbox-grid');
+        if (!button || !list) {
+            return;
         }
-    }
+
+        const hasChecked = Array.from(list.querySelectorAll('input[type="checkbox"]')).some(function (input) {
+            return input.checked;
+        });
+        const hasError = container.querySelector('.error-message');
+        if (hasChecked || hasError) {
+            container.classList.add('is-open');
+            button.textContent = 'Ocultar subzonas ▲';
+        }
+
+        button.addEventListener('click', function () {
+            const isOpen = container.classList.toggle('is-open');
+            button.textContent = isOpen ? 'Ocultar subzonas ▲' : 'Ver subzonas ▼';
+        });
+    });
 </script>
 
 <?php Validation::clear(); ?>

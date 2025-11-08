@@ -41,8 +41,8 @@ foreach ($todasLasSalas as $sala) {
     <main>
         <section>
             <h3><i class="ph ph-list-bullets"></i>Calendario de Reservas</h3>
-            <div style="overflow-x:auto;">
-                <table>
+            <div class="table-responsive">
+                <table class="data-table">
                     <thead>
                     <tr>
                         <th>Fecha</th>

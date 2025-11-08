@@ -138,8 +138,8 @@ if (!$esAdminOInstructor) {
             </form>
 
             <h3><i class="ph ph-list-bullets"></i> Sub Zonas Registradas</h3>
-            <div style="overflow-x:auto;">
-                <table>
+            <div class="table-responsive">
+                <table class="data-table">
                     <thead>
                     <tr>
                         <th>Nombre</th>

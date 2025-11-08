@@ -55,8 +55,8 @@ if ($tipoUsuario === 'cliente') {
                     <?php if (empty($misReservas)): ?>
                         <p>No tienes reservas registradas.</p>
                     <?php else: ?>
-                        <div style="overflow-x:auto;">
-                            <table>
+                        <div class="table-responsive">
+                            <table class="data-table">
                                 <thead>
                                 <tr>
                                     <th>Fecha</th>
@@ -96,8 +96,8 @@ if ($tipoUsuario === 'cliente') {
                     </div>
                 <?php endif; ?>
 
-                <div style="overflow-x:auto;">
-                    <table>
+                <div class="table-responsive">
+                    <table class="data-table">
                         <thead>
                         <tr>
                             <th>Fecha</th>

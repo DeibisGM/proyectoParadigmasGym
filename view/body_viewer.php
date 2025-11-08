@@ -4,65 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor Interactivo del Cuerpo Humano</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .main-wrapper {
-            padding: 30px 0 0 0;
-            max-width: 1000px;
-            margin: auto;
-            text-align: center;
-        }
-        h1 { color: #333; margin-bottom: 5px; }
-        p { color: #666; margin-top: 0; margin-bottom: 30px; }
-        .viewer-grid {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        .body-view {
-            flex: 1;
-            min-width: 200px;
-            max-width: 250px;
-        }
-        .body-view h2 { color: #555; font-weight: 600; }
-        .body-container { position: relative; }
-        .body-container svg { width: 100%; height: auto; }
-        .body-part {
-            transition: opacity 0.4s ease-in-out, fill 0.4s ease-in-out;
-            fill: #E8A883;
-            opacity: 0.25;
-        }
-        .viewer-grid.is-interacting .body-part {
-            opacity: 0.15;
-            filter: grayscale(80%);
-        }
-        .viewer-grid.is-interacting .body-part:hover {
-            opacity: 1;
-            filter: grayscale(0%) drop-shadow(0 0 8px rgba(255, 190, 0, 0.9));
-        }
-        .tooltip {
-            position: fixed;
-            background-color: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            white-space: nowrap;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-            z-index: 1000;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
-<body>
-<div class="main-wrapper">
-    <div class="viewer-grid">
+<body class="viewer-body">
+<div class="container viewer-container">
+    <header>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <h2><i class="ph ph-activity"></i>Visor Interactivo del Cuerpo Humano</h2>
+    </header>
+
+    <main class="viewer-main">
+        <section class="viewer-section">
+            <header>
+                <h3><i class="ph ph-users-three"></i>Mapa corporal interactivo</h3>
+            </header>
+            <p>Explora cada zona del cuerpo y visualiza el progreso asociado a las rutinas activas.</p>
+
+            <div class="viewer-grid">
         <div class="body-view">
             <div class="body-container">
                 <svg viewBox="0 0 563.72511 1133.0802">
@@ -107,7 +66,17 @@
                    </svg>
             </div>
         </div>
-    </div>
+                </div>
+            <div class="viewer-legend">
+                <h4>Referencias rápidas</h4>
+                <ul>
+                    <li><span class="color" style="background: rgba(232, 168, 131, 0.25);"></span>Zonas sin trabajar recientemente</li>
+                    <li><span class="color" style="background: rgba(137, 194, 53, 0.45);"></span>Entrenamiento moderado</li>
+                    <li><span class="color" style="background: rgba(137, 194, 53, 0.8);"></span>Entrenamiento intensivo</li>
+                </ul>
+            </div>
+        </section>
+    </main>
 </div>
 <div class="tooltip"></div>
 <script>
@@ -204,3 +173,5 @@
         });
     });
 </script>
+</body>
+</html>

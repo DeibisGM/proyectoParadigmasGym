@@ -34,84 +34,6 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
     <title>Gestión de Ejercicios de Equilibrio/Coordinación</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <style>
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875rem;
-            display: block;
-            margin-top: 0.25rem;
-        }
-        .success-message {
-            color: #28a745;
-            font-size: 1rem;
-        }
-        .flash-msg {
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            border-radius: 4px;
-            border: 1px solid transparent;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-        .success-message.flash-msg {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        .error-message.flash-msg {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-        .actions-cell {
-            white-space: nowrap;
-        }
-        .actions-cell button {
-            margin: 0.25rem;
-        }
-        table input[type="text"],
-        table input[type="number"],
-        table textarea,
-        table select {
-            width: 100%;
-            box-sizing: border-box;
-        }
-        table td {
-            vertical-align: top;
-            padding: 0.75rem;
-        }
-        .toggle-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 10px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .toggle-btn:hover {
-            background-color: #0056b3;
-        }
-        .subzonas {
-            display: none;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 8px;
-        }
-        .checkbox-group label {
-            border:1px solid #ccc;
-            padding:5px 10px;
-            border-radius:5px;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -175,7 +97,7 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                     <div class="form-group">
                         <label>Subzonas (seleccione una o varias):</label>
                         <span class="error-message"><?= Validation::getError('subzona') ?></span>
-                        <div class="checkbox-group" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div class="checkbox-grid">
                             <?php foreach ($subzonas as $subzona): ?>
                                 <label>
                                     <input type="checkbox" name="subzona[]"
@@ -232,8 +154,8 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
             <!-- Tabla de ejercicios -->
             <section>
                 <h3><i class="ph ph-list-bullets"></i> Ejercicios Registrados</h3>
-                <div style="overflow-x:auto;">
-                    <table>
+                <div class="table-responsive">
+                    <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
@@ -291,31 +213,31 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                     ?>
                                     <input type="hidden" name="id" value="<?= $idFila ?>"/>
                                     <td>
-                                        <span class="error-message"><?= $errNombre ?></span>
+                                        <?php if ($errNombre): ?><div class="error-message"><?= $errNombre ?></div><?php endif; ?>
                                         <input type="text" name="nombre" value="<?= htmlspecialchars($valNombre) ?>"/>
                                     </td>
                                     <td>
-                                        <span class="error-message"><?= $errDescripcion ?></span>
+                                        <?php if ($errDescripcion): ?><div class="error-message"><?= $errDescripcion ?></div><?php endif; ?>
                                         <textarea name="descripcion" rows="3"><?= htmlspecialchars($valDescripcion) ?></textarea>
                                     </td>
                                     <td>
-                                        <span class="error-message"><?= $errSubzona ?></span>
-                                        <button type="button" class="toggle-btn" onclick="toggleSubzonas(<?= $idFila ?>)">
-                                            Ver/Editar Subzonas
-                                        </button>
-                                        <div id="subzonas-<?= $idFila ?>" class="subzonas">
-                                            <?php foreach ($subzonas as $subzona): ?>
-                                                <label>
-                                                    <input type="checkbox" name="subzona[]"
-                                                           value="<?= $subzona->getSubzonaid() ?>"
-                                                           <?= in_array($subzona->getSubzonaid(), $subzonaIdsMarcadas) ? 'checked' : '' ?>>
-                                                    <?= htmlspecialchars($subzona->getSubzonanombre()) ?>
-                                                </label>
-                                            <?php endforeach; ?>
+                                        <div class="subzona-toggle">
+                                            <button type="button" class="toggle-btn">Ver/Editar subzonas</button>
+                                            <div class="checkbox-grid">
+                                                <?php foreach ($subzonas as $subzona): ?>
+                                                    <label>
+                                                        <input type="checkbox" name="subzona[]"
+                                                               value="<?= $subzona->getSubzonaid() ?>"
+                                                               <?= in_array((int)$subzona->getSubzonaid(), $subzonaIdsMarcadas, true) ? 'checked' : '' ?>>
+                                                        <?= htmlspecialchars($subzona->getSubzonanombre()) ?>
+                                                    </label>
+                                                <?php endforeach; ?>
+                                            </div>
                                         </div>
+                                        <?php if ($errSubzona): ?><div class="error-message"><?= $errSubzona ?></div><?php endif; ?>
                                     </td>
                                     <td>
-                                        <span class="error-message"><?= $errDificultad ?></span>
+                                        <?php if ($errDificultad): ?><div class="error-message"><?= $errDificultad ?></div><?php endif; ?>
                                         <select name="dificultad">
                                             <option value="Principiante" <?= $valDificultad == 'Principiante' ? 'selected' : '' ?>>Principiante</option>
                                             <option value="Intermedio" <?= $valDificultad == 'Intermedio' ? 'selected' : '' ?>>Intermedio</option>
@@ -323,14 +245,14 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                         </select>
                                     </td>
                                     <td>
-                                        <span class="error-message"><?= $errDuracion ?></span>
+                                        <?php if ($errDuracion): ?><div class="error-message"><?= $errDuracion ?></div><?php endif; ?>
                                         <input type="number" name="duracion" value="<?= htmlspecialchars($valDuracion) ?>" min="1"/>
                                     </td>
                                     <td>
                                         <input type="text" name="materiales" value="<?= htmlspecialchars($valMateriales) ?>"/>
                                     </td>
                                     <td>
-                                        <span class="error-message"><?= $errPostura ?></span>
+                                        <?php if ($errPostura): ?><div class="error-message"><?= $errPostura ?></div><?php endif; ?>
                                         <select name="postura">
                                             <option value="De pie" <?= $valPostura == 'De pie' ? 'selected' : '' ?>>De pie</option>
                                             <option value="Sentado" <?= $valPostura == 'Sentado' ? 'selected' : '' ?>>Sentado</option>
@@ -338,29 +260,31 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
                                             <option value="En movimiento" <?= $valPostura == 'En movimiento' ? 'selected' : '' ?>>En movimiento</option>
                                         </select>
                                     </td>
-                                    <td class="actions-cell">
-                                        <button type="submit" name="actualizar" class="btn-primary">
-                                            <i class="ph ph-check"></i> Actualizar
-                                        </button>
-                                        <button type="submit" name="eliminar" class="btn-danger" onclick="return confirm('¿Está seguro de eliminar este ejercicio?');">
-                                            <i class="ph ph-trash"></i> Eliminar
-                                        </button>
+                                    <td>
+                                        <div class="actions">
+                                            <button type="submit" name="actualizar" class="btn-primary">
+                                                <i class="ph ph-check"></i>
+                                            </button>
+                                            <button type="submit" name="eliminar" class="btn-danger" onclick="return confirm('¿Está seguro de eliminar este ejercicio?');">
+                                                <i class="ph ph-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </form>
                                 <?php else: ?>
                                     <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibrionombre()) ?></td>
                                     <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibriodescripcion()) ?></td>
                                     <td>
-                                        <?php
-                                        $subzonaIds = $ejercicio->getSubzonaIds();
-                                        $subzonaNombres = [];
-                                        foreach ($subzonas as $subzona) {
-                                            if (in_array($subzona->getSubzonaid(), $subzonaIds)) {
-                                                $subzonaNombres[] = $subzona->getSubzonanombre();
+                                        <div class="tag-list">
+                                            <?php
+                                            $subzonaIds = array_map('intval', (array)$ejercicio->getSubzonaIds());
+                                            foreach ($subzonas as $subzona) {
+                                                if (in_array((int)$subzona->getSubzonaid(), $subzonaIds, true)) {
+                                                    echo '<span class="tag">' . htmlspecialchars($subzona->getSubzonanombre()) . '</span>';
+                                                }
                                             }
-                                        }
-                                        echo htmlspecialchars(implode(', ', $subzonaNombres));
-                                        ?>
+                                            ?>
+                                        </div>
                                     </td>
                                     <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibriodificultad()) ?></td>
                                     <td><?= htmlspecialchars($ejercicio->getTbejercicioequilibrioduracion()) ?></td>
@@ -377,14 +301,27 @@ $subzonas = $subZonaBusiness->getAllTBSubZona();
     </div>
 
     <script>
-        function toggleSubzonas(id) {
-            const subzonasDiv = document.getElementById('subzonas-' + id);
-            if (subzonasDiv.style.display === 'flex') {
-                subzonasDiv.style.display = 'none';
-            } else {
-                subzonasDiv.style.display = 'flex';
+        document.querySelectorAll('.subzona-toggle').forEach(function (container) {
+            const button = container.querySelector('.toggle-btn');
+            const list = container.querySelector('.checkbox-grid');
+            if (!button || !list) {
+                return;
             }
-        }
+
+            const hasChecked = Array.from(list.querySelectorAll('input[type="checkbox"]')).some(function (input) {
+                return input.checked;
+            });
+            const hasError = container.parentElement.querySelector('.error-message');
+            if (hasChecked || hasError) {
+                container.classList.add('is-open');
+                button.textContent = 'Ocultar subzonas ▲';
+            }
+
+            button.addEventListener('click', function () {
+                const isOpen = container.classList.toggle('is-open');
+                button.textContent = isOpen ? 'Ocultar subzonas ▲' : 'Ver/Editar subzonas';
+            });
+        });
     </script>
 </body>
 </html>

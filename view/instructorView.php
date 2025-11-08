@@ -31,344 +31,240 @@ $instructores = $business->getAllTBInstructor($esAdmin);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Instructores</title>
-    <style>
-        .error {
-            color: #fca5a5;
-            font-weight: 600;
-        }
-
-        .success {
-            color: #6ee7b7;
-            font-weight: 600;
-        }
-
-        .id-cell {
-            background: rgba(99, 102, 241, 0.12);
-            border-radius: 10px;
-            font-weight: 600;
-            color: var(--color-text);
-        }
-
-        .imagen-actual-container {
-            display: inline-flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .imagen-actual-container img {
-            max-width: 110px;
-            border-radius: var(--radius-sm);
-            box-shadow: 0 12px 24px rgba(8, 16, 31, 0.35);
-        }
-
-        .eliminar-imagen-btn,
-        .delete-image-btn {
-            cursor: pointer;
-            background: linear-gradient(135deg, #f87171, #ef4444);
-            color: #0b1120;
-            border: none;
-            padding: 0.4rem 0.75rem;
-            border-radius: 999px;
-            font-weight: 600;
-            box-shadow: 0 14px 24px rgba(248, 113, 113, 0.4);
-            transition: filter 0.2s ease, transform 0.2s ease;
-        }
-
-        .delete-image-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 26px;
-            height: 26px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .eliminar-imagen-btn:hover,
-        .delete-image-btn:hover {
-            filter: brightness(1.05);
-            transform: translateY(-1px);
-        }
-
-        .certificado-badge {
-            margin: 2px;
-            padding: 0.35rem 0.7rem;
-            background: rgba(99, 102, 241, 0.2);
-            color: var(--color-text);
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .btn-ver-certificados {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(34, 211, 238, 0.35));
-            color: var(--color-text);
-            padding: 0.6rem 1rem;
-            text-decoration: none;
-            border-radius: var(--radius-sm);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 600;
-            box-shadow: 0 14px 26px rgba(14, 23, 42, 0.45);
-            transition: transform 0.2s ease, filter 0.2s ease;
-        }
-
-        .btn-ver-certificados:hover {
-            filter: brightness(1.05);
-            transform: translateY(-1px);
-        }
-
-        .field-error {
-            color: #fca5a5;
-            font-size: 0.82rem;
-            margin-top: 0.35rem;
-            font-weight: 600;
-        }
-
-        input.error {
-            border-color: rgba(248, 113, 113, 0.6);
-            background-color: rgba(248, 113, 113, 0.08);
-        }
-
-        .password-toggle {
-            cursor: pointer;
-            color: var(--color-accent-secondary);
-            font-size: 0.82rem;
-            margin-top: 0.35rem;
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
 <body>
+<div class="container">
+    <header>
+        <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
+        <div class="title-group">
+            <h2><i class="ph ph-chalkboard-teacher"></i>Gestión de Instructores</h2>
+            <p class="title-subtitle"><?= $esAdmin ? 'Administra el equipo del gimnasio.' : 'Consulta la información del equipo disponible.' ?></p>
+        </div>
+    </header>
 
-<header>
-            <a href="../index.php" class="back-button">← </a>
+    <main>
+        <?php if ($esAdmin): ?>
+            <section>
+                <h3><i class="ph ph-user-plus"></i>Registrar instructor</h3>
+                <form method="post" action="../action/instructorAction.php" enctype="multipart/form-data" onsubmit="return validateForm()">
+                    <div class="form-grid-container">
+                        <div class="form-group">
+                            <label for="id"><i class="ph ph-identification-card"></i>Cédula (3 dígitos)</label>
+                            <input type="text" name="id" id="id" placeholder="Ej: 001" required pattern="[0-9]{3}" title="3 dígitos numéricos (001, 002, etc.)">
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre"><i class="ph ph-user"></i>Nombre completo</label>
+                            <input type="text" name="nombre" id="nombre" placeholder="Nombre completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono"><i class="ph ph-phone"></i>Teléfono</label>
+                            <input type="text" name="telefono" id="telefono" placeholder="Teléfono">
+                        </div>
+                        <div class="form-group">
+                            <label for="direccion"><i class="ph ph-map-pin"></i>Dirección</label>
+                            <input type="text" name="direccion" id="direccion" placeholder="Dirección">
+                        </div>
+                        <div class="form-group">
+                            <label for="correo"><i class="ph ph-envelope"></i>Correo</label>
+                            <input type="email" name="correo" id="correo" placeholder="correo@ejemplo.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cuenta"><i class="ph ph-bank"></i>Cuenta bancaria</label>
+                            <input type="text" name="cuenta" id="cuenta" placeholder="IBAN o cuenta bancaria">
+                        </div>
+                        <div class="form-group">
+                            <label for="contraseña"><i class="ph ph-lock"></i>Contraseña</label>
+                            <input type="password" name="contraseña" id="contraseña" placeholder="Contraseña (4-8 chars)" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="verificar_contraseña"><i class="ph ph-lock-key"></i>Verificar contraseña</label>
+                            <input type="password" name="verificar_contraseña" id="verificar_contraseña" placeholder="Repetir contraseña" required>
+                        </div>
+                        <div class="form-group form-group-horizontal">
+                            <label for="tbinstructorimagenid"><i class="ph ph-image"></i>Imagen</label>
+                            <input type="file" name="tbinstructorimagenid[]" id="tbinstructorimagenid" accept="image/png, image/jpeg, image/webp">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" name="create"><i class="ph ph-floppy-disk"></i>Crear instructor</button>
+                    </div>
+                </form>
+                <div class="password-toggle" onclick="togglePasswordVisibility()"><i class="ph ph-eye"></i>Mostrar/Ocultar contraseñas</div>
+            </section>
+        <?php endif; ?>
 
-    <h2>Gimnasio - Instructores</h2>
-</header>
-
-<hr>
-
-<main>
-    <?php if ($esAdmin): ?>
-        <h2>Crear Nuevo Instructor</h2>
-        <form method="post" action="../action/instructorAction.php" enctype="multipart/form-data"
-              onsubmit="return validateForm()">
-            <table border="1">
-                <tr>
-                    <th>Cédula (3 dígitos)</th>
-                    <th>Nombre</th>
-                    <th>Teléfono</th>
-                    <th>Dirección</th>
-                    <th>Correo</th>
-                    <th>Cuenta Bancaria</th>
-                    <th>Contraseña</th>
-                    <th>Verificar Contraseña</th>
-                    <th>Imagen</th>
-                    <th>Acción</th>
-                </tr>
-                <tr>
-                    <td><input type="text" name="id" placeholder="Ej: 001" required pattern="[0-9]{3}"
-                               title="3 dígitos numéricos (001, 002, etc.)"></td>
-                    <td><input type="text" name="nombre" placeholder="Nombre completo" required></td>
-                    <td><input type="text" name="telefono" placeholder="Teléfono"></td>
-                    <td><input type="text" name="direccion" placeholder="Dirección"></td>
-                    <td><input type="email" name="correo" placeholder="correo@ejemplo.com" required></td>
-                    <td><input type="text" name="cuenta" placeholder="Cuenta bancaria"></td>
-                    <td><input type="password" name="contraseña" id="contraseña" placeholder="Contraseña (4-8 chars)" required></td>
-                    <td><input type="password" name="verificar_contraseña" id="verificar_contraseña" placeholder="Repetir contraseña" required></td>
-                    <td><input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp"></td>
-                    <td><input type="submit" value="Crear" name="create"></td>
-                </tr>
-            </table>
-            <div class="password-toggle" onclick="togglePasswordVisibility()">Mostrar/Ocultar Contraseñas</div>
-        </form>
-    <?php endif; ?>
-
-    <h2><?php echo $esAdmin ? 'Lista de Instructores' : 'Nuestros Instructores'; ?></h2>
-    <table border="1">
-        <thead>
-        <tr>
-            <th>Cedula</th>
-            <th>Nombre</th>
-            <th>Teléfono</th>
-            <th>Dirección</th>
-            <th>Correo</th>
-            <?php if ($esAdmin): ?>
-                <th>Cuenta Bancaria</th>
-                <th>Contraseña</th>
-                <th>Verificar Contraseña</th>
-                <th>Imagen</th>
+        <?php if (isset($_GET['error']) || isset($_GET['success'])): ?>
+            <?php
+            $errores = [
+                'datos_faltantes' => 'Los campos obligatorios no pueden estar vacíos.',
+                'invalidName' => 'El nombre no puede contener números.',
+                'nameTooLong' => 'El nombre es demasiado largo.',
+                'correo_invalido' => 'El correo electrónico no es válido.',
+                'dbError' => 'No se pudo procesar la transacción en la base de datos.',
+                'passwordLengthInvalid' => 'La contraseña debe tener entre 4 y 8 caracteres.',
+                'invalidId' => 'La cédula debe contener exactamente 3 dígitos numéricos.',
+                'existe' => 'La cédula ya está registrada para otro instructor.',
+                'emailExists' => 'El correo electrónico ya está registrado para otro instructor.',
+                'error' => 'Ocurrió un error inesperado.',
+                'invalidPhone' => 'El teléfono solo puede contener números.',
+                'phoneLengthInvalid' => 'El teléfono debe tener entre 8 y 15 dígitos.',
+                'image_deleted' => 'No se pudo eliminar la imagen.',
+                'password_mismatch' => 'Las contraseñas no coinciden.'
+            ];
+            $exitos = [
+                'inserted' => 'Instructor creado correctamente.',
+                'updated' => 'Instructor actualizado correctamente.',
+                'eliminado' => 'Instructor eliminado correctamente.',
+                'activated' => 'Instructor activado correctamente.',
+                'image_deleted' => 'Imagen eliminada correctamente.'
+            ];
+            ?>
+            <?php if (isset($_GET['error'])): ?>
+                <?php $claveError = $_GET['error']; ?>
+                <div class="error-message">
+                    <i class="ph ph-warning-circle"></i>
+                    <span><?= $errores[$claveError] ?? ('Error: ' . htmlspecialchars($claveError)); ?></span>
+                </div>
+            <?php elseif (isset($_GET['success'])): ?>
+                <?php $claveSuccess = $_GET['success']; ?>
+                <div class="success-message">
+                    <i class="ph ph-check-circle"></i>
+                    <span><?= $exitos[$claveSuccess] ?? 'Operación completada correctamente.'; ?></span>
+                </div>
             <?php endif; ?>
-            <th>Certificados</th>
-            <th>Ver Certificados</th>
-            <?php if ($esAdmin): ?>
-                <th>Estado</th>
-                <th>Acciones</th>
-            <?php elseif ($esInstructor): ?>
-                <th>Acciones</th>
+        <?php endif; ?>
+
+        <section>
+            <h3><i class="ph ph-users-three"></i><?= $esAdmin ? 'Listado de instructores' : 'Equipo del gimnasio' ?></h3>
+            <p class="section-subtitle">
+                <?= $esAdmin ? 'Gestiona datos de contacto, accesos y certificaciones.' : 'Revisa los datos de contacto y certificaciones disponibles.' ?>
+            </p>
+
+            <?php if (empty($instructores)): ?>
+                <p>No hay instructores registrados.</p>
+            <?php else: ?>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Dirección</th>
+                            <th>Correo</th>
+                            <?php if ($esAdmin): ?>
+                                <th>Cuenta bancaria</th>
+                                <th>Contraseña</th>
+                                <th>Confirmación</th>
+                                <th>Imagen</th>
+                            <?php endif; ?>
+                            <th>Certificados</th>
+                            <th>Ver certificados</th>
+                            <?php if ($esAdmin): ?>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            <?php elseif ($esInstructor): ?>
+                                <th>Acciones</th>
+                            <?php endif; ?>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($instructores as $instructor): ?>
+                            <?php
+                            $puedeEditar = $esAdmin || $esInstructor;
+                            $formId = 'instructor-form-' . $instructor->getInstructorId();
+                            $instructorIdFormatted = str_pad($instructor->getInstructorId(), 3, '0', STR_PAD_LEFT);
+                            $certificadosInstructor = $certificadoBusiness->getCertificadosPorInstructor($instructor->getInstructorId());
+                            $certificadosIds = [];
+                            if (!empty($certificadosInstructor)) {
+                                foreach ($certificadosInstructor as $cert) {
+                                    $certificadosIds[] = str_pad($cert->getId(), 3, '0', STR_PAD_LEFT);
+                                }
+                            }
+                            $imageId = $instructor->getTbinstructorImagenId();
+                            $imagenInstructor = null;
+                            if (!empty($imageId)) {
+                                $imagen = $imageManager->getImagesByIds($imageId);
+                                if (!empty($imagen) && !empty($imagen[0]['tbimagenruta'])) {
+                                    $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
+                                    $imagenInstructor = $imagePath . '?t=' . time();
+                                }
+                            }
+                            ?>
+                            <form id="<?= $formId ?>" method="post" action="../action/instructorAction.php" enctype="multipart/form-data"></form>
+                            <tr>
+                                <td class="id-cell">
+                                    <?= htmlspecialchars($instructorIdFormatted); ?>
+                                    <?php if ($puedeEditar): ?>
+                                        <input type="hidden" name="id" value="<?= $instructor->getInstructorId(); ?>" form="<?= $formId ?>">
+                                    <?php endif; ?>
+                                </td>
+                                <?php if ($puedeEditar): ?>
+                                    <td><input type="text" name="nombre" value="<?= htmlspecialchars($instructor->getInstructorNombre() ?? ''); ?>" required form="<?= $formId ?>"></td>
+                                    <td><input type="text" name="telefono" value="<?= htmlspecialchars($instructor->getInstructorTelefono() ?? ''); ?>" form="<?= $formId ?>"></td>
+                                    <td><input type="text" name="direccion" value="<?= htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?>" form="<?= $formId ?>"></td>
+                                    <td><input type="email" name="correo" value="<?= htmlspecialchars($instructor->getInstructorCorreo() ?? ''); ?>" required form="<?= $formId ?>"></td>
+                                    <?php if ($esAdmin): ?>
+                                        <td><input type="text" name="cuenta" value="<?= htmlspecialchars($instructor->getInstructorCuenta() ?? ''); ?>" form="<?= $formId ?>"></td>
+                                        <td><input type="password" name="contraseña" id="contraseña_<?= $instructor->getInstructorId(); ?>" value="<?= htmlspecialchars($instructor->getInstructorContraseña() ?? ''); ?>" required form="<?= $formId ?>"></td>
+                                        <td><input type="password" name="verificar_contraseña" id="verificar_contraseña_<?= $instructor->getInstructorId(); ?>" placeholder="Repetir contraseña" required form="<?= $formId ?>"></td>
+                                        <td>
+                                            <?php if ($imagenInstructor): ?>
+                                                <div class="image-container">
+                                                    <img src="<?= $imagenInstructor; ?>" alt="Imagen del instructor">
+                                                    <button type="button" class="delete-image-btn" data-instructor-id="<?= $instructor->getInstructorId(); ?>" data-image-id="<?= $imageId; ?>" onclick="confirmImageDelete(this)"><i class="ph ph-x"></i></button>
+                                                </div>
+                                            <?php else: ?>
+                                                <input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp" form="<?= $formId ?>">
+                                            <?php endif; ?>
+                                        </td>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <td><?= htmlspecialchars($instructor->getInstructorNombre() ?? ''); ?></td>
+                                    <td><?= htmlspecialchars($instructor->getInstructorTelefono() ?? ''); ?></td>
+                                    <td><?= htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?></td>
+                                    <td><?= htmlspecialchars($instructor->getInstructorCorreo() ?? ''); ?></td>
+                                <?php endif; ?>
+
+                                <td><?= empty($certificadosIds) ? 'Sin certificados' : implode(' | ', $certificadosIds); ?></td>
+                                <td><a href="../view/certificadoView.php?instructor_id=<?= $instructor->getInstructorId(); ?>" class="btn-ver-certificados"><i class="ph ph-certificate"></i>Ver certificados</a></td>
+
+                                <?php if ($esAdmin): ?>
+                                    <td>
+                                        <?php if ($instructor->getInstructorActivo()): ?>
+                                            <span class="status-pill success"><i class="ph ph-check-circle"></i>Activo</span>
+                                        <?php else: ?>
+                                            <span class="status-pill error"><i class="ph ph-warning"></i>Inactivo</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endif; ?>
+
+                                <?php if ($puedeEditar): ?>
+                                    <td>
+                                    <div class="actions">
+                                        <button type="submit" name="update" class="btn-row" form="<?= $formId ?>"><i class="ph ph-floppy-disk"></i></button>
+                                        <?php if ($esAdmin): ?>
+                                            <button type="submit" name="delete" class="btn-row btn-danger" form="<?= $formId ?>" onclick="return confirm('¿Eliminar este instructor?');"><i class="ph ph-trash"></i></button>
+                                            <?php if (!$instructor->getInstructorActivo()): ?>
+                                                <button type="submit" name="activate" class="btn-row" form="<?= $formId ?>"><i class="ph ph-lightning"></i></button>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    </td>
+                                <?php elseif ($esAdmin): ?>
+                                    <td></td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             <?php endif; ?>
-        </tr>
-        </thead>
-        <tbody>
-        <?php
-        if (empty($instructores)) {
-            $colspan = $esAdmin ? 13 : ($esInstructor ? 8 : 7);
-            echo "<tr><td colspan='{$colspan}'>No hay instructores registrados</td></tr>";
-        } else {
-            foreach ($instructores as $instructor) {
-                $puedeEditar = $esAdmin || $esInstructor;
-                echo '<tr>';
-                // MOSTRAR LA CÉDULA (ID) - siempre visible con formato de 3 dígitos
-                $instructorIdFormatted = str_pad($instructor->getInstructorId(), 3, '0', STR_PAD_LEFT);
-                echo '<td class="id-cell">' . htmlspecialchars($instructorIdFormatted) . '</td>';
-
-                if ($puedeEditar) {
-                    echo '<form method="post" action="../action/instructorAction.php" enctype="multipart/form-data">';
-                    echo '<input type="hidden" name="id" value="' . $instructor->getInstructorId() . '">';
-
-                    echo '<td><input type="text" name="nombre" value="' . htmlspecialchars($instructor->getInstructorNombre() ?? '') . '" required></td>';
-                    echo '<td><input type="text" name="telefono" value="' . htmlspecialchars($instructor->getInstructorTelefono() ?? '') . '"></td>';
-                    echo '<td><input type="text" name="direccion" value="' . htmlspecialchars($instructor->getInstructorDireccion() ?? '') . '"></td>';
-                    echo '<td><input type="email" name="correo" value="' . htmlspecialchars($instructor->getInstructorCorreo() ?? '') . '" required></td>';
-
-                    if ($esAdmin) {
-                        echo '<td><input type="text" name="cuenta" value="' . htmlspecialchars($instructor->getInstructorCuenta() ?? '') . '"></td>';
-                        echo '<td><input type="password" name="contraseña" id="contraseña_'.$instructor->getInstructorId().'" value="' . htmlspecialchars($instructor->getInstructorContraseña() ?? '') . '" required></td>';
-                        echo '<td><input type="password" name="verificar_contraseña" id="verificar_contraseña_'.$instructor->getInstructorId().'" placeholder="Repetir contraseña" required></td>';
-                      echo '<td>';
-                      $imageId = $instructor->getTbinstructorImagenId();
-                      if (!empty($imageId)) {
-                          $imagen = $imageManager->getImagesByIds($imageId);
-                          if (!empty($imagen) && !empty($imagen[0]['tbimagenruta'])) {
-                              $imagePath = '..' . htmlspecialchars($imagen[0]['tbimagenruta']);
-                              $finalSrc = $imagePath . '?t=' . time();
-                              echo '<div class="image-container"><img src="' . $finalSrc . '" alt="Imagen"><button type="button" data-instructor-id="' . $instructor->getInstructorId() . '" data-image-id="' . $imageId . '" class="delete-image-btn" onclick="confirmImageDelete(this)">X</button></div>';                          } else {
-                              echo '<input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp">';
-                          }
-                      } else {
-                          echo '<input type="file" name="tbinstructorimagenid[]" accept="image/png, image/jpeg, image/webp">';
-                      }
-                      echo '</td>';
-                    }
-                } else {
-                    // PARA USUARIOS NO ADMIN Y NO ES SU PROPIO PERFIL
-                    echo '<td>' . htmlspecialchars($instructor->getInstructorNombre() ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($instructor->getInstructorTelefono() ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($instructor->getInstructorDireccion() ?? '') . '</td>';
-                    echo '<td>' . htmlspecialchars($instructor->getInstructorCorreo() ?? '') . '</td>';
-                }
-
-                // COLUMNA DE CERTIFICADOS (para todos los usuarios)
-                echo '<td>';
-                $certificadosInstructor = $certificadoBusiness->getCertificadosPorInstructor($instructor->getInstructorId());
-
-                if (!empty($certificadosInstructor)) {
-                    $certificadosIds = [];
-                    foreach ($certificadosInstructor as $cert) {
-                        $certificadosIds[] = str_pad($cert->getId(), 3, '0', STR_PAD_LEFT);
-                    }
-                    echo implode(' | ', $certificadosIds);
-                } else {
-                    echo 'Sin certificados';
-                }
-                echo '</td>';
-
-                echo '<td>';
-                echo '<a href="../view/certificadoView.php?instructor_id=' . $instructor->getInstructorId() . '" class="btn-ver-certificados">Ver Certificados</a>';
-                echo '</td>';
-
-                if ($puedeEditar) {
-                    if ($esAdmin) {
-                        echo '<td>' . ($instructor->getInstructorActivo() ? 'Activo' : 'Inactivo') . '</td>';
-                    }
-
-                    echo '<td>
-                                    <input type="submit" value="Actualizar" name="update">';
-                    if ($esAdmin) {
-                        echo '<input type="submit" value="Eliminar" name="delete" onclick="return confirm(\'¿Eliminar instructor?\')">';
-                        if (!$instructor->getInstructorActivo()) {
-                            echo '<input type="submit" value="Activar" name="activate">';
-                        }
-                    }
-                    echo '</td>';
-
-                    if ($puedeEditar) {
-                        echo '</form>';
-                    }
-                }
-                echo '</tr>';
-            }
-        }
-        ?>
-        </tbody>
-    </table>
-
-    <div>
-        <?php
-        if (isset($_GET['error'])) {
-            echo '<p class="error"><b>';
-            if ($_GET['error'] == "datos_faltantes") {
-                echo 'Error: Los campos obligatorios no pueden estar vacíos.';
-            } else if ($_GET['error'] == "invalidName") {
-                echo 'Error: El nombre no puede contener números.';
-            } else if ($_GET['error'] == "nameTooLong") {
-                echo 'Error: El nombre es demasiado largo.';
-            } else if ($_GET['error'] == "correo_invalido") {
-                echo 'Error: El correo electrónico no es válido.';
-            } else if ($_GET['error'] == "dbError") {
-                echo 'Error: No se pudo procesar la transacción en la base de datos.';
-            } else if ($_GET['error'] == "passwordLengthInvalid") {
-                echo 'Error: La contraseña debe tener entre 4 y 8 caracteres.';
-            } else if ($_GET['error'] == "invalidId") {
-                echo 'Error: La cédula debe contener exactamente 3 dígitos numéricos.';
-            } else if ($_GET['error'] == "existe") {
-                echo 'Error: La cédula ya está registrada para otro instructor.';
-            } else if ($_GET['error'] == "emailExists") {
-                echo 'Error: El correo electrónico ya está registrado para otro instructor.';
-            } else if ($_GET['error'] == "error") {
-                echo 'Error: Ocurrió un error inesperado.';
-            } else if ($_GET['error'] == "invalidPhone") {
-                echo 'Error: El teléfono solo puede contener números.';
-            } else if ($_GET['error'] == "phoneLengthInvalid") {
-                echo 'Error: El teléfono debe tener entre 8 y 15 dígitos.';
-            } else if ($_GET['error'] == "image_deleted") {
-                echo 'Error: No se pudo eliminar la imagen.';
-            } else if ($_GET['error'] == "password_mismatch") {
-                echo 'Error: Las contraseñas no coinciden.';
-            }
-            echo '</b></p>';
-        } else if (isset($_GET['success'])) {
-            echo '<p class="success"><b>';
-            if ($_GET['success'] == "inserted") {
-                echo 'Éxito: Instructor creado correctamente.';
-            } else if ($_GET['success'] == "updated") {
-                echo 'Éxito: Instructor actualizado correctamente.';
-            } else if ($_GET['success'] == "eliminado") {
-                echo 'Éxito: Instructor eliminado correctamente.';
-            } else if ($_GET['success'] == "activated") {
-                echo 'Éxito: Instructor activado correctamente.';
-            } else if ($_GET['success'] == "image_deleted") {
-                echo 'Éxito: Imagen eliminada correctamente.';
-            }
-            echo '</b></p>';
-        }
-        ?>
-    </div>
-</main>
-
-<hr>
-
-<footer>
-    <p>Fin de la página.</p>
-</footer>
-
+        </section>
+    </main>
+</div>
 <script>
     // Validación en tiempo real para todos los campos
     document.addEventListener('DOMContentLoaded', function () {
