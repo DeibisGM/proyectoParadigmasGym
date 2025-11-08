@@ -136,7 +136,7 @@ if ($tipoUsuario == 'cliente') {
                             <?php $error = Validation::getError('fechaInscripcion'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                             <input type="date" id="fechaInscripcion" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion') ?>">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group form-group-horizontal">
                             <label for="tbclienteimagenid">Foto de cliente:</label>
                             <input type="file" id="tbclienteimagenid" name="tbclienteimagenid[]" accept="image/png, image/jpeg, image/webp">
                         </div>
@@ -147,8 +147,8 @@ if ($tipoUsuario == 'cliente') {
 
             <section>
                 <h3><i class="ph ph-list-bullets"></i>Clientes Registrados</h3>
-                <div style="overflow-x:auto;">
-                    <table>
+                <div class="table-wrapper">
+                    <table class="table-clients">
                         <thead>
                         <tr>
                             <th>Nombre</th>
@@ -175,32 +175,32 @@ if ($tipoUsuario == 'cliente') {
                                 <form id="form-<?= $rowId ?>" method="post" action="../action/clienteAction.php" enctype="multipart/form-data"></form>
                                 <input type="hidden" name="id" value="<?= $rowId ?>" form="form-<?= $rowId ?>">
                                 <input type="hidden" name="carnet" value="<?= htmlspecialchars($c->getCarnet()) ?>" form="form-<?= $rowId ?>">
-                                <td>
+                                <td data-label="Nombre">
                                     <?php $error = Validation::getError('nombre_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$rowId, $c->getNombre())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td><?= htmlspecialchars($c->getCarnet()) ?></td>
-                                <td>
+                                <td data-label="Carnet"><?= htmlspecialchars($c->getCarnet()) ?></td>
+                                <td data-label="Nacimiento">
                                     <?php $error = Validation::getError('fechaNacimiento_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="date" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento_'.$rowId, $c->getFechaNacimiento()) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
+                                <td data-label="Teléfono">
                                     <?php $error = Validation::getError('telefono_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="text" name="telefono" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('telefono_'.$rowId, $c->getTelefono())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
+                                <td data-label="Correo">
                                     <?php $error = Validation::getError('correo_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="email" name="correo" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('correo_'.$rowId, $c->getCorreo())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
+                                <td data-label="Contraseña">
                                     <?php $error = Validation::getError('contrasena_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="password" name="contrasena" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('contrasena_'.$rowId, $c->getContrasena())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
+                                <td data-label="Dirección">
                                     <?php $error = Validation::getError('direccion_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="text" name="direccion" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('direccion_'.$rowId, $c->getDireccion())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
+                                <td data-label="Género">
                                     <?php $error = Validation::getError('genero_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <select name="genero" form="form-<?= $rowId ?>">
                                         <option value="M" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='M'?'selected':'' ?>>Masculino</option>
@@ -208,31 +208,33 @@ if ($tipoUsuario == 'cliente') {
                                         <option value="Otro" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='Otro'?'selected':'' ?>>Otro</option>
                                     </select>
                                 </td>
-                                <td>
+                                <td data-label="Inscripción">
                                     <?php $error = Validation::getError('fechaInscripcion_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion_'.$rowId, $c->getInscripcion()) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
+                                <td data-label="Estado">
                                     <?php $error = Validation::getError('estado_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <select name="estado" form="form-<?= $rowId ?>">
                                         <option value="1" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==1?'selected':'' ?>>Activo</option>
                                         <option value="0" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==0?'selected':'' ?>>Inactivo</option>
                                     </select>
                                 </td>
-                                <td>
+                                <td data-label="Imagen">
                                     <?php
                                     $img = $imageManager->getImagesByIds($c->getTbclienteImagenId());
                                     if (!empty($img)) {
                                         $src = '..' . htmlspecialchars($img[0]['tbimagenruta']) . '?t=' . time();
-                                        echo '<div class="image-container"><img src="'.$src.'" alt="Imagen"><button type="submit" name="delete_image" value="'.$c->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');" form="form-'.$rowId.'">X</button></div>';
+                                        echo '<div class="image-container"><img src="'.$src.'" alt="Imagen" onerror="this.onerror=null; this.src=\'noimage.svg\';"><button type="submit" name="delete_image" value="'.$c->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');" form="form-'.$rowId.'"><i class="ph ph-x"></i></button></div>';
                                     } else {
                                         echo '<input type="file" name="tbclienteimagenid[]" form="form-'.$rowId.'">';
                                     }
                                     ?>
                                 </td>
-                                <td>
-                                    <button type="submit" name="actualizar" form="form-<?= $rowId ?>"><i class="ph ph-pencil-simple"></i>Actualizar</button>
-                                    <button type="submit" name="eliminar" onclick="return confirm('¿Estás seguro de eliminar este cliente?');" form="form-<?= $rowId ?>"><i class="ph ph-trash"></i>Eliminar</button>
+                                <td data-label="Acción">
+                                    <div class="actions">
+                                        <button type="submit" name="actualizar" form="form-<?= $rowId ?>" class="btn-row"><i class="ph ph-pencil-simple"></i></button>
+                                        <button type="submit" name="eliminar" onclick="return confirm('¿Estás seguro de eliminar este cliente?');" form="form-<?= $rowId ?>" class="btn-row btn-danger"><i class="ph ph-trash"></i></button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -307,7 +309,7 @@ if ($tipoUsuario == 'cliente') {
                                 $img = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
                                 if (!empty($img)) {
                                     $src = '..' . htmlspecialchars($img[0]['tbimagenruta']) . '?t=' . time();
-                                    echo '<div class="image-container"><img src="'.$src.'" alt="Imagen"><button type="submit" name="delete_image" value="'.$cliente->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button></div>';
+                                    echo '<div class="image-container"><img src="'.$src.'" alt="Imagen" onerror="this.onerror=null; this.src=\'noimage.svg\';"><button type="submit" name="delete_image" value="'.$cliente->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');"><i class="ph ph-x"></i></button></div>';
                                 } else {
                                     echo '<input type="file" name="tbclienteimagenid[]">';
                                 }

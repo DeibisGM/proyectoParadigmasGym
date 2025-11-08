@@ -64,7 +64,7 @@ if ($tipoUsuario == 'cliente') {
                 <div class="menu-grid">
                     <a href='view/ejercicioFuerzaView.php'><button><i class="ph-fill ph-barbell"></i>Ejercicios de fuerza</button></a>
                     <!-- NUEVO: Ejercicios de Equilibrio/Coordinación -->
-                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph-fill ph-balance"></i>Ejercicios de Equilibrio</button></a>
+                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph-fill ph-scales"></i>Ejercicios de Equilibrio</button></a>
                     <a href='view/ejercicioResistenciaView.php'><button><i class="ph-fill ph-barbell"></i>Ejercicios de resistencia</button></a>
                     <a href='view/ejercicioFlexibilidadView.php'><button><i class="ph-fill ph-barbell"></i>Ejercicios de Flexibilidad</button></a>
                 </div>
@@ -120,6 +120,7 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/rutinaView.php'><button><i class="ph-fill ph-notebook"></i>Mis Rutinas</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph-fill ph-user-plus"></i>Instructor Personal</button></a>
                     <a href='view/horarioLibreView.php'><button><i class="ph-fill ph-barbell"></i>Uso Libre</button></a>
+                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph-fill ph-balance"></i>Ejercicios de Equilibrio</button></a>
                     <a href='view/instructorHorarioView.php'><button><i class="ph-fill ph-calendar"></i>Horarios de Instructores</button></a>
                     <a href='view/instructorClienteView.php'><button><i class="ph-fill ph-chalkboard-teacher"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph-fill ph-person-simple-run"></i>Zonas del Cuerpo</button></a>

@@ -219,6 +219,17 @@ body.auth-body {
     font-size: 1.2rem;
 }
 
+.form-group-horizontal {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+}
+
+.form-group-horizontal label {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -308,7 +319,7 @@ input[type="submit"]:active {
 header {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     padding: 0.8rem clamp(1.8rem, 3vw, 2.4rem);
     background: linear-gradient(145deg, rgba(137, 194, 53, 0.05) 0%, rgba(0, 0, 0, 0.9) 100%);
     border-radius: var(--radius-lg);
@@ -332,6 +343,9 @@ header p {
 }
 
 header.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     flex-wrap: wrap;
 }
 
@@ -544,39 +558,147 @@ i.ph {
     font-weight: 600;
 }
 
-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-bottom: 2.2rem;
-    background: var(--color-surface-solid);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    border: 1px solid rgba(148, 163, 184, 0.15);
-    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+/* Estilos de tabla mejorados para tu tema oscuro verde */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(137, 194, 53, 0.12);
+  background: radial-gradient(circle at top, rgba(137, 194, 53, 0.03), rgba(0,0,0,0.9));
+  box-shadow: 0 20px 40px rgba(0,0,0,.35);
+}
+.table-clients {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1180px;
+  font-size: .85rem;
+  color: #fff;
+}
+.table-clients thead th {
+  background: var(--color-surface-strong);
+  border-bottom: none;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 600;
+  padding: .9rem .75rem;
+  white-space: nowrap;
 }
 
-th,
-td {
-    padding: 1rem 1.1rem;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-    text-align: left;
-    vertical-align: top;
+.table-clients thead th:first-child,
+.table-clients tbody td:first-child {
+    padding-left: 1.5rem;
 }
 
-th {
-    background: var(--color-accent-soft);
+.table-clients thead th:last-child,
+.table-clients tbody td:last-child {
+    padding-right: 1.5rem;
+}
+.table-clients tbody tr {
+  background: rgba(0,0,0,.25);
+  border-bottom: 1px solid rgba(137, 194, 53, 0.03);
+  transition: background .15s ease, transform .15s ease;
+}
+.table-clients tbody tr:nth-child(even) {
+  background: rgba(255,255,255,.01);
+}
+.table-clients tbody tr:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+.table-clients td {
+  padding: .6rem .5rem;
+  vertical-align: middle;
+}
+/* inputs compactos dentro de la tabla */
+.table-clients input[type="text"],
+.table-clients input[type="email"],
+.table-clients input[type="date"],
+.table-clients input[type="password"],
+.table-clients select {
+  width: 100%;
+  min-width: 140px;
+  background: rgba(12,12,12,.7);
+  border: 1px solid rgba(148, 163, 184, 0.25); /* Dark gray border */
+  border-radius: .4rem;
+  padding: .35rem .55rem;
+  font-size: .85rem;
+  color: #fff;
+}
+
+.table-clients select {
+  min-width: 110px;
+}
+
+.actions {
+    display: flex;
+    gap: 0.4rem;
+    justify-content: center;
+}
+
+.btn-row {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    font-size: 1rem;
+    border-radius: var(--radius-xs);
+    background: transparent;
     color: var(--color-text);
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-tr:nth-child(even) td {
-    background: var(--color-surface-strong);
+.btn-row:hover {
+    transform: translateY(-1px);
+    background: var(--color-accent);
+    color: #000;
+    border-color: var(--color-accent-strong);
+    box-shadow: none;
+    filter: none;
 }
 
-tr:hover td {
-    background: var(--color-accent-soft);
+.btn-row.btn-danger {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+    box-shadow: none;
+}
+
+.btn-row.btn-danger:hover {
+    background: #ef4444;
+    color: #fff;
+    box-shadow: none;
+    filter: none;
+}
+
+/* Override general danger button styles within the table */
+.table-clients .btn-row.btn-danger,
+.table-clients .btn-row.btn-danger:hover {
+    box-shadow: none !important;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-strong);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-accent);
+  border-radius: 6px;
+  border: 3px solid var(--color-surface-strong);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-accent-strong);
 }
 
 td select {
@@ -612,28 +734,38 @@ hr {
     object-fit: cover;
 }
 
+.table-clients td input[type="file"] {
+    width: auto;
+    display: block;
+    margin: 0 auto;
+}
+
 .image-container button[name="delete_image"] {
     position: absolute;
-    top: -6px;
-    right: -6px;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #f87171, #ef4444);
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 0 0 0 var(--radius-sm);
+    background: #ef4444; /* Use background shorthand */
     border: none;
-    color: #0b1120;
-    font-weight: 700;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 10px 18px rgba(248, 113, 113, 0.35);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+    transition: background 0.2s ease;
+}
+
+.image-container button[name="delete_image"] i {
+    font-size: 0.9rem; /* Smaller icon */
 }
 
 .image-container button[name="delete_image"]:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 16px 26px rgba(248, 113, 113, 0.45);
+    background: #dc2626; /* Use background shorthand */
+    box-shadow: none;
+    transform: none;
 }
 
 .navegacion-semana {
