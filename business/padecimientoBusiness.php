@@ -38,8 +38,16 @@ class PadecimientoBusiness {
         return $this->padecimientoData->obtenerTbpadecimientoPorId($padecimientoid);
     }
 
-    public function obtenerTbpadecimientoPorTipo($tipo) {
-        return $this->padecimientoData->obtenerTbpadecimientoPorTipo($tipo);
+    public function obtenerPadecimientosPorTipo($tipo) {
+        $padecimientosObj = $this->padecimientoData->obtenerTbpadecimientoPorTipo($tipo);
+        $padecimientos = array();
+        foreach ($padecimientosObj as $padecimiento) {
+            $padecimientos[] = array(
+                'tbpadecimientoid' => $padecimiento->getTbpadecimientoid(),
+                'tbpadecimientonombre' => $padecimiento->getTbpadecimientonombre()
+            );
+        }
+        return $padecimientos;
     }
 
     public function validarPadecimiento($tipo, $nombre, $descripcion, $formaDeActuar) {

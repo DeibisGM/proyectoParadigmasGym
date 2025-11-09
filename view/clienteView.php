@@ -28,6 +28,20 @@ if ($tipoUsuario == 'cliente') {
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Gestión de Clientes</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.2rem;
+        }
+        .form-grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+    </style>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="../utility/Events.js"></script>
 
@@ -71,58 +85,61 @@ if ($tipoUsuario == 'cliente') {
             <section>
                 <h3><i class="ph ph-user-plus"></i>Registrar Cliente</h3>
                 <form name="clienteForm" method="post" action="../action/clienteAction.php" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label>Identificación: </label>
-                        <span class="error-message"><?= Validation::getError('carnet') ?></span>
-                        <input type="text" name="carnet" maxlength="10" placeholder="Carnet" value="<?= Validation::getOldInput('carnet') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Nombre: </label>
-                        <span class="error-message"><?= Validation::getError('nombre') ?></span>
-                        <input type="text" name="nombre" maxlength="50" placeholder="Nombre" value="<?= Validation::getOldInput('nombre') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha de nacimiento: </label>
-                        <span class="error-message"><?= Validation::getError('fechaNacimiento') ?></span>
-                        <input type="date" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Telefono: </label>
-                        <span class="error-message"><?= Validation::getError('telefono') ?></span>
-                        <input type="text" name="telefono" maxlength="8" placeholder="Teléfono" value="<?= Validation::getOldInput('telefono') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Correo: </label>
-                        <span class="error-message"><?= Validation::getError('correo') ?></span>
-                        <input type="email" name="correo" maxlength="100" placeholder="Correo" value="<?= Validation::getOldInput('correo') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Contraseña: </label>
-                        <span class="error-message"><?= Validation::getError('contrasena') ?></span>
-                        <input type="password" name="contrasena" maxlength="8" placeholder="Contraseña" value="<?= Validation::getOldInput('contrasena') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Direccion: </label>
-                        <span class="error-message"><?= Validation::getError('direccion') ?></span>
-                        <input type="text" name="direccion" maxlength="100" placeholder="Dirección" value="<?= Validation::getOldInput('direccion') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Genero: </label>
-                        <span class="error-message"><?= Validation::getError('genero') ?></span>
-                        <select name="genero">
-                            <option value="M" <?= (Validation::getOldInput('genero')=='M'?'selected':'') ?>>Masculino</option>
-                            <option value="F" <?= (Validation::getOldInput('genero')=='F'?'selected':'') ?>>Femenino</option>
-                            <option value="Otro" <?= (Validation::getOldInput('genero')=='Otro'?'selected':'') ?>>Otro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Fecha de inscripción: </label>
-                        <span class="error-message"><?= Validation::getError('fechaInscripcion') ?></span>
-                        <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion') ?>">
-                    </div>
-                    <div class="form-group">
-                        <label>Foto de cliente:</label>
-                        <input type="file" name="tbclienteimagenid[]" accept="image/png, image/jpeg, image/webp">
+                    <div class="form-grid-container">
+                        <div class="form-group">
+                            <label for="carnet">Identificación: </label>
+                            <?php $error = Validation::getError('carnet'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                            <input type="text" id="carnet" name="carnet" maxlength="10" placeholder="Ej: 123456789" value="<?= Validation::getOldInput('carnet') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre: </label>
+                            <?php $error = Validation::getError('nombre'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?><input type="text" id="nombre" name="nombre" maxlength="50" placeholder="Ej: Juan Pérez" value="<?= Validation::getOldInput('nombre') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaNacimiento">Fecha de Nacimiento: </label>
+                            <?php $error = Validation::getError('fechaNacimiento'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                            <input type="date" id="fechaNacimiento" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono: </label>
+                            <?php $error = Validation::getError('telefono'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                            <input type="text" id="telefono" name="telefono" maxlength="8" placeholder="Ej: 88888888" value="<?= Validation::getOldInput('telefono') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="correo">Correo: </label>
+                            <?php $error = Validation::getError('correo'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?><input type="email" id="correo" name="correo" maxlength="100" placeholder="ejemplo@correo.com" value="<?= Validation::getOldInput('correo') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="contrasena">Contraseña: </label>
+                            <?php $error = Validation::getError('contrasena'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                            <div class="password-group">
+                                <input type="password" id="contrasena" name="contrasena" maxlength="8" placeholder="********" value="<?= Validation::getOldInput('contrasena') ?>">
+                                <i class="ph ph-eye" id="togglePassword"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="direccion">Dirección: </label>
+                            <?php $error = Validation::getError('direccion'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                            <input type="text" id="direccion" name="direccion" maxlength="100" placeholder="Ej: San José, Costa Rica" value="<?= Validation::getOldInput('direccion') ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="genero">Género: </label>
+                            <?php $error = Validation::getError('genero'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                            <select id="genero" name="genero">
+                                <option value="M" <?= (Validation::getOldInput('genero')=='M'?'selected':'') ?>>Masculino</option>
+                                <option value="F" <?= (Validation::getOldInput('genero')=='F'?'selected':'') ?>>Femenino</option>
+                                <option value="Otro" <?= (Validation::getOldInput('genero')=='Otro'?'selected':'') ?>>Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaInscripcion">Fecha de inscripción: </label>
+                            <?php $error = Validation::getError('fechaInscripcion'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                            <input type="date" id="fechaInscripcion" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion') ?>">
+                        </div>
+                        <div class="form-group form-group-horizontal">
+                            <label for="tbclienteimagenid">Foto de cliente:</label>
+                            <input type="file" id="tbclienteimagenid" name="tbclienteimagenid[]" accept="image/png, image/jpeg, image/webp">
+                        </div>
                     </div>
                     <button type="submit" name="insertar"><i class="ph ph-plus"></i>Registrar Cliente</button>
                 </form>
@@ -130,8 +147,8 @@ if ($tipoUsuario == 'cliente') {
 
             <section>
                 <h3><i class="ph ph-list-bullets"></i>Clientes Registrados</h3>
-                <div style="overflow-x:auto;">
-                    <table>
+                <div class="table-wrapper">
+                    <table class="table-clients">
                         <thead>
                         <tr>
                             <th>Nombre</th>
@@ -158,64 +175,66 @@ if ($tipoUsuario == 'cliente') {
                                 <form id="form-<?= $rowId ?>" method="post" action="../action/clienteAction.php" enctype="multipart/form-data"></form>
                                 <input type="hidden" name="id" value="<?= $rowId ?>" form="form-<?= $rowId ?>">
                                 <input type="hidden" name="carnet" value="<?= htmlspecialchars($c->getCarnet()) ?>" form="form-<?= $rowId ?>">
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('nombre_'.$rowId) ?></span>
+                                <td data-label="Nombre">
+                                    <?php $error = Validation::getError('nombre_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="text" name="nombre" maxlength="50" value="<?= htmlspecialchars(Validation::getOldInput('nombre_'.$rowId, $c->getNombre())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td><?= htmlspecialchars($c->getCarnet()) ?></td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('fechaNacimiento_'.$rowId) ?></span>
+                                <td data-label="Carnet"><?= htmlspecialchars($c->getCarnet()) ?></td>
+                                <td data-label="Nacimiento">
+                                    <?php $error = Validation::getError('fechaNacimiento_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="date" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento_'.$rowId, $c->getFechaNacimiento()) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('telefono_'.$rowId) ?></span>
+                                <td data-label="Teléfono">
+                                    <?php $error = Validation::getError('telefono_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="text" name="telefono" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('telefono_'.$rowId, $c->getTelefono())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('correo_'.$rowId) ?></span>
+                                <td data-label="Correo">
+                                    <?php $error = Validation::getError('correo_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="email" name="correo" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('correo_'.$rowId, $c->getCorreo())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('contrasena_'.$rowId) ?></span>
+                                <td data-label="Contraseña">
+                                    <?php $error = Validation::getError('contrasena_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="password" name="contrasena" maxlength="8" value="<?= htmlspecialchars(Validation::getOldInput('contrasena_'.$rowId, $c->getContrasena())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('direccion_'.$rowId) ?></span>
+                                <td data-label="Dirección">
+                                    <?php $error = Validation::getError('direccion_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="text" name="direccion" maxlength="100" value="<?= htmlspecialchars(Validation::getOldInput('direccion_'.$rowId, $c->getDireccion())) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('genero_'.$rowId) ?></span>
+                                <td data-label="Género">
+                                    <?php $error = Validation::getError('genero_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <select name="genero" form="form-<?= $rowId ?>">
                                         <option value="M" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='M'?'selected':'' ?>>Masculino</option>
                                         <option value="F" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='F'?'selected':'' ?>>Femenino</option>
                                         <option value="Otro" <?= Validation::getOldInput('genero_'.$rowId, $c->getGenero())=='Otro'?'selected':'' ?>>Otro</option>
                                     </select>
                                 </td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('fechaInscripcion_'.$rowId) ?></span>
+                                <td data-label="Inscripción">
+                                    <?php $error = Validation::getError('fechaInscripcion_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion_'.$rowId, $c->getInscripcion()) ?>" form="form-<?= $rowId ?>">
                                 </td>
-                                <td>
-                                    <span class="error-message"><?= Validation::getError('estado_'.$rowId) ?></span>
+                                <td data-label="Estado">
+                                    <?php $error = Validation::getError('estado_'.$rowId); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
                                     <select name="estado" form="form-<?= $rowId ?>">
                                         <option value="1" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==1?'selected':'' ?>>Activo</option>
                                         <option value="0" <?= Validation::getOldInput('estado_'.$rowId, $c->getActivo())==0?'selected':'' ?>>Inactivo</option>
                                     </select>
                                 </td>
-                                <td>
+                                <td data-label="Imagen">
                                     <?php
                                     $img = $imageManager->getImagesByIds($c->getTbclienteImagenId());
                                     if (!empty($img)) {
                                         $src = '..' . htmlspecialchars($img[0]['tbimagenruta']) . '?t=' . time();
-                                        echo '<div class="image-container"><img src="'.$src.'" alt="Imagen"><button type="submit" name="delete_image" value="'.$c->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');" form="form-'.$rowId.'">X</button></div>';
+                                        echo '<div class="image-container"><img src="'.$src.'" alt="Imagen" onerror="this.onerror=null; this.src=\'noimage.svg\';"><button type="submit" name="delete_image" value="'.$c->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');" form="form-'.$rowId.'"><i class="ph ph-x"></i></button></div>';
                                     } else {
                                         echo '<input type="file" name="tbclienteimagenid[]" form="form-'.$rowId.'">';
                                     }
                                     ?>
                                 </td>
-                                <td>
-                                    <button type="submit" name="actualizar" form="form-<?= $rowId ?>"><i class="ph ph-pencil-simple"></i>Actualizar</button>
-                                    <button type="submit" name="eliminar" onclick="return confirm('¿Estás seguro de eliminar este cliente?');" form="form-<?= $rowId ?>"><i class="ph ph-trash"></i>Eliminar</button>
+                                <td data-label="Acción">
+                                    <div class="actions">
+                                        <button type="submit" name="actualizar" form="form-<?= $rowId ?>" class="btn-row"><i class="ph ph-pencil-simple"></i></button>
+                                        <button type="submit" name="eliminar" onclick="return confirm('¿Estás seguro de eliminar este cliente?');" form="form-<?= $rowId ?>" class="btn-row btn-danger"><i class="ph ph-trash"></i></button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -229,69 +248,73 @@ if ($tipoUsuario == 'cliente') {
                 <h3><i class="ph ph-user-circle"></i>Mi Información</h3>
                 <?php if ($cliente): ?>
                     <form method="post" action="../action/clienteAction.php" enctype="multipart/form-data">
-                        <input type="hidden" name="id" value="<?= $cliente->getId() ?>">
-                        <input type="hidden" name="carnet" value="<?= htmlspecialchars($cliente->getCarnet()) ?>">
+                        <div class="form-grid-container">
+                            <input type="hidden" name="id" value="<?= $cliente->getId() ?>">
+                            <input type="hidden" name="carnet" value="<?= htmlspecialchars($cliente->getCarnet()) ?>">
 
-                        <div class="form-group">
-                            <label>Carnet:</label>
-                            <p><?= htmlspecialchars($cliente->getCarnet()) ?></p>
-                        </div>
-                        <div class="form-group">
-                            <span class="error-message"><?= Validation::getError('nombre') ?></span>
-                            <label>Nombre:</label>
-                            <input type="text" name="nombre" maxlength="50" value="<?= Validation::getOldInput('nombre', htmlspecialchars($cliente->getNombre())) ?>">
-                        </div>
-                        <div class="form-group">
-                            <span class="error-message"><?= Validation::getError('fechaNacimiento') ?></span>
-                            <label>Fecha de nacimiento:</label>
-                            <input type="date" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento', $cliente->getFechaNacimiento()) ?>">
-                        </div>
-                        <div class="form-group">
-                            <span class="error-message"><?= Validation::getError('telefono') ?></span>
-                            <label>Teléfono:</label>
-                            <input type="text" name="telefono" maxlength="8" value="<?= Validation::getOldInput('telefono', htmlspecialchars($cliente->getTelefono())) ?>">
-                        </div>
-                        <div class="form-group">
-                            <span class="error-message"><?= Validation::getError('correo') ?></span>
-                            <label>Correo:</label>
-                            <input type="email" name="correo" maxlength="100" value="<?= Validation::getOldInput('correo', htmlspecialchars($cliente->getCorreo())) ?>">
-                        </div>
-                        <div class="form-group">
-                            <span class="error-message"><?= Validation::getError('contrasena') ?></span>
-                            <label>Contraseña:</label>
-                            <input type="password" name="contrasena" maxlength="8" value="<?= Validation::getOldInput('contrasena', htmlspecialchars($cliente->getContrasena())) ?>">
-                        </div>
-                        <div class="form-group">
-                            <span class="error-message"><?= Validation::getError('direccion') ?></span>
-                            <label>Dirección:</label>
-                            <input type="text" name="direccion" maxlength="100" value="<?= Validation::getOldInput('direccion', htmlspecialchars($cliente->getDireccion())) ?>">
-                        </div>
-                        <div class="form-group">
-                            <span class="error-message"><?= Validation::getError('genero') ?></span>
-                            <label>Género:</label>
-                            <select name="genero">
-                                <option value="M" <?= (Validation::getOldInput('genero', $cliente->getGenero())=='M'?'selected':'') ?>>Masculino</option>
-                                <option value="F" <?= (Validation::getOldInput('genero', $cliente->getGenero())=='F'?'selected':'') ?>>Femenino</option>
-                                <option value="Otro" <?= (Validation::getOldInput('genero', $cliente->getGenero())=='Otro'?'selected':'') ?>>Otro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Fecha de inscripción:</label>
-                            <input type="date" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion', $cliente->getInscripcion()) ?>">
-                        </div>
-                        <input type="hidden" name="estado" value="<?= $cliente->getActivo() ?>">
+                            <div class="form-group">
+                                <label for="carnet_cliente">Carnet:</label>
+                                <input type="text" id="carnet_cliente" name="carnet" value="<?= htmlspecialchars($cliente->getCarnet()) ?>" disabled>
+                            </div>
+                            <div class="form-group">
+                                <?php $error = Validation::getError('nombre'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                                <label for="nombre_cliente">Nombre:</label>
+                                <input type="text" id="nombre_cliente" name="nombre" maxlength="50" value="<?= Validation::getOldInput('nombre', htmlspecialchars($cliente->getNombre())) ?>">
+                            </div>
+                            <div class="form-group">
+                                <?php $error = Validation::getError('fechaNacimiento'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                                <label for="fechaNacimiento_cliente">Fecha de nacimiento:</label>
+                                <input type="date" id="fechaNacimiento_cliente" name="fechaNacimiento" value="<?= Validation::getOldInput('fechaNacimiento', $cliente->getFechaNacimiento()) ?>">
+                            </div>
+                            <div class="form-group">
+                                <?php $error = Validation::getError('telefono'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                                <label for="telefono_cliente">Teléfono:</label>
+                                <input type="text" id="telefono_cliente" name="telefono" maxlength="8" value="<?= Validation::getOldInput('telefono', htmlspecialchars($cliente->getTelefono())) ?>">
+                            </div>
+                            <div class="form-group">
+                                <?php $error = Validation::getError('correo'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                                <label for="correo_cliente">Correo:</label>
+                                <input type="email" id="correo_cliente" name="correo" maxlength="100" value="<?= Validation::getOldInput('correo', htmlspecialchars($cliente->getCorreo())) ?>">
+                            </div>
+                                                    <div class="form-group">
+                                                        <?php $error = Validation::getError('contrasena'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                                                        <label for="contrasena_cliente">Contraseña:</label>
+                                                        <div class="password-group">
+                                                            <input type="password" id="contrasena_cliente" name="contrasena" maxlength="8" value="<?= Validation::getOldInput('contrasena', htmlspecialchars($cliente->getContrasena())) ?>">
+                                                            <i class="ph ph-eye" id="togglePasswordCliente"></i>
+                                                        </div>
+                                                    </div>                            <div class="form-group">
+                                <?php $error = Validation::getError('direccion'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                                <label for="direccion_cliente">Dirección:</label>
+                                <input type="text" id="direccion_cliente" name="direccion" maxlength="100" value="<?= Validation::getOldInput('direccion', htmlspecialchars($cliente->getDireccion())) ?>">
+                            </div>
+                            <div class="form-group">
+                                <?php $error = Validation::getError('genero'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
+                                <label for="genero_cliente">Género:</label>
+                                <select id="genero_cliente" name="genero">
+                                    <option value="M" <?= (Validation::getOldInput('genero', $cliente->getGenero())=='M'?'selected':'') ?>>Masculino</option>
+                                    <option value="F" <?= (Validation::getOldInput('genero', $cliente->getGenero())=='F'?'selected':'') ?>>Femenino</option>
+                                    <option value="Otro" <?= (Validation::getOldInput('genero', $cliente->getGenero())=='Otro'?'selected':'') ?>>Otro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="fechaInscripcion_cliente">Fecha de inscripción:</label>
+                                <input type="date" id="fechaInscripcion_cliente" name="fechaInscripcion" value="<?= Validation::getOldInput('fechaInscripcion', $cliente->getInscripcion()) ?>">
+                            </div>
+                            <input type="hidden" name="estado" value="<?= $cliente->getActivo() ?>">
 
-                        <div class="form-group">
-                            <label>Foto de perfil:</label>
-                            <?php
-                            $img = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
-                            if (!empty($img)) {
-                                $src = '..' . htmlspecialchars($img[0]['tbimagenruta']) . '?t=' . time();
-                                echo '<div class="image-container"><img src="'.$src.'" alt="Imagen"><button type="submit" name="delete_image" value="'.$cliente->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');">X</button></div>';
-                            } else {
-                                echo '<input type="file" name="tbclienteimagenid[]">';
-                            }
-                            ?>
+                            <div class="form-group">
+                                <label>Foto de perfil:</label>
+                                <?php
+                                $img = $imageManager->getImagesByIds($cliente->getTbclienteImagenId());
+                                if (!empty($img)) {
+                                    $src = '..' . htmlspecialchars($img[0]['tbimagenruta']) . '?t=' . time();
+                                    echo '<div class="image-container"><img src="'.$src.'" alt="Imagen" onerror="this.onerror=null; this.src=\'noimage.svg\';"><button type="submit" name="delete_image" value="'.$cliente->getTbclienteImagenId().'" onclick="return confirm(\'¿Eliminar esta imagen?\');"><i class="ph ph-x"></i></button></div>';
+                                } else {
+                                    echo '<input type="file" name="tbclienteimagenid[]">';
+                                }
+                                ?>
+                            </div>
                         </div>
                         <button type="submit" name="actualizar"><i class="ph ph-floppy-disk"></i>Actualizar Mis Datos</button>
                     </form>
@@ -302,10 +325,34 @@ if ($tipoUsuario == 'cliente') {
         <?php } ?>
     </main>
 
-    <footer>
-        <p>&copy; <?= date("Y") ?> Gimnasio. Todos los derechos reservados.</p>
-    </footer>
 </div>
 <?php Validation::clear(); ?>
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#contrasena');
+
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            // toggle the eye slash icon
+            this.classList.toggle('ph-eye-slash');
+        });
+    }
+
+    const togglePasswordCliente = document.querySelector('#togglePasswordCliente');
+    const passwordCliente = document.querySelector('#contrasena_cliente');
+
+    if (togglePasswordCliente) {
+        togglePasswordCliente.addEventListener('click', function (e) {
+            // toggle the type attribute
+            const type = passwordCliente.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordCliente.setAttribute('type', type);
+            // toggle the eye slash icon
+            this.classList.toggle('ph-eye-slash');
+        });
+    }
+</script>
 </body>
 </html>

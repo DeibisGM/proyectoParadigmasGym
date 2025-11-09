@@ -27,11 +27,11 @@ $tiposPadecimiento = $padecimientoBusiness->obtenerTiposPadecimiento();
 $padecimientos = array();
 foreach ($padecimientosObj as $padecimiento) {
     $padecimientos[] = array(
-        'tbpadecimientoid' => $padecimiento->getTbpadecimientoid(),
-        'tbpadecimientotipo' => $padecimiento->getTbpadecimientotipo(),
-        'tbpadecimientonombre' => $padecimiento->getTbpadecimientonombre(),
-        'tbpadecimientodescripcion' => $padecimiento->getTbpadecimientodescripcion(),
-        'tbpadecimientoformadeactuar' => $padecimiento->getTbpadecimientoformadeactuar()
+            'tbpadecimientoid' => $padecimiento->getTbpadecimientoid(),
+            'tbpadecimientotipo' => $padecimiento->getTbpadecimientotipo(),
+            'tbpadecimientonombre' => $padecimiento->getTbpadecimientonombre(),
+            'tbpadecimientodescripcion' => $padecimiento->getTbpadecimientodescripcion(),
+            'tbpadecimientoformadeactuar' => $padecimiento->getTbpadecimientoformadeactuar()
     );
 }
 
@@ -45,12 +45,12 @@ if ($esUsuarioCliente) {
 $clientePadecimientos = array();
 foreach ($clientePadecimientosObj as $clienteObj) {
     $clientePadecimientos[] = array(
-        'tbclientepadecimientoid' => $clienteObj->getTbclientepadecimientoid(),
-        'tbclienteid' => $clienteObj->getTbclienteid(),
-        'tbpadecimientoid' => $clienteObj->getTbpadecimientoid(),
-        'tbpadecimientodictamenid' => $clienteObj->getTbpadecimientodictamenid(),
-        'carnet' => $clienteObj->getCarnet(),
-        'padecimientosNombres' => $clienteObj->getPadecimientosNombres()
+            'tbclientepadecimientoid' => $clienteObj->getTbclientepadecimientoid(),
+            'tbclienteid' => $clienteObj->getTbclienteid(),
+            'tbpadecimientoid' => $clienteObj->getTbpadecimientoid(),
+            'tbpadecimientodictamenid' => $clienteObj->getTbpadecimientodictamenid(),
+            'carnet' => $clienteObj->getCarnet(),
+            'padecimientosNombres' => $clienteObj->getPadecimientosNombres()
     );
 }
 
@@ -169,7 +169,7 @@ if (isset($_GET['success'])) {
                             <option value="">Seleccione un cliente</option>
                             <?php foreach ($clientes as $cliente): ?>
                                 <option value="<?php echo $cliente['id']; ?>"
-                                    <?php echo (Validation::getOldInput('clienteId') == $cliente['id']) ? 'selected' : ''; ?>>
+                                        <?php echo (Validation::getOldInput('clienteId') == $cliente['id']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($cliente['carnet'] . ' - ' . $cliente['nombre']); ?>
                                 </option>
                             <?php endforeach; ?>
@@ -186,7 +186,7 @@ if (isset($_GET['success'])) {
                         <option value="">Seleccione un tipo</option>
                         <?php foreach ($tiposPadecimiento as $tipo): ?>
                             <option value="<?php echo htmlspecialchars($tipo); ?>"
-                                <?php echo (Validation::getOldInput('tipoPadecimiento') == $tipo) ? 'selected' : ''; ?>>
+                                    <?php echo (Validation::getOldInput('tipoPadecimiento') == $tipo) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($tipo); ?>
                             </option>
                         <?php endforeach; ?>
@@ -201,14 +201,14 @@ if (isset($_GET['success'])) {
                     <select id="padecimiento" name="padecimientosIds[]" disabled>
                         <option value="">Primero seleccione un tipo</option>
                         <?php
-                            $oldPadecimientoId = Validation::getOldInput('padecimientosIds');
-                            if ($oldPadecimientoId && is_array($oldPadecimientoId) && count($oldPadecimientoId) > 0) {
-                                $selectedId = $oldPadecimientoId[0];
-                                $selectedPadecimiento = $padecimientoBusiness->getTbpadecimientoById($selectedId);
-                                if ($selectedPadecimiento) {
-                                    echo '<option value="' . htmlspecialchars($selectedPadecimiento->getTbpadecimientoid()) . '" selected>' . htmlspecialchars($selectedPadecimiento->getTbpadecimientonombre()) . '</option>';
-                                }
+                        $oldPadecimientoId = Validation::getOldInput('padecimientosIds');
+                        if ($oldPadecimientoId && is_array($oldPadecimientoId) && count($oldPadecimientoId) > 0) {
+                            $selectedId = $oldPadecimientoId[0];
+                            $selectedPadecimiento = $padecimientoBusiness->getTbpadecimientoById($selectedId);
+                            if ($selectedPadecimiento) {
+                                echo '<option value="' . htmlspecialchars($selectedPadecimiento->getTbpadecimientoid()) . '" selected>' . htmlspecialchars($selectedPadecimiento->getTbpadecimientonombre()) . '</option>';
                             }
+                        }
                         ?>
                     </select>
                 </div>
@@ -254,7 +254,7 @@ if (isset($_GET['success'])) {
                     <div class="form-group">
                         <label for="entidademisionModal">Entidad de Emisión:</label>
                         <input type="text" id="entidademisionModal" name="entidademision"
-                            placeholder="Nombre de la entidad">
+                               placeholder="Nombre de la entidad">
                     </div>
                     <div class="form-group">
                         <label for="imagenesModal">Imágenes del Dictamen:</label>
@@ -363,14 +363,14 @@ if (isset($_GET['success'])) {
         });
 
         <?php if ($oldPadecimientoId && is_array($oldPadecimientoId) && count($oldPadecimientoId) > 0): ?>
-            const oldPadecimiento = padecimientosData.find(p => p.tbpadecimientoid == '<?php echo $selectedId; ?>');
-            if (oldPadecimiento) {
-                document.getElementById('tipoPadecimiento').value = oldPadecimiento.tbpadecimientotipo;
-                cargarPadecimientosPorTipo();
-                setTimeout(() => {
-                    document.getElementById('padecimiento').value = '<?php echo $selectedId; ?>';
-                }, 100);
-            }
+        const oldPadecimiento = padecimientosData.find(p => p.tbpadecimientoid == '<?php echo $selectedId; ?>');
+        if (oldPadecimiento) {
+            document.getElementById('tipoPadecimiento').value = oldPadecimiento.tbpadecimientotipo;
+            cargarPadecimientosPorTipo();
+            setTimeout(() => {
+                document.getElementById('padecimiento').value = '<?php echo $selectedId; ?>';
+            }, 100);
+        }
         <?php endif; ?>
     };
 
@@ -705,50 +705,50 @@ if (isset($_GET['success'])) {
         formData.append('accion', 'guardar');
         formData.append('ajax_request', '1');
 
-         fetch('../action/PadecimientoDictamenAction.php', {
+        fetch('../action/PadecimientoDictamenAction.php', {
             method: 'POST',
             body: formData,
 
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.text(); // Primero obtener como texto
-        })
-        .then(text => {
-            loading.style.display = 'none';
-            btnGuardar.disabled = false;
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text(); // Primero obtener como texto
+            })
+            .then(text => {
+                loading.style.display = 'none';
+                btnGuardar.disabled = false;
 
-            // Intentar parsear como JSON
-            let data;
-            try {
-                data = JSON.parse(text);
-            } catch (e) {
-                console.error('Respuesta del servidor no es JSON válido:', text);
-                mostrarMensajeModal('Error: El servidor no devolvió una respuesta válida. Revise la consola para más detalles.', 'error');
-                return;
-            }
+                // Intentar parsear como JSON
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    console.error('Respuesta del servidor no es JSON válido:', text);
+                    mostrarMensajeModal('Error: El servidor no devolvió una respuesta válida. Revise la consola para más detalles.', 'error');
+                    return;
+                }
 
-            if (data.success) {
-                document.getElementById('dictamenIdHidden').value = data.dictamenId;
-                document.getElementById('dictamenDisplay').value = entidad;
-                document.getElementById('btnLimpiarDictamen').style.display = 'inline-flex';
-                mostrarMensajeModal(data.message, 'success');
-                setTimeout(() => {
-                    document.getElementById('modalDictamen').style.display = 'none';
-                    modalDictamenAbierto = false;
-                }, 1500);
-            } else {
-                mostrarMensajeModal(data.message, 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            loading.style.display = 'none';
-            btnGuardar.disabled = false;
-            mostrarMensajeModal('Error de conexión o del servidor.', 'error');
-        });
+                if (data.success) {
+                    document.getElementById('dictamenIdHidden').value = data.dictamenId;
+                    document.getElementById('dictamenDisplay').value = entidad;
+                    document.getElementById('btnLimpiarDictamen').style.display = 'inline-flex';
+                    mostrarMensajeModal(data.message, 'success');
+                    setTimeout(() => {
+                        document.getElementById('modalDictamen').style.display = 'none';
+                        modalDictamenAbierto = false;
+                    }, 1500);
+                } else {
+                    mostrarMensajeModal(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                loading.style.display = 'none';
+                btnGuardar.disabled = false;
+                mostrarMensajeModal('Error de conexión o del servidor.', 'error');
+            });
     });
 
     function mostrarMensajeModal(mensaje, tipo) {

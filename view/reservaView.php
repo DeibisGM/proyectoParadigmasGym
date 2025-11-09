@@ -55,8 +55,8 @@ if ($tipoUsuario === 'cliente') {
                     <?php if (empty($misReservas)): ?>
                         <p>No tienes reservas registradas.</p>
                     <?php else: ?>
-                        <div style="overflow-x:auto;">
-                            <table>
+                        <div class="table-wrapper">
+                            <table class="table-clients">
                                 <thead>
                                 <tr>
                                     <th>Fecha</th>
@@ -75,7 +75,18 @@ if ($tipoUsuario === 'cliente') {
                                         <td><?php echo htmlspecialchars($reserva['tipo']); ?></td>
                                         <td><?php echo htmlspecialchars($reserva['descripcion']); ?></td>
                                         <td><?php echo htmlspecialchars($reserva['instructor']); ?></td>
-                                        <td><?php echo htmlspecialchars($reserva['estado']); ?></td>
+                                        <td>
+                                            <span class="badge-soft <?php
+                                                $estado = htmlspecialchars($reserva['estado']);
+                                                if ($estado === 'Confirmada' || $estado === 'Activa') {
+                                                    echo 'activo';
+                                                } elseif ($estado === 'Cancelada' || $estado === 'Inactiva') {
+                                                    echo 'inactivo';
+                                                } elseif ($estado === 'Reservado') {
+                                                    echo 'reservado';
+                                                }
+                                            ?>"><?php echo $estado; ?></span>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                                 </tbody>
@@ -96,8 +107,8 @@ if ($tipoUsuario === 'cliente') {
                     </div>
                 <?php endif; ?>
 
-                <div style="overflow-x:auto;">
-                    <table>
+                <div class="table-wrapper">
+                    <table class="table-clients">
                         <thead>
                         <tr>
                             <th>Fecha</th>
@@ -126,7 +137,18 @@ if ($tipoUsuario === 'cliente') {
                                     <td><?php echo htmlspecialchars($reserva['tipo']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['descripcion']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['instructor']); ?></td>
-                                    <td><?php echo htmlspecialchars($reserva['estado']); ?></td>
+                                    <td>
+                                        <span class="badge-soft <?php
+                                            $estado = htmlspecialchars($reserva['estado']);
+                                            if ($estado === 'Confirmada' || $estado === 'Activa') {
+                                                echo 'activo';
+                                            } elseif ($estado === 'Cancelada' || $estado === 'Inactiva') {
+                                                echo 'inactivo';
+                                            } elseif ($estado === 'Reservado') {
+                                                echo 'reservado';
+                                            }
+                                        ?>"><?php echo $estado; ?></span>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -136,9 +158,6 @@ if ($tipoUsuario === 'cliente') {
             </section>
         <?php endif; ?>
     </main>
-    <footer>
-        <p>&copy; <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.</p>
-    </footer>
 </div>
 </body>
 </html>

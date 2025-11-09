@@ -23,10 +23,10 @@ $subZonaBusiness = new subZonaBusiness();
 $cuerpoZonaBusiness = new cuerpoZonaBusiness();
 $imageManager = new ImageManager();
 
-if (isset($_POST['borrar_imagen'])) {
+if (isset($_POST['delete_image'])) {
     if (isset($_POST['id'])) {
         $parteId = $_POST['id'];
-        $imagenId = $_POST['borrar_imagen'];
+        $imagenId = $_POST['delete_image'];
 
         $subZona = $subZonaBusiness->getSubZonaPorId($parteId);
         if ($subZona) {

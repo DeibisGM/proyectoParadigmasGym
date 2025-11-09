@@ -66,7 +66,7 @@ try {
 
         if (Validation::hasErrors()) {
             $response['success'] = false;
-            $response['message'] = 'Error de validación. Por favor revise los campos.';
+            // No se establece un mensaje general aquí, ya que los errores específicos se manejarán en el frontend
             $response['errors'] = [
                 'tipo' => Validation::getError('tipo'),
                 'nombre' => Validation::getError('nombre'),
@@ -125,7 +125,7 @@ try {
 
             if (Validation::hasErrors()) {
                 $response['success'] = false;
-                $response['message'] = 'Error de validación. Por favor revise los campos.';
+                // No se establece un mensaje general aquí, ya que los errores específicos se manejarán en el frontend
                 $response['errors'] = [
                     'tipo_'.$id => Validation::getError('tipo_'.$id),
                     'nombre_'.$id => Validation::getError('nombre_'.$id),
