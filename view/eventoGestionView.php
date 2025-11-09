@@ -148,7 +148,9 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
                             </select>
                         </div>
                     </div>
-                    <button type="submit" name="crear_evento"><i class="ph ph-plus"></i>Crear Evento</button>
+                    <div class="button-container">
+                        <button type="submit" name="crear_evento"><i class="ph ph-plus"></i>Crear Evento</button>
+                    </div>
                 </form>
             </section>
 
