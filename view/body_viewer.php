@@ -4,64 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor Interactivo del Cuerpo Humano</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .main-wrapper {
-            padding: 30px 0 0 0;
-            max-width: 1000px;
-            margin: auto;
-            text-align: center;
-        }
-        h1 { color: #333; margin-bottom: 5px; }
-        p { color: #666; margin-top: 0; margin-bottom: 30px; }
-        .viewer-grid {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        .body-view {
-            flex: 1;
-            min-width: 200px;
-            max-width: 250px;
-        }
-        .body-view h2 { color: #555; font-weight: 600; }
-        .body-container { position: relative; }
-        .body-container svg { width: 100%; height: auto; }
-        .body-part {
-            transition: opacity 0.4s ease-in-out, fill 0.4s ease-in-out;
-            fill: #E8A883;
-            opacity: 0.25;
-        }
-        .viewer-grid.is-interacting .body-part {
-            opacity: 0.15;
-            filter: grayscale(80%);
-        }
-        .viewer-grid.is-interacting .body-part:hover {
-            opacity: 1;
-            filter: grayscale(0%) drop-shadow(0 0 8px rgba(255, 190, 0, 0.9));
-        }
-        .tooltip {
-            position: fixed;
-            background-color: rgba(0, 0, 0, 0.85);
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            white-space: nowrap;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease-in-out;
-            z-index: 1000;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="main-wrapper">
+<div class="body-viewer-container">
+    <h1>Visor de Progreso Corporal</h1>
+    <p>Selecciona un grupo muscular para ver el progreso.</p>
+    <div class="filter-buttons">
+        <button class="btn-filter" data-period="daily">Diario</button>
+        <button class="btn-filter active" data-period="weekly">Semanal</button>
+        <button class="btn-filter" data-period="monthly">Mensual</button>
+    </div>
     <div class="viewer-grid">
         <div class="body-view">
             <div class="body-container">
@@ -114,93 +67,108 @@
     document.addEventListener('DOMContentLoaded', function () {
         const mainWrapper = document.querySelector('.viewer-grid');
         const bodyParts = document.querySelectorAll('.body-part');
-        const tooltip = document.querySelector('.tooltip');
+        const filterButtons = document.querySelectorAll('.btn-filter');
+
+        // --- DUMMY DATA ---
+        const progresoDataDaily = { pectoralmayor: 10, gemelosfrontal: 20, abdominales: 15 };
+        const progresoDataWeekly = { pectoralmayor: 50, biceps: 70, cuadriceps: 60, hombrofrontal: 40 };
+        const progresoDataMonthly = { pectoralmayor: 80, biceps: 90, cuadriceps: 85, hombrofrontal: 75, gemelosfrontal: 60, abdominales: 50, Isquiotibiales: 45 };
+
+        const progresoData = {
+            daily: progresoDataDaily,
+            weekly: progresoDataWeekly,
+            monthly: progresoDataMonthly
+        };
+        // --- END DUMMY DATA ---
 
         function getHslFromPercentage(percentage) {
-            const hue = 120 - (percentage * 1.2); // 120 (verde) -> 0 (rojo)
+            const hue = 120 - (percentage * 1.2);
             return `hsl(${hue}, 80%, 60%)`;
         }
 
+        function clearLabels() {
+            const existingLabels = document.querySelectorAll('.body-label');
+            existingLabels.forEach(label => label.remove());
+        }
+
+        function createLabels() {
+            clearLabels();
+            bodyParts.forEach(part => {
+                const name = part.dataset.name;
+                const porcentaje = part.dataset.porcentaje;
+
+                if (name && porcentaje) {
+                    const container = part.closest('.body-container');
+                    const label = document.createElement('div');
+                    label.className = 'body-label';
+                    label.textContent = `${name} (${porcentaje}%)`;
+                    container.appendChild(label);
+
+                    const svgRect = container.querySelector('svg').getBoundingClientRect();
+                    const partRect = part.getBoundingClientRect();
+
+                    const x = (partRect.right - svgRect.left + 5);
+                    const y = (partRect.top + partRect.height / 4 - svgRect.top);
+
+                    label.style.left = `${x}px`;
+                    label.style.top = `${y}px`;
+
+                    setTimeout(() => {
+                        label.style.opacity = '1';
+                    }, 100);
+                }
+            });
+        }
+
         function aplicarProgresoVisual(data) {
-            // --- INICIO DE LA CORRECCIÓN DE OPACIDAD ---
+            bodyParts.forEach(part => {
+                part.style.opacity = 0.25;
+                part.style.fill = 'var(--color-surface-strong)';
+                delete part.dataset.porcentaje;
+            });
 
-            // Si no hay datos, se resetea el visor.
             if (!data || Object.keys(data).length === 0) {
-                bodyParts.forEach(part => {
-                    part.style.opacity = 0.25;
-                    part.style.fill = '#E8A883';
-                    delete part.dataset.porcentaje;
-                });
-                return;
-            };
-
-            // CORRECCIÓN: Encontrar el porcentaje máximo para calcular opacidades relativas
-            const porcentajes = Object.values(data);
-            const maxPorcentaje = Math.max(...porcentajes);
-
-            // Si el máximo es 0, no hay nada que mostrar
-            if (maxPorcentaje === 0) {
-                bodyParts.forEach(part => {
-                    part.style.opacity = 0.25;
-                    part.style.fill = '#E8A883';
-                    delete part.dataset.porcentaje;
-                });
+                createLabels();
                 return;
             }
 
-            // Aplicar opacidades y colores relativos al máximo porcentaje
+            const porcentajes = Object.values(data);
+            const maxPorcentaje = Math.max(...porcentajes);
+
+            if (maxPorcentaje === 0) {
+                createLabels();
+                return;
+            }
+
             for (const parteId in data) {
                 const porcentaje = data[parteId];
                 const elementos = document.querySelectorAll(`#${parteId}`);
 
                 if (elementos.length > 0) {
-                    // CORRECCIÓN: La opacidad ahora es relativa al máximo porcentaje
-                    // La zona con mayor porcentaje tendrá opacidad 1.0 (100%)
                     const opacidadRelativa = porcentaje / maxPorcentaje;
                     const opacidad = 0.30 + opacidadRelativa * 0.70;
-                    
-                    // El color se basa en el porcentaje relativo también
                     const color = getHslFromPercentage(100 - opacidadRelativa * 100);
 
                     elementos.forEach(el => {
                         el.style.opacity = opacidad;
                         el.style.fill = color;
-                        // El tooltip muestra el porcentaje real
                         el.dataset.porcentaje = Math.round(porcentaje);
                     });
                 }
             }
-            // --- FIN DE LA CORRECCIÓN DE OPACIDAD ---
+            createLabels();
         }
 
-        if (typeof progresoData !== 'undefined') {
-            aplicarProgresoVisual(progresoData);
-        }
-
-        bodyParts.forEach(part => {
-            part.addEventListener('mouseover', function () {
-                mainWrapper.classList.add('is-interacting');
-                const name = part.dataset.name;
-                const porcentaje = part.dataset.porcentaje;
-                if (name) {
-                    let tooltipText = name;
-                    if (typeof progresoData !== 'undefined' && Object.keys(progresoData).length > 0) {
-                        tooltipText += ` (Trabajado al ${porcentaje || 0}%)`;
-                    }
-                    tooltip.textContent = tooltipText;
-                    tooltip.style.opacity = '1';
-                }
-            });
-
-            part.addEventListener('mouseout', function () {
-                mainWrapper.classList.remove('is-interacting');
-                tooltip.style.opacity = '0';
-            });
-
-            part.addEventListener('mousemove', function (e) {
-                tooltip.style.left = (e.clientX + 15) + 'px';
-                tooltip.style.top = (e.clientY - 15) + 'px';
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const period = this.dataset.period;
+                aplicarProgresoVisual(progresoData[period]);
             });
         });
+
+        // Initial load
+        aplicarProgresoVisual(progresoData.weekly);
     });
 </script>

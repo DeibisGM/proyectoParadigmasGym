@@ -1178,3 +1178,110 @@ hr {
 #action-panel-container .btn-danger {
     box-shadow: none;
 }
+/* Body Viewer Styles */
+.body-viewer-container {
+    padding: 30px 0 0 0;
+    max-width: 1000px;
+    margin: auto;
+    text-align: center;
+}
+
+.body-viewer-container h1 {
+    color: var(--color-text);
+    margin-bottom: 5px;
+}
+
+.body-viewer-container p {
+    color: var(--color-text-muted);
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+.viewer-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.body-view {
+    flex: 1;
+    min-width: 200px;
+    max-width: 250px;
+}
+
+.body-view h2 {
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.body-container {
+    position: relative;
+}
+
+.body-container svg {
+    width: 100%;
+    height: auto;
+}
+
+.body-part {
+    transition: opacity 0.4s ease-in-out, fill 0.4s ease-in-out;
+    fill: var(--color-surface-strong);
+    opacity: 0.25;
+    stroke: var(--color-border-strong);
+    stroke-width: 1.5px;
+}
+
+.viewer-grid.is-interacting .body-part {
+    opacity: 0.15;
+    filter: grayscale(80%);
+}
+
+.viewer-grid.is-interacting .body-part:hover {
+    opacity: 1;
+    filter: grayscale(0%);
+    -webkit-filter: drop-shadow(0 0 8px rgba(137, 194, 53, 0.9));
+    filter: drop-shadow(0 0 8px rgba(137, 194, 53, 0.9));
+}
+
+/* Filter Buttons */
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.btn-filter {
+    background: var(--color-surface-strong);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-filter.active,
+.btn-filter:hover {
+    background: var(--color-accent);
+    color: #000;
+    border-color: var(--color-accent-strong);
+}
+
+
+/* Static Body Labels */
+.body-label {
+    position: absolute;
+    background-color: var(--color-surface-solid);
+    color: var(--color-text);
+    padding: 4px 8px;
+    border-radius: var(--radius-xs);
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    opacity: 0; /* Initially hidden, will be faded in with JS */
+    transition: opacity 0.5s ease-in-out;
+}
