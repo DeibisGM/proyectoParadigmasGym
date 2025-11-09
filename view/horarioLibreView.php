@@ -102,6 +102,66 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                                 <a href="?semana=<?php echo $semanaSiguiente; ?>"><button><i
                                                 class="ph ph-caret-right"></i></button></a>            </section>
 
+            <div id="action-panel-container" style="display: none;">
+                <?php if ($esAdmin): ?>
+                    <section id="panel-admin-creacion">
+                        <h3><i class="ph ph-plus-circle"></i> Crear Nuevos Espacios</h3>
+                        <p>Se crearán <strong id="contador-seleccion">0</strong> espacios en las celdas seleccionadas.</p>
+                        <form id="form-crear-slots" method="POST" action="../action/horarioLibreAction.php">
+                            <input type="hidden" name="accion" value="crear">
+                            <div id="slots-seleccionados-container"></div>
+                            <div class="form-grid-container">
+                                <div class="form-group">
+                                    <label for="instructorId">Instructor:</label>
+                                    <select id="instructorId" name="instructorId" required>
+                                        <option value="">-- Elige un instructor --</option>
+                                        <?php foreach ($instructores as $instructor): ?>
+                                            <option value="<?php echo $instructor->getInstructorId(); ?>">
+                                                <?php echo htmlspecialchars($instructor->getInstructorNombre()); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="cupos">Cupos por Hora:</label>
+                                    <input type="number" id="cupos" name="cupos" min="1" required>
+                                </div>
+                            </div>
+                            <div class="button-container">
+                                <button type="submit"><i class="ph ph-check-circle"></i> Confirmar</button>
+                                <button type="button" id="btn-limpiar-seleccion" class="btn-danger">Limpiar</button>
+                            </div>
+                        </form>
+                    </section>
+                <?php else: ?>
+                    <section id="panel-cliente-reserva">
+                        <h3><i class="ph ph-check-square"></i> Confirmar Reservas</h3>
+                        <p>Se van a reservar <strong id="contador-seleccion-cliente">0</strong> espacios.</p>
+                        <form id="form-reservar-libre">
+                            <div id="slots-seleccionados-cliente-container"></div>
+                            <div class="form-grid-container">
+                                <div class="form-group" style="grid-column: 1 / -1;">
+                                    <label style="flex-direction: row; align-items: center;">
+                                        <input type="checkbox" name="incluirme" checked
+                                            style="width: auto; height: auto; margin-right: 0.5rem;">
+                                        Incluirme en la reserva
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="ids_invitados">IDs de miembros invitados:</label>
+                                    <input type="text" name="ids_invitados" id="ids_invitados" placeholder="Ej: 2, 8, 15">
+                                </div>
+                            </div>
+                            <div class="button-container">
+                                <button type="submit" id="btn-confirmar-reserva"><i class="ph ph-calendar-plus"></i>
+                                    Reservar</button>
+                                <button type="button" id="btn-limpiar-seleccion-cliente"
+                                    class="btn-danger">Limpiar</button>
+                            </div>
+                        </form>
+                    </section>
+                <?php endif; ?>
+            </div>
             <section class="grid-container">
                 <table class="grid-horario">
                     <thead>
@@ -180,60 +240,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                     </tbody>
                 </table>
             </section>
-
-            <?php if ($esAdmin): ?>
-                <section id="panel-admin-creacion" style="display:none;">
-                    <h3><i class="ph ph-plus-circle"></i> Crear Nuevos Espacios</h3>
-                    <p>Se crearán <strong id="contador-seleccion">0</strong> espacios en las celdas seleccionadas.</p>
-                    <form id="form-crear-slots" method="POST" action="../action/horarioLibreAction.php">
-                        <input type="hidden" name="accion" value="crear">
-                        <div id="slots-seleccionados-container"></div>
-                        <div class="form-grid-container">
-                            <div class="form-group">
-                                <label for="instructorId">Instructor:</label>
-                                <select id="instructorId" name="instructorId" required>
-                                    <option value="">-- Elige un instructor --</option>
-                                    <?php foreach ($instructores as $instructor): ?>
-                                        <option value="<?php echo $instructor->getInstructorId(); ?>">
-                                            <?php echo htmlspecialchars($instructor->getInstructorNombre()); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="cupos">Cupos por Hora:</label>
-                                <input type="number" id="cupos" name="cupos" min="1" required>
-                            </div>
-                        </div>
-                        <button type="submit"><i class="ph ph-check-circle"></i> Confirmar</button>
-                        <button type="button" id="btn-limpiar-seleccion" class="btn-danger">Limpiar</button>
-                    </form>
-                </section>
-            <?php else: ?>
-                <section id="panel-cliente-reserva" style="display: none;">
-                    <h3><i class="ph ph-check-square"></i> Confirmar Reservas</h3>
-                    <p>Se van a reservar <strong id="contador-seleccion-cliente">0</strong> espacios.</p>
-                    <form id="form-reservar-libre">
-                        <div id="slots-seleccionados-cliente-container"></div>
-                        <div class="form-grid-container">
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label style="flex-direction: row; align-items: center;">
-                                    <input type="checkbox" name="incluirme" checked
-                                        style="width: auto; height: auto; margin-right: 0.5rem;">
-                                    Incluirme en la reserva
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label for="ids_invitados">IDs de miembros invitados:</label>
-                                <input type="text" name="ids_invitados" id="ids_invitados" placeholder="Ej: 2, 8, 15">
-                            </div>
-                        </div>
-                        <button type="submit" id="btn-confirmar-reserva"><i class="ph ph-calendar-plus"></i>
-                            Reservar</button>
-                        <button type="button" id="btn-limpiar-seleccion-cliente" class="btn-danger">Limpiar</button>
-                    </form>
-                </section>
-            <?php endif; ?>
         </main>
     </div>
     <script>
@@ -247,7 +253,7 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
 
         function setupAdminInteractions() {
             const grid = document.querySelector('.grid-horario');
-            const panel = document.getElementById('panel-admin-creacion');
+            const panelContainer = document.getElementById('action-panel-container');
             const contador = document.getElementById('contador-seleccion');
             const container = document.getElementById('slots-seleccionados-container');
             const btnLimpiar = document.getElementById('btn-limpiar-seleccion');
@@ -278,13 +284,13 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                     input.value = cell.dataset.fechaHora;
                     container.appendChild(input);
                 });
-                panel.style.display = seleccionados.length > 0 ? 'block' : 'none';
+                panelContainer.style.display = seleccionados.length > 0 ? 'block' : 'none';
             }
         }
 
         function setupClientInteractions() {
             const grid = document.querySelector('.grid-horario');
-            const panel = document.getElementById('panel-cliente-reserva');
+            const panelContainer = document.getElementById('action-panel-container');
             const contador = document.getElementById('contador-seleccion-cliente');
             const formReserva = document.getElementById('form-reservar-libre');
             const container = document.getElementById('slots-seleccionados-cliente-container');
@@ -359,7 +365,7 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
                     container.appendChild(input);
                 });
 
-                panel.style.display = seleccionados.length > 0 ? 'block' : 'none';
+                panelContainer.style.display = seleccionados.length > 0 ? 'block' : 'none';
             }
         }
     </script>

@@ -48,12 +48,12 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
 
         <main>
             <?php if (isset($_GET['success'])): ?>
-                <p class="success-message flash-msg">¡Acción completada con éxito!</p>
+                <p class="success-message flash-msg"><b>¡Acción completada con éxito!</b></p>
             <?php endif; ?>
             <?php if ($generalError = Validation::getError('general')): ?>
-                <p class="error-message flash-msg">Error:
+                <p class="error-message flash-msg"><b>Error:
                     <?= htmlspecialchars($generalError) ?>
-                </p>
+                </b></p>
             <?php endif; ?>
 
             <section>

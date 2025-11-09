@@ -46,7 +46,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
 
         <main>
             <?php if (isset($_GET['error'])): ?>
-                <p class="error-message">
+                <p class="error-message"><b>
                     <?php
                     switch ($_GET['error']) {
                         case 'datos_faltantes':
@@ -96,9 +96,9 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                             break;
                     }
                     ?>
-                </p>
+                </b></p>
             <?php elseif (isset($_GET['success'])): ?>
-                <p class="success-message">
+                <p class="success-message"><b>
                     <?php
                     switch ($_GET['success']) {
                         case 'inserted':
@@ -118,7 +118,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                             break;
                     }
                     ?>
-                </p>
+                </b></p>
             <?php endif; ?>
 
             <?php if ($esAdmin): ?>
@@ -327,12 +327,6 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                 </div>
             </section>
         </main>
-
-        <footer>
-            <p>&copy;
-                <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.
-            </p>
-        </footer>
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
