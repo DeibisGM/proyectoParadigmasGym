@@ -37,13 +37,16 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
     <title>Gestión de Eventos</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
 </head>
 
 <body>
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-calendar-plus"></i>Gestión de Eventos</h2>
+            <h2>Gestión de Eventos</h2>
         </header>
 
         <main>
@@ -83,7 +86,7 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
                             <?php if ($error = Validation::getError('fecha')): ?><span class="error-message">
                                     <?= $error ?>
                                 </span><?php endif; ?>
-                            <input type="date" id="fecha" name="fecha"
+                            <input type="text" id="fecha" name="fecha" class="datepicker"
                                 value="<?= htmlspecialchars(Validation::getOldInput('fecha', date('Y-m-d'))) ?>"
                                 min="<?= date('Y-m-d') ?>">
                         </div>
@@ -148,7 +151,7 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
                             </select>
                         </div>
                     </div>
-                    <button type="submit" name="crear_evento"><i class="ph ph-plus"></i>Crear Evento</button>
+                    <button type="submit" name="crear_evento" class="button-spacing"><i class="ph ph-plus"></i>Crear Evento</button>
                 </form>
             </section>
 
@@ -195,7 +198,7 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
                                                     Privado</option>
                                             </select>
                                         </td>
-                                        <td data-label="Fecha"><input type="date" name="fecha"
+                                        <td data-label="Fecha"><input type="text" name="fecha" class="datepicker"
                                                 value="<?= htmlspecialchars($evento->getFecha()) ?>"
                                                 min="<?= date('Y-m-d') ?>" form="form-<?= $evento->getId() ?>"></td>
                                         <td data-label="Horario" style="white-space: nowrap;"><input type="time"
@@ -260,6 +263,14 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
         </main>
     </div>
     <?php Validation::clear(); ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            flatpickr(".datepicker", {
+                "locale": "es",
+                dateFormat: "Y-m-d",
+            });
+        });
+    </script>
 </body>
 
 </html>
