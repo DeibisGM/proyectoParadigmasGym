@@ -1,5 +1,7 @@
 <?php
 session_start();
+include_once '../utility/Validation.php';
+Validation::start();
 if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['admin', 'instructor'])) {
     header("Location: ../index.php?error=unauthorized");
     exit();
@@ -42,25 +44,21 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
                                 <option value="Síndrome">Síndrome</option>
                                 <option value="Otro">Otro</option>
                             </select>
-                            <span class="error-message" id="error-tipo"></span>
                         </div>
                         <div class="form-group">
                             <label for="nombre">Nombre:</label>
                             <input type="text" id="nombre" name="nombre" maxlength="100"
                                 placeholder="Nombre del padecimiento">
-                            <span class="error-message" id="error-nombre"></span>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <label for="descripcion">Descripción:</label>
                             <textarea id="descripcion" name="descripcion" maxlength="500"
                                 placeholder="Descripción detallada"></textarea>
-                            <span class="error-message" id="error-descripcion"></span>
                         </div>
                         <div class="form-group" style="grid-column: 1 / -1;">
                             <label for="formaDeActuar">Forma de Actuar:</label>
                             <textarea id="formaDeActuar" name="formaDeActuar" maxlength="1000"
                                 placeholder="Instrucciones sobre cómo actuar"></textarea>
-                            <span class="error-message" id="error-formaDeActuar"></span>
                         </div>
                     </div>
                     <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
@@ -90,13 +88,17 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
     </div>
     <script>
         let padecimientos = [];
-        document.addEventListener('DOMContentLoaded', () => cargarPadecimientos());
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarPadecimientos();
+        });
 
         document.getElementById('formPadecimiento').addEventListener('submit', function (e) {
             e.preventDefault();
+            limpiarErrores();
             const formData = new FormData(this);
             const accion = document.getElementById('accion').value;
-            formData.append(accion, '1');
+            formData.set(accion, '1'); 
+
             fetch('../action/padecimientoAction.php', { method: 'POST', body: formData })
                 .then(res => res.json())
                 .then(data => {
@@ -106,6 +108,9 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
                         cargarPadecimientos();
                     } else {
                         mostrarMensaje(data.message, 'error');
+                        if (data.errors) {
+                            mostrarErrores(data.errors);
+                        }
                     }
                 })
                 .catch(() => mostrarMensaje('Error de conexión.', 'error'));
@@ -149,6 +154,7 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
         }
 
         function editarRegistro(id) {
+            limpiarFormulario();
             const p = padecimientos.find(pad => pad.id == id);
             if (!p) return;
             document.getElementById('accion').value = 'update';
@@ -183,7 +189,8 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
                                     if (confirmData.success) cargarPadecimientos();
                                 });
                         }
-                    } else {
+                    }
+                     else {
                         mostrarMensaje(data.message, data.success ? 'success' : 'error');
                         if (data.success) cargarPadecimientos();
                     }
@@ -197,6 +204,7 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
             document.getElementById('padecimientoId').value = '';
             document.getElementById('btnSubmit').innerHTML = '<i class="ph ph-plus"></i>Registrar';
             document.getElementById('btnCancelar').style.display = 'none';
+            limpiarErrores();
         }
 
         function mostrarMensaje(mensaje, tipo) {
@@ -206,7 +214,30 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
             div.className = tipo === 'success' ? 'success-message flash-msg' : 'error-message flash-msg';
             setTimeout(() => { div.style.display = 'none'; }, 5000);
         }
-    </script>
-</body>
 
+        function mostrarErrores(errors) {
+            for (const key in errors) {
+                if (errors.hasOwnProperty(key) && errors[key]) {
+                    const input = document.getElementById(key);
+                    if (input) {
+                        const errorSpan = document.createElement('span');
+                        errorSpan.className = 'error-message';
+                        errorSpan.textContent = errors[key];
+                        input.parentNode.insertBefore(errorSpan, input.nextSibling);
+                    }
+                }
+            }
+        }
+
+        function limpiarErrores() {
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach(span => {
+                if(span.id !== 'mensaje') { // No eliminar el mensaje general
+                    span.remove();
+                }
+            });
+        }
+    </script>
+    <?php Validation::clear(); ?>
+</body>
 </html>

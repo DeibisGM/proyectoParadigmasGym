@@ -90,6 +90,7 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/instructorHorarioView.php'><button><i class="ph-fill ph-calendar"></i>Mis Horarios de Trabajo</button></a>
                     <a href='view/clienteView.php'><button><i class="ph-fill ph-users"></i>Ver Clientes</button></a>
                     <a href='view/instructorView.php'><button><i class="ph-fill ph-user-rectangle"></i>Ver Instructores</button></a>
+                    <a href='view/cuerpoZonaView.php'><button><i class="ph-fill ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/subzonaView.php'><button><i class="ph-fill ph-hand"></i>Sub Zonas del cuerpo</button></a>
                     <a href='view/salaView.php'><button><i class="ph-fill ph-storefront"></i>Ver Salas</button></a>
                 </div>

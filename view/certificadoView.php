@@ -261,11 +261,6 @@ if (isset($_GET['instructor_id']) && !empty($_GET['instructor_id'])) {
             </section>
         </main>
 
-        <footer>
-            <p>&copy;
-                <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.
-            </p>
-        </footer>
     </div>
 </body>
 

@@ -62,7 +62,9 @@ $salas = $salaBusiness->obtenerTbsala();
                                     value="<?= Validation::getOldInput('capacidad') ?>">
                             </div>
                         </div>
-                        <button type="submit" name="insertar"><i class="ph ph-plus"></i>Registrar Sala</button>
+                        <div class="button-container">
+                            <button type="submit" name="insertar"><i class="ph ph-plus"></i>Registrar Sala</button>
+                        </div>
                     </form>
                 </section>
             <?php } ?>

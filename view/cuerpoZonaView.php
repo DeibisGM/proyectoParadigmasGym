@@ -50,13 +50,15 @@ $allCuerpoZonas = $esAdminOInstructor ?
                                 <input type="text" id="descripcion" name="tbcuerpozonadescripcion"
                                     placeholder="Descripción de la zona" required>
                             </div>
-                            <div class="form-group form-group-horizontal">
-                                <label for="imagenes">Imágenes:</label>
+                            <div class="form-group">
+                                <label for="imagenes" style="margin-right: 1rem;">Imágenes:</label>
                                 <input type="file" id="imagenes" name="imagenes[]"
                                     accept="image/png, image/jpeg, image/webp" multiple>
                             </div>
                         </div>
-                        <button type="submit" name="create"><i class="ph ph-plus"></i>Crear Zona</button>
+                        <div class="button-container">
+                            <button type="submit" name="create"><i class="ph ph-plus"></i>Crear Zona</button>
+                        </div>
                     </form>
                 </section>
             <?php endif; ?>

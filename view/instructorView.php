@@ -220,28 +220,42 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                                             <?php echo str_pad($instructor->getInstructorId(), 3, '0', STR_PAD_LEFT); ?>
                                         </td>
                                         <td data-label="Nombre">
-                                            <input type="text" name="nombre"
-                                                value="<?php echo htmlspecialchars($instructor->getInstructorNombre() ?? ''); ?>"
-                                                <?php echo $puedeEditar ? '' : 'readonly'; ?> required
-                                                form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php if ($puedeEditar): ?>
+                                                <input type="text" name="nombre"
+                                                    value="<?php echo htmlspecialchars($instructor->getInstructorNombre() ?? ''); ?>"
+                                                    required
+                                                    form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php else: ?>
+                                                <span><?php echo htmlspecialchars($instructor->getInstructorNombre() ?? ''); ?></span>
+                                            <?php endif; ?>
                                         </td>
                                         <td data-label="Teléfono">
-                                            <input type="text" name="telefono"
-                                                value="<?php echo htmlspecialchars($instructor->getInstructorTelefono() ?? ''); ?>"
-                                                <?php echo $puedeEditar ? '' : 'readonly'; ?>
-                                                form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php if ($puedeEditar): ?>
+                                                <input type="text" name="telefono"
+                                                    value="<?php echo htmlspecialchars($instructor->getInstructorTelefono() ?? ''); ?>"
+                                                    form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php else: ?>
+                                                <span><?php echo htmlspecialchars($instructor->getInstructorTelefono() ?? ''); ?></span>
+                                            <?php endif; ?>
                                         </td>
                                         <td data-label="Dirección">
-                                            <input type="text" name="direccion"
-                                                value="<?php echo htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?>"
-                                                <?php echo $puedeEditar ? '' : 'readonly'; ?>
-                                                form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php if ($puedeEditar): ?>
+                                                <input type="text" name="direccion"
+                                                    value="<?php echo htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?>"
+                                                    form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php else: ?>
+                                                <span><?php echo htmlspecialchars($instructor->getInstructorDireccion() ?? ''); ?></span>
+                                            <?php endif; ?>
                                         </td>
                                         <td data-label="Correo">
-                                            <input type="email" name="correo"
-                                                value="<?php echo htmlspecialchars($instructor->getInstructorCorreo() ?? ''); ?>"
-                                                <?php echo $puedeEditar ? '' : 'readonly'; ?> required
-                                                form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php if ($puedeEditar): ?>
+                                                <input type="email" name="correo"
+                                                    value="<?php echo htmlspecialchars($instructor->getInstructorCorreo() ?? ''); ?>"
+                                                    required
+                                                    form="form-<?= $instructor->getInstructorId() ?>">
+                                            <?php else: ?>
+                                                <span><?php echo htmlspecialchars($instructor->getInstructorCorreo() ?? ''); ?></span>
+                                            <?php endif; ?>
                                         </td>
 
                                         <?php if ($esAdmin): ?>
@@ -274,7 +288,7 @@ $instructores = $business->getAllTBInstructor($esAdmin);
                                             </td>
                                         <?php endif; ?>
 
-                                        <td data-label="Certificados">
+                                        <td data-label="Certificados" class="actions">
                                             <a href="../view/certificadoView.php?instructor_id=<?php echo $instructor->getInstructorId(); ?>"
                                                 class="btn-row"><i class="ph ph-file-text"></i></a>
                                         </td>

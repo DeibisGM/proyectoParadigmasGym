@@ -95,12 +95,14 @@ if (!$esAdminOInstructor) {
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="form-group form-group-horizontal">
-                                <label for="imagenes">Imágenes:</label>
+                            <div class="form-group">
+                                <label for="imagenes" style="margin-right: 1rem;">Imágenes:</label>
                                 <input type="file" id="imagenes" name="imagenes[]" multiple>
                             </div>
                         </div>
-                        <button type="submit" name="guardar"><i class="ph ph-plus"></i> Guardar</button>
+                        <div class="button-container">
+                            <button type="submit" name="guardar"><i class="ph ph-plus"></i> Guardar</button>
+                        </div>
                     </form>
                 </section>
             <?php endif; ?>
@@ -172,7 +174,7 @@ if (!$esAdminOInstructor) {
                                             foreach ($imagenes as $img) {
                                                 echo '<div class="image-container" style="width: 60px; height: 60px;"><img src="..' . htmlspecialchars($img['tbimagenruta'] ?? '') . '?t=' . time() . '" alt="Imagen" onerror="this.onerror=null; this.src=\'noimage.svg\';">';
                                                 if ($esAdminOInstructor) {
-                                                    echo '<button type="submit" name="borrar_imagen" value="' . $img['tbimagenid'] . '" onclick="return confirm(\'¿Eliminar imagen?\');" form="form-' . $parte->getSubzonaid() . '"><i class="ph ph-x"></i></button>';
+                                                    echo '<button type="submit" name="delete_image" value="' . $img['tbimagenid'] . '" onclick="return confirm(\'¿Eliminar esta imagen?\');" form="form-' . $parte->getSubzonaid() . '"><i class="ph ph-x"></i></button>';
                                                 }
                                                 echo '</div>';
                                             }
