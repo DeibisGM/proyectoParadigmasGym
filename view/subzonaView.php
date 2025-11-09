@@ -47,7 +47,7 @@ if (!$esAdminOInstructor) {
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-atom"></i> Gestión de Sub Zonas</h2>
+            <h2>Gestión de Sub Zonas</h2>
         </header>
 
         <main>
@@ -144,16 +144,22 @@ if (!$esAdminOInstructor) {
                                         form="form-<?= $parte->getSubzonaid() ?>">
 
                                     <td data-label="Nombre">
-                                        <input type="text" name="nombre" maxlength="50"
-                                            value="<?= htmlspecialchars(Validation::getOldInput('nombre_' . $parte->getSubzonaid(), $parte->getSubzonanombre())) ?>"
-                                            <?= $esAdminOInstructor ? '' : 'readonly' ?>
-                                            form="form-<?= $parte->getSubzonaid() ?>">
+                                        <?php if ($esAdminOInstructor): ?>
+                                            <input type="text" name="nombre" maxlength="50"
+                                                value="<?= htmlspecialchars(Validation::getOldInput('nombre_' . $parte->getSubzonaid(), $parte->getSubzonanombre())) ?>"
+                                                form="form-<?= $parte->getSubzonaid() ?>">
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($parte->getSubzonanombre()) ?>
+                                        <?php endif; ?>
                                     </td>
                                     <td data-label="Descripción">
-                                        <input type="text" name="descripcion" maxlength="100"
-                                            value="<?= htmlspecialchars(Validation::getOldInput('descripcion_' . $parte->getSubzonaid(), $parte->getSubzonadescripcion())) ?>"
-                                            <?= $esAdminOInstructor ? '' : 'readonly' ?>
-                                            form="form-<?= $parte->getSubzonaid() ?>">
+                                        <?php if ($esAdminOInstructor): ?>
+                                            <input type="text" name="descripcion" maxlength="100"
+                                                value="<?= htmlspecialchars(Validation::getOldInput('descripcion_' . $parte->getSubzonaid(), $parte->getSubzonadescripcion())) ?>"
+                                                form="form-<?= $parte->getSubzonaid() ?>">
+                                        <?php else: ?>
+                                            <?= htmlspecialchars($parte->getSubzonadescripcion()) ?>
+                                        <?php endif; ?>
                                     </td>
                                     <td data-label="Imágenes">
                                         <div

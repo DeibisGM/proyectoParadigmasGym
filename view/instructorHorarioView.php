@@ -43,7 +43,7 @@ $diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-calendar"></i> Horarios de Instructores</h2>
+            <h2>Horarios de Instructores</h2>
         </header>
 
         <main>

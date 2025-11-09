@@ -153,11 +153,6 @@ $allCuerpoZonas = $esAdminOInstructor ?
                 </div>
             </section>
         </main>
-        <footer>
-            <p>&copy;
-                <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.
-            </p>
-        </footer>
     </div>
 </body>
 

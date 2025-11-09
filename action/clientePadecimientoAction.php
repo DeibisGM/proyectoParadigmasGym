@@ -13,6 +13,18 @@ if (!class_exists('ClientePadecimiento')) {
 
 Validation::start();
 
+if (isset($_GET['action']) && $_GET['action'] == 'get_padecimientos_por_tipo') {
+    $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : '';
+    if (!empty($tipo)) {
+        include_once '../business/padecimientoBusiness.php';
+        $padecimientoBusiness = new PadecimientoBusiness();
+        $padecimientos = $padecimientoBusiness->obtenerPadecimientosPorTipo($tipo);
+        header('Content-Type: application/json');
+        echo json_encode($padecimientos);
+    }
+    exit;
+}
+
 if (!isset($_SESSION['usuario_id'])) {
     header("location: ../view/loginView.php");
     exit();

@@ -73,7 +73,7 @@ foreach ($dictamenesObj as $dictamen) {
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-first-aid-kit"></i>Gestión de Padecimientos del Cliente</h2>
+            <h2>Gestión de Padecimientos del Cliente</h2>
         </header>
 
         <main>
@@ -163,7 +163,7 @@ foreach ($dictamenesObj as $dictamen) {
                             </div>
                         </div>
                     </div>
-                    <button type="submit" id="btnSubmit" name="create"><i class="ph ph-plus"></i>Registrar</button>
+                    <button type="submit" id="btnSubmit" name="create" style="margin-top: 1rem;"><i class="ph ph-plus"></i>Registrar</button>
                 </form>
             </section>
 
@@ -197,42 +197,52 @@ foreach ($dictamenesObj as $dictamen) {
     </div>
 </body>
 <script>
-    let padecimientosData = <?php echo json_encode($padecimientos); ?>;
     let esUsuarioCliente = <?php echo $esUsuarioCliente ? 'true' : 'false'; ?>;
     let esAdmin = <?php echo $esAdmin ? 'true' : 'false'; ?>;
+    let esInstructor = <?php echo $esInstructor ? 'true' : 'false'; ?>;
     let clientePadecimientos = <?php echo json_encode($clientePadecimientos); ?>;
     let dictamenes = <?php echo json_encode($dictamenes); ?>;
 
     function cargarPadecimientosPorTipo() {
         const tipoSeleccionado = document.getElementById('tipoPadecimiento').value;
         const selectPadecimiento = document.getElementById('padecimiento');
-        selectPadecimiento.innerHTML = '<option value="">Seleccione un padecimiento</option>';
+        selectPadecimiento.innerHTML = '<option value="">Cargando...</option>';
         if (tipoSeleccionado) {
-            const padecimientosFiltrados = padecimientosData.filter(p => p.tbpadecimientotipo === tipoSeleccionado);
-            padecimientosFiltrados.forEach(padecimiento => {
-                const option = document.createElement('option');
-                option.value = padecimiento.tbpadecimientoid;
-                option.textContent = padecimiento.tbpadecimientonombre;
-                selectPadecimiento.appendChild(option);
-            });
-            selectPadecimiento.disabled = false;
+            fetch(`../action/clientePadecimientoAction.php?action=get_padecimientos_por_tipo&tipo=${tipoSeleccionado}`)
+                .then(response => response.json())
+                .then(data => {
+                    selectPadecimiento.innerHTML = '<option value="">Seleccione un padecimiento</option>';
+                    data.forEach(padecimiento => {
+                        const option = document.createElement('option');
+                        option.value = padecimiento.tbpadecimientoid;
+                        option.textContent = padecimiento.tbpadecimientonombre;
+                        selectPadecimiento.appendChild(option);
+                    });
+                    selectPadecimiento.disabled = false;
+                })
         } else {
+            selectPadecimiento.innerHTML = '<option value="">Primero seleccione un tipo</option>';
             selectPadecimiento.disabled = true;
         }
     }
 
     function cargarDatosEnTabla() {
         const tbody = document.getElementById('tablaBody');
+        const tableWrapper = document.querySelector('.table-wrapper');
+        const mensajeVacio = document.getElementById('mensajeVacio');
+
         tbody.innerHTML = '';
         if (clientePadecimientos.length === 0) {
-            document.getElementById('mensajeVacio').style.display = 'block';
+            tableWrapper.style.display = 'none';
+            mensajeVacio.style.display = 'block';
             return;
         }
-        document.getElementById('mensajeVacio').style.display = 'none';
+        tableWrapper.style.display = 'block';
+        mensajeVacio.style.display = 'none';
 
         clientePadecimientos.forEach(registro => {
             const padecimientosIds = registro.tbpadecimientoid ? registro.tbpadecimientoid.split('$').filter(id => id) : [];
-            const padecimientosNombres = registro.padecimientosNombres ? registro.padecimientosNombres.split('$').filter(name => name) : [];
+            const padecimientosNombres = Array.isArray(registro.padecimientosNombres) ? registro.padecimientosNombres : [];
 
             padecimientosIds.forEach((padecimientoId, index) => {
                 const nombrePadecimiento = padecimientosNombres[index] || `ID: ${padecimientoId}`;
@@ -274,6 +284,23 @@ foreach ($dictamenesObj as $dictamen) {
             })
             .catch(error => alert('Error de conexión.'));
     }
+
+    function abrirRegistroDictamen() {
+        window.open('padecimientoDictamenView.php', 'SeleccionarDictamen', 'width=800,height=600');
+    }
+
+    function seleccionarDictamen(id, entidad) {
+        document.getElementById('dictamenIdHidden').value = id;
+        document.getElementById('dictamenDisplay').value = entidad;
+        document.getElementById('btnLimpiarDictamen').style.display = 'inline-block';
+    }
+
+    function limpiarDictamen() {
+        document.getElementById('dictamenDisplay').value = 'No se ha registrado dictamen';
+        document.getElementById('dictamenIdHidden').value = '';
+        document.getElementById('btnLimpiarDictamen').style.display = 'none';
+    }
+
 
 
     document.addEventListener('DOMContentLoaded', function () {

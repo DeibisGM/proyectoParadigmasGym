@@ -25,7 +25,7 @@ $eventos = $eventoBusiness->getAllEventosActivos();
     <div class="container">
         <header>
             <a href="reservaView.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-sparkle"></i> Eventos Disponibles</h2>
+            <h2>Eventos Disponibles</h2>
         </header>
 
         <main>
@@ -48,8 +48,7 @@ $eventos = $eventoBusiness->getAllEventosActivos();
                     <section class="evento-card">
                         <h3 style="display: flex; justify-content: space-between; align-items: center;">
                             <?php echo htmlspecialchars($evento->getNombre()); ?>
-                            <span class="badge-soft"
-                                style="background-color: <?php echo $evento->getTipo() == 'abierto' ? 'var(--color-success)' : 'var(--color-error)'; ?>; color: white;">
+                            <span class="badge-soft <?php echo $evento->getTipo() == 'abierto' ? 'abierto' : 'cerrado'; ?>">
                                 <?php echo ucfirst($evento->getTipo()); ?>
                             </span>
                         </h3>

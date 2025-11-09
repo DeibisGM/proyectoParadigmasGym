@@ -253,8 +253,8 @@ if ($tipoUsuario == 'cliente') {
                             <input type="hidden" name="carnet" value="<?= htmlspecialchars($cliente->getCarnet()) ?>">
 
                             <div class="form-group">
-                                <label>Carnet:</label>
-                                <p><?= htmlspecialchars($cliente->getCarnet()) ?></p>
+                                <label for="carnet_cliente">Carnet:</label>
+                                <input type="text" id="carnet_cliente" name="carnet" value="<?= htmlspecialchars($cliente->getCarnet()) ?>" disabled>
                             </div>
                             <div class="form-group">
                                 <?php $error = Validation::getError('nombre'); if ($error): ?><span class="error-message"><?= $error ?></span><?php endif; ?>
@@ -325,9 +325,6 @@ if ($tipoUsuario == 'cliente') {
         <?php } ?>
     </main>
 
-    <footer>
-        <p>&copy; <?= date("Y") ?> Gimnasio. Todos los derechos reservados.</p>
-    </footer>
 </div>
 <?php Validation::clear(); ?>
 <script>

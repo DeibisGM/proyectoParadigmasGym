@@ -193,6 +193,31 @@ body.auth-body {
     text-transform: uppercase;
 }
 
+.badge-soft.activo {
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
+}
+
+.badge-soft.inactivo {
+    background-color: rgba(255, 65, 54, 0.12);
+    color: #FFC1BC;
+}
+
+.badge-soft.reservado {
+    background-color: rgba(0, 123, 255, 0.12);
+    color: #87CEEB; /* Light blue */
+}
+
+.badge-soft.abierto {
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent);
+}
+
+.badge-soft.cerrado {
+    background-color: rgba(255, 65, 54, 0.12);
+    color: #FFC1BC;
+}
+
 .auth-form {
     display: flex;
     flex-direction: column;
@@ -608,6 +633,7 @@ i.ph {
 .table-clients td {
   padding: .6rem .5rem;
   vertical-align: middle;
+  text-align: center;
 }
 /* inputs compactos dentro de la tabla */
 .table-clients input[type="text"],
@@ -740,7 +766,7 @@ hr {
     justify-content: center;
     background: var(--color-surface-strong);
     position: relative;
-    margin: 0 auto;
+    /* margin: 0 auto; Removed to align left */
     box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.08);
 }
 

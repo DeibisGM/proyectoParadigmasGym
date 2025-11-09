@@ -40,7 +40,7 @@ if ($tipoUsuario == 'cliente') {
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-phone-plus"></i> Gestión de Números de Emergencia</h2>
+            <h2>Gestión de Números de Emergencia</h2>
         </header>
 
         <main>
@@ -124,7 +124,7 @@ if ($tipoUsuario == 'cliente') {
                                 value="<?= Validation::getOldInput('relacion') ?>">
                         </div>
                     </div>
-                    <button type="submit" name="insertar"><i class="ph ph-plus"></i>Agregar</button>
+                    <button type="submit" name="insertar" style="margin-top: 1rem;"><i class="ph ph-plus"></i>Agregar</button>
                 </form>
             </section>
 
@@ -142,69 +142,75 @@ if ($tipoUsuario == 'cliente') {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($numeros as $n): ?>
+                            <?php if (empty($numeros)): ?>
                                 <tr>
-                                    <form id="form-<?= $n->getId() ?>" method="post"
-                                        action="../action/numeroEmergenciaAction.php"></form>
-                                    <input type="hidden" name="id" value="<?= $n->getId() ?>"
-                                        form="form-<?= $n->getId() ?>">
-                                    <input type="hidden" name="clienteId" value="<?= $n->getClienteId() ?>"
-                                        form="form-<?= $n->getId() ?>">
+                                    <td colspan="5" style="text-align: center;">No hay números de emergencia registrados.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($numeros as $n): ?>
+                                    <tr>
+                                        <form id="form-<?= $n->getId() ?>" method="post"
+                                            action="../action/numeroEmergenciaAction.php"></form>
+                                        <input type="hidden" name="id" value="<?= $n->getId() ?>"
+                                            form="form-<?= $n->getId() ?>">
+                                        <input type="hidden" name="clienteId" value="<?= $n->getClienteId() ?>"
+                                            form="form-<?= $n->getId() ?>">
 
-                                    <td data-label="Cliente">
-                                        <?php
-                                        if ($tipoUsuario === 'cliente') {
-                                            echo htmlspecialchars($cliente->getNombre());
-                                        } else {
-                                            foreach ($clientes as $c) {
-                                                if ($c->getId() == $n->getClienteId()) {
-                                                    echo htmlspecialchars($c->getNombre() . ' - ' . $c->getCarnet());
-                                                    break;
+                                        <td data-label="Cliente">
+                                            <?php
+                                            if ($tipoUsuario === 'cliente') {
+                                                echo htmlspecialchars($cliente->getNombre());
+                                            } else {
+                                                foreach ($clientes as $c) {
+                                                    if ($c->getId() == $n->getClienteId()) {
+                                                        echo htmlspecialchars($c->getNombre() . ' - ' . $c->getCarnet());
+                                                        break;
+                                                    }
                                                 }
                                             }
-                                        }
-                                        ?>
-                                    </td>
-                                    <td data-label="Nombre Contacto">
-                                        <input type="text" name="nombre" maxlength="50"
-                                            value="<?= htmlspecialchars(Validation::getOldInput('nombre_' . $n->getId(), $n->getNombre())) ?>"
-                                            form="form-<?= $n->getId() ?>">
-                                        <?php if ($error = Validation::getError('nombre_' . $n->getId())): ?><span
-                                            class="error-message">
-                                                <?= $error ?>
-                                            </span><?php endif; ?>
-                                    </td>
-                                    <td data-label="Teléfono">
-                                        <input type="text" name="telefono" maxlength="8"
-                                            value="<?= htmlspecialchars(Validation::getOldInput('telefono_' . $n->getId(), $n->getTelefono())) ?>"
-                                            form="form-<?= $n->getId() ?>">
-                                        <?php if ($error = Validation::getError('telefono_' . $n->getId())): ?><span
-                                            class="error-message">
-                                                <?= $error ?>
-                                            </span><?php endif; ?>
-                                    </td>
-                                    <td data-label="Relación">
-                                        <input type="text" name="relacion" maxlength="30"
-                                            value="<?= htmlspecialchars(Validation::getOldInput('relacion_' . $n->getId(), $n->getRelacion())) ?>"
-                                            form="form-<?= $n->getId() ?>">
-                                        <?php if ($error = Validation::getError('relacion_' . $n->getId())): ?><span
-                                            class="error-message">
-                                                <?= $error ?>
-                                            </span><?php endif; ?>
-                                    </td>
-                                    <td data-label="Acciones">
-                                        <div class="actions">
-                                            <button type="submit" name="actualizar" class="btn-row" title="Actualizar"
-                                                form="form-<?= $n->getId() ?>"><i
-                                                    class="ph ph-pencil-simple"></i></button>
-                                            <button type="submit" name="eliminar" class="btn-row btn-danger"
-                                                onclick="return confirm('¿Seguro que desea eliminar?');"
-                                                title="Eliminar" form="form-<?= $n->getId() ?>"><i
-                                                    class="ph ph-trash"></i></button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                                            ?>
+                                        </td>
+                                        <td data-label="Nombre Contacto">
+                                            <input type="text" name="nombre" maxlength="50"
+                                                value="<?= htmlspecialchars(Validation::getOldInput('nombre_' . $n->getId(), $n->getNombre())) ?>"
+                                                form="form-<?= $n->getId() ?>">
+                                            <?php if ($error = Validation::getError('nombre_' . $n->getId())): ?><span
+                                                class="error-message">
+                                                    <?= $error ?>
+                                                </span><?php endif; ?>
+                                        </td>
+                                        <td data-label="Teléfono">
+                                            <input type="text" name="telefono" maxlength="8"
+                                                value="<?= htmlspecialchars(Validation::getOldInput('telefono_' . $n->getId(), $n->getTelefono())) ?>"
+                                                form="form-<?= $n->getId() ?>">
+                                            <?php if ($error = Validation::getError('telefono_' . $n->getId())): ?><span
+                                                class="error-message">
+                                                    <?= $error ?>
+                                                </span><?php endif; ?>
+                                        </td>
+                                        <td data-label="Relación">
+                                            <input type="text" name="relacion" maxlength="30"
+                                                value="<?= htmlspecialchars(Validation::getOldInput('relacion_' . $n->getId(), $n->getRelacion())) ?>"
+                                                form="form-<?= $n->getId() ?>">
+                                            <?php if ($error = Validation::getError('relacion_' . $n->getId())): ?><span
+                                                class="error-message">
+                                                    <?= $error ?>
+                                                </span><?php endif; ?>
+                                        </td>
+                                        <td data-label="Acciones">
+                                            <div class="actions">
+                                                <button type="submit" name="actualizar" class="btn-row" title="Actualizar"
+                                                    form="form-<?= $n->getId() ?>"><i
+                                                        class="ph ph-pencil-simple"></i></button>
+                                                <button type="submit" name="eliminar" class="btn-row btn-danger"
+                                                    onclick="return confirm('¿Seguro que desea eliminar?');"
+                                                    title="Eliminar" form="form-<?= $n->getId() ?>"><i
+                                                        class="ph ph-trash"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>

@@ -28,7 +28,7 @@ $salas = $salaBusiness->obtenerTbsala();
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-door"></i> Gestión de Salas</h2>
+            <h2>Gestión de Salas</h2>
         </header>
 
         <main>
@@ -127,7 +127,9 @@ $salas = $salaBusiness->obtenerTbsala();
                                             <?php echo $sala->getTbsalacapacidad(); ?>
                                         </td>
                                         <td data-label="Estado">
-                                            <?php echo ($sala->getTbsalaestado() == 1 ? 'Activa' : 'Inactiva'); ?>
+                                            <span class="badge-soft <?= $sala->getTbsalaestado() == 1 ? 'activo' : 'inactivo' ?>">
+                                                <?php echo ($sala->getTbsalaestado() == 1 ? 'Activa' : 'Inactiva'); ?>
+                                            </span>
                                         </td>
                                     <?php endif; ?>
                                 </tr>

@@ -40,7 +40,7 @@ $clientes = $esAdminOInstructor ? $clientePadecimientoBusiness->obtenerTodosLosC
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-file-text"></i>Gestión de Dictamen Médico</h2>
+            <h2>Gestión de Dictamen Médico</h2>
         </header>
 
         <main>
@@ -155,6 +155,7 @@ $clientes = $esAdminOInstructor ? $clientePadecimientoBusiness->obtenerTodosLosC
                                         <?php if ($esAdminOInstructor): ?>
                                             <td data-label="Acciones">
                                                 <div class="actions">
+                                                    <button type="button" class="btn-row seleccionar-btn" title="Seleccionar"><i class="ph ph-check"></i></button>
                                                     <button type="button" class="btn-row actualizar-btn"
                                                         title="Actualizar"><i class="ph ph-pencil-simple"></i></button>
                                                     <button type="button" class="btn-row btn-danger eliminar-btn"
@@ -172,6 +173,22 @@ $clientes = $esAdminOInstructor ? $clientePadecimientoBusiness->obtenerTodosLosC
         </main>
     </div>
     <?php Validation::clear(); ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.seleccionar-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const id = row.dataset.id;
+                    const entidad = row.querySelector('input[name="entidademision"]').value;
+                    
+                    if (window.opener && !window.opener.closed) {
+                        window.opener.seleccionarDictamen(id, entidad);
+                        window.close();
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

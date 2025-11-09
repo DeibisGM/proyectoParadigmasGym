@@ -75,7 +75,18 @@ if ($tipoUsuario === 'cliente') {
                                         <td><?php echo htmlspecialchars($reserva['tipo']); ?></td>
                                         <td><?php echo htmlspecialchars($reserva['descripcion']); ?></td>
                                         <td><?php echo htmlspecialchars($reserva['instructor']); ?></td>
-                                        <td><?php echo htmlspecialchars($reserva['estado']); ?></td>
+                                        <td>
+                                            <span class="badge-soft <?php
+                                                $estado = htmlspecialchars($reserva['estado']);
+                                                if ($estado === 'Confirmada' || $estado === 'Activa') {
+                                                    echo 'activo';
+                                                } elseif ($estado === 'Cancelada' || $estado === 'Inactiva') {
+                                                    echo 'inactivo';
+                                                } elseif ($estado === 'Reservado') {
+                                                    echo 'reservado';
+                                                }
+                                            ?>"><?php echo $estado; ?></span>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                                 </tbody>
@@ -126,7 +137,18 @@ if ($tipoUsuario === 'cliente') {
                                     <td><?php echo htmlspecialchars($reserva['tipo']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['descripcion']); ?></td>
                                     <td><?php echo htmlspecialchars($reserva['instructor']); ?></td>
-                                    <td><?php echo htmlspecialchars($reserva['estado']); ?></td>
+                                    <td>
+                                        <span class="badge-soft <?php
+                                            $estado = htmlspecialchars($reserva['estado']);
+                                            if ($estado === 'Confirmada' || $estado === 'Activa') {
+                                                echo 'activo';
+                                            } elseif ($estado === 'Cancelada' || $estado === 'Inactiva') {
+                                                echo 'inactivo';
+                                            } elseif ($estado === 'Reservado') {
+                                                echo 'reservado';
+                                            }
+                                        ?>"><?php echo $estado; ?></span>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>

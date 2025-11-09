@@ -20,7 +20,7 @@ $instructores = $business->getAllTBInstructor();
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-users"></i> Instructores Disponibles</h2>
+            <h2>Instructores Disponibles</h2>
         </header>
 
         <main>
@@ -63,11 +63,6 @@ $instructores = $business->getAllTBInstructor();
             </section>
         </main>
 
-        <footer>
-            <p>&copy;
-                <?php echo date("Y"); ?> Gimnasio. Todos los derechos reservados.
-            </p>
-        </footer>
     </div>
 </body>
 
