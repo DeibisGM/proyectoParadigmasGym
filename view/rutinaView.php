@@ -23,22 +23,23 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-notebook"></i> Mis Rutinas</h2>
+            <h2>Mis Rutinas</h2>
         </header>
         <main>
             <section>
                 <h3><i class="ph ph-plus-circle"></i> Registrar Rutina del Día</h3>
                 <form action="../action/rutinaAction.php" method="POST" id="form-rutina-principal">
                     <input type="hidden" name="create_rutina" value="1">
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 2rem;">
                         <label for="fecha_rutina">Fecha del Entrenamiento:</label>
-                        <input type="date" id="fecha_rutina" name="fecha_rutina" value="<?php echo date('Y-m-d'); ?>"
+                        <input type="date" id="fecha_rutina" name="fecha_rutina" class="date-input" value="<?php echo date('Y-m-d'); ?>"
                             required>
                     </div>
 
+                    <h4 style="margin-top: 2rem;">Añadir Ejercicio</h4>
                     <div id="panel-agregar-ejercicio"
                         style="border: 1px solid var(--color-border); padding: 1.5rem; margin-bottom: 1.5rem; border-radius: var(--radius-md);">
-                        <h4>Añadir Ejercicio</h4>
+                        
                         <div class="form-grid-container">
                             <div class="form-group">
                                 <label for="tipo-ejercicio">Tipo:</label>
@@ -51,7 +52,7 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                                 </select>
                             </div>
                             <div class="form-group" id="container-ejercicio-select" style="display:none;">
-                                <label for="ejercicio-select">Ejercicio:</label>
+                                <label for="ejercicio-select" style="margin-bottom: 0.5rem;">Ejercicio:</label>
                                 <select id="ejercicio-select"></select>
                             </div>
                         </div>
@@ -73,7 +74,7 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                             placeholder="¿Cómo te sentiste? ¿Alguna nota importante?"></textarea>
                     </div>
 
-                    <button type="submit">
+                    <button type="submit" style="margin-top: 1rem;">
                         <i class="ph ph-floppy-disk"></i> Guardar Rutina Completa
                     </button>
                 </form>
@@ -101,7 +102,7 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                                             <?php echo date('d/m/Y', strtotime($rutina->getFecha())); ?>
                                         </td>
                                         <td data-label="Observaciones">
-                                            <?php echo htmlspecialchars($rutina->getObservacion()); ?>
+                                            <?php echo !empty($rutina->getObservacion()) ? htmlspecialchars($rutina->getObservacion()) : '-'; ?>
                                         </td>
                                         <td data-label="Ejercicios">
                                             <ul style="padding-left: 1rem; margin: 0;">
@@ -130,9 +131,9 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                                                 <?php endforeach; ?>
                                             </ul>
                                         </td>
-                                        <td data-label="Acciones">
+                                        <td data-label="Acciones" class="actions">
                                             <form action="../action/rutinaAction.php" method="POST"
-                                                onsubmit="return confirm('¿Eliminar esta rutina?');">
+                                                onsubmit="return confirm('¿Eliminar esta rutina?');" style="margin: 0;">
                                                 <input type="hidden" name="delete_rutina" value="1">
                                                 <input type="hidden" name="rutina_id"
                                                     value="<?php echo $rutina->getId(); ?>">
@@ -282,6 +283,15 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                 ejercicioSelect.innerHTML = '';
                 camposContainer.innerHTML = '';
             }
+
+            // Abrir el date picker al hacer clic en el campo
+            document.getElementById('fecha_rutina').addEventListener('click', function() {
+                try {
+                    this.showPicker();
+                } catch (error) {
+                    console.error("showPicker() is not supported by this browser.");
+                }
+            });
         });
     </script>
 </body>

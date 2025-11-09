@@ -571,8 +571,7 @@ i.ph {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  min-width: 1180px;
-  font-size: .85rem;
+  font-size: 1rem;
   color: #fff;
 }
 .table-clients thead th {
@@ -674,6 +673,23 @@ i.ph {
     box-shadow: none;
     filter: none;
 }
+
+.date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.date-input {
+    color-scheme: dark;
+}
+
+.form-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+
 
 /* Override general danger button styles within the table */
 .table-clients .btn-row.btn-danger,
