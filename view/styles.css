@@ -1169,3 +1169,12 @@ hr {
     border-color: var(--color-text);
     filter: none;
 }
+
+#action-panel-container .button-container {
+    padding-top: 1rem;
+    gap: 1rem;
+}
+
+#action-panel-container .btn-danger {
+    box-shadow: none;
+}

@@ -38,6 +38,10 @@ $salas = $salaBusiness->obtenerTbsala();
             } else if (isset($_GET['success'])) {
                 echo '<p class="success-message flash-msg"><b>Éxito: ' . htmlspecialchars($_GET['success']) . '</b></p>';
             }
+            $generalError = Validation::getError('general');
+            if ($generalError) {
+                echo '<p class="error-message flash-msg"><b>Error: ' . htmlspecialchars($generalError) . '</b></p>';
+            }
             ?>
 
             <?php if ($tipoUsuario == 'admin' || $tipoUsuario == 'instructor') { ?>
