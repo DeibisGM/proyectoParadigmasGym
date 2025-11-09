@@ -22,7 +22,7 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-first-aid"></i> Gestión de Padecimientos</h2>
+            <h2>Gestión de Padecimientos</h2>
         </header>
 
         <main>
@@ -61,9 +61,11 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
                                 placeholder="Instrucciones sobre cómo actuar"></textarea>
                         </div>
                     </div>
-                    <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
-                    <button type="button" onclick="limpiarFormulario()" id="btnCancelar" class="btn-danger"
-                        style="display: none;"><i class="ph ph-x-circle"></i>Cancelar</button>
+                    <div class="button-container">
+                        <button type="submit" id="btnSubmit"><i class="ph ph-plus"></i>Registrar</button>
+                        <button type="button" onclick="limpiarFormulario()" id="btnCancelar" class="btn-secondary-outline"
+                            style="display: none;"><i class="ph ph-x"></i>Cancelar</button>
+                    </div>
                 </form>
             </section>
 
@@ -209,6 +211,10 @@ if (!isset($_SESSION['usuario_id']) || !in_array($_SESSION['tipo_usuario'], ['ad
 
         function mostrarMensaje(mensaje, tipo) {
             const div = document.getElementById('mensaje');
+            if (!mensaje) { // Only display if there's a message
+                div.style.display = 'none';
+                return;
+            }
             div.textContent = mensaje;
             div.style.display = 'block';
             div.className = tipo === 'success' ? 'success-message flash-msg' : 'error-message flash-msg';
