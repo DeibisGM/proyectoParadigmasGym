@@ -60,115 +60,234 @@
                    </svg>
             </div>
         </div>
+        <div class="body-insights">
+            <div class="body-summary">
+                <div class="body-summary-row">
+                    <span class="body-summary-label">Periodo:</span>
+                    <span class="body-summary-value" data-summary="period">-</span>
+                </div>
+                <div class="body-summary-row">
+                    <span class="body-summary-label">Rango:</span>
+                    <span class="body-summary-value" data-summary="range">-</span>
+                </div>
+                <div class="body-summary-row">
+                    <span class="body-summary-label">Rutinas consideradas:</span>
+                    <span class="body-summary-value" data-summary="routines">0</span>
+                </div>
+                <p class="body-summary-hint">Los porcentajes se calculan con las rutinas registradas en el rango seleccionado.</p>
+            </div>
+            <div class="body-legend">
+                <h2>Detalle por zonas</h2>
+                <ul class="body-legend-list"></ul>
+            </div>
+            <div class="body-viewer-empty" hidden>
+                <p>No se registran rutinas para este periodo.</p>
+            </div>
+        </div>
     </div>
 </div>
 <div class="tooltip"></div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const mainWrapper = document.querySelector('.viewer-grid');
+    document.addEventListener('DOMContentLoaded', () => {
         const bodyParts = document.querySelectorAll('.body-part');
         const filterButtons = document.querySelectorAll('.btn-filter');
+        const legendList = document.querySelector('.body-legend-list');
+        const summaryPeriod = document.querySelector('[data-summary="period"]');
+        const summaryRange = document.querySelector('[data-summary="range"]');
+        const summaryRoutines = document.querySelector('[data-summary="routines"]');
+        const emptyState = document.querySelector('.body-viewer-empty');
+        const progresoDataset = window.progresoData || {};
+        const allBodyPartIds = Array.from(bodyParts).map(part => part.id);
+        const periodLabels = { daily: 'Diario', weekly: 'Semanal', monthly: 'Mensual' };
+        const escapeId = (value) => window.CSS && CSS.escape ? CSS.escape(value) : value;
+        const inactiveFill = (getComputedStyle(document.documentElement).getPropertyValue('--color-muscle-inactive') || '#1A1A1A').trim() || '#1A1A1A';
 
-        // --- DUMMY DATA ---
-        const progresoDataDaily = { pectoralmayor: 10, gemelosfrontal: 20, abdominales: 15 };
-        const progresoDataWeekly = { pectoralmayor: 50, biceps: 70, cuadriceps: 60, hombrofrontal: 40 };
-        const progresoDataMonthly = { pectoralmayor: 80, biceps: 90, cuadriceps: 85, hombrofrontal: 75, gemelosfrontal: 60, abdominales: 50, Isquiotibiales: 45 };
-
-        const progresoData = {
-            daily: progresoDataDaily,
-            weekly: progresoDataWeekly,
-            monthly: progresoDataMonthly
-        };
-        // --- END DUMMY DATA ---
+        if (!legendList || !summaryPeriod || !summaryRange || !summaryRoutines) {
+            return;
+        }
 
         function getHslFromPercentage(percentage) {
             const hue = 120 - (percentage * 1.2);
             return `hsl(${hue}, 80%, 60%)`;
         }
 
-        function clearLabels() {
-            const existingLabels = document.querySelectorAll('.body-label');
-            existingLabels.forEach(label => label.remove());
-        }
+        function formatDate(value) {
+            if (!value) {
+                return '-';
+            }
 
-        function createLabels() {
-            clearLabels();
-            bodyParts.forEach(part => {
-                const name = part.dataset.name;
-                const porcentaje = part.dataset.porcentaje;
+            const date = new Date(`${value}T00:00:00`);
+            if (Number.isNaN(date.getTime())) {
+                return value;
+            }
 
-                if (name && porcentaje) {
-                    const container = part.closest('.body-container');
-                    const label = document.createElement('div');
-                    label.className = 'body-label';
-                    label.textContent = `${name} (${porcentaje}%)`;
-                    container.appendChild(label);
-
-                    const svgRect = container.querySelector('svg').getBoundingClientRect();
-                    const partRect = part.getBoundingClientRect();
-
-                    const x = (partRect.right - svgRect.left + 5);
-                    const y = (partRect.top + partRect.height / 4 - svgRect.top);
-
-                    label.style.left = `${x}px`;
-                    label.style.top = `${y}px`;
-
-                    setTimeout(() => {
-                        label.style.opacity = '1';
-                    }, 100);
-                }
+            return date.toLocaleDateString('es-CR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
             });
         }
 
-        function aplicarProgresoVisual(data) {
+        function resetBodyParts() {
             bodyParts.forEach(part => {
-                part.style.opacity = 0.25;
-                part.style.fill = 'var(--color-surface-strong)';
+                part.classList.remove('active');
+                part.classList.add('inactive');
+                part.style.opacity = 0.2;
+                part.style.fill = inactiveFill;
                 delete part.dataset.porcentaje;
+                delete part.dataset.color;
             });
+        }
 
-            if (!data || Object.keys(data).length === 0) {
-                createLabels();
-                return;
+        function updateSummary(periodKey, dataset) {
+            summaryPeriod.textContent = periodLabels[periodKey] || '-';
+            const fechaInicio = dataset.fechaInicio ?? dataset.fecha_inicio ?? null;
+            const fechaFin = dataset.fechaFin ?? dataset.fecha_fin ?? null;
+
+            if (fechaInicio && fechaFin) {
+                summaryRange.textContent = (fechaInicio === fechaFin)
+                    ? formatDate(fechaInicio)
+                    : `${formatDate(fechaInicio)} - ${formatDate(fechaFin)}`;
+            } else {
+                summaryRange.textContent = '-';
             }
 
-            const porcentajes = Object.values(data);
-            const maxPorcentaje = Math.max(...porcentajes);
+            summaryRoutines.textContent = dataset.rutinas != null ? dataset.rutinas : 0;
+        }
 
-            if (maxPorcentaje === 0) {
-                createLabels();
-                return;
+        function buildLegendItem(options) {
+            const { color, name, value, note, isInactive } = options;
+            const item = document.createElement('li');
+            item.className = 'body-legend-item' + (isInactive ? ' is-inactive' : '');
+
+            const swatch = document.createElement('span');
+            swatch.className = 'body-legend-swatch' + (isInactive ? ' is-inactive' : '');
+            if (color) {
+                swatch.style.background = color;
             }
 
-            for (const parteId in data) {
-                const porcentaje = data[parteId];
-                const elementos = document.querySelectorAll(`#${parteId}`);
+            const textWrapper = document.createElement('div');
+            textWrapper.className = 'body-legend-text';
 
-                if (elementos.length > 0) {
+            const nameEl = document.createElement('span');
+            nameEl.className = 'body-legend-name';
+            nameEl.textContent = name;
+
+            textWrapper.appendChild(nameEl);
+
+            if (value != null) {
+                const valueEl = document.createElement('span');
+                valueEl.className = 'body-legend-value';
+                valueEl.textContent = value;
+                textWrapper.appendChild(valueEl);
+            }
+
+            if (note) {
+                const noteEl = document.createElement('span');
+                noteEl.className = 'body-legend-note';
+                noteEl.textContent = note;
+                textWrapper.appendChild(noteEl);
+            }
+
+            item.appendChild(swatch);
+            item.appendChild(textWrapper);
+
+            return item;
+        }
+
+        function updateLegend(porcentajes) {
+            legendList.innerHTML = '';
+            const entries = Object.entries(porcentajes).sort(([, a], [, b]) => b - a);
+
+            if (!entries.length) {
+                legendList.appendChild(buildLegendItem({
+                    name: 'No se registran zonas trabajadas en este periodo.',
+                    note: null,
+                    color: inactiveFill,
+                    isInactive: true
+                }));
+            } else {
+                entries.forEach(([parteId, valor]) => {
+                    const elemento = document.getElementById(parteId);
+                    const nombre = elemento ? (elemento.dataset.name || parteId) : parteId;
+                    const color = elemento && elemento.dataset.color ? elemento.dataset.color : getHslFromPercentage(50);
+
+                    legendList.appendChild(buildLegendItem({
+                        color,
+                        name: nombre,
+                        value: `${Math.round(valor)}%`
+                    }));
+                });
+            }
+
+            const inactiveCount = allBodyPartIds.filter(id => !porcentajes[id]).length;
+            if (inactiveCount > 0) {
+                legendList.appendChild(buildLegendItem({
+                    name: 'Zonas sin actividad registrada',
+                    note: `${inactiveCount} ${inactiveCount === 1 ? 'zona' : 'zonas'}`,
+                    isInactive: true
+                }));
+            }
+        }
+
+        function aplicarProgresoVisual(periodKey) {
+            const dataset = progresoDataset[periodKey] || {};
+            const porcentajes = dataset.porcentajes || {};
+            const valores = Object.values(porcentajes);
+            const maxPorcentaje = valores.length ? Math.max(...valores) : 0;
+
+            resetBodyParts();
+
+            if (maxPorcentaje > 0) {
+                Object.entries(porcentajes).forEach(([parteId, porcentaje]) => {
+                    const elementos = document.querySelectorAll(`#${escapeId(parteId)}`);
+                    if (!elementos.length) {
+                        return;
+                    }
+
                     const opacidadRelativa = porcentaje / maxPorcentaje;
-                    const opacidad = 0.30 + opacidadRelativa * 0.70;
+                    const opacidad = 0.35 + opacidadRelativa * 0.65;
                     const color = getHslFromPercentage(100 - opacidadRelativa * 100);
 
                     elementos.forEach(el => {
+                        el.classList.add('active');
+                        el.classList.remove('inactive');
                         el.style.opacity = opacidad;
                         el.style.fill = color;
                         el.dataset.porcentaje = Math.round(porcentaje);
+                        el.dataset.color = color;
                     });
+                });
+            }
+
+            const tieneDatos = valores.length > 0 && maxPorcentaje > 0;
+            updateSummary(periodKey, dataset);
+            updateLegend(porcentajes);
+
+            if (emptyState) {
+                if (tieneDatos) {
+                    emptyState.setAttribute('hidden', 'hidden');
+                } else {
+                    emptyState.removeAttribute('hidden');
                 }
             }
-            createLabels();
         }
 
         filterButtons.forEach(button => {
             button.addEventListener('click', function () {
                 filterButtons.forEach(btn => btn.classList.remove('active'));
                 this.classList.add('active');
-                const period = this.dataset.period;
-                aplicarProgresoVisual(progresoData[period]);
+                aplicarProgresoVisual(this.dataset.period);
             });
         });
 
-        // Initial load
-        aplicarProgresoVisual(progresoData.weekly);
+        const defaultPeriod = progresoDataset.weekly ? 'weekly' : (filterButtons[0]?.dataset.period || 'daily');
+        const defaultButton = Array.from(filterButtons).find(btn => btn.dataset.period === defaultPeriod);
+        if (defaultButton) {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            defaultButton.classList.add('active');
+        }
+
+        aplicarProgresoVisual(defaultPeriod);
     });
 </script>
