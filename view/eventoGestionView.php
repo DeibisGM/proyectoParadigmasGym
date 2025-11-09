@@ -43,7 +43,7 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-calendar-plus"></i>Gestión de Eventos</h2>
+            <h2>Gestión de Eventos</h2>
         </header>
 
         <main>
@@ -148,7 +148,9 @@ $misEventos = ($tipoUsuario === 'admin') ? $todosLosEventos : array_filter($todo
                             </select>
                         </div>
                     </div>
-                    <button type="submit" name="crear_evento"><i class="ph ph-plus"></i>Crear Evento</button>
+                    <div class="button-container">
+                        <button type="submit" name="crear_evento"><i class="ph ph-plus"></i>Crear Evento</button>
+                    </div>
                 </form>
             </section>
 
