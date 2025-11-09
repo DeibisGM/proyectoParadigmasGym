@@ -63,7 +63,7 @@ if ($esAdmin || $esInstructor) {
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-user-focus"></i> Instructor Personal - Reservas</h2>
+            <h2>Instructor Personal - Reservas</h2>
         </header>
 
         <main>
@@ -99,7 +99,7 @@ if ($esAdmin || $esInstructor) {
                                             <td data-label="Duración">
                                                 <?php echo $reserva->getDuracion(); ?> minutos
                                             </td>
-                                            <td data-label="Acciones">
+                                            <td data-label="Acciones" class="actions">
                                                 <button class="btn-row btn-danger"
                                                     onclick="cancelarReserva(<?php echo $reserva->getId(); ?>)">
                                                     <i class="ph ph-x"></i>
@@ -151,7 +151,7 @@ if ($esAdmin || $esInstructor) {
                                                     <?= $horario->getEstado() === 'disponible' ? 'Disponible' : 'Ocupado' ?>
                                                 </span>
                                             </td>
-                                            <td data-label="Acciones">
+                                            <td data-label="Acciones" class="actions">
                                                 <?php if ($horario->getEstado() === 'disponible'): ?>
                                                     <button class="btn-row"
                                                         onclick="reservarHorario(<?php echo $horario->getId(); ?>)">

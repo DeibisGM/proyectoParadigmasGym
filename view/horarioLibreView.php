@@ -90,19 +90,17 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domin
     <div class="container">
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
-            <h2><i class="ph ph-clock-afternoon"></i> Gestión de Horario Libre</h2>
+            <h2>Gestión de Horario Libre</h2>
         </header>
 
         <main>
             <section class="navegacion-semana">
-                <a href="?semana=<?php echo $semanaAnterior; ?>"><button><i class="ph ph-caret-left"></i>
-                        Anterior</button></a>
+                <a href="?semana=<?php echo $semanaAnterior; ?>"><button><i class="ph ph-caret-left"></i></button></a>
                 <h3>
                     <?php echo $semanaActual; ?>
                 </h3>
-                <a href="?semana=<?php echo $semanaSiguiente; ?>"><button>Siguiente <i
-                            class="ph ph-caret-right"></i></button></a>
-            </section>
+                                <a href="?semana=<?php echo $semanaSiguiente; ?>"><button><i
+                                                class="ph ph-caret-right"></i></button></a>            </section>
 
             <section class="grid-container">
                 <table class="grid-horario">
