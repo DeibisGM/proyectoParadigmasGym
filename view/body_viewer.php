@@ -24,6 +24,16 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
         $viewerDefaultPeriod = $keys[0];
     }
 }
+$viewerHasDelta = $viewerHasDelta ?? false;
+if (!$viewerHasDelta) {
+    foreach ($viewerPeriodButtons as $button) {
+        $key = $button['key'] ?? '';
+        if ($key === 'diferencia' || $key === 'delta' || $key === 'diff') {
+            $viewerHasDelta = true;
+            break;
+        }
+    }
+}
 ?>
 <div class="body-viewer-grid">
     <div id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" class="body-viewer-container" data-viewer-id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" data-default-period="<?php echo htmlspecialchars($viewerDefaultPeriod ?? '', ENT_QUOTES, 'UTF-8'); ?>">
@@ -118,15 +128,8 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                     <span class="body-metric-label">Carga acumulada</span>
                     <span class="body-metric-value">0 kg</span>
                 </li>
-                <li class="body-metric" data-metric="tiempo">
-                    <span class="body-metric-label">Tiempo activo</span>
-                    <span class="body-metric-value">0</span>
-                </li>
-                <li class="body-metric" data-metric="volumen">
-                    <span class="body-metric-label">Índice de esfuerzo</span>
-                    <span class="body-metric-value">0</span>
-                </li>
             </ul>
+<?php if ($viewerHasDelta): ?>
             <div class="body-summary-delta" data-delta-hint hidden>
                 <span class="delta-legend-item">
                     <span class="delta-swatch delta-swatch--positive"></span>
@@ -137,6 +140,7 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                     Menos trabajo en el periodo B
                 </span>
             </div>
+<?php endif; ?>
             <p class="body-summary-hint">Los porcentajes se calculan con las rutinas registradas en el rango seleccionado.</p>
         </div>
         <div class="body-legend">
@@ -343,8 +347,19 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
 
         function computeVisualPalette(element, intensity, overrideColor = null) {
             const ratio = clamp(intensity, 0, 1);
-            const baseColor = overrideColor || resolveBaseColor(element);
+            const originalBase = resolveBaseColor(element);
+            const baseColor = overrideColor || originalBase || hslToCss(defaultHighlightHsl.h, defaultHighlightHsl.s, defaultHighlightHsl.l);
             const baseHsl = colorStringToHsl(baseColor) || defaultHighlightHsl;
+
+            if (overrideColor) {
+                const saturation = clamp(baseHsl.s * (0.85 + ratio * 0.35), 58, 96);
+                const lightness = clamp(36 + ratio * 28, 32, 78);
+                const fill = hslToCss(baseHsl.h, saturation, lightness);
+                const glowLightness = clamp(lightness + 12, 42, 92);
+                const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.35 + ratio * 0.45, 0.32, 0.82));
+                const swatch = hslToCss(baseHsl.h, clamp(saturation, 60, 92), clamp(44 + ratio * 16, 40, 82));
+                return { fill, glow, swatch };
+            }
 
             const saturation = clamp(baseHsl.s * (0.68 + ratio * 0.42), 30, 96);
             const lightness = clamp(baseHsl.l * (0.55 + ratio * 0.6) + ratio * 8, 22, 86);
@@ -352,8 +367,9 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
             const fill = hslToCss(baseHsl.h, saturation, lightness);
             const glowLightness = clamp(lightness + 10, 28, 92);
             const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.24 + ratio * 0.4, 0.22, 0.72));
+            const swatch = originalBase || hslToCss(baseHsl.h, baseHsl.s, clamp(baseHsl.l, 26, 58));
 
-            return { fill, glow };
+            return { fill, glow, swatch };
         }
 
         function showTooltip(part, event) {
@@ -550,17 +566,18 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
         }
 
         function buildLegendItem(options) {
-            const { color, name, value, note, isInactive, trend } = options;
+            const { color, swatch: swatchOverride, name, value, note, isInactive, trend } = options;
             const item = document.createElement('li');
             item.className = 'body-legend-item' + (isInactive ? ' is-inactive' : '');
             if (trend) {
                 item.classList.add(`is-${trend}`);
             }
 
-            const swatch = document.createElement('span');
-            swatch.className = 'body-legend-swatch' + (isInactive ? ' is-inactive' : '');
-            if (color && !isInactive) {
-                swatch.style.background = color;
+            const swatchEl = document.createElement('span');
+            swatchEl.className = 'body-legend-swatch' + (isInactive ? ' is-inactive' : '');
+            const swatchColor = swatchOverride || color;
+            if (swatchColor && !isInactive) {
+                swatchEl.style.background = swatchColor;
             }
 
             const textWrapper = document.createElement('div');
@@ -578,9 +595,6 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                 const valueEl = document.createElement('span');
                 valueEl.className = 'body-legend-value';
                 valueEl.textContent = value;
-                if (color && !isInactive) {
-                    valueEl.style.color = color;
-                }
                 if (trend) {
                     valueEl.classList.add(`is-${trend}`);
                 }
@@ -596,7 +610,7 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                 textWrapper.appendChild(noteEl);
             }
 
-            item.appendChild(swatch);
+            item.appendChild(swatchEl);
             item.appendChild(textWrapper);
 
             return item;
@@ -647,13 +661,16 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                         ? null
                         : (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral));
                     const palette = computeVisualPalette(elemento, intensidad || 0.45, overrideColor);
-                    const color = palette.fill;
+                    const swatchColor = palette.swatch || overrideColor || inactiveFill;
                     const displayValue = deltaMode
                         ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}%`
                         : `${Math.round(numericValue)}%`;
 
                     legendList.appendChild(buildLegendItem({
-                        color,
+                        color: deltaMode
+                            ? (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral))
+                            : null,
+                        swatch: swatchColor,
                         name: nombre,
                         value: displayValue,
                         trend,
