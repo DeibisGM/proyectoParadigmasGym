@@ -1,10 +1,17 @@
+<?php
+$viewerStylesPath = 'styles.css';
+$self = $_SERVER['PHP_SELF'] ?? '';
+if (strpos($self, '/view/') === false) {
+    $viewerStylesPath = 'view/styles.css';
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor Interactivo del Cuerpo Humano</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="<?php echo htmlspecialchars($viewerStylesPath, ENT_QUOTES, 'UTF-8'); ?>">
 </head>
 <body>
 <div class="body-viewer-container">

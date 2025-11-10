@@ -33,8 +33,13 @@ class ProgresoBusiness {
         $periodos = ['daily', 'weekly', 'monthly'];
         $respuesta = [];
 
+        $fechaReferencia = $this->rutinaData->getUltimaFechaRutinaPorCliente($clienteId);
+        $fechaBase = $fechaReferencia
+            ? DateTimeImmutable::createFromFormat('Y-m-d', $fechaReferencia) ?: new DateTimeImmutable('today')
+            : new DateTimeImmutable('today');
+
         foreach ($periodos as $periodo) {
-            [$inicio, $fin] = $this->obtenerRangoFechasPorPeriodo($periodo);
+            [$inicio, $fin] = $this->obtenerRangoFechasPorPeriodo($periodo, $fechaBase);
             $resultado = $this->calcularProgresoEntreFechas($clienteId, $inicio, $fin);
 
             $respuesta[$periodo] = [
@@ -119,30 +124,26 @@ class ProgresoBusiness {
         ];
     }
 
-    private function obtenerRangoFechasPorPeriodo($periodo)
+    private function obtenerRangoFechasPorPeriodo($periodo, DateTimeImmutable $referencia)
     {
-        $hoy = new DateTimeImmutable('today');
         $periodo = strtolower($periodo);
 
         switch ($periodo) {
             case 'daily':
-                $inicio = $hoy;
-                $fin = $hoy;
+                $inicio = $referencia;
+                $fin = $referencia;
                 break;
             case 'weekly':
-                $inicio = $hoy->modify('monday this week');
-                if ($inicio > $hoy) {
-                    $inicio = $inicio->modify('-7 days');
-                }
-                $fin = $hoy;
+                $fin = $referencia;
+                $inicio = $referencia->modify('-6 days');
                 break;
             case 'monthly':
-                $inicio = $hoy->modify('first day of this month');
-                $fin = $hoy;
+                $inicio = $referencia->modify('first day of this month');
+                $fin = $referencia;
                 break;
             default:
-                $inicio = $hoy->modify('-30 days');
-                $fin = $hoy;
+                $fin = $referencia;
+                $inicio = $referencia->modify('-29 days');
                 break;
         }
 

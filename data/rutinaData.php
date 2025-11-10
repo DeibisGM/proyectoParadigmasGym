@@ -118,5 +118,24 @@ class RutinaData extends Data
         mysqli_close($conn);
         return $rutinas;
     }
+
+    public function getUltimaFechaRutinaPorCliente($clienteId)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $query = "SELECT MAX(tbrutinafecha) AS ultima_fecha FROM tbrutina WHERE tbclienteid = ?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "i", $clienteId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $ultimaFecha = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $ultimaFecha = $row['ultima_fecha'] ?? null;
+        }
+        mysqli_close($conn);
+
+        return $ultimaFecha ?: null;
+    }
 }
 ?>
+
