@@ -153,32 +153,37 @@ class ProgresoBusiness {
                 // Mantener el día actual como referencia visual, incluso si no hay rutinas hoy.
                 break;
             case 'weekly':
-                $inicio = $hoy->sub(new DateInterval('P6D'));
+                // Contemplar los últimos 7 días completos (hoy y los 6 anteriores).
+                $inicio = $hoy->sub(new DateInterval('P7D'));
                 break;
             case 'monthly':
+                // Desde el mismo día del mes anterior hasta hoy.
                 $inicio = $hoy->sub(new DateInterval('P1M'));
                 break;
             case 'all':
                 if ($primeraRutina) {
                     $inicio = $primeraRutina;
                 }
-                if ($ultimaRutina) {
-                    $fin = $ultimaRutina > $hoy ? $ultimaRutina : $hoy;
-                }
+                $fin = $ultimaRutina ?: $hoy;
                 break;
             default:
                 $inicio = $hoy->sub(new DateInterval('P29D'));
                 break;
         }
 
-        if ($periodo !== 'all') {
-            if ($ultimaRutina && $fin < $ultimaRutina) {
-                $fin = $ultimaRutina;
+        if ($periodo === 'all') {
+            if ($fin > $hoy) {
+                $fin = $hoy;
             }
+            if ($primeraRutina && $inicio > $fin) {
+                $inicio = $fin;
+            }
+        } else {
+            $fin = $hoy;
         }
 
-        if ($inicio > $fin) {
-            $inicio = $fin;
+        if ($fin < $inicio) {
+            $fin = $inicio;
         }
 
         return [$inicio, $fin];

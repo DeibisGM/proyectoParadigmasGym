@@ -104,6 +104,7 @@ if (strpos($self, '/view/') === false) {
         const summaryRange = document.querySelector('[data-summary="range"]');
         const summaryRoutines = document.querySelector('[data-summary="routines"]');
         const emptyState = document.querySelector('.body-viewer-empty');
+        const tooltip = document.querySelector('.tooltip');
         const progresoDataset = window.progresoData || {};
         const allBodyPartIds = Array.from(bodyParts).map(part => part.id);
         const periodLabels = {
@@ -113,19 +114,227 @@ if (strpos($self, '/view/') === false) {
             all: 'Todas las rutinas'
         };
         const escapeId = (value) => window.CSS && CSS.escape ? CSS.escape(value) : value;
-        const inactiveFill = (getComputedStyle(document.documentElement).getPropertyValue('--color-muscle-inactive') || '#1A1A1A').trim() || '#1A1A1A';
+        const inactiveFill = (getComputedStyle(document.documentElement).getPropertyValue('--color-muscle-inactive') || '#3a3a3a').trim() || '#3a3a3a';
+        const defaultHighlightHsl = { h: 137, s: 42, l: 38 };
+
+        let tooltipVisible = false;
+
+        const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+        function rgbToHsl(r, g, b) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
+
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h;
+            let s;
+            const l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r:
+                        h = (g - b) / d + (g < b ? 6 : 0);
+                        break;
+                    case g:
+                        h = (b - r) / d + 2;
+                        break;
+                    default:
+                        h = (r - g) / d + 4;
+                        break;
+                }
+                h /= 6;
+            }
+
+            return {
+                h: Math.round(h * 360),
+                s: Math.round(s * 100),
+                l: Math.round(l * 100)
+            };
+        }
+
+        function hexToHsl(hex) {
+            let value = hex.trim();
+            if (value.startsWith('#')) {
+                value = value.substring(1);
+            }
+
+            if (value.length === 3) {
+                value = value.split('').map(char => char + char).join('');
+            }
+
+            if (value.length !== 6) {
+                return null;
+            }
+
+            const num = parseInt(value, 16);
+            const r = (num >> 16) & 255;
+            const g = (num >> 8) & 255;
+            const b = num & 255;
+
+            return rgbToHsl(r, g, b);
+        }
+
+        function parseHslString(color) {
+            const match = color.match(/hsla?\(\s*([\d.]+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%/i);
+            if (!match) {
+                return null;
+            }
+
+            return {
+                h: Number(match[1]),
+                s: Number(match[2]),
+                l: Number(match[3])
+            };
+        }
+
+        function parseRgbString(color) {
+            const match = color.match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)/i);
+            if (!match) {
+                return null;
+            }
+
+            return rgbToHsl(Number(match[1]), Number(match[2]), Number(match[3]));
+        }
+
+        function colorStringToHsl(color) {
+            if (!color || typeof color !== 'string') {
+                return null;
+            }
+
+            const value = color.trim();
+
+            if (value.startsWith('#')) {
+                return hexToHsl(value);
+            }
+
+            if (value.toLowerCase().startsWith('rgb')) {
+                return parseRgbString(value);
+            }
+
+            if (value.toLowerCase().startsWith('hsl')) {
+                return parseHslString(value);
+            }
+
+            return null;
+        }
+
+        function hslToCss(h, s, l) {
+            return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`;
+        }
+
+        function hslToCssAlpha(h, s, l, a) {
+            return `hsla(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%, ${a.toFixed(2)})`;
+        }
+
+        function extractInlineFill(styleValue) {
+            if (!styleValue) {
+                return null;
+            }
+            const match = styleValue.match(/fill:\s*([^;]+)/i);
+            return match ? match[1].trim() : null;
+        }
+
+        function resolveBaseColor(element) {
+            if (!element) {
+                return null;
+            }
+
+            if (element.dataset.baseColor) {
+                return element.dataset.baseColor;
+            }
+
+            const direct = element.getAttribute('data-color')
+                || element.getAttribute('fill')
+                || extractInlineFill(element.getAttribute('style'));
+
+            if (direct) {
+                return direct;
+            }
+
+            const child = element.querySelector('path, polygon, rect, circle, ellipse');
+            if (child) {
+                const childColor = child.getAttribute('fill')
+                    || extractInlineFill(child.getAttribute('style'));
+                if (childColor) {
+                    return childColor;
+                }
+            }
+
+            return null;
+        }
+
+        function computeVisualPalette(element, intensity) {
+            const ratio = clamp(intensity, 0, 1);
+            const baseColor = resolveBaseColor(element);
+            const baseHsl = colorStringToHsl(baseColor) || defaultHighlightHsl;
+
+            const saturation = clamp(baseHsl.s * (0.68 + ratio * 0.42), 30, 96);
+            const lightness = clamp(baseHsl.l * (0.55 + ratio * 0.6) + ratio * 8, 22, 86);
+
+            const fill = hslToCss(baseHsl.h, saturation, lightness);
+            const glowLightness = clamp(lightness + 10, 28, 92);
+            const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.24 + ratio * 0.4, 0.22, 0.72));
+
+            return { fill, glow };
+        }
+
+        function showTooltip(part, event) {
+            if (!tooltip) {
+                return;
+            }
+            tooltipVisible = true;
+            updateTooltip(part, event);
+            tooltip.classList.add('is-visible');
+        }
+
+        function updateTooltip(part, event) {
+            if (!tooltip || !tooltipVisible) {
+                return;
+            }
+
+            const nombre = part.dataset.legendName || part.dataset.name || part.id || '';
+            const porcentaje = part.dataset.porcentaje != null
+                ? `${part.dataset.porcentaje}%`
+                : '0%';
+
+            tooltip.textContent = `${nombre}: ${porcentaje}`;
+
+            const offsetX = 16;
+            const offsetY = 18;
+            const pageX = event.pageX || (event.clientX + window.scrollX);
+            const pageY = event.pageY || (event.clientY + window.scrollY);
+
+            tooltip.style.left = `${pageX + offsetX}px`;
+            tooltip.style.top = `${pageY + offsetY}px`;
+        }
+
+        function hideTooltip() {
+            if (!tooltip) {
+                return;
+            }
+            tooltipVisible = false;
+            tooltip.classList.remove('is-visible');
+        }
 
         if (!legendList || !summaryPeriod || !summaryRange || !summaryRoutines) {
             return;
         }
 
-        function getColorFromRatio(value) {
-            const ratio = Math.max(0, Math.min(1, value));
-            const hue = 30 + (1 - ratio) * 140;
-            const saturation = 70 + ratio * 25;
-            const lightness = 32 + ratio * 30;
-            return `hsl(${hue.toFixed(0)}, ${saturation.toFixed(0)}%, ${lightness.toFixed(0)}%)`;
-        }
+        bodyParts.forEach(part => {
+            const baseColor = resolveBaseColor(part);
+            if (baseColor) {
+                part.dataset.baseColor = baseColor;
+            }
+            part.addEventListener('mouseenter', event => showTooltip(part, event));
+            part.addEventListener('mousemove', event => updateTooltip(part, event));
+            part.addEventListener('mouseleave', hideTooltip);
+        });
 
         function formatDate(value) {
             if (!value) {
@@ -148,9 +357,9 @@ if (strpos($self, '/view/') === false) {
             bodyParts.forEach(part => {
                 part.classList.remove('active');
                 part.classList.add('inactive');
-                part.style.opacity = 0.12;
+                part.style.opacity = 0.18;
                 part.style.fill = inactiveFill;
-                part.style.filter = 'grayscale(100%) brightness(0.55)';
+                part.style.filter = 'grayscale(100%) contrast(0.65) brightness(0.78)';
                 delete part.dataset.porcentaje;
                 delete part.dataset.color;
             });
@@ -179,25 +388,32 @@ if (strpos($self, '/view/') === false) {
 
             const swatch = document.createElement('span');
             swatch.className = 'body-legend-swatch' + (isInactive ? ' is-inactive' : '');
-            if (color) {
+            if (color && !isInactive) {
                 swatch.style.background = color;
             }
 
             const textWrapper = document.createElement('div');
             textWrapper.className = 'body-legend-text';
 
+            const mainRow = document.createElement('div');
+            mainRow.className = 'body-legend-main';
+
             const nameEl = document.createElement('span');
             nameEl.className = 'body-legend-name';
             nameEl.textContent = name;
-
-            textWrapper.appendChild(nameEl);
+            mainRow.appendChild(nameEl);
 
             if (value != null) {
                 const valueEl = document.createElement('span');
                 valueEl.className = 'body-legend-value';
                 valueEl.textContent = value;
-                textWrapper.appendChild(valueEl);
+                if (color && !isInactive) {
+                    valueEl.style.color = color;
+                }
+                mainRow.appendChild(valueEl);
             }
+
+            textWrapper.appendChild(mainRow);
 
             if (note) {
                 const noteEl = document.createElement('span');
@@ -215,6 +431,7 @@ if (strpos($self, '/view/') === false) {
         function updateLegend(porcentajes) {
             legendList.innerHTML = '';
             const entries = Object.entries(porcentajes).sort(([, a], [, b]) => b - a);
+            const maxValor = entries.length ? Math.max(...entries.map(([, value]) => value)) : 0;
 
             if (!entries.length) {
                 legendList.appendChild(buildLegendItem({
@@ -229,9 +446,9 @@ if (strpos($self, '/view/') === false) {
                     const nombre = elemento
                         ? (elemento.dataset.legendName || elemento.dataset.name || parteId)
                         : parteId;
-                    const color = elemento && elemento.dataset.color
-                        ? elemento.dataset.color
-                        : getColorFromRatio(0.45);
+                    const intensidad = maxValor > 0 ? valor / maxValor : 0;
+                    const palette = computeVisualPalette(elemento, intensidad || 0.45);
+                    const color = palette.fill;
 
                     legendList.appendChild(buildLegendItem({
                         color,
@@ -257,6 +474,7 @@ if (strpos($self, '/view/') === false) {
             const valores = Object.values(porcentajes);
             const maxPorcentaje = valores.length ? Math.max(...valores) : 0;
 
+            hideTooltip();
             resetBodyParts();
 
             if (maxPorcentaje > 0) {
@@ -266,20 +484,19 @@ if (strpos($self, '/view/') === false) {
                         return;
                     }
 
-                    const intensidadRelativa = porcentaje / maxPorcentaje;
-                    const opacidad = 0.25 + intensidadRelativa * 0.75;
-                    const color = getColorFromRatio(intensidadRelativa);
+                    const intensidadRelativa = maxPorcentaje > 0 ? porcentaje / maxPorcentaje : 0;
+                    const opacidad = Math.min(0.95, 0.32 + intensidadRelativa * 0.58);
                     const glowRadius = (4 + intensidadRelativa * 12).toFixed(2);
-                    const glowOpacity = (0.18 + intensidadRelativa * 0.45).toFixed(2);
 
                     elementos.forEach(el => {
+                        const palette = computeVisualPalette(el, intensidadRelativa || 0);
                         el.classList.add('active');
                         el.classList.remove('inactive');
                         el.style.opacity = opacidad;
-                        el.style.fill = color;
-                        el.style.filter = `drop-shadow(0 0 ${glowRadius}px rgba(137, 194, 53, ${glowOpacity}))`;
+                        el.style.fill = palette.fill;
+                        el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow})`;
                         el.dataset.porcentaje = Math.round(porcentaje);
-                        el.dataset.color = color;
+                        el.dataset.color = palette.fill;
                     });
                 });
             }
