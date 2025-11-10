@@ -177,6 +177,10 @@ if (!$viewerHasDelta) {
         let tooltipVisible = false;
         let activeTooltipPart = null;
 
+        if (!viewerContainer.dataset.mode) {
+            viewerContainer.dataset.mode = 'intensity';
+        }
+
         const rootStyles = getComputedStyle(document.documentElement);
         const colorSuccess = (rootStyles.getPropertyValue('--color-success') || '#3CCB73').trim() || '#3CCB73';
         const colorError = (rootStyles.getPropertyValue('--color-error') || '#FF5A5F').trim() || '#FF5A5F';
@@ -446,6 +450,35 @@ if (!$viewerHasDelta) {
             return { fill, glow, swatch, base: swatch };
         }
 
+        function roundToPrecision(value, decimals = 1) {
+            if (!Number.isFinite(value)) {
+                return 0;
+            }
+            const factor = 10 ** Math.max(decimals, 0);
+            return Math.round(value * factor) / factor;
+        }
+
+        function trimTrailingZeros(value) {
+            return value
+                .replace(/(\.\d*?[1-9])0+$/g, '$1')
+                .replace(/\.0+$/g, '')
+                .replace(/\.$/g, '');
+        }
+
+        function formatPercentageValue(value, { delta = false, decimals = 1 } = {}) {
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric) || numeric === 0) {
+                return '0%';
+            }
+            const rounded = roundToPrecision(Math.abs(numeric), decimals);
+            const formatted = trimTrailingZeros(rounded.toFixed(decimals));
+            if (delta) {
+                const sign = numeric > 0 ? '+' : '−';
+                return `${sign}${formatted}%`;
+            }
+            return `${formatted}%`;
+        }
+
         function showTooltip(part, event) {
             if (!tooltip) {
                 return;
@@ -463,10 +496,13 @@ if (!$viewerHasDelta) {
             }
 
             const nombre = targetPart.dataset.legendName || targetPart.dataset.name || targetPart.id || '';
-            const porcentajeRaw = targetPart.dataset.porcentaje;
-            const porcentaje = porcentajeRaw != null
-                ? (String(porcentajeRaw).trim().endsWith('%') ? String(porcentajeRaw).trim() : `${String(porcentajeRaw).trim()}%`)
-                : '0%';
+            const tooltipValue = targetPart.dataset.tooltipValue;
+            const trend = targetPart.dataset.trend || null;
+            const mode = viewerContainer.dataset.mode || '';
+            const isDelta = mode === 'delta' || (trend && trend !== '');
+            const rawNumeric = Number(targetPart.dataset.porcentaje);
+            const porcentaje = tooltipValue
+                || formatPercentageValue(Number.isFinite(rawNumeric) ? rawNumeric : 0, { delta: isDelta, decimals: 1 });
 
             tooltip.textContent = `${nombre}: ${porcentaje}`;
 
@@ -585,6 +621,7 @@ if (!$viewerHasDelta) {
                 });
                 restoreStrokeAttributes(part);
                 delete part.dataset.porcentaje;
+                delete part.dataset.tooltipValue;
                 delete part.dataset.color;
                 delete part.dataset.trend;
             });
@@ -753,9 +790,7 @@ if (!$viewerHasDelta) {
                         ? (elemento.dataset.baseColor || null)
                         : null;
                     const swatchColor = storedBaseColor || palette.base || palette.swatch || inactiveFill;
-                    const displayValue = deltaMode
-                        ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}%`
-                        : `${Math.round(numericValue)}%`;
+                    const displayValue = formatPercentageValue(numericValue, { delta: deltaMode, decimals: 1 });
 
                     legendList.appendChild(buildLegendItem({
                         color: swatchColor,
@@ -894,10 +929,10 @@ if (!$viewerHasDelta) {
                         } else {
                             el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1 + intensidadRelativa * 0.4).toFixed(2)}) brightness(${(0.95 + intensidadRelativa * 0.18).toFixed(2)})`;
                         }
-                        const formattedValue = deltaMode
-                            ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}`
-                            : Math.round(numericValue);
-                        el.dataset.porcentaje = formattedValue;
+                        const tooltipValue = formatPercentageValue(numericValue, { delta: deltaMode, decimals: 1 });
+                        const datasetValue = roundToPrecision(numericValue, 3);
+                        el.dataset.porcentaje = String(datasetValue);
+                        el.dataset.tooltipValue = tooltipValue;
                         el.dataset.color = deltaMode ? palette.fill : baseColor;
                     });
                 });
@@ -1026,6 +1061,8 @@ if (!$viewerHasDelta) {
         viewerContainer.addEventListener('pointerover', handlePointerOver);
         viewerContainer.addEventListener('pointermove', handlePointerMove);
         viewerContainer.addEventListener('pointerout', handlePointerOut);
+        viewerContainer.addEventListener('pointerleave', hideTooltip);
+        viewerContainer.addEventListener('pointercancel', hideTooltip);
 
         filterButtons.forEach(button => {
             button.addEventListener('click', () => {

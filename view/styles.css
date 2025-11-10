@@ -16,8 +16,8 @@
     --color-accent-soft: rgba(137, 194, 53, 0.15);
     --color-muscle-inactive: #2f2f2f;
     --color-accent-secondary: #89C235;
-    --color-success: #3CCB73;
-    --color-error: #FF5A5F;
+    --color-success: #7EE888;
+    --color-error: #FF6B6F;
     --color-body-stroke: rgba(255, 255, 255, 0.32);
     --color-warning: #FFDC00;
     --shadow-lg: 0 30px 60px rgba(137, 194, 53, 0.1);
@@ -1478,11 +1478,13 @@ hr {
 }
 
 .body-legend-item.is-positive .body-legend-swatch {
-    box-shadow: 0 0 0 2px rgba(137, 194, 53, 0.5), 0 0 12px rgba(137, 194, 53, 0.35);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-success) 55%, transparent),
+        0 0 12px color-mix(in srgb, var(--color-success) 45%, transparent);
 }
 
 .body-legend-item.is-negative .body-legend-swatch {
-    box-shadow: 0 0 0 2px rgba(255, 65, 54, 0.5), 0 0 12px rgba(255, 65, 54, 0.35);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-error) 55%, transparent),
+        0 0 12px color-mix(in srgb, var(--color-error) 45%, transparent);
 }
 
 .body-legend-item.is-neutral .body-legend-swatch {
@@ -1620,7 +1622,7 @@ hr {
     font-weight: 600;
     opacity: 0;
     transition: opacity 0.15s ease-out;
-    border: 1px solid rgba(137, 194, 53, 0.35);
+    border: 1px solid color-mix(in srgb, var(--color-success) 55%, transparent);
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.45);
     z-index: 20;
     white-space: nowrap;

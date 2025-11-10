@@ -155,6 +155,21 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
         const rutinaClienteInput = document.getElementById('rutina-cliente-id');
         const formPlanificador = document.getElementById('form-planificador');
 
+        function formatPercentage(value, decimals = 1) {
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) {
+                return '0%';
+            }
+            const factor = 10 ** Math.max(decimals, 0);
+            const rounded = Math.round(Math.max(numeric, 0) * factor) / factor;
+            const formatted = rounded
+                .toFixed(decimals)
+                .replace(/(\.\d*?[1-9])0+$/g, '$1')
+                .replace(/\.0+$/g, '')
+                .replace(/\.$/g, '');
+            return `${formatted}%`;
+        }
+
         function setAlert(message, type = 'info') {
             if (!alertSeguimiento) return;
             alertSeguimiento.textContent = message;
@@ -188,7 +203,7 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                 const nombre = document.createElement('span');
                 nombre.textContent = zona.nombre;
                 const valor = document.createElement('span');
-                valor.textContent = `${Math.round(zona.porcentaje)}%`;
+                valor.textContent = formatPercentage(zona.porcentaje, 1);
                 item.appendChild(nombre);
                 item.appendChild(valor);
                 container.appendChild(item);
