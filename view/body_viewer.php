@@ -1,27 +1,56 @@
 <?php
-$viewerStylesPath = 'styles.css';
-$self = $_SERVER['PHP_SELF'] ?? '';
-if (strpos($self, '/view/') === false) {
-    $viewerStylesPath = 'view/styles.css';
+$viewerId = $viewerId ?? 'body-viewer-dashboard';
+$viewerPeriodButtons = $viewerPeriodButtons ?? [
+    ['key' => 'daily', 'label' => 'Diario'],
+    ['key' => 'weekly', 'label' => 'Semanal'],
+    ['key' => 'monthly', 'label' => 'Mensual'],
+    ['key' => 'all', 'label' => 'Todas']
+];
+$viewerPeriodButtons = array_values(array_filter($viewerPeriodButtons, static function ($button) {
+    return isset($button['key'], $button['label']) && $button['key'] !== '';
+}));
+$viewerDefaultPeriod = $viewerDefaultPeriod ?? null;
+if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
+    $keys = array_map(static function ($btn) {
+        return $btn['key'];
+    }, $viewerPeriodButtons);
+    if (in_array('weekly', $keys, true)) {
+        $viewerDefaultPeriod = 'weekly';
+    } elseif (in_array('monthly', $keys, true)) {
+        $viewerDefaultPeriod = 'monthly';
+    } elseif (in_array('daily', $keys, true)) {
+        $viewerDefaultPeriod = 'daily';
+    } else {
+        $viewerDefaultPeriod = $keys[0];
+    }
+}
+$viewerHasDelta = $viewerHasDelta ?? false;
+if (!$viewerHasDelta) {
+    foreach ($viewerPeriodButtons as $button) {
+        $key = $button['key'] ?? '';
+        if ($key === 'diferencia' || $key === 'delta' || $key === 'diff') {
+            $viewerHasDelta = true;
+            break;
+        }
+    }
 }
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor Interactivo del Cuerpo Humano</title>
-    <link rel="stylesheet" href="<?php echo htmlspecialchars($viewerStylesPath, ENT_QUOTES, 'UTF-8'); ?>">
-</head>
-<body>
-<div class="body-viewer-container">
+<div class="body-viewer-grid">
+    <div id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" class="body-viewer-container" data-viewer-id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" data-default-period="<?php echo htmlspecialchars($viewerDefaultPeriod ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+<?php if (!empty($viewerPeriodButtons)): ?>
     <div class="filter-buttons">
-        <button class="btn-filter" data-period="daily">Diario</button>
-        <button class="btn-filter active" data-period="weekly">Semanal</button>
-        <button class="btn-filter" data-period="monthly">Mensual</button>
-        <button class="btn-filter" data-period="all">Todas</button>
+        <?php foreach ($viewerPeriodButtons as $button):
+            $key = $button['key'];
+            $label = $button['label'];
+            $isActive = ($viewerDefaultPeriod !== null && $key === $viewerDefaultPeriod);
+        ?>
+        <button class="btn-filter<?php echo $isActive ? ' active' : ''; ?>" data-period="<?php echo htmlspecialchars($key, ENT_QUOTES, 'UTF-8'); ?>" data-label="<?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>">
+            <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+        </button>
+        <?php endforeach; ?>
     </div>
-    <div class="body-views-wrapper">
+<?php endif; ?>
+<div class="body-views-wrapper">
         <div class="body-view">
             <div class="body-container">
                 <svg viewBox="0 0 563.72511 1133.0802">
@@ -67,59 +96,125 @@ if (strpos($self, '/view/') === false) {
             </div>
         </div>
     </div>
-</div>
-        <div class="body-insights">
-
-            <div class="body-summary">
-                    <h3 style="margin: 0;">Porcentaje de trabajo por zonas del cuerpo</h3>
-                <div class="body-summary-row">
-                    <span class="body-summary-label">Periodo:</span>
-                    <span class="body-summary-value" data-summary="period">-</span>
-                </div>
-                <div class="body-summary-row">
-                    <span class="body-summary-label">Rango:</span>
-                    <span class="body-summary-value" data-summary="range">-</span>
-                </div>
-                <div class="body-summary-row">
-                    <span class="body-summary-label">Rutinas consideradas:</span>
-                    <span class="body-summary-value" data-summary="routines">0</span>
-                </div>
-                <p class="body-summary-hint">Los porcentajes se calculan con las rutinas registradas en el rango seleccionado.</p>
+    <div class="body-insights">
+        <div class="body-summary">
+            <h3 class="body-summary-title">Porcentaje de trabajo por zonas del cuerpo</h3>
+            <div class="body-summary-row">
+                <span class="body-summary-label">Periodo:</span>
+                <span class="body-summary-value" data-summary="period">-</span>
             </div>
-            <div class="body-legend">
-
-                <ul class="body-legend-list"></ul>
+            <div class="body-summary-row">
+                <span class="body-summary-label">Rango:</span>
+                <span class="body-summary-value" data-summary="range">-</span>
             </div>
-            <div class="body-viewer-empty" hidden>
-                <p>No se registran rutinas para este periodo.</p>
+            <div class="body-summary-row">
+                <span class="body-summary-label">Rutinas consideradas:</span>
+                <span class="body-summary-value" data-summary="routines">0</span>
             </div>
+            <ul class="body-metrics">
+                <li class="body-metric" data-metric="ejercicios">
+                    <span class="body-metric-label">Ejercicios</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+                <li class="body-metric" data-metric="series">
+                    <span class="body-metric-label">Series</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+                <li class="body-metric" data-metric="repeticiones">
+                    <span class="body-metric-label">Repeticiones</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+                <li class="body-metric" data-metric="peso">
+                    <span class="body-metric-label">Carga acumulada</span>
+                    <span class="body-metric-value">0 kg</span>
+                </li>
+            </ul>
+<?php if ($viewerHasDelta): ?>
+            <div class="body-summary-delta" data-delta-hint hidden>
+                <span class="delta-legend-item">
+                    <span class="delta-swatch delta-swatch--positive"></span>
+                    Más trabajo en el periodo B
+                </span>
+                <span class="delta-legend-item">
+                    <span class="delta-swatch delta-swatch--negative"></span>
+                    Menos trabajo en el periodo B
+                </span>
+            </div>
+<?php endif; ?>
+            <p class="body-summary-hint">Los porcentajes se calculan con las rutinas registradas en el rango seleccionado.</p>
         </div>
-<div class="tooltip"></div>
+        <div class="body-legend">
+            <ul class="body-legend-list"></ul>
+        </div>
+        <div class="body-viewer-empty" hidden>
+            <p>No se registran rutinas para este periodo.</p>
+        </div>
+    </div>
+    <div class="body-viewer-tooltip" data-body-tooltip></div>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const bodyParts = document.querySelectorAll('.body-part');
-        const filterButtons = document.querySelectorAll('.btn-filter');
-        const legendList = document.querySelector('.body-legend-list');
-        const summaryPeriod = document.querySelector('[data-summary="period"]');
-        const summaryRange = document.querySelector('[data-summary="range"]');
-        const summaryRoutines = document.querySelector('[data-summary="routines"]');
-        const emptyState = document.querySelector('.body-viewer-empty');
-        const tooltip = document.querySelector('.tooltip');
-        const progresoDataset = window.progresoData || {};
-        const allBodyPartIds = Array.from(bodyParts).map(part => part.id);
-        const periodLabels = {
-            daily: 'Diario',
-            weekly: 'Semanal',
-            monthly: 'Mensual',
-            all: 'Todas las rutinas'
-        };
-        const escapeId = (value) => window.CSS && CSS.escape ? CSS.escape(value) : value;
-        const inactiveFill = (getComputedStyle(document.documentElement).getPropertyValue('--color-muscle-inactive') || '#3a3a3a').trim() || '#3a3a3a';
+        const viewerContainer = document.getElementById('<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>');
+        if (!viewerContainer) {
+            return;
+        }
+
+        const viewerRoot = viewerContainer.closest('.body-viewer-grid') || viewerContainer.parentElement || viewerContainer;
+        const bodyParts = viewerContainer.querySelectorAll('.body-part');
+        const filterButtons = viewerContainer.querySelectorAll('.btn-filter');
+        const legendList = viewerRoot.querySelector('.body-legend-list');
+        const summaryPeriod = viewerRoot.querySelector('[data-summary="period"]');
+        const summaryRange = viewerRoot.querySelector('[data-summary="range"]');
+        const summaryRoutines = viewerRoot.querySelector('[data-summary="routines"]');
+        const metricItems = viewerRoot.querySelectorAll('.body-metric');
+        const deltaHint = viewerRoot.querySelector('[data-delta-hint]');
+        const emptyState = viewerRoot.querySelector('.body-viewer-empty');
+        const tooltip = viewerRoot.querySelector('[data-body-tooltip]');
+
+        let progresoDataset = window.progresoData ? { ...window.progresoData } : {};
+        let explicitDefaultPeriod = viewerContainer.dataset.defaultPeriod || null;
+        let currentPeriod = null;
+        let tooltipVisible = false;
+        let activeTooltipPart = null;
+
+        const rootStyles = getComputedStyle(document.documentElement);
+        const colorSuccess = (rootStyles.getPropertyValue('--color-success') || '#3CCB73').trim() || '#3CCB73';
+        const colorError = (rootStyles.getPropertyValue('--color-error') || '#FF5A5F').trim() || '#FF5A5F';
+        const colorNeutral = (rootStyles.getPropertyValue('--color-body-neutral') || '#9CA3AF').trim() || '#9CA3AF';
+        const inactiveFill = (rootStyles.getPropertyValue('--color-muscle-inactive') || '#3a3a3a').trim() || '#3a3a3a';
+        const defaultStrokeColor = (rootStyles.getPropertyValue('--color-body-stroke')
+            || rootStyles.getPropertyValue('--color-border-strong')
+            || 'rgba(255, 255, 255, 0.32)').trim() || 'rgba(255, 255, 255, 0.32)';
         const defaultHighlightHsl = { h: 137, s: 42, l: 38 };
 
-        let tooltipVisible = false;
-
+        const escapeId = (value) => window.CSS && CSS.escape ? CSS.escape(value) : value;
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+        const shapeSelector = 'path, polygon, rect, circle, ellipse, polyline';
+
+        function applyStylesToGroup(element, styles) {
+            if (!element || !styles) {
+                return;
+            }
+
+            const targets = [element, ...element.querySelectorAll(shapeSelector)];
+            Object.entries(styles).forEach(([property, value]) => {
+                const applied = value == null ? '' : value;
+                targets.forEach(target => {
+                    target.style[property] = applied;
+                });
+            });
+        }
+
+        const periodLabels = {};
+        filterButtons.forEach(button => {
+            const periodKey = button.dataset.period;
+            const label = button.dataset.label || button.textContent.trim();
+            if (periodKey) {
+                periodLabels[periodKey] = label;
+            }
+        });
+
+        const allBodyPartIds = Array.from(new Set(Array.from(bodyParts).map(part => part.id)));
 
         function rgbToHsl(r, g, b) {
             r /= 255;
@@ -232,12 +327,66 @@ if (strpos($self, '/view/') === false) {
             return `hsla(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%, ${a.toFixed(2)})`;
         }
 
-        function extractInlineFill(styleValue) {
+        function extractInlineStyleValue(styleValue, property) {
             if (!styleValue) {
                 return null;
             }
-            const match = styleValue.match(/fill:\s*([^;]+)/i);
+            const regex = new RegExp(`${property}\\s*:\\s*([^;]+)`, 'i');
+            const match = styleValue.match(regex);
             return match ? match[1].trim() : null;
+        }
+
+        function extractInlineFill(styleValue) {
+            return extractInlineStyleValue(styleValue, 'fill');
+        }
+
+        function captureBaseStrokeAttributes(element) {
+            if (!element || element.dataset.baseStrokeCaptured) {
+                return;
+            }
+            const styleAttr = element.getAttribute('style') || '';
+            const stroke = element.getAttribute('stroke') || extractInlineStyleValue(styleAttr, 'stroke');
+            const strokeWidth = element.getAttribute('stroke-width') || extractInlineStyleValue(styleAttr, 'stroke-width');
+            const strokeDasharray = element.getAttribute('stroke-dasharray') || extractInlineStyleValue(styleAttr, 'stroke-dasharray');
+            const strokeOpacity = element.getAttribute('stroke-opacity') || extractInlineStyleValue(styleAttr, 'stroke-opacity');
+
+            if (stroke) {
+                element.dataset.baseStroke = stroke;
+            }
+            if (strokeWidth) {
+                element.dataset.baseStrokeWidth = strokeWidth;
+            }
+            if (strokeDasharray) {
+                element.dataset.baseStrokeDasharray = strokeDasharray;
+            }
+            if (strokeOpacity) {
+                element.dataset.baseStrokeOpacity = strokeOpacity;
+            }
+            element.dataset.baseStrokeCaptured = 'true';
+        }
+
+        function restoreStrokeAttributes(element) {
+            if (!element) {
+                return;
+            }
+
+            const fallbackStroke = element.dataset.baseStroke || defaultStrokeColor;
+            const fallbackStrokeWidth = element.dataset.baseStrokeWidth || '';
+            const fallbackStrokeDasharray = element.dataset.baseStrokeDasharray || '';
+            const fallbackStrokeOpacity = element.dataset.baseStrokeOpacity || '';
+
+            const targets = [element, ...element.querySelectorAll(shapeSelector)];
+            targets.forEach(target => {
+                const stroke = target.dataset.baseStroke || fallbackStroke;
+                const strokeWidth = target.dataset.baseStrokeWidth || fallbackStrokeWidth;
+                const strokeDasharray = target.dataset.baseStrokeDasharray || fallbackStrokeDasharray;
+                const strokeOpacity = target.dataset.baseStrokeOpacity || fallbackStrokeOpacity;
+
+                target.style.stroke = stroke;
+                target.style.strokeWidth = strokeWidth;
+                target.style.strokeDasharray = strokeDasharray;
+                target.style.strokeOpacity = strokeOpacity;
+            });
         }
 
         function resolveBaseColor(element) {
@@ -269,38 +418,54 @@ if (strpos($self, '/view/') === false) {
             return null;
         }
 
-        function computeVisualPalette(element, intensity) {
+        function computeVisualPalette(element, intensity, overrideColor = null) {
             const ratio = clamp(intensity, 0, 1);
-            const baseColor = resolveBaseColor(element);
-            const baseHsl = colorStringToHsl(baseColor) || defaultHighlightHsl;
+            const storedBase = element ? (element.dataset.baseColor || resolveBaseColor(element)) : null;
+            const fallbackBase = storedBase || hslToCss(defaultHighlightHsl.h, defaultHighlightHsl.s, defaultHighlightHsl.l);
+            const sourceColor = overrideColor || fallbackBase;
+            const baseHsl = colorStringToHsl(sourceColor) || defaultHighlightHsl;
 
-            const saturation = clamp(baseHsl.s * (0.68 + ratio * 0.42), 30, 96);
-            const lightness = clamp(baseHsl.l * (0.55 + ratio * 0.6) + ratio * 8, 22, 86);
+            if (overrideColor) {
+                const saturation = clamp(baseHsl.s * (0.9 + ratio * 0.25), 58, 100);
+                const lightness = clamp(38 + ratio * 34, 42, 85);
+                const fill = hslToCss(baseHsl.h, saturation, lightness);
+                const glowLightness = clamp(lightness + 14, 48, 94);
+                const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.45 + ratio * 0.4, 0.45, 0.92));
+                const swatch = storedBase || fallbackBase;
+                return { fill, glow, swatch, base: fallbackBase };
+            }
 
-            const fill = hslToCss(baseHsl.h, saturation, lightness);
-            const glowLightness = clamp(lightness + 10, 28, 92);
-            const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.24 + ratio * 0.4, 0.22, 0.72));
+            const baseColorHsl = colorStringToHsl(fallbackBase) || defaultHighlightHsl;
+            const saturation = clamp(baseColorHsl.s + ratio * 12, 45, 96);
+            const lightness = clamp(baseColorHsl.l + ratio * 10, 30, 80);
+            const glowLightness = clamp(lightness + 12, 42, 92);
+            const glow = hslToCssAlpha(baseColorHsl.h, saturation, glowLightness, clamp(0.28 + ratio * 0.32, 0.28, 0.75));
+            const fill = storedBase || hslToCss(baseColorHsl.h, clamp(baseColorHsl.s, 40, 92), clamp(baseColorHsl.l, 26, 64));
+            const swatch = storedBase || fallbackBase;
 
-            return { fill, glow };
+            return { fill, glow, swatch, base: swatch };
         }
 
         function showTooltip(part, event) {
             if (!tooltip) {
                 return;
             }
+            activeTooltipPart = part;
             tooltipVisible = true;
             updateTooltip(part, event);
             tooltip.classList.add('is-visible');
         }
 
         function updateTooltip(part, event) {
-            if (!tooltip || !tooltipVisible) {
+            const targetPart = part || activeTooltipPart;
+            if (!tooltip || !tooltipVisible || !targetPart) {
                 return;
             }
 
-            const nombre = part.dataset.legendName || part.dataset.name || part.id || '';
-            const porcentaje = part.dataset.porcentaje != null
-                ? `${part.dataset.porcentaje}%`
+            const nombre = targetPart.dataset.legendName || targetPart.dataset.name || targetPart.id || '';
+            const porcentajeRaw = targetPart.dataset.porcentaje;
+            const porcentaje = porcentajeRaw != null
+                ? (String(porcentajeRaw).trim().endsWith('%') ? String(porcentajeRaw).trim() : `${String(porcentajeRaw).trim()}%`)
                 : '0%';
 
             tooltip.textContent = `${nombre}: ${porcentaje}`;
@@ -319,22 +484,9 @@ if (strpos($self, '/view/') === false) {
                 return;
             }
             tooltipVisible = false;
+            activeTooltipPart = null;
             tooltip.classList.remove('is-visible');
         }
-
-        if (!legendList || !summaryPeriod || !summaryRange || !summaryRoutines) {
-            return;
-        }
-
-        bodyParts.forEach(part => {
-            const baseColor = resolveBaseColor(part);
-            if (baseColor) {
-                part.dataset.baseColor = baseColor;
-            }
-            part.addEventListener('mouseenter', event => showTooltip(part, event));
-            part.addEventListener('mousemove', event => updateTooltip(part, event));
-            part.addEventListener('mouseleave', hideTooltip);
-        });
 
         function formatDate(value) {
             if (!value) {
@@ -353,43 +505,166 @@ if (strpos($self, '/view/') === false) {
             });
         }
 
+        function formatDuration(seconds) {
+            if (!Number.isFinite(seconds) || seconds <= 0) {
+                return '0';
+            }
+            const totalSeconds = Math.round(seconds);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const secs = totalSeconds % 60;
+
+            if (hours > 0) {
+                return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+            }
+            if (minutes > 0) {
+                return `${minutes}m ${secs.toString().padStart(2, '0')}s`;
+            }
+            return `${secs}s`;
+        }
+
+        function formatMetricValue(key, rawValue, mode) {
+            const deltaMode = mode === 'delta';
+            if (rawValue == null || rawValue === '') {
+                return { text: '0', trend: null };
+            }
+
+            if (typeof rawValue === 'string' && rawValue.trim() !== '' && Number.isNaN(Number(rawValue))) {
+                return { text: rawValue, trend: null };
+            }
+
+            const numericValue = Number(rawValue);
+            if (!Number.isFinite(numericValue)) {
+                return { text: '0', trend: null };
+            }
+
+            const signSymbol = deltaMode ? (numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')) : '';
+            const absoluteValue = deltaMode ? Math.abs(numericValue) : numericValue;
+            const trend = !deltaMode ? null : (numericValue > 0 ? 'positive' : (numericValue < 0 ? 'negative' : null));
+
+            const numberFormatter = new Intl.NumberFormat('es-CR', { maximumFractionDigits: key === 'peso' ? 1 : (key === 'volumen' ? 0 : 0) });
+            let text;
+            switch (key) {
+                case 'peso': {
+                    const formatted = numberFormatter.format(absoluteValue);
+                    text = `${signSymbol}${formatted} kg`;
+                    break;
+                }
+                case 'tiempo': {
+                    const formatted = formatDuration(absoluteValue);
+                    text = signSymbol ? `${signSymbol}${formatted}` : formatted;
+                    break;
+                }
+                case 'volumen': {
+                    const formatted = numberFormatter.format(absoluteValue);
+                    text = signSymbol ? `${signSymbol}${formatted}` : formatted;
+                    break;
+                }
+                default: {
+                    const formatted = numberFormatter.format(absoluteValue);
+                    text = signSymbol ? `${signSymbol}${formatted}` : formatted;
+                }
+            }
+
+            return { text, trend };
+        }
+
         function resetBodyParts() {
             bodyParts.forEach(part => {
                 part.classList.remove('active');
                 part.classList.add('inactive');
-                part.style.opacity = 0.18;
-                part.style.fill = inactiveFill;
-                part.style.filter = 'grayscale(100%) contrast(0.65) brightness(0.78)';
+                part.classList.remove('has-delta-trend');
+                part.style.opacity = 0.22;
+                part.style.filter = 'grayscale(100%) contrast(0.6) brightness(0.78)';
+                applyStylesToGroup(part, {
+                    fill: inactiveFill,
+                    stroke: '',
+                    strokeWidth: '',
+                    strokeDasharray: '',
+                    strokeOpacity: ''
+                });
+                restoreStrokeAttributes(part);
                 delete part.dataset.porcentaje;
                 delete part.dataset.color;
+                delete part.dataset.trend;
             });
         }
 
         function updateSummary(periodKey, dataset) {
-            summaryPeriod.textContent = periodLabels[periodKey] || '-';
-            const fechaInicio = dataset.fechaInicio ?? dataset.fecha_inicio ?? null;
-            const fechaFin = dataset.fechaFin ?? dataset.fecha_fin ?? null;
-
-            if (fechaInicio && fechaFin) {
-                summaryRange.textContent = (fechaInicio === fechaFin)
-                    ? formatDate(fechaInicio)
-                    : `${formatDate(fechaInicio)} - ${formatDate(fechaFin)}`;
-            } else {
-                summaryRange.textContent = '-';
+            const mode = dataset.mode || dataset.modo || 'intensity';
+            viewerContainer.dataset.mode = mode;
+            if (deltaHint) {
+                deltaHint.hidden = mode !== 'delta';
+            }
+            if (summaryPeriod) {
+                const label = dataset.label || dataset.nombre || periodLabels[periodKey] || (periodKey || '-');
+                summaryPeriod.textContent = label;
             }
 
-            summaryRoutines.textContent = dataset.rutinas != null ? dataset.rutinas : 0;
+            if (summaryRange) {
+                const fechaInicio = dataset.fechaInicio ?? dataset.fecha_inicio ?? null;
+                const fechaFin = dataset.fechaFin ?? dataset.fecha_fin ?? null;
+                if (fechaInicio && fechaFin) {
+                    summaryRange.textContent = (fechaInicio === fechaFin)
+                        ? formatDate(fechaInicio)
+                        : `${formatDate(fechaInicio)} - ${formatDate(fechaFin)}`;
+                } else {
+                    summaryRange.textContent = '-';
+                }
+            }
+
+            if (summaryRoutines) {
+                const meta = dataset.meta || {};
+                if (dataset.rutinas != null) {
+                    summaryRoutines.textContent = dataset.rutinas;
+                } else if (meta.rutinasTexto) {
+                    summaryRoutines.textContent = meta.rutinasTexto;
+                } else {
+                    summaryRoutines.textContent = '0';
+                }
+            }
+
+            const metricas = dataset.metricas || dataset.metrics || {};
+            metricItems.forEach(item => {
+                const key = item.dataset.metric;
+                const valueElement = item.querySelector('.body-metric-value');
+                if (!valueElement || !key) {
+                    return;
+                }
+                const formatted = formatMetricValue(key, metricas[key], mode);
+                valueElement.textContent = formatted.text;
+                item.classList.toggle('is-positive', formatted.trend === 'positive');
+                item.classList.toggle('is-negative', formatted.trend === 'negative');
+                if (formatted.trend) {
+                    item.dataset.trend = formatted.trend;
+                    valueElement.dataset.trend = formatted.trend;
+                } else {
+                    delete item.dataset.trend;
+                    delete valueElement.dataset.trend;
+                }
+            });
         }
 
         function buildLegendItem(options) {
-            const { color, name, value, note, isInactive } = options;
+            const { color, swatch: swatchOverride, name, value, note, isInactive, trend, fullWidth } = options;
             const item = document.createElement('li');
             item.className = 'body-legend-item' + (isInactive ? ' is-inactive' : '');
+            if (trend) {
+                item.classList.add(`is-${trend}`);
+                item.dataset.trend = trend;
+            }
+            if (trend === 'neutral') {
+                item.classList.add('is-neutral');
+            }
+            if (fullWidth) {
+                item.style.gridColumn = '1 / -1';
+            }
 
-            const swatch = document.createElement('span');
-            swatch.className = 'body-legend-swatch' + (isInactive ? ' is-inactive' : '');
-            if (color && !isInactive) {
-                swatch.style.background = color;
+            const swatchEl = document.createElement('span');
+            swatchEl.className = 'body-legend-swatch' + (isInactive ? ' is-inactive' : '');
+            const swatchColor = swatchOverride || color;
+            if (swatchColor && !isInactive) {
+                swatchEl.style.background = swatchColor;
             }
 
             const textWrapper = document.createElement('div');
@@ -407,8 +682,8 @@ if (strpos($self, '/view/') === false) {
                 const valueEl = document.createElement('span');
                 valueEl.className = 'body-legend-value';
                 valueEl.textContent = value;
-                if (color && !isInactive) {
-                    valueEl.style.color = color;
+                if (trend) {
+                    valueEl.classList.add(`is-${trend}`);
                 }
                 mainRow.appendChild(valueEl);
             }
@@ -422,88 +697,215 @@ if (strpos($self, '/view/') === false) {
                 textWrapper.appendChild(noteEl);
             }
 
-            item.appendChild(swatch);
+            item.appendChild(swatchEl);
             item.appendChild(textWrapper);
 
             return item;
         }
 
-        function updateLegend(porcentajes) {
+        function updateLegend(porcentajes, dataset) {
+            if (!legendList) {
+                return;
+            }
             legendList.innerHTML = '';
-            const entries = Object.entries(porcentajes).sort(([, a], [, b]) => b - a);
-            const maxValor = entries.length ? Math.max(...entries.map(([, value]) => value)) : 0;
+            const entries = Object.entries(porcentajes || {});
+            const mode = dataset.mode || dataset.modo || 'intensity';
+            const deltaMode = mode === 'delta';
 
-            if (!entries.length) {
+            const sortedEntries = entries.sort(([, a], [, b]) => {
+                const valueA = deltaMode ? Math.abs(Number(a) || 0) : Number(a) || 0;
+                const valueB = deltaMode ? Math.abs(Number(b) || 0) : Number(b) || 0;
+                return valueB - valueA;
+            });
+
+            const maxValor = sortedEntries.length
+                ? Math.max(...sortedEntries.map(([, value]) => {
+                    const numeric = Number(value) || 0;
+                    return deltaMode ? Math.abs(numeric) : numeric;
+                }))
+                : 0;
+
+            if (!sortedEntries.length) {
                 legendList.appendChild(buildLegendItem({
                     name: 'No se registran zonas trabajadas en este periodo.',
                     note: null,
                     color: inactiveFill,
-                    isInactive: true
+                    isInactive: true,
+                    fullWidth: true
                 }));
             } else {
-                entries.forEach(([parteId, valor]) => {
-                    const elemento = document.getElementById(parteId);
+                sortedEntries.forEach(([parteId, valor]) => {
+                    const elementos = viewerContainer.querySelectorAll(`#${escapeId(parteId)}`);
+                    const elemento = elementos.length ? elementos[0] : null;
                     const nombre = elemento
                         ? (elemento.dataset.legendName || elemento.dataset.name || parteId)
                         : parteId;
-                    const intensidad = maxValor > 0 ? valor / maxValor : 0;
-                    const palette = computeVisualPalette(elemento, intensidad || 0.45);
-                    const color = palette.fill;
+                    const numericValue = Number(valor) || 0;
+                    const intensidad = maxValor > 0 ? (deltaMode ? Math.abs(numericValue) : numericValue) / maxValor : 0;
+                    const trend = !deltaMode
+                        ? null
+                        : (numericValue > 0 ? 'positive' : (numericValue < 0 ? 'negative' : 'neutral'));
+                    const overrideColor = !deltaMode
+                        ? null
+                        : (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral));
+                    const palette = computeVisualPalette(elemento, intensidad || 0.45, overrideColor);
+                    const storedBaseColor = elemento
+                        ? (elemento.dataset.baseColor || null)
+                        : null;
+                    const swatchColor = storedBaseColor || palette.base || palette.swatch || inactiveFill;
+                    const displayValue = deltaMode
+                        ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}%`
+                        : `${Math.round(numericValue)}%`;
 
                     legendList.appendChild(buildLegendItem({
-                        color,
+                        color: swatchColor,
+                        swatch: swatchColor,
                         name: nombre,
-                        value: `${Math.round(valor)}%`
+                        value: displayValue,
+                        trend,
+                        note: trend === 'neutral' ? 'Sin cambios relevantes' : undefined
                     }));
                 });
             }
 
-            const inactiveCount = allBodyPartIds.filter(id => !(id in porcentajes) || porcentajes[id] <= 0).length;
+            const inactiveCount = allBodyPartIds.filter(id => {
+                const hasEntry = porcentajes && Object.prototype.hasOwnProperty.call(porcentajes, id);
+                if (!hasEntry) {
+                    return true;
+                }
+                const numeric = Number(porcentajes[id]) || 0;
+                if (deltaMode) {
+                    return false;
+                }
+                return numeric <= 0;
+            }).length;
+
             if (inactiveCount > 0) {
                 legendList.appendChild(buildLegendItem({
                     name: 'Zonas sin actividad registrada',
                     note: `${inactiveCount} ${inactiveCount === 1 ? 'zona' : 'zonas'}`,
-                    isInactive: true
+                    isInactive: true,
+                    fullWidth: true
+                }));
+            }
+
+            if (deltaMode) {
+                legendList.appendChild(buildLegendItem({
+                    name: 'Interpretación',
+                    note: 'Verde indica más trabajo en el periodo B, rojo refleja retroceso y los contornos punteados señalan zonas sin cambios.',
+                    isInactive: true,
+                    fullWidth: true
                 }));
             }
         }
 
         function aplicarProgresoVisual(periodKey) {
-            const dataset = progresoDataset[periodKey] || {};
+            const dataset = progresoDataset[periodKey];
+            if (!dataset) {
+                resetBodyParts();
+                updateSummary(periodKey, {});
+                updateLegend({}, {});
+                if (emptyState) {
+                    emptyState.removeAttribute('hidden');
+                }
+                return;
+            }
+
             const porcentajes = dataset.porcentajes || {};
-            const valores = Object.values(porcentajes);
-            const maxPorcentaje = valores.length ? Math.max(...valores) : 0;
+            const mode = dataset.mode || dataset.modo || 'intensity';
+            const deltaMode = mode === 'delta';
+            const valores = Object.values(porcentajes).map(value => Number(value) || 0);
+            const maxPorcentaje = valores.length
+                ? Math.max(...valores.map(value => deltaMode ? Math.abs(value) : value))
+                : 0;
 
             hideTooltip();
             resetBodyParts();
 
             if (maxPorcentaje > 0) {
                 Object.entries(porcentajes).forEach(([parteId, porcentaje]) => {
-                    const elementos = document.querySelectorAll(`#${escapeId(parteId)}`);
+                    const elementos = viewerContainer.querySelectorAll(`#${escapeId(parteId)}`);
                     if (!elementos.length) {
                         return;
                     }
 
-                    const intensidadRelativa = maxPorcentaje > 0 ? porcentaje / maxPorcentaje : 0;
-                    const opacidad = Math.min(0.95, 0.32 + intensidadRelativa * 0.58);
-                    const glowRadius = (4 + intensidadRelativa * 12).toFixed(2);
+                    const numericValue = Number(porcentaje) || 0;
+                    const intensidadRelativa = maxPorcentaje > 0
+                        ? (deltaMode ? Math.abs(numericValue) : numericValue) / maxPorcentaje
+                        : 0;
+                    const glowRadiusValue = deltaMode
+                        ? 6 + intensidadRelativa * 18
+                        : 4 + intensidadRelativa * 12;
+                    const glowRadius = glowRadiusValue.toFixed(2);
 
                     elementos.forEach(el => {
-                        const palette = computeVisualPalette(el, intensidadRelativa || 0);
+                        const trend = deltaMode
+                            ? (numericValue > 0 ? 'positive' : (numericValue < 0 ? 'negative' : 'neutral'))
+                            : null;
+                        const overrideColor = deltaMode
+                            ? (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral))
+                            : null;
+                        const palette = computeVisualPalette(el, intensidadRelativa || 0, overrideColor);
+                        const baseColor = el.dataset.baseColor || palette.base || palette.swatch || overrideColor || inactiveFill;
                         el.classList.add('active');
                         el.classList.remove('inactive');
-                        el.style.opacity = opacidad;
-                        el.style.fill = palette.fill;
-                        el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow})`;
-                        el.dataset.porcentaje = Math.round(porcentaje);
-                        el.dataset.color = palette.fill;
+                        if (deltaMode) {
+                            el.classList.add('has-delta-trend');
+                            el.dataset.trend = trend;
+                            const strokeStyles = {};
+                            if (trend === 'positive') {
+                                strokeStyles.stroke = colorSuccess;
+                                strokeStyles.strokeWidth = '3';
+                                strokeStyles.strokeDasharray = '';
+                                strokeStyles.strokeOpacity = '0.85';
+                            } else if (trend === 'negative') {
+                                strokeStyles.stroke = colorError;
+                                strokeStyles.strokeWidth = '3';
+                                strokeStyles.strokeDasharray = '10 6';
+                                strokeStyles.strokeOpacity = '0.9';
+                            } else {
+                                strokeStyles.stroke = colorNeutral;
+                                strokeStyles.strokeWidth = '2.5';
+                                strokeStyles.strokeDasharray = '6 6';
+                                strokeStyles.strokeOpacity = '0.75';
+                            }
+                            applyStylesToGroup(el, {
+                                fill: palette.fill,
+                                ...strokeStyles
+                            });
+                        } else {
+                            el.classList.remove('has-delta-trend');
+                            delete el.dataset.trend;
+                            applyStylesToGroup(el, {
+                                fill: baseColor,
+                                stroke: '',
+                                strokeWidth: '',
+                                strokeDasharray: '',
+                                strokeOpacity: ''
+                            });
+                            restoreStrokeAttributes(el);
+                        }
+                        const opacityValue = deltaMode
+                            ? Math.min(1, 0.72 + intensidadRelativa * 0.28)
+                            : Math.min(0.95, 0.38 + intensidadRelativa * 0.5);
+                        el.style.opacity = opacityValue.toFixed(2);
+                        if (deltaMode) {
+                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1.18 + intensidadRelativa * 0.35).toFixed(2)}) brightness(${(1 + intensidadRelativa * 0.2).toFixed(2)})`;
+                        } else {
+                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1 + intensidadRelativa * 0.4).toFixed(2)}) brightness(${(0.95 + intensidadRelativa * 0.18).toFixed(2)})`;
+                        }
+                        const formattedValue = deltaMode
+                            ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}`
+                            : Math.round(numericValue);
+                        el.dataset.porcentaje = formattedValue;
+                        el.dataset.color = deltaMode ? palette.fill : baseColor;
                     });
                 });
             }
 
-            const tieneDatos = valores.length > 0 && maxPorcentaje > 0;
+            const tieneDatos = valores.some(value => (deltaMode ? Math.abs(value) : value) > 0);
             updateSummary(periodKey, dataset);
-            updateLegend(porcentajes);
+            updateLegend(porcentajes, dataset);
 
             if (emptyState) {
                 if (tieneDatos) {
@@ -514,23 +916,169 @@ if (strpos($self, '/view/') === false) {
             }
         }
 
-        filterButtons.forEach(button => {
-            button.addEventListener('click', function () {
+        function syncFilterButtons() {
+            const keys = Object.keys(progresoDataset);
+            filterButtons.forEach(button => {
+                const periodKey = button.dataset.period;
+                const disponible = periodKey && keys.includes(periodKey);
+                button.disabled = !disponible;
+                button.classList.toggle('is-disabled', !disponible);
+                if (!disponible) {
+                    button.classList.remove('active');
+                }
+            });
+            return keys;
+        }
+
+        function determineDefaultPeriod(keys) {
+            if (explicitDefaultPeriod && keys.includes(explicitDefaultPeriod)) {
+                return explicitDefaultPeriod;
+            }
+            if (keys.includes('weekly')) {
+                return 'weekly';
+            }
+            if (keys.includes('monthly')) {
+                return 'monthly';
+            }
+            if (keys.includes('daily')) {
+                return 'daily';
+            }
+            return keys[0] || null;
+        }
+
+        function applyPeriodAndActivate(periodKey) {
+            if (!periodKey || !(periodKey in progresoDataset)) {
                 filterButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                aplicarProgresoVisual(this.dataset.period);
+                aplicarProgresoVisual(periodKey);
+                currentPeriod = null;
+                viewerContainer.dataset.activePeriod = '';
+                return;
+            }
+            filterButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.period === periodKey));
+            aplicarProgresoVisual(periodKey);
+            currentPeriod = periodKey;
+            viewerContainer.dataset.activePeriod = periodKey;
+        }
+
+        function prepareBodyParts() {
+            bodyParts.forEach(part => {
+                const baseColor = resolveBaseColor(part);
+                if (baseColor) {
+                    part.dataset.baseColor = baseColor;
+                }
+                captureBaseStrokeAttributes(part);
+                part.querySelectorAll(shapeSelector).forEach(shape => {
+                    captureBaseStrokeAttributes(shape);
+                    if (!shape.dataset.baseColor) {
+                        const shapeColor = shape.getAttribute('fill') || extractInlineFill(shape.getAttribute('style'));
+                        if (shapeColor) {
+                            shape.dataset.baseColor = shapeColor;
+                        }
+                    }
+                });
+                restoreStrokeAttributes(part);
+            });
+        }
+
+        prepareBodyParts();
+
+        function handlePointerOver(event) {
+            const targetPart = event.target.closest('.body-part');
+            if (!targetPart || !viewerContainer.contains(targetPart)) {
+                return;
+            }
+            showTooltip(targetPart, event);
+        }
+
+        function handlePointerMove(event) {
+            if (!tooltipVisible) {
+                return;
+            }
+            const targetPart = event.target.closest('.body-part');
+            const part = targetPart || activeTooltipPart;
+            if (!part || !viewerContainer.contains(part)) {
+                hideTooltip();
+                return;
+            }
+            updateTooltip(part, event);
+        }
+
+        function handlePointerOut(event) {
+            if (!tooltipVisible) {
+                return;
+            }
+            const currentPart = event.target.closest('.body-part');
+            if (!currentPart) {
+                hideTooltip();
+                return;
+            }
+            const relatedElement = event.relatedTarget;
+            if (relatedElement && currentPart.contains(relatedElement)) {
+                return;
+            }
+            const nextPart = relatedElement ? relatedElement.closest('.body-part') : null;
+            if (nextPart && viewerContainer.contains(nextPart)) {
+                return;
+            }
+            hideTooltip();
+        }
+
+        viewerContainer.addEventListener('pointerover', handlePointerOver);
+        viewerContainer.addEventListener('pointermove', handlePointerMove);
+        viewerContainer.addEventListener('pointerout', handlePointerOut);
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.disabled) {
+                    return;
+                }
+                applyPeriodAndActivate(button.dataset.period);
             });
         });
 
-        const defaultPeriod = progresoDataset.weekly
-            ? 'weekly'
-            : (progresoDataset.monthly ? 'monthly' : (progresoDataset.daily ? 'daily' : (filterButtons[0]?.dataset.period || 'daily')));
-        const defaultButton = Array.from(filterButtons).find(btn => btn.dataset.period === defaultPeriod);
-        if (defaultButton) {
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            defaultButton.classList.add('active');
+        const initialKeys = syncFilterButtons();
+        const initialPeriod = determineDefaultPeriod(initialKeys);
+        if (initialPeriod) {
+            applyPeriodAndActivate(initialPeriod);
+        } else {
+            resetBodyParts();
+            updateSummary(null, {});
+            updateLegend({}, {});
+            if (emptyState) {
+                emptyState.removeAttribute('hidden');
+            }
         }
 
-        aplicarProgresoVisual(defaultPeriod);
+        window.bodyViewer = {
+            setDataset(dataset, options = {}) {
+                const merge = Boolean(options.merge);
+                if (merge) {
+                    progresoDataset = { ...progresoDataset, ...(dataset || {}) };
+                } else {
+                    progresoDataset = dataset ? { ...dataset } : {};
+                }
+                window.progresoData = progresoDataset;
+                if (options.defaultPeriod !== undefined) {
+                    explicitDefaultPeriod = options.defaultPeriod;
+                } else if (!merge) {
+                    explicitDefaultPeriod = viewerContainer.dataset.defaultPeriod || null;
+                }
+                const keys = syncFilterButtons();
+                const nextPeriod = determineDefaultPeriod(keys);
+                applyPeriodAndActivate(nextPeriod);
+            },
+            applyPeriod(periodKey) {
+                applyPeriodAndActivate(periodKey);
+            },
+            getDataset() {
+                return { ...progresoDataset };
+            },
+            getAvailablePeriods() {
+                return Object.keys(progresoDataset);
+            },
+            getCurrentPeriod() {
+                return currentPeriod;
+            }
+        };
     });
 </script>
