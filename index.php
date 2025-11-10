@@ -52,6 +52,7 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/padecimientoView.php'><button><i class="ph-fill ph-bandaids"></i>Padecimientos</button></a>
                     <a href='view/certificadoView.php'><button><i class="ph-fill ph-certificate"></i>Certificados</button></a>
                     <a href='view/clientePadecimientoView.php'><button><i class="ph-fill ph-first-aid-kit"></i>Datos Clínicos</button></a>
+                    <a href='view/seguimientoClientesView.php'><button><i class="ph-fill ph-graph"></i>Seguimiento de clientes</button></a>
                     <a href='view/padecimientoDictamenView.php'><button><i class="ph-fill ph-file-text"></i> Dictamen Médico</button></a>
                     <a href='view/numeroEmergenciaView.php'><button><i class="ph-fill ph-phone-plus"></i>Números Emergencia</button></a>
                     <a href='view/salaView.php'><button><i class="ph-fill ph-storefront"></i>Salas</button></a>
@@ -89,6 +90,7 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/horarioPersonalView.php'><button><i class="ph-fill ph-user-plus"></i>Mis Horarios Personales</button></a>
                     <a href='view/instructorHorarioView.php'><button><i class="ph-fill ph-calendar"></i>Mis Horarios de Trabajo</button></a>
                     <a href='view/clienteView.php'><button><i class="ph-fill ph-users"></i>Ver Clientes</button></a>
+                    <a href='view/seguimientoClientesView.php'><button><i class="ph-fill ph-graph"></i>Seguimiento de clientes</button></a>
                     <a href='view/instructorView.php'><button><i class="ph-fill ph-user-rectangle"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph-fill ph-person-simple-run"></i>Zonas del Cuerpo</button></a>
                     <a href='view/subzonaView.php'><button><i class="ph-fill ph-hand"></i>Sub Zonas del cuerpo</button></a>
@@ -121,6 +123,7 @@ if ($tipoUsuario == 'cliente') {
                 <div class="menu-grid">
                     <a href='view/reservaView.php'><button><i class="ph-fill ph-calendar-check"></i>Mis Reservas</button></a>
                     <a href='view/rutinaView.php'><button><i class="ph-fill ph-notebook"></i>Mis Rutinas</button></a>
+                    <a href='view/progresoComparativaView.php'><button><i class="ph-fill ph-chart-line-up"></i>Comparar progreso</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph-fill ph-user-plus"></i>Instructor Personal</button></a>
                     <a href='view/horarioLibreView.php'><button><i class="ph-fill ph-barbell"></i>Uso Libre</button></a>
                     <a href='view/ejercicioEquilibrioView.php'><button><i class="ph-fill ph-balance"></i>Ejercicios de Equilibrio</button></a>
