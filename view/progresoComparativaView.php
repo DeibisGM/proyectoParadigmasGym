@@ -21,7 +21,6 @@ $clienteId = (int) $_SESSION['usuario_id'];
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
             <h2>Comparativa de Progreso Corporal</h2>
-            <p class="page-subtitle">Hola <?php echo htmlspecialchars($nombreUsuario); ?>, compara tu rendimiento entre dos periodos.</p>
         </header>
 
         <main class="analytics-layout">
@@ -30,19 +29,19 @@ $clienteId = (int) $_SESSION['usuario_id'];
                 <p class="text-muted">Elige dos periodos de tu historial para evaluar el progreso de tu entrenamiento por zonas del cuerpo.</p>
                 <div class="form-grid-container">
                     <div class="form-group">
+                        <label for="granularidad">Tipo de periodo</label>
+                        <select id="granularidad">
+                            <option value="week">Semanas</option>
+                            <option value="month">Meses</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="periodo-a">Periodo A</label>
                         <select id="periodo-a"></select>
                     </div>
                     <div class="form-group">
                         <label for="periodo-b">Periodo B</label>
                         <select id="periodo-b"></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="granularidad">Tipo de periodo</label>
-                        <select id="granularidad">
-                            <option value="week">Semanas</option>
-                            <option value="month">Meses</option>
-                        </select>
                     </div>
                 </div>
                 <div class="analytics-actions">
@@ -106,7 +105,7 @@ $clienteId = (int) $_SESSION['usuario_id'];
 
             <section class="analytics-panel">
                 <h3><i class="ph ph-person-simple-run"></i> Visualización corporal</h3>
-                <p class="text-muted">Usa los botones sobre la visualización para alternar entre los periodos y la diferencia.</p>
+                <p class="text-muted">Alterna entre los periodos y su diferencia desde los botones del visor. En modo diferencia, los tonos verdes indican más trabajo en el periodo B, los rojos señalan retrocesos y los contornos punteados marcan zonas sin cambios relevantes.</p>
                 <script>
                     window.progresoData = {};
                 </script>

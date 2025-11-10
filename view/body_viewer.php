@@ -25,7 +25,8 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
     }
 }
 ?>
-<div id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" class="body-viewer-container" data-viewer-id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" data-default-period="<?php echo htmlspecialchars($viewerDefaultPeriod ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+<div class="body-viewer-grid">
+    <div id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" class="body-viewer-container" data-viewer-id="<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>" data-default-period="<?php echo htmlspecialchars($viewerDefaultPeriod ?? '', ENT_QUOTES, 'UTF-8'); ?>">
 <?php if (!empty($viewerPeriodButtons)): ?>
     <div class="filter-buttons">
         <?php foreach ($viewerPeriodButtons as $button):
@@ -85,76 +86,86 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
             </div>
         </div>
     </div>
-</div>
-        <div class="body-insights">
-
-            <div class="body-summary">
-                    <h3 style="margin: 0;">Porcentaje de trabajo por zonas del cuerpo</h3>
-                <div class="body-summary-row">
-                    <span class="body-summary-label">Periodo:</span>
-                    <span class="body-summary-value" data-summary="period">-</span>
-                </div>
-                <div class="body-summary-row">
-                    <span class="body-summary-label">Rango:</span>
-                    <span class="body-summary-value" data-summary="range">-</span>
-                </div>
-                <div class="body-summary-row">
-                    <span class="body-summary-label">Rutinas consideradas:</span>
-                    <span class="body-summary-value" data-summary="routines">0</span>
-                </div>
-                <ul class="body-metrics">
-                    <li class="body-metric" data-metric="ejercicios">
-                        <span class="body-metric-label">Ejercicios</span>
-                        <span class="body-metric-value">0</span>
-                    </li>
-                    <li class="body-metric" data-metric="series">
-                        <span class="body-metric-label">Series</span>
-                        <span class="body-metric-value">0</span>
-                    </li>
-                    <li class="body-metric" data-metric="repeticiones">
-                        <span class="body-metric-label">Repeticiones</span>
-                        <span class="body-metric-value">0</span>
-                    </li>
-                    <li class="body-metric" data-metric="peso">
-                        <span class="body-metric-label">Carga acumulada</span>
-                        <span class="body-metric-value">0 kg</span>
-                    </li>
-                    <li class="body-metric" data-metric="tiempo">
-                        <span class="body-metric-label">Tiempo activo</span>
-                        <span class="body-metric-value">0</span>
-                    </li>
-                    <li class="body-metric" data-metric="volumen">
-                        <span class="body-metric-label">Índice de esfuerzo</span>
-                        <span class="body-metric-value">0</span>
-                    </li>
-                </ul>
-                <p class="body-summary-hint">Los porcentajes se calculan con las rutinas registradas en el rango seleccionado.</p>
+    <div class="body-insights">
+        <div class="body-summary">
+            <h3 class="body-summary-title">Porcentaje de trabajo por zonas del cuerpo</h3>
+            <div class="body-summary-row">
+                <span class="body-summary-label">Periodo:</span>
+                <span class="body-summary-value" data-summary="period">-</span>
             </div>
-            <div class="body-legend">
-
-                <ul class="body-legend-list"></ul>
+            <div class="body-summary-row">
+                <span class="body-summary-label">Rango:</span>
+                <span class="body-summary-value" data-summary="range">-</span>
             </div>
-            <div class="body-viewer-empty" hidden>
-                <p>No se registran rutinas para este periodo.</p>
+            <div class="body-summary-row">
+                <span class="body-summary-label">Rutinas consideradas:</span>
+                <span class="body-summary-value" data-summary="routines">0</span>
             </div>
+            <ul class="body-metrics">
+                <li class="body-metric" data-metric="ejercicios">
+                    <span class="body-metric-label">Ejercicios</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+                <li class="body-metric" data-metric="series">
+                    <span class="body-metric-label">Series</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+                <li class="body-metric" data-metric="repeticiones">
+                    <span class="body-metric-label">Repeticiones</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+                <li class="body-metric" data-metric="peso">
+                    <span class="body-metric-label">Carga acumulada</span>
+                    <span class="body-metric-value">0 kg</span>
+                </li>
+                <li class="body-metric" data-metric="tiempo">
+                    <span class="body-metric-label">Tiempo activo</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+                <li class="body-metric" data-metric="volumen">
+                    <span class="body-metric-label">Índice de esfuerzo</span>
+                    <span class="body-metric-value">0</span>
+                </li>
+            </ul>
+            <div class="body-summary-delta" data-delta-hint hidden>
+                <span class="delta-legend-item">
+                    <span class="delta-swatch delta-swatch--positive"></span>
+                    Más trabajo en el periodo B
+                </span>
+                <span class="delta-legend-item">
+                    <span class="delta-swatch delta-swatch--negative"></span>
+                    Menos trabajo en el periodo B
+                </span>
+            </div>
+            <p class="body-summary-hint">Los porcentajes se calculan con las rutinas registradas en el rango seleccionado.</p>
         </div>
-<div class="tooltip"></div>
+        <div class="body-legend">
+            <ul class="body-legend-list"></ul>
+        </div>
+        <div class="body-viewer-empty" hidden>
+            <p>No se registran rutinas para este periodo.</p>
+        </div>
+    </div>
+    <div class="body-viewer-tooltip" data-body-tooltip></div>
+</div>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const viewerContainer = document.querySelector('.body-viewer-container');
+        const viewerContainer = document.getElementById('<?php echo htmlspecialchars($viewerId, ENT_QUOTES, 'UTF-8'); ?>');
         if (!viewerContainer) {
             return;
         }
 
+        const viewerRoot = viewerContainer.closest('.body-viewer-grid') || viewerContainer.parentElement || viewerContainer;
         const bodyParts = viewerContainer.querySelectorAll('.body-part');
         const filterButtons = viewerContainer.querySelectorAll('.btn-filter');
-        const legendList = viewerContainer.querySelector('.body-legend-list');
-        const summaryPeriod = viewerContainer.querySelector('[data-summary="period"]');
-        const summaryRange = viewerContainer.querySelector('[data-summary="range"]');
-        const summaryRoutines = viewerContainer.querySelector('[data-summary="routines"]');
-        const metricItems = viewerContainer.querySelectorAll('.body-metric');
-        const emptyState = viewerContainer.querySelector('.body-viewer-empty');
-        const tooltip = document.querySelector('.tooltip');
+        const legendList = viewerRoot.querySelector('.body-legend-list');
+        const summaryPeriod = viewerRoot.querySelector('[data-summary="period"]');
+        const summaryRange = viewerRoot.querySelector('[data-summary="range"]');
+        const summaryRoutines = viewerRoot.querySelector('[data-summary="routines"]');
+        const metricItems = viewerRoot.querySelectorAll('.body-metric');
+        const deltaHint = viewerRoot.querySelector('[data-delta-hint]');
+        const emptyState = viewerRoot.querySelector('.body-viewer-empty');
+        const tooltip = viewerRoot.querySelector('[data-body-tooltip]');
 
         let progresoDataset = window.progresoData ? { ...window.progresoData } : {};
         let explicitDefaultPeriod = viewerContainer.dataset.defaultPeriod || null;
@@ -164,6 +175,7 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
         const rootStyles = getComputedStyle(document.documentElement);
         const colorSuccess = (rootStyles.getPropertyValue('--color-success') || '#89C235').trim() || '#89C235';
         const colorError = (rootStyles.getPropertyValue('--color-error') || '#FF4136').trim() || '#FF4136';
+        const colorNeutral = (rootStyles.getPropertyValue('--color-body-neutral') || '#9CA3AF').trim() || '#9CA3AF';
         const inactiveFill = (rootStyles.getPropertyValue('--color-muscle-inactive') || '#3a3a3a').trim() || '#3a3a3a';
         const defaultHighlightHsl = { h: 137, s: 42, l: 38 };
 
@@ -179,7 +191,7 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
             }
         });
 
-        const allBodyPartIds = Array.from(bodyParts).map(part => part.id);
+        const allBodyPartIds = Array.from(new Set(Array.from(bodyParts).map(part => part.id)));
 
         function rgbToHsl(r, g, b) {
             r /= 255;
@@ -468,15 +480,26 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
             bodyParts.forEach(part => {
                 part.classList.remove('active');
                 part.classList.add('inactive');
+                part.classList.remove('has-delta-trend');
                 part.style.opacity = 0.18;
                 part.style.fill = inactiveFill;
                 part.style.filter = 'grayscale(100%) contrast(0.65) brightness(0.78)';
                 delete part.dataset.porcentaje;
                 delete part.dataset.color;
+                delete part.dataset.trend;
+                part.style.stroke = '';
+                part.style.strokeWidth = '';
+                part.style.strokeDasharray = '';
+                part.style.strokeOpacity = '';
             });
         }
 
         function updateSummary(periodKey, dataset) {
+            const mode = dataset.mode || dataset.modo || 'intensity';
+            viewerContainer.dataset.mode = mode;
+            if (deltaHint) {
+                deltaHint.hidden = mode !== 'delta';
+            }
             if (summaryPeriod) {
                 const label = dataset.label || dataset.nombre || periodLabels[periodKey] || (periodKey || '-');
                 summaryPeriod.textContent = label;
@@ -512,10 +535,17 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                 if (!valueElement || !key) {
                     return;
                 }
-                const formatted = formatMetricValue(key, metricas[key], dataset.mode || dataset.modo);
+                const formatted = formatMetricValue(key, metricas[key], mode);
                 valueElement.textContent = formatted.text;
                 item.classList.toggle('is-positive', formatted.trend === 'positive');
                 item.classList.toggle('is-negative', formatted.trend === 'negative');
+                if (formatted.trend) {
+                    item.dataset.trend = formatted.trend;
+                    valueElement.dataset.trend = formatted.trend;
+                } else {
+                    delete item.dataset.trend;
+                    delete valueElement.dataset.trend;
+                }
             });
         }
 
@@ -603,16 +633,21 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                 }));
             } else {
                 sortedEntries.forEach(([parteId, valor]) => {
-                    const elementos = document.querySelectorAll(`#${escapeId(parteId)}`);
+                    const elementos = viewerContainer.querySelectorAll(`#${escapeId(parteId)}`);
                     const elemento = elementos.length ? elementos[0] : null;
                     const nombre = elemento
                         ? (elemento.dataset.legendName || elemento.dataset.name || parteId)
                         : parteId;
                     const numericValue = Number(valor) || 0;
                     const intensidad = maxValor > 0 ? (deltaMode ? Math.abs(numericValue) : numericValue) / maxValor : 0;
-                    const palette = computeVisualPalette(elemento, intensidad || 0.45, deltaMode ? (numericValue >= 0 ? colorSuccess : colorError) : null);
+                    const trend = !deltaMode
+                        ? null
+                        : (numericValue > 0 ? 'positive' : (numericValue < 0 ? 'negative' : 'neutral'));
+                    const overrideColor = !deltaMode
+                        ? null
+                        : (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral));
+                    const palette = computeVisualPalette(elemento, intensidad || 0.45, overrideColor);
                     const color = palette.fill;
-                    const trend = !deltaMode ? null : (numericValue > 0 ? 'positive' : (numericValue < 0 ? 'negative' : null));
                     const displayValue = deltaMode
                         ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}%`
                         : `${Math.round(numericValue)}%`;
@@ -621,18 +656,22 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                         color,
                         name: nombre,
                         value: displayValue,
-                        trend
+                        trend,
+                        note: trend === 'neutral' ? 'Sin cambios relevantes' : undefined
                     }));
                 });
             }
 
             const inactiveCount = allBodyPartIds.filter(id => {
-                const value = porcentajes ? porcentajes[id] : null;
-                if (value == null) {
+                const hasEntry = porcentajes && Object.prototype.hasOwnProperty.call(porcentajes, id);
+                if (!hasEntry) {
                     return true;
                 }
-                const numeric = Number(value) || 0;
-                return deltaMode ? Math.abs(numeric) <= 0 : numeric <= 0;
+                const numeric = Number(porcentajes[id]) || 0;
+                if (deltaMode) {
+                    return false;
+                }
+                return numeric <= 0;
             }).length;
 
             if (inactiveCount > 0) {
@@ -646,7 +685,7 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
             if (deltaMode) {
                 legendList.appendChild(buildLegendItem({
                     name: 'Interpretación',
-                    note: 'Valores positivos indican mayor trabajo en el periodo de comparación B. Valores negativos reflejan una disminución.',
+                    note: 'Verde indica más trabajo en el periodo B, rojo refleja retroceso y los contornos punteados señalan zonas sin cambios.',
                     isInactive: true
                 }));
             }
@@ -677,7 +716,7 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
 
             if (maxPorcentaje > 0) {
                 Object.entries(porcentajes).forEach(([parteId, porcentaje]) => {
-                    const elementos = document.querySelectorAll(`#${escapeId(parteId)}`);
+                    const elementos = viewerContainer.querySelectorAll(`#${escapeId(parteId)}`);
                     if (!elementos.length) {
                         return;
                     }
@@ -692,9 +731,42 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                     const glowRadius = (4 + intensidadRelativa * 12).toFixed(2);
 
                     elementos.forEach(el => {
-                        const palette = computeVisualPalette(el, intensidadRelativa || 0, deltaMode ? (numericValue >= 0 ? colorSuccess : colorError) : null);
+                        const trend = deltaMode
+                            ? (numericValue > 0 ? 'positive' : (numericValue < 0 ? 'negative' : 'neutral'))
+                            : null;
+                        const overrideColor = deltaMode
+                            ? (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral))
+                            : null;
+                        const palette = computeVisualPalette(el, intensidadRelativa || 0, overrideColor);
                         el.classList.add('active');
                         el.classList.remove('inactive');
+                        if (deltaMode) {
+                            el.classList.add('has-delta-trend');
+                            el.dataset.trend = trend;
+                            if (trend === 'positive') {
+                                el.style.stroke = colorSuccess;
+                                el.style.strokeWidth = '3';
+                                el.style.strokeDasharray = '';
+                                el.style.strokeOpacity = '0.85';
+                            } else if (trend === 'negative') {
+                                el.style.stroke = colorError;
+                                el.style.strokeWidth = '3';
+                                el.style.strokeDasharray = '10 6';
+                                el.style.strokeOpacity = '0.9';
+                            } else {
+                                el.style.stroke = colorNeutral;
+                                el.style.strokeWidth = '2.5';
+                                el.style.strokeDasharray = '6 6';
+                                el.style.strokeOpacity = '0.75';
+                            }
+                        } else {
+                            el.classList.remove('has-delta-trend');
+                            delete el.dataset.trend;
+                            el.style.stroke = '';
+                            el.style.strokeWidth = '';
+                            el.style.strokeDasharray = '';
+                            el.style.strokeOpacity = '';
+                        }
                         el.style.opacity = opacidad;
                         el.style.fill = palette.fill;
                         el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow})`;
@@ -755,11 +827,13 @@ if (!$viewerDefaultPeriod && !empty($viewerPeriodButtons)) {
                 filterButtons.forEach(btn => btn.classList.remove('active'));
                 aplicarProgresoVisual(periodKey);
                 currentPeriod = null;
+                viewerContainer.dataset.activePeriod = '';
                 return;
             }
             filterButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.period === periodKey));
             aplicarProgresoVisual(periodKey);
             currentPeriod = periodKey;
+            viewerContainer.dataset.activePeriod = periodKey;
         }
 
         function prepareBodyParts() {
