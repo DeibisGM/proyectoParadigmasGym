@@ -14,32 +14,101 @@ class ProgresoBusiness {
         $this->cuerpoZonaData = new CuerpoZonaData();
     }
 
+    /**
+     * Mantiene compatibilidad con la firma original devolviendo únicamente la distribución
+     * porcentual para un rango en días específico.
+     */
     public function getProgresoVisual($clienteId, $dias = 30) {
-        $fechaFin = date('Y-m-d');
-        $fechaInicio = date('Y-m-d', strtotime("-$dias days"));
+        $fechaFin = new DateTimeImmutable('today');
+        $fechaInicio = $fechaFin->modify("-$dias days");
 
-        $rutinas = $this->rutinaData->getRutinasPorClienteEnRangoFechas($clienteId, $fechaInicio, $fechaFin);
+        $resultado = $this->calcularProgresoEntreFechas($clienteId, $fechaInicio, $fechaFin);
+        return $resultado['porcentajes'];
+    }
 
+    /**
+     * Retorna la información necesaria para el visor corporal agrupada por periodo (día, semana y mes).
+     */
+    public function getProgresoPorPeriodos($clienteId) {
+        $periodos = ['daily', 'weekly', 'monthly', 'all'];
+        $respuesta = [];
+
+        $hoy = new DateTimeImmutable('today');
+        $ultimaFechaRegistro = $this->rutinaData->getUltimaFechaRutinaPorCliente($clienteId);
+        $primeraFechaRegistro = method_exists($this->rutinaData, 'getPrimeraFechaRutinaPorCliente')
+            ? $this->rutinaData->getPrimeraFechaRutinaPorCliente($clienteId)
+            : null;
+
+        $fechaUltimaRutina = $ultimaFechaRegistro
+            ? DateTimeImmutable::createFromFormat('Y-m-d', $ultimaFechaRegistro) ?: $hoy
+            : null;
+        $fechaPrimeraRutina = $primeraFechaRegistro
+            ? DateTimeImmutable::createFromFormat('Y-m-d', $primeraFechaRegistro) ?: $fechaUltimaRutina
+            : null;
+
+        foreach ($periodos as $periodo) {
+            [$inicio, $fin] = $this->obtenerRangoFechasPorPeriodo(
+                $periodo,
+                $hoy,
+                $fechaPrimeraRutina,
+                $fechaUltimaRutina
+            );
+            $resultado = $this->calcularProgresoEntreFechas($clienteId, $inicio, $fin);
+
+            $respuesta[$periodo] = [
+                'fechaInicio' => $inicio->format('Y-m-d'),
+                'fechaFin' => $fin->format('Y-m-d'),
+                'rutinas' => $resultado['rutinas'],
+                'totalInstancias' => $resultado['totalInstancias'],
+                'porcentajes' => $resultado['porcentajes']
+            ];
+        }
+
+        return $respuesta;
+    }
+
+    private function calcularProgresoEntreFechas($clienteId, DateTimeImmutable $inicio, DateTimeImmutable $fin) {
+        $rutinas = $this->rutinaData->getRutinasPorClienteEnRangoFechas(
+            $clienteId,
+            $inicio->format('Y-m-d'),
+            $fin->format('Y-m-d')
+        );
+
+        $distribucion = $this->calcularDistribucionSubzonas($rutinas);
+
+        return [
+            'rutinas' => count($rutinas),
+            'totalInstancias' => $distribucion['totalInstancias'],
+            'porcentajes' => $distribucion['porcentajes']
+        ];
+    }
+
+    private function calcularDistribucionSubzonas($rutinas) {
         if (empty($rutinas)) {
-            return [];
+            return [
+                'totalInstancias' => 0,
+                'porcentajes' => []
+            ];
         }
 
         $subzonaCounts = [];
-        // CAMBIO CORREGIDO: Ahora contamos el total de "instancias de trabajo" de subzonas
-        // no solo ejercicios, para obtener porcentajes proporcionales reales
         $totalInstanciasSubzonas = 0;
 
         foreach ($rutinas as $rutina) {
             $ejercicios = $this->rutinaData->getEjerciciosPorRutinaId($rutina->getId());
             foreach ($ejercicios as $ejercicio) {
-                $subzonasDelEjercicio = $this->ejercicioSubzonaData->getSubzonasPorEjercicio($ejercicio->getEjercicioId(), $ejercicio->getTipo());
+                $subzonasDelEjercicio = $this->ejercicioSubzonaData->getSubzonasPorEjercicio(
+                    $ejercicio->getEjercicioId(),
+                    $ejercicio->getTipo()
+                );
                 foreach ($subzonasDelEjercicio as $subzona) {
                     $subzonaIds = explode('$', $subzona->getSubzona());
-                    foreach($subzonaIds as $szId) {
+                    foreach ($subzonaIds as $szId) {
                         $szId = trim($szId);
-                        if (empty($szId)) continue;
+                        if (empty($szId)) {
+                            continue;
+                        }
 
-                        // CAMBIO: Incrementamos tanto el contador de la subzona como el total de instancias
                         if (!isset($subzonaCounts[$szId])) {
                             $subzonaCounts[$szId] = 0;
                         }
@@ -50,20 +119,74 @@ class ProgresoBusiness {
             }
         }
 
-        // CAMBIO CORREGIDO: Si no hay instancias de subzonas, no hay nada que calcular.
         if ($totalInstanciasSubzonas === 0) {
-            return [];
+            return [
+                'totalInstancias' => 0,
+                'porcentajes' => []
+            ];
         }
 
         $porcentajes = [];
-        // CAMBIO CORREGIDO: Ahora calculamos el porcentaje basado en el total de instancias de subzonas
-        // Esto da un porcentaje real de cuánto se trabajó cada zona en relación al total de trabajo realizado
         foreach ($subzonaCounts as $subzonaId => $count) {
-            // Fórmula corregida: (veces que se trabajó la zona / total de instancias de subzonas) * 100
             $porcentajes[$subzonaId] = ($count / $totalInstanciasSubzonas) * 100;
         }
 
-        return $this->mapearSubzonasASVG($porcentajes);
+        return [
+            'totalInstancias' => $totalInstanciasSubzonas,
+            'porcentajes' => $this->mapearSubzonasASVG($porcentajes)
+        ];
+    }
+
+    private function obtenerRangoFechasPorPeriodo(
+        $periodo,
+        DateTimeImmutable $hoy,
+        ?DateTimeImmutable $primeraRutina = null,
+        ?DateTimeImmutable $ultimaRutina = null
+    )
+    {
+        $periodo = strtolower($periodo);
+        $inicio = $hoy;
+        $fin = $hoy;
+
+        switch ($periodo) {
+            case 'daily':
+                // Mantener el día actual como referencia visual, incluso si no hay rutinas hoy.
+                break;
+            case 'weekly':
+                // Contemplar los últimos 7 días completos (hoy y los 6 anteriores).
+                $inicio = $hoy->sub(new DateInterval('P7D'));
+                break;
+            case 'monthly':
+                // Desde el mismo día del mes anterior hasta hoy.
+                $inicio = $hoy->sub(new DateInterval('P1M'));
+                break;
+            case 'all':
+                if ($primeraRutina) {
+                    $inicio = $primeraRutina;
+                }
+                $fin = $ultimaRutina ?: $hoy;
+                break;
+            default:
+                $inicio = $hoy->sub(new DateInterval('P29D'));
+                break;
+        }
+
+        if ($periodo === 'all') {
+            if ($fin > $hoy) {
+                $fin = $hoy;
+            }
+            if ($primeraRutina && $inicio > $fin) {
+                $inicio = $fin;
+            }
+        } else {
+            $fin = $hoy;
+        }
+
+        if ($fin < $inicio) {
+            $fin = $inicio;
+        }
+
+        return [$inicio, $fin];
     }
 
     private function mapearSubzonasASVG($porcentajes) {

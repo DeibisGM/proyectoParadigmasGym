@@ -14,7 +14,7 @@ $progresoData = [];
 if ($tipoUsuario == 'cliente') {
     include_once 'business/progresoBusiness.php';
     $progresoBusiness = new ProgresoBusiness();
-    $progresoData = $progresoBusiness->getProgresoVisual($usuarioId, 30); // 30 días
+    $progresoData = $progresoBusiness->getProgresoPorPeriodos($usuarioId);
 }
 
 ?>
@@ -143,7 +143,7 @@ if ($tipoUsuario == 'cliente') {
     </main>
 
     <script>
-        const progresoData = <?php echo json_encode($progresoData); ?>;
+        window.progresoData = <?php echo json_encode($progresoData); ?>;
     </script>
 
     <?php if ($tipoUsuario === 'cliente') {
