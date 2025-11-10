@@ -15,15 +15,13 @@ if (strpos($self, '/view/') === false) {
 </head>
 <body>
 <div class="body-viewer-container">
-    <h1>Visor de Progreso Corporal</h1>
-    <p>Selecciona un grupo muscular para ver el progreso.</p>
     <div class="filter-buttons">
         <button class="btn-filter" data-period="daily">Diario</button>
         <button class="btn-filter active" data-period="weekly">Semanal</button>
         <button class="btn-filter" data-period="monthly">Mensual</button>
         <button class="btn-filter" data-period="all">Todas</button>
     </div>
-    <div class="viewer-grid">
+    <div class="body-views-wrapper">
         <div class="body-view">
             <div class="body-container">
                 <svg viewBox="0 0 563.72511 1133.0802">
@@ -68,8 +66,12 @@ if (strpos($self, '/view/') === false) {
                    </svg>
             </div>
         </div>
+    </div>
+</div>
         <div class="body-insights">
+
             <div class="body-summary">
+                    <h3 style="margin: 0;">Porcentaje de trabajo por zonas del cuerpo</h3>
                 <div class="body-summary-row">
                     <span class="body-summary-label">Periodo:</span>
                     <span class="body-summary-value" data-summary="period">-</span>
@@ -85,15 +87,13 @@ if (strpos($self, '/view/') === false) {
                 <p class="body-summary-hint">Los porcentajes se calculan con las rutinas registradas en el rango seleccionado.</p>
             </div>
             <div class="body-legend">
-                <h2>Detalle por zonas</h2>
+
                 <ul class="body-legend-list"></ul>
             </div>
             <div class="body-viewer-empty" hidden>
                 <p>No se registran rutinas para este periodo.</p>
             </div>
         </div>
-    </div>
-</div>
 <div class="tooltip"></div>
 <script>
     document.addEventListener('DOMContentLoaded', () => {

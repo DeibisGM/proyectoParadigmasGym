@@ -1198,16 +1198,18 @@ hr {
     margin-bottom: 30px;
 }
 
-.viewer-grid {
-    display: grid;
-    grid-template-columns: minmax(260px, 360px) minmax(320px, 1fr);
-    align-items: start;
-    gap: clamp(2.5rem, 6vw, 5rem);
-    padding: 0 clamp(1rem, 3vw, 2.5rem);
+.body-views-wrapper {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
 }
 
+
+
 .body-view {
-    max-width: 360px;
+    max-width: 280px;
     justify-self: center;
     padding: 0 clamp(0.5rem, 2vw, 1.5rem);
     width: 100%;
@@ -1246,21 +1248,25 @@ hr {
 }
 
 .body-insights {
-    min-width: 0;
-    text-align: left;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-soft);
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    margin-top: 2rem;             /* Added spacing */
+    width: 100%;                  /* Ocupa todo el ancho disponible */
+    max-width: none;              /* Sin límite máximo */
+    min-width: 0;                 /* Evita recortes en contenedores flex/grid */
+    text-align: left;             /* Alinea el texto a la izquierda */
+    background: var(--color-surface);  /* Color de fondo */
+    border: 1px solid var(--color-border); /* Borde suave */
+    border-radius: var(--radius-md);   /* Bordes redondeados */
+    padding: 2rem;                /* Espaciado interno cómodo */
+    box-shadow: var(--shadow-soft);    /* Sombra ligera */
+    display: flex;                /* Permite layout interno flexible */
+    flex-direction: column;       /* Acomoda los hijos en columna */
+    gap: 1.5rem;                  /* Espaciado entre elementos internos */
 }
 
+
 @media (max-width: 1080px) {
-    .viewer-grid {
-        grid-template-columns: 1fr;
+    .body-views-wrapper {
+        flex-direction: column; /* Stack items vertically */
         gap: clamp(2rem, 5vw, 3rem);
     }
 
@@ -1307,8 +1313,8 @@ hr {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid; /* Changed to grid */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* 4 columns, responsive */
     gap: 0.6rem;
     max-height: clamp(260px, 55vh, 420px);
     overflow-y: auto;
@@ -1425,17 +1431,7 @@ hr {
     }
 }
 
-.viewer-grid.is-interacting .body-part {
-    opacity: 0.15;
-    filter: grayscale(80%);
-}
 
-.viewer-grid.is-interacting .body-part:hover {
-    opacity: 1;
-    filter: grayscale(0%);
-    -webkit-filter: drop-shadow(0 0 8px rgba(137, 194, 53, 0.9));
-    filter: drop-shadow(0 0 8px rgba(137, 194, 53, 0.9));
-}
 
 /* Filter Buttons */
 .filter-buttons {
