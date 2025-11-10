@@ -136,6 +136,24 @@ class RutinaData extends Data
 
         return $ultimaFecha ?: null;
     }
+
+    public function getPrimeraFechaRutinaPorCliente($clienteId)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $query = "SELECT MIN(tbrutinafecha) AS primera_fecha FROM tbrutina WHERE tbclienteid = ?";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "i", $clienteId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $primeraFecha = null;
+        if ($row = mysqli_fetch_assoc($result)) {
+            $primeraFecha = $row['primera_fecha'] ?? null;
+        }
+        mysqli_close($conn);
+
+        return $primeraFecha ?: null;
+    }
 }
 ?>
 

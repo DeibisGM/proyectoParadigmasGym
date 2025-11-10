@@ -30,16 +30,29 @@ class ProgresoBusiness {
      * Retorna la información necesaria para el visor corporal agrupada por periodo (día, semana y mes).
      */
     public function getProgresoPorPeriodos($clienteId) {
-        $periodos = ['daily', 'weekly', 'monthly'];
+        $periodos = ['daily', 'weekly', 'monthly', 'all'];
         $respuesta = [];
 
-        $fechaReferencia = $this->rutinaData->getUltimaFechaRutinaPorCliente($clienteId);
-        $fechaBase = $fechaReferencia
-            ? DateTimeImmutable::createFromFormat('Y-m-d', $fechaReferencia) ?: new DateTimeImmutable('today')
-            : new DateTimeImmutable('today');
+        $hoy = new DateTimeImmutable('today');
+        $ultimaFechaRegistro = $this->rutinaData->getUltimaFechaRutinaPorCliente($clienteId);
+        $primeraFechaRegistro = method_exists($this->rutinaData, 'getPrimeraFechaRutinaPorCliente')
+            ? $this->rutinaData->getPrimeraFechaRutinaPorCliente($clienteId)
+            : null;
+
+        $fechaUltimaRutina = $ultimaFechaRegistro
+            ? DateTimeImmutable::createFromFormat('Y-m-d', $ultimaFechaRegistro) ?: $hoy
+            : null;
+        $fechaPrimeraRutina = $primeraFechaRegistro
+            ? DateTimeImmutable::createFromFormat('Y-m-d', $primeraFechaRegistro) ?: $fechaUltimaRutina
+            : null;
 
         foreach ($periodos as $periodo) {
-            [$inicio, $fin] = $this->obtenerRangoFechasPorPeriodo($periodo, $fechaBase);
+            [$inicio, $fin] = $this->obtenerRangoFechasPorPeriodo(
+                $periodo,
+                $hoy,
+                $fechaPrimeraRutina,
+                $fechaUltimaRutina
+            );
             $resultado = $this->calcularProgresoEntreFechas($clienteId, $inicio, $fin);
 
             $respuesta[$periodo] = [
@@ -124,27 +137,48 @@ class ProgresoBusiness {
         ];
     }
 
-    private function obtenerRangoFechasPorPeriodo($periodo, DateTimeImmutable $referencia)
+    private function obtenerRangoFechasPorPeriodo(
+        $periodo,
+        DateTimeImmutable $hoy,
+        ?DateTimeImmutable $primeraRutina = null,
+        ?DateTimeImmutable $ultimaRutina = null
+    )
     {
         $periodo = strtolower($periodo);
+        $inicio = $hoy;
+        $fin = $hoy;
 
         switch ($periodo) {
             case 'daily':
-                $inicio = $referencia;
-                $fin = $referencia;
+                // Mantener el día actual como referencia visual, incluso si no hay rutinas hoy.
                 break;
             case 'weekly':
-                $fin = $referencia;
-                $inicio = $referencia->modify('-6 days');
+                $inicio = $hoy->sub(new DateInterval('P6D'));
                 break;
             case 'monthly':
-                $inicio = $referencia->modify('first day of this month');
-                $fin = $referencia;
+                $inicio = $hoy->sub(new DateInterval('P1M'));
+                break;
+            case 'all':
+                if ($primeraRutina) {
+                    $inicio = $primeraRutina;
+                }
+                if ($ultimaRutina) {
+                    $fin = $ultimaRutina > $hoy ? $ultimaRutina : $hoy;
+                }
                 break;
             default:
-                $fin = $referencia;
-                $inicio = $referencia->modify('-29 days');
+                $inicio = $hoy->sub(new DateInterval('P29D'));
                 break;
+        }
+
+        if ($periodo !== 'all') {
+            if ($ultimaRutina && $fin < $ultimaRutina) {
+                $fin = $ultimaRutina;
+            }
+        }
+
+        if ($inicio > $fin) {
+            $inicio = $fin;
         }
 
         return [$inicio, $fin];
