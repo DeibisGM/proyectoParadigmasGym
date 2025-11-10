@@ -69,7 +69,6 @@ $clienteId = (int) $_SESSION['usuario_id'];
                             <li><span>Series</span><span data-summary-value="A-series">0</span></li>
                             <li><span>Repeticiones</span><span data-summary-value="A-repeticiones">0</span></li>
                             <li><span>Carga acumulada</span><span data-summary-value="A-peso">0 kg</span></li>
-                            <li><span>Tiempo activo</span><span data-summary-value="A-tiempo">0</span></li>
                         </ul>
                     </div>
                     <div class="analytics-card" data-summary-card="B">
@@ -83,7 +82,6 @@ $clienteId = (int) $_SESSION['usuario_id'];
                             <li><span>Series</span><span data-summary-value="B-series">0</span></li>
                             <li><span>Repeticiones</span><span data-summary-value="B-repeticiones">0</span></li>
                             <li><span>Carga acumulada</span><span data-summary-value="B-peso">0 kg</span></li>
-                            <li><span>Tiempo activo</span><span data-summary-value="B-tiempo">0</span></li>
                         </ul>
                     </div>
                     <div class="analytics-card analytics-card--delta" data-summary-card="diff">
@@ -97,7 +95,6 @@ $clienteId = (int) $_SESSION['usuario_id'];
                             <li><span>Series</span><span data-summary-value="diff-series">0</span></li>
                             <li><span>Repeticiones</span><span data-summary-value="diff-repeticiones">0</span></li>
                             <li><span>Carga acumulada</span><span data-summary-value="diff-peso">0 kg</span></li>
-                            <li><span>Tiempo activo</span><span data-summary-value="diff-tiempo">0</span></li>
                         </ul>
                     </div>
                 </div>
@@ -130,30 +127,13 @@ $clienteId = (int) $_SESSION['usuario_id'];
         const btnComparar = document.getElementById('btn-comparar');
         const btnRefrescar = document.getElementById('btn-cargar-periodos');
         const alertBox = document.getElementById('comparativa-alert');
-        const metricKeys = ['rutinas', 'ejercicios', 'series', 'repeticiones', 'peso', 'tiempo'];
+        const metricKeys = ['rutinas', 'ejercicios', 'series', 'repeticiones', 'peso'];
         let periodosDisponibles = [];
 
         const numberFormatters = {
             entero: new Intl.NumberFormat('es-CR', { maximumFractionDigits: 0 }),
             decimal: new Intl.NumberFormat('es-CR', { maximumFractionDigits: 1 })
         };
-
-        function formatDuration(seconds) {
-            const total = Math.round(seconds || 0);
-            if (total <= 0) {
-                return '0';
-            }
-            const hours = Math.floor(total / 3600);
-            const minutes = Math.floor((total % 3600) / 60);
-            const secs = total % 60;
-            if (hours > 0) {
-                return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
-            }
-            if (minutes > 0) {
-                return `${minutes}m ${secs.toString().padStart(2, '0')}s`;
-            }
-            return `${secs}s`;
-        }
 
         function showAlert(message, type = 'info') {
             if (!alertBox) return;
@@ -289,8 +269,6 @@ $clienteId = (int) $_SESSION['usuario_id'];
             switch (key) {
                 case 'peso':
                     return `${sign}${numberFormatters.decimal.format(absolute)} kg`;
-                case 'tiempo':
-                    return sign ? `${sign}${formatDuration(absolute)}` : formatDuration(absolute);
                 default:
                     return `${sign}${numberFormatters.entero.format(absolute)}`;
             }

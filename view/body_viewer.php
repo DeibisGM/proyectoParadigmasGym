@@ -347,29 +347,30 @@ if (!$viewerHasDelta) {
 
         function computeVisualPalette(element, intensity, overrideColor = null) {
             const ratio = clamp(intensity, 0, 1);
-            const originalBase = resolveBaseColor(element);
-            const baseColor = overrideColor || originalBase || hslToCss(defaultHighlightHsl.h, defaultHighlightHsl.s, defaultHighlightHsl.l);
-            const baseHsl = colorStringToHsl(baseColor) || defaultHighlightHsl;
+            const storedBase = element ? (element.dataset.baseColor || resolveBaseColor(element)) : null;
+            const fallbackBase = storedBase || hslToCss(defaultHighlightHsl.h, defaultHighlightHsl.s, defaultHighlightHsl.l);
+            const sourceColor = overrideColor || fallbackBase;
+            const baseHsl = colorStringToHsl(sourceColor) || defaultHighlightHsl;
 
             if (overrideColor) {
-                const saturation = clamp(baseHsl.s * (0.85 + ratio * 0.35), 58, 96);
-                const lightness = clamp(36 + ratio * 28, 32, 78);
+                const saturation = clamp(baseHsl.s * (0.9 + ratio * 0.25), 58, 100);
+                const lightness = clamp(38 + ratio * 34, 42, 85);
                 const fill = hslToCss(baseHsl.h, saturation, lightness);
-                const glowLightness = clamp(lightness + 12, 42, 92);
-                const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.35 + ratio * 0.45, 0.32, 0.82));
-                const swatch = hslToCss(baseHsl.h, clamp(saturation, 60, 92), clamp(44 + ratio * 16, 40, 82));
-                return { fill, glow, swatch };
+                const glowLightness = clamp(lightness + 14, 48, 94);
+                const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.45 + ratio * 0.4, 0.45, 0.92));
+                const swatch = storedBase || fallbackBase;
+                return { fill, glow, swatch, base: fallbackBase };
             }
 
-            const saturation = clamp(baseHsl.s * (0.68 + ratio * 0.42), 30, 96);
-            const lightness = clamp(baseHsl.l * (0.55 + ratio * 0.6) + ratio * 8, 22, 86);
+            const baseColorHsl = colorStringToHsl(fallbackBase) || defaultHighlightHsl;
+            const saturation = clamp(baseColorHsl.s + ratio * 12, 45, 96);
+            const lightness = clamp(baseColorHsl.l + ratio * 10, 30, 80);
+            const glowLightness = clamp(lightness + 12, 42, 92);
+            const glow = hslToCssAlpha(baseColorHsl.h, saturation, glowLightness, clamp(0.28 + ratio * 0.32, 0.28, 0.75));
+            const fill = storedBase || hslToCss(baseColorHsl.h, clamp(baseColorHsl.s, 40, 92), clamp(baseColorHsl.l, 26, 64));
+            const swatch = storedBase || fallbackBase;
 
-            const fill = hslToCss(baseHsl.h, saturation, lightness);
-            const glowLightness = clamp(lightness + 10, 28, 92);
-            const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.24 + ratio * 0.4, 0.22, 0.72));
-            const swatch = originalBase || hslToCss(baseHsl.h, baseHsl.s, clamp(baseHsl.l, 26, 58));
-
-            return { fill, glow, swatch };
+            return { fill, glow, swatch, base: swatch };
         }
 
         function showTooltip(part, event) {
@@ -566,11 +567,18 @@ if (!$viewerHasDelta) {
         }
 
         function buildLegendItem(options) {
-            const { color, swatch: swatchOverride, name, value, note, isInactive, trend } = options;
+            const { color, swatch: swatchOverride, name, value, note, isInactive, trend, fullWidth } = options;
             const item = document.createElement('li');
             item.className = 'body-legend-item' + (isInactive ? ' is-inactive' : '');
             if (trend) {
                 item.classList.add(`is-${trend}`);
+                item.dataset.trend = trend;
+            }
+            if (trend === 'neutral') {
+                item.classList.add('is-neutral');
+            }
+            if (fullWidth) {
+                item.style.gridColumn = '1 / -1';
             }
 
             const swatchEl = document.createElement('span');
@@ -643,7 +651,8 @@ if (!$viewerHasDelta) {
                     name: 'No se registran zonas trabajadas en este periodo.',
                     note: null,
                     color: inactiveFill,
-                    isInactive: true
+                    isInactive: true,
+                    fullWidth: true
                 }));
             } else {
                 sortedEntries.forEach(([parteId, valor]) => {
@@ -661,15 +670,16 @@ if (!$viewerHasDelta) {
                         ? null
                         : (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral));
                     const palette = computeVisualPalette(elemento, intensidad || 0.45, overrideColor);
-                    const swatchColor = palette.swatch || overrideColor || inactiveFill;
+                    const baseColor = elemento
+                        ? (elemento.dataset.baseColor || palette.base || palette.swatch || overrideColor)
+                        : null;
+                    const swatchColor = baseColor || inactiveFill;
                     const displayValue = deltaMode
                         ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}%`
                         : `${Math.round(numericValue)}%`;
 
                     legendList.appendChild(buildLegendItem({
-                        color: deltaMode
-                            ? (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral))
-                            : null,
+                        color: swatchColor,
                         swatch: swatchColor,
                         name: nombre,
                         value: displayValue,
@@ -695,7 +705,8 @@ if (!$viewerHasDelta) {
                 legendList.appendChild(buildLegendItem({
                     name: 'Zonas sin actividad registrada',
                     note: `${inactiveCount} ${inactiveCount === 1 ? 'zona' : 'zonas'}`,
-                    isInactive: true
+                    isInactive: true,
+                    fullWidth: true
                 }));
             }
 
@@ -703,7 +714,8 @@ if (!$viewerHasDelta) {
                 legendList.appendChild(buildLegendItem({
                     name: 'Interpretación',
                     note: 'Verde indica más trabajo en el periodo B, rojo refleja retroceso y los contornos punteados señalan zonas sin cambios.',
-                    isInactive: true
+                    isInactive: true,
+                    fullWidth: true
                 }));
             }
         }
@@ -743,9 +755,12 @@ if (!$viewerHasDelta) {
                         ? (deltaMode ? Math.abs(numericValue) : numericValue) / maxPorcentaje
                         : 0;
                     const opacidad = deltaMode
-                        ? Math.min(0.95, 0.35 + intensidadRelativa * 0.6)
-                        : Math.min(0.95, 0.32 + intensidadRelativa * 0.58);
-                    const glowRadius = (4 + intensidadRelativa * 12).toFixed(2);
+                        ? Math.min(1, 0.55 + intensidadRelativa * 0.45)
+                        : Math.min(0.95, 0.35 + intensidadRelativa * 0.5);
+                    const glowRadiusValue = deltaMode
+                        ? 6 + intensidadRelativa * 18
+                        : 4 + intensidadRelativa * 12;
+                    const glowRadius = glowRadiusValue.toFixed(2);
 
                     elementos.forEach(el => {
                         const trend = deltaMode
@@ -755,6 +770,7 @@ if (!$viewerHasDelta) {
                             ? (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral))
                             : null;
                         const palette = computeVisualPalette(el, intensidadRelativa || 0, overrideColor);
+                        const baseColor = el.dataset.baseColor || palette.base || palette.swatch || overrideColor || inactiveFill;
                         el.classList.add('active');
                         el.classList.remove('inactive');
                         if (deltaMode) {
@@ -785,13 +801,18 @@ if (!$viewerHasDelta) {
                             el.style.strokeOpacity = '';
                         }
                         el.style.opacity = opacidad;
-                        el.style.fill = palette.fill;
-                        el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow})`;
+                        if (deltaMode) {
+                            el.style.fill = palette.fill;
+                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1.1 + intensidadRelativa * 0.35).toFixed(2)})`;
+                        } else {
+                            el.style.fill = baseColor;
+                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1 + intensidadRelativa * 0.4).toFixed(2)}) brightness(${(0.95 + intensidadRelativa * 0.18).toFixed(2)})`;
+                        }
                         const formattedValue = deltaMode
                             ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}`
                             : Math.round(numericValue);
                         el.dataset.porcentaje = formattedValue;
-                        el.dataset.color = palette.fill;
+                        el.dataset.color = deltaMode ? palette.fill : baseColor;
                     });
                 });
             }
