@@ -201,6 +201,15 @@ if (!$viewerHasDelta) {
             });
         }
 
+        function extractInlineProperty(styleValue, property) {
+            if (!styleValue) {
+                return null;
+            }
+            const regex = new RegExp(`${property}\\s*:\\s*([^;]+)`, 'i');
+            const match = styleValue.match(regex);
+            return match ? match[1].trim() : null;
+        }
+
         const periodLabels = {};
         filterButtons.forEach(button => {
             const periodKey = button.dataset.period;
@@ -323,14 +332,6 @@ if (!$viewerHasDelta) {
             return `hsla(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%, ${a.toFixed(2)})`;
         }
 
-        function extractInlineFill(styleValue) {
-            if (!styleValue) {
-                return null;
-            }
-            const match = styleValue.match(/fill:\s*([^;]+)/i);
-            return match ? match[1].trim() : null;
-        }
-
         function resolveBaseColor(element) {
             if (!element) {
                 return null;
@@ -342,7 +343,7 @@ if (!$viewerHasDelta) {
 
             const direct = element.getAttribute('data-color')
                 || element.getAttribute('fill')
-                || extractInlineFill(element.getAttribute('style'));
+                || extractInlineProperty(element.getAttribute('style'), 'fill');
 
             if (direct) {
                 return direct;
@@ -351,13 +352,48 @@ if (!$viewerHasDelta) {
             const child = element.querySelector('path, polygon, rect, circle, ellipse');
             if (child) {
                 const childColor = child.getAttribute('fill')
-                    || extractInlineFill(child.getAttribute('style'));
+                    || extractInlineProperty(child.getAttribute('style'), 'fill');
                 if (childColor) {
                     return childColor;
                 }
             }
 
             return null;
+        }
+
+        function resolveStrokeData(element) {
+            if (!element) {
+                return {};
+            }
+
+            const styleAttr = element.getAttribute('style');
+            const stroke = element.getAttribute('stroke')
+                || extractInlineProperty(styleAttr, 'stroke');
+            const strokeWidth = element.getAttribute('stroke-width')
+                || extractInlineProperty(styleAttr, 'stroke-width');
+            const strokeDasharray = element.getAttribute('stroke-dasharray')
+                || extractInlineProperty(styleAttr, 'stroke-dasharray');
+            const strokeOpacity = element.getAttribute('stroke-opacity')
+                || extractInlineProperty(styleAttr, 'stroke-opacity');
+
+            return { stroke, strokeWidth, strokeDasharray, strokeOpacity };
+        }
+
+        function restoreInitialStyles(element) {
+            if (!element) {
+                return;
+            }
+            const targets = [element, ...element.querySelectorAll(shapeSelector)];
+            targets.forEach(target => {
+                const initial = target.dataset.initialStyle;
+                if (initial !== undefined) {
+                    if (initial) {
+                        target.setAttribute('style', initial);
+                    } else {
+                        target.removeAttribute('style');
+                    }
+                }
+            });
         }
 
         function computeVisualPalette(element, intensity, overrideColor = null) {
@@ -510,17 +546,14 @@ if (!$viewerHasDelta) {
 
         function resetBodyParts() {
             bodyParts.forEach(part => {
+                restoreInitialStyles(part);
                 part.classList.remove('active');
                 part.classList.add('inactive');
                 part.classList.remove('has-delta-trend');
-                part.style.opacity = 0.22;
+                part.style.opacity = 0.28;
                 part.style.filter = 'grayscale(100%) contrast(0.6) brightness(0.78)';
                 applyStylesToGroup(part, {
-                    fill: inactiveFill,
-                    stroke: '',
-                    strokeWidth: '',
-                    strokeDasharray: '',
-                    strokeOpacity: ''
+                    fill: inactiveFill
                 });
                 delete part.dataset.porcentaje;
                 delete part.dataset.color;
@@ -814,12 +847,22 @@ if (!$viewerHasDelta) {
                         } else {
                             el.classList.remove('has-delta-trend');
                             delete el.dataset.trend;
+                            const strokeStyles = {};
+                            if (el.dataset.baseStroke) {
+                                strokeStyles.stroke = el.dataset.baseStroke;
+                            }
+                            if (el.dataset.baseStrokeWidth) {
+                                strokeStyles.strokeWidth = el.dataset.baseStrokeWidth;
+                            }
+                            if (el.dataset.baseStrokeDasharray) {
+                                strokeStyles.strokeDasharray = el.dataset.baseStrokeDasharray;
+                            }
+                            if (el.dataset.baseStrokeOpacity) {
+                                strokeStyles.strokeOpacity = el.dataset.baseStrokeOpacity;
+                            }
                             applyStylesToGroup(el, {
                                 fill: baseColor,
-                                stroke: '',
-                                strokeWidth: '',
-                                strokeDasharray: '',
-                                strokeOpacity: ''
+                                ...strokeStyles
                             });
                         }
                         const opacityValue = deltaMode
@@ -899,18 +942,44 @@ if (!$viewerHasDelta) {
 
         function prepareBodyParts() {
             bodyParts.forEach(part => {
+                const targets = [part, ...part.querySelectorAll(shapeSelector)];
+                targets.forEach(target => {
+                    if (target.dataset.initialStyle === undefined) {
+                        const initialStyle = target.getAttribute('style') || '';
+                        target.dataset.initialStyle = initialStyle;
+                    }
+                    const strokeData = resolveStrokeData(target);
+                    if (strokeData.stroke && !part.dataset.baseStroke) {
+                        part.dataset.baseStroke = strokeData.stroke;
+                    }
+                    if (strokeData.strokeWidth && !part.dataset.baseStrokeWidth) {
+                        part.dataset.baseStrokeWidth = strokeData.strokeWidth;
+                    }
+                    if (strokeData.strokeDasharray && !part.dataset.baseStrokeDasharray) {
+                        part.dataset.baseStrokeDasharray = strokeData.strokeDasharray;
+                    }
+                    if (strokeData.strokeOpacity && !part.dataset.baseStrokeOpacity) {
+                        part.dataset.baseStrokeOpacity = strokeData.strokeOpacity;
+                    }
+                });
+
                 const baseColor = resolveBaseColor(part);
                 if (baseColor) {
                     part.dataset.baseColor = baseColor;
                 }
                 part.querySelectorAll(shapeSelector).forEach(shape => {
                     if (!shape.dataset.baseColor) {
-                        const shapeColor = shape.getAttribute('fill') || extractInlineFill(shape.getAttribute('style'));
+                        const shapeColor = shape.getAttribute('fill') || extractInlineProperty(shape.getAttribute('style'), 'fill');
                         if (shapeColor) {
                             shape.dataset.baseColor = shapeColor;
                         }
                     }
+
+                    shape.addEventListener('mouseenter', event => showTooltip(part, event));
+                    shape.addEventListener('mousemove', event => updateTooltip(part, event));
+                    shape.addEventListener('mouseleave', hideTooltip);
                 });
+
                 part.addEventListener('mouseenter', event => showTooltip(part, event));
                 part.addEventListener('mousemove', event => updateTooltip(part, event));
                 part.addEventListener('mouseleave', hideTooltip);
