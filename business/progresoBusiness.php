@@ -7,6 +7,32 @@ class ProgresoBusiness {
     private $rutinaData;
     private $ejercicioSubzonaData;
     private $cuerpoZonaData;
+    private $subzonaSvgMap = [
+        '29' => ['pectoralmayor'],
+        '30' => ['pectoralmayor'],
+        '31' => ['pectoralmayor'],
+        '25' => ['gemelosfrontal', 'gemelostrasero'],
+        '28' => ['cuadriceps'],
+        '27' => ['Isquiotibiales'],
+        '26' => ['gluteos'],
+        '23' => ['abductores'],
+        '24' => ['abductores'],
+        '8'  => ['abdominales'],
+        '10' => ['abdominales'],
+        '9'  => ['oblicuosfrontales', 'oblicuotrasero'],
+        '11' => ['dorsalancho'],
+        '14' => ['dorsalancho'],
+        '12' => ['trapeciofrontal', 'trapeciotrasero'],
+        '13' => ['Infraespinoso'],
+        '16' => ['hombrofrontal'],
+        '18' => ['hombrotrasero'],
+        '17' => ['hombrofrontal', 'hombrotrasero'],
+        '22' => ['biceps'],
+        '21' => ['triceps'],
+        '20' => ['Braquiorradialfrontal', 'Braquiorradialtrasero', 'flexordedos', 'extensordedos'],
+        '15' => ['serratoanterior'],
+        '37' => ['abdominales', 'oblicuosfrontales', 'oblicuotrasero']
+    ];
 
     public function __construct() {
         $this->rutinaData = new RutinaData();
@@ -46,6 +72,13 @@ class ProgresoBusiness {
             ? DateTimeImmutable::createFromFormat('Y-m-d', $primeraFechaRegistro) ?: $fechaUltimaRutina
             : null;
 
+        $labels = [
+            'daily' => 'Últimas 24 horas',
+            'weekly' => 'Semana reciente',
+            'monthly' => 'Último mes',
+            'all' => 'Historial completo'
+        ];
+
         foreach ($periodos as $periodo) {
             [$inicio, $fin] = $this->obtenerRangoFechasPorPeriodo(
                 $periodo,
@@ -60,11 +93,175 @@ class ProgresoBusiness {
                 'fechaFin' => $fin->format('Y-m-d'),
                 'rutinas' => $resultado['rutinas'],
                 'totalInstancias' => $resultado['totalInstancias'],
-                'porcentajes' => $resultado['porcentajes']
+                'porcentajes' => $resultado['porcentajes'],
+                'metricas' => $resultado['metricas'],
+                'zonas' => $resultado['zonas'],
+                'label' => $labels[$periodo] ?? ucfirst($periodo),
+                'mode' => 'intensity'
             ];
         }
 
         return $respuesta;
+    }
+
+    /**
+     * Recupera los indicadores de progreso para un rango personalizado.
+     */
+    public function getProgresoPorRango($clienteId, $fechaInicio, $fechaFin) {
+        $inicio = $this->parseFecha($fechaInicio) ?? new DateTimeImmutable($fechaInicio);
+        $fin = $this->parseFecha($fechaFin) ?? new DateTimeImmutable($fechaFin);
+
+        if ($fin < $inicio) {
+            [$inicio, $fin] = [$fin, $inicio];
+        }
+
+        $resultado = $this->calcularProgresoEntreFechas($clienteId, $inicio, $fin);
+
+        $resultado['fechaInicio'] = $inicio->format('Y-m-d');
+        $resultado['fechaFin'] = $fin->format('Y-m-d');
+        $resultado['mode'] = 'intensity';
+
+        return $resultado;
+    }
+
+    /**
+     * Lista los periodos disponibles (semanas o meses) con actividad registrada.
+     */
+    public function getPeriodosDisponibles($clienteId, $granularidad = 'week', $limite = 12) {
+        $rutinas = $this->rutinaData->getRutinasPorCliente($clienteId);
+        if (empty($rutinas)) {
+            return [];
+        }
+
+        $granularidad = strtolower($granularidad);
+        $buckets = [];
+
+        foreach ($rutinas as $rutina) {
+            $fecha = $this->parseFecha($rutina->getFecha());
+            if (!$fecha) {
+                continue;
+            }
+
+            if ($granularidad === 'month') {
+                $inicio = $fecha->modify('first day of this month');
+                $fin = $fecha->modify('last day of this month');
+                $clave = $inicio->format('Y-m');
+                $label = sprintf('Mes %s/%s', $inicio->format('m'), $inicio->format('Y'));
+            } else {
+                $inicio = $fecha->modify('monday this week');
+                $fin = $fecha->modify('sunday this week');
+                $clave = sprintf('%s-W%s', $inicio->format('o'), $inicio->format('W'));
+                $label = sprintf('Semana %s (%s - %s)',
+                    $inicio->format('W'),
+                    $inicio->format('d/m'),
+                    $fin->format('d/m')
+                );
+            }
+
+            if (!isset($buckets[$clave])) {
+                $buckets[$clave] = [
+                    'clave' => $clave,
+                    'fechaInicio' => $inicio->format('Y-m-d'),
+                    'fechaFin' => $fin->format('Y-m-d'),
+                    'label' => $label,
+                    'rutinas' => 0
+                ];
+            }
+
+            $buckets[$clave]['rutinas']++;
+        }
+
+        $periodos = array_values($buckets);
+        usort($periodos, function ($a, $b) {
+            return strcmp($b['fechaInicio'], $a['fechaInicio']);
+        });
+
+        if ($limite > 0) {
+            $periodos = array_slice($periodos, 0, $limite);
+        }
+
+        return $periodos;
+    }
+
+    /**
+     * Genera un resumen de cobertura corporal para un cliente en un rango concreto.
+     */
+    public function getCoberturaCliente($clienteId, DateTimeImmutable $inicio, DateTimeImmutable $fin) {
+        if ($fin < $inicio) {
+            [$inicio, $fin] = [$fin, $inicio];
+        }
+
+        $resultado = $this->calcularProgresoEntreFechas($clienteId, $inicio, $fin);
+        $resultado['fechaInicio'] = $inicio->format('Y-m-d');
+        $resultado['fechaFin'] = $fin->format('Y-m-d');
+        $resultado['label'] = 'Cobertura seleccionada';
+        $resultado['mode'] = 'intensity';
+
+        $porcentajes = $resultado['porcentajes'];
+        $zonasActivas = $this->cuerpoZonaData->getActiveTBCuerpoZona();
+
+        $trabajadas = [];
+        $faltantes = [];
+
+        foreach ($zonasActivas as $zona) {
+            $subzonasRaw = $this->cuerpoZonaData->getCuerpoZonaSubZonaId($zona->getIdCuerpoZona());
+            $subzonasIds = array_filter(array_map('trim', explode('$', (string) $subzonasRaw)));
+            $svgIds = [];
+            foreach ($subzonasIds as $subzonaId) {
+                $svgIds = array_merge($svgIds, $this->resolveSvgTargets($subzonaId));
+            }
+            $svgIds = array_values(array_unique($svgIds));
+
+            $porcentajeZona = 0;
+            foreach ($svgIds as $svgId) {
+                $porcentajeZona += $porcentajes[$svgId] ?? 0;
+            }
+            $porcentajeZona = round(min($porcentajeZona, 100), 2);
+
+            $registro = [
+                'id' => $zona->getIdCuerpoZona(),
+                'nombre' => $zona->getNombreCuerpoZona(),
+                'porcentaje' => $porcentajeZona,
+                'componentes' => $svgIds
+            ];
+
+            if ($porcentajeZona > 0) {
+                $trabajadas[] = $registro;
+            } else {
+                $faltantes[] = $registro;
+            }
+        }
+
+        usort($trabajadas, function ($a, $b) {
+            return $b['porcentaje'] <=> $a['porcentaje'];
+        });
+        usort($faltantes, function ($a, $b) {
+            return strcmp($a['nombre'], $b['nombre']);
+        });
+
+        return [
+            'dataset' => $resultado,
+            'resumenZonas' => [
+                'trabajadas' => $trabajadas,
+                'faltantes' => $faltantes
+            ]
+        ];
+    }
+
+    private function parseFecha($fecha) {
+        if ($fecha instanceof DateTimeImmutable) {
+            return $fecha;
+        }
+        if ($fecha instanceof DateTimeInterface) {
+            return DateTimeImmutable::createFromInterface($fecha);
+        }
+        if (is_string($fecha)) {
+            $parsed = DateTimeImmutable::createFromFormat('Y-m-d', $fecha);
+            if ($parsed !== false) {
+                return $parsed;
+            }
+        }
+        return null;
     }
 
     private function calcularProgresoEntreFechas($clienteId, DateTimeImmutable $inicio, DateTimeImmutable $fin) {
@@ -79,62 +276,201 @@ class ProgresoBusiness {
         return [
             'rutinas' => count($rutinas),
             'totalInstancias' => $distribucion['totalInstancias'],
-            'porcentajes' => $distribucion['porcentajes']
+            'porcentajes' => $distribucion['porcentajes'],
+            'zonas' => $distribucion['zonas'],
+            'metricas' => $distribucion['metricas'],
+            'mode' => 'intensity'
         ];
     }
 
     private function calcularDistribucionSubzonas($rutinas) {
+        $resultado = [
+            'totalInstancias' => 0,
+            'porcentajes' => [],
+            'zonas' => [],
+            'metricas' => [
+                'ejercicios' => 0,
+                'series' => 0,
+                'repeticiones' => 0,
+                'peso' => 0.0,
+                'tiempo' => 0,
+                'volumen' => 0.0
+            ]
+        ];
+
         if (empty($rutinas)) {
-            return [
-                'totalInstancias' => 0,
-                'porcentajes' => []
-            ];
+            return $resultado;
         }
 
-        $subzonaCounts = [];
-        $totalInstanciasSubzonas = 0;
+        $svgStats = [];
+        $totalVolumenReferencia = 0.0;
 
         foreach ($rutinas as $rutina) {
             $ejercicios = $this->rutinaData->getEjerciciosPorRutinaId($rutina->getId());
             foreach ($ejercicios as $ejercicio) {
+                $metricas = $this->calcularMetricasEjercicio($ejercicio);
+                $volumenBase = $metricas['volumen'];
+                if ($volumenBase <= 0) {
+                    $volumenBase = max($metricas['series'], 1);
+                }
+
+                $resultado['metricas']['ejercicios']++;
+                $resultado['metricas']['series'] += $metricas['series'];
+                $resultado['metricas']['repeticiones'] += $metricas['repeticiones'];
+                $resultado['metricas']['peso'] += $metricas['peso'];
+                $resultado['metricas']['tiempo'] += $metricas['tiempo'];
+                $resultado['metricas']['volumen'] += $volumenBase;
+
                 $subzonasDelEjercicio = $this->ejercicioSubzonaData->getSubzonasPorEjercicio(
                     $ejercicio->getEjercicioId(),
                     $ejercicio->getTipo()
                 );
+
+                if (empty($subzonasDelEjercicio)) {
+                    continue;
+                }
+
                 foreach ($subzonasDelEjercicio as $subzona) {
-                    $subzonaIds = explode('$', $subzona->getSubzona());
-                    foreach ($subzonaIds as $szId) {
-                        $szId = trim($szId);
-                        if (empty($szId)) {
+                    $subzonaIds = array_filter(array_map('trim', explode('$', $subzona->getSubzona())));
+                    if (empty($subzonaIds)) {
+                        continue;
+                    }
+
+                    foreach ($subzonaIds as $subzonaId) {
+                        $targets = $this->resolveSvgTargets($subzonaId);
+                        if (empty($targets)) {
                             continue;
                         }
 
-                        if (!isset($subzonaCounts[$szId])) {
-                            $subzonaCounts[$szId] = 0;
+                        $division = max(count($subzonaIds) * count($targets), 1);
+                        $aporteVolumen = $volumenBase / $division;
+                        $aporteSeries = $metricas['series'] / $division;
+                        $aporteRepeticiones = $metricas['repeticiones'] / $division;
+                        $aportePeso = $metricas['peso'] / $division;
+                        $aporteTiempo = $metricas['tiempo'] / $division;
+
+                        foreach ($targets as $targetId) {
+                            if (!isset($svgStats[$targetId])) {
+                                $svgStats[$targetId] = [
+                                    'valor' => 0.0,
+                                    'series' => 0.0,
+                                    'repeticiones' => 0.0,
+                                    'peso' => 0.0,
+                                    'tiempo' => 0.0,
+                                    'instancias' => 0.0
+                                ];
+                            }
+                            $svgStats[$targetId]['valor'] += $aporteVolumen;
+                            $svgStats[$targetId]['series'] += $aporteSeries;
+                            $svgStats[$targetId]['repeticiones'] += $aporteRepeticiones;
+                            $svgStats[$targetId]['peso'] += $aportePeso;
+                            $svgStats[$targetId]['tiempo'] += $aporteTiempo;
+                            $svgStats[$targetId]['instancias'] += 1 / max(count($targets), 1);
                         }
-                        $subzonaCounts[$szId]++;
-                        $totalInstanciasSubzonas++;
+
+                        $totalVolumenReferencia += $aporteVolumen;
                     }
                 }
             }
         }
 
-        if ($totalInstanciasSubzonas === 0) {
-            return [
-                'totalInstancias' => 0,
-                'porcentajes' => []
-            ];
+        if ($totalVolumenReferencia <= 0) {
+            $totalVolumenReferencia = 1;
         }
 
         $porcentajes = [];
-        foreach ($subzonaCounts as $subzonaId => $count) {
-            $porcentajes[$subzonaId] = ($count / $totalInstanciasSubzonas) * 100;
+        foreach ($svgStats as $zonaId => $stats) {
+            $porcentaje = ($stats['valor'] / $totalVolumenReferencia) * 100;
+            $porcentajes[$zonaId] = $porcentaje;
+            $svgStats[$zonaId]['porcentaje'] = $porcentaje;
+            $svgStats[$zonaId]['valor'] = round($stats['valor'], 2);
+            $svgStats[$zonaId]['series'] = round($stats['series'], 2);
+            $svgStats[$zonaId]['repeticiones'] = round($stats['repeticiones'], 2);
+            $svgStats[$zonaId]['peso'] = round($stats['peso'], 2);
+            $svgStats[$zonaId]['tiempo'] = round($stats['tiempo'], 2);
+            $svgStats[$zonaId]['instancias'] = round($stats['instancias'], 2);
+        }
+
+        $resultado['totalInstancias'] = (int) round(array_sum(array_column($svgStats, 'instancias')));
+        if ($resultado['totalInstancias'] === 0) {
+            $resultado['totalInstancias'] = $resultado['metricas']['ejercicios'];
+        }
+
+        $resultado['porcentajes'] = $porcentajes;
+        $resultado['zonas'] = $svgStats;
+        $resultado['metricas']['peso'] = round($resultado['metricas']['peso'], 2);
+        $resultado['metricas']['volumen'] = round($resultado['metricas']['volumen'], 2);
+
+        return $resultado;
+    }
+
+    private function calcularMetricasEjercicio($ejercicio) {
+        $series = max((int) $ejercicio->getSeries(), 0);
+        $repeticiones = max((int) $ejercicio->getRepeticiones(), 0);
+        $peso = (float) $ejercicio->getPeso();
+        $tiempo = max((int) $ejercicio->getTiempo(), 0);
+        $tipo = strtolower($ejercicio->getTipo());
+
+        $totalRepeticiones = $series > 0 && $repeticiones > 0 ? $series * $repeticiones : $repeticiones;
+        if ($totalRepeticiones === 0 && $repeticiones > 0) {
+            $totalRepeticiones = $repeticiones;
+        }
+
+        $totalTiempo = $series > 0 && $tiempo > 0 ? $series * $tiempo : $tiempo;
+
+        $volumen = 0.0;
+        switch ($tipo) {
+            case 'fuerza':
+                $baseSeries = $series > 0 ? $series : 1;
+                $baseReps = $repeticiones > 0 ? $repeticiones : 1;
+                $basePeso = $peso > 0 ? $peso : 1;
+                $volumen = $baseSeries * $baseReps * $basePeso;
+                break;
+            case 'resistencia':
+                $baseSeries = $series > 0 ? $series : 1;
+                if ($tiempo > 0) {
+                    $volumen = $baseSeries * $tiempo;
+                } elseif ($repeticiones > 0) {
+                    $volumen = $baseSeries * $repeticiones;
+                } else {
+                    $volumen = $baseSeries;
+                }
+                break;
+            case 'equilibrio':
+            case 'flexibilidad':
+                $baseSeries = $series > 0 ? $series : 1;
+                $volumen = $baseSeries * ($tiempo > 0 ? $tiempo : 60);
+                break;
+            default:
+                $baseSeries = $series > 0 ? $series : 1;
+                $volumen = $baseSeries * ($repeticiones > 0 ? $repeticiones : ($tiempo > 0 ? $tiempo : 1));
+                break;
+        }
+
+        if ($volumen <= 0) {
+            $volumen = max($series, 1);
+        }
+
+        $tonelaje = 0.0;
+        if ($peso > 0 && $totalRepeticiones > 0) {
+            $tonelaje = $peso * $totalRepeticiones;
         }
 
         return [
-            'totalInstancias' => $totalInstanciasSubzonas,
-            'porcentajes' => $this->mapearSubzonasASVG($porcentajes)
+            'series' => $series,
+            'repeticiones' => $totalRepeticiones,
+            'peso' => $tonelaje,
+            'tiempo' => $totalTiempo,
+            'volumen' => $volumen
         ];
+    }
+
+    private function resolveSvgTargets($subzonaId) {
+        $targets = $this->subzonaSvgMap[$subzonaId] ?? [];
+        if (!is_array($targets)) {
+            $targets = [$targets];
+        }
+        return array_filter(array_map('strval', $targets));
     }
 
     private function obtenerRangoFechasPorPeriodo(
@@ -142,22 +478,18 @@ class ProgresoBusiness {
         DateTimeImmutable $hoy,
         ?DateTimeImmutable $primeraRutina = null,
         ?DateTimeImmutable $ultimaRutina = null
-    )
-    {
+    ) {
         $periodo = strtolower($periodo);
         $inicio = $hoy;
         $fin = $hoy;
 
         switch ($periodo) {
             case 'daily':
-                // Mantener el día actual como referencia visual, incluso si no hay rutinas hoy.
                 break;
             case 'weekly':
-                // Contemplar los últimos 7 días completos (hoy y los 6 anteriores).
-                $inicio = $hoy->sub(new DateInterval('P7D'));
+                $inicio = $hoy->modify('-6 days');
                 break;
             case 'monthly':
-                // Desde el mismo día del mes anterior hasta hoy.
                 $inicio = $hoy->sub(new DateInterval('P1M'));
                 break;
             case 'all':
@@ -187,49 +519,6 @@ class ProgresoBusiness {
         }
 
         return [$inicio, $fin];
-    }
-
-    private function mapearSubzonasASVG($porcentajes) {
-        $mapa = [
-            '29' => 'pectoralmayor', '30' => 'pectoralmayor', '31' => 'pectoralmayor',
-            '25' => ['gemelosfrontal', 'gemelostrasero'],
-            '28' => 'cuadriceps', '27' => 'Isquiotibiales', '26' => 'gluteos',
-            '23' => 'abductores', '24' => 'abductores',
-            '8'  => 'abdominales', '10' => 'abdominales',
-            '9'  => ['oblicuosfrontales', 'oblicuotrasero'],
-            '11' => 'dorsalancho', '14' => 'dorsalancho',
-            '12' => ['trapeciofrontal', 'trapeciotrasero'],
-            '13' => 'Infraespinoso',
-            '16' => 'hombrofrontal', '18' => 'hombrotrasero',
-            '17' => ['hombrofrontal', 'hombrotrasero'],
-            '22' => 'biceps', '21' => 'triceps',
-            '20' => ['Braquiorradialfrontal', 'Braquiorradialtrasero', 'flexordedos', 'extensordedos'],
-            '15' => 'serratoanterior',
-            '37' => ['abdominales', 'oblicuosfrontales', 'oblicuotrasero']
-        ];
-
-        $resultadoSVG = [];
-        foreach ($porcentajes as $subzonaId => $porcentaje) {
-            if (isset($mapa[$subzonaId])) {
-                if (is_array($mapa[$subzonaId])) {
-                    foreach ($mapa[$subzonaId] as $parteSVG) {
-                        $resultadoSVG[$parteSVG] = ($resultadoSVG[$parteSVG] ?? 0) + $porcentaje;
-                    }
-                } else {
-                    $resultadoSVG[$mapa[$subzonaId]] = ($resultadoSVG[$mapa[$subzonaId]] ?? 0) + $porcentaje;
-                }
-            }
-        }
-
-        // CAMBIO: Ahora no es necesario normalizar a 100, pero se mantiene como seguridad.
-        // La normalización real ocurre en el Javascript del visor para ajustar la escala de colores.
-        foreach ($resultadoSVG as $key => $value) {
-            if ($value > 100) {
-                $resultadoSVG[$key] = 100;
-            }
-        }
-
-        return $resultadoSVG;
     }
 }
 ?>
