@@ -185,6 +185,21 @@ if (!$viewerHasDelta) {
 
         const escapeId = (value) => window.CSS && CSS.escape ? CSS.escape(value) : value;
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+        const shapeSelector = 'path, polygon, rect, circle, ellipse, polyline';
+
+        function applyStylesToGroup(element, styles) {
+            if (!element || !styles) {
+                return;
+            }
+
+            const targets = [element, ...element.querySelectorAll(shapeSelector)];
+            Object.entries(styles).forEach(([property, value]) => {
+                const applied = value == null ? '' : value;
+                targets.forEach(target => {
+                    target.style[property] = applied;
+                });
+            });
+        }
 
         const periodLabels = {};
         filterButtons.forEach(button => {
@@ -498,16 +513,18 @@ if (!$viewerHasDelta) {
                 part.classList.remove('active');
                 part.classList.add('inactive');
                 part.classList.remove('has-delta-trend');
-                part.style.opacity = 0.18;
-                part.style.fill = inactiveFill;
-                part.style.filter = 'grayscale(100%) contrast(0.65) brightness(0.78)';
+                part.style.opacity = 0.22;
+                part.style.filter = 'grayscale(100%) contrast(0.6) brightness(0.78)';
+                applyStylesToGroup(part, {
+                    fill: inactiveFill,
+                    stroke: '',
+                    strokeWidth: '',
+                    strokeDasharray: '',
+                    strokeOpacity: ''
+                });
                 delete part.dataset.porcentaje;
                 delete part.dataset.color;
                 delete part.dataset.trend;
-                part.style.stroke = '';
-                part.style.strokeWidth = '';
-                part.style.strokeDasharray = '';
-                part.style.strokeOpacity = '';
             });
         }
 
@@ -670,10 +687,10 @@ if (!$viewerHasDelta) {
                         ? null
                         : (trend === 'positive' ? colorSuccess : (trend === 'negative' ? colorError : colorNeutral));
                     const palette = computeVisualPalette(elemento, intensidad || 0.45, overrideColor);
-                    const baseColor = elemento
-                        ? (elemento.dataset.baseColor || palette.base || palette.swatch || overrideColor)
+                    const storedBaseColor = elemento
+                        ? (elemento.dataset.baseColor || null)
                         : null;
-                    const swatchColor = baseColor || inactiveFill;
+                    const swatchColor = storedBaseColor || palette.base || palette.swatch || inactiveFill;
                     const displayValue = deltaMode
                         ? `${numericValue > 0 ? '+' : (numericValue < 0 ? '−' : '')}${Math.round(Math.abs(numericValue))}%`
                         : `${Math.round(numericValue)}%`;
@@ -754,9 +771,6 @@ if (!$viewerHasDelta) {
                     const intensidadRelativa = maxPorcentaje > 0
                         ? (deltaMode ? Math.abs(numericValue) : numericValue) / maxPorcentaje
                         : 0;
-                    const opacidad = deltaMode
-                        ? Math.min(1, 0.55 + intensidadRelativa * 0.45)
-                        : Math.min(0.95, 0.35 + intensidadRelativa * 0.5);
                     const glowRadiusValue = deltaMode
                         ? 6 + intensidadRelativa * 18
                         : 4 + intensidadRelativa * 12;
@@ -776,36 +790,45 @@ if (!$viewerHasDelta) {
                         if (deltaMode) {
                             el.classList.add('has-delta-trend');
                             el.dataset.trend = trend;
+                            const strokeStyles = {};
                             if (trend === 'positive') {
-                                el.style.stroke = colorSuccess;
-                                el.style.strokeWidth = '3';
-                                el.style.strokeDasharray = '';
-                                el.style.strokeOpacity = '0.85';
+                                strokeStyles.stroke = colorSuccess;
+                                strokeStyles.strokeWidth = '3';
+                                strokeStyles.strokeDasharray = '';
+                                strokeStyles.strokeOpacity = '0.85';
                             } else if (trend === 'negative') {
-                                el.style.stroke = colorError;
-                                el.style.strokeWidth = '3';
-                                el.style.strokeDasharray = '10 6';
-                                el.style.strokeOpacity = '0.9';
+                                strokeStyles.stroke = colorError;
+                                strokeStyles.strokeWidth = '3';
+                                strokeStyles.strokeDasharray = '10 6';
+                                strokeStyles.strokeOpacity = '0.9';
                             } else {
-                                el.style.stroke = colorNeutral;
-                                el.style.strokeWidth = '2.5';
-                                el.style.strokeDasharray = '6 6';
-                                el.style.strokeOpacity = '0.75';
+                                strokeStyles.stroke = colorNeutral;
+                                strokeStyles.strokeWidth = '2.5';
+                                strokeStyles.strokeDasharray = '6 6';
+                                strokeStyles.strokeOpacity = '0.75';
                             }
+                            applyStylesToGroup(el, {
+                                fill: palette.fill,
+                                ...strokeStyles
+                            });
                         } else {
                             el.classList.remove('has-delta-trend');
                             delete el.dataset.trend;
-                            el.style.stroke = '';
-                            el.style.strokeWidth = '';
-                            el.style.strokeDasharray = '';
-                            el.style.strokeOpacity = '';
+                            applyStylesToGroup(el, {
+                                fill: baseColor,
+                                stroke: '',
+                                strokeWidth: '',
+                                strokeDasharray: '',
+                                strokeOpacity: ''
+                            });
                         }
-                        el.style.opacity = opacidad;
+                        const opacityValue = deltaMode
+                            ? Math.min(1, 0.72 + intensidadRelativa * 0.28)
+                            : Math.min(0.95, 0.38 + intensidadRelativa * 0.5);
+                        el.style.opacity = opacityValue.toFixed(2);
                         if (deltaMode) {
-                            el.style.fill = palette.fill;
-                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1.1 + intensidadRelativa * 0.35).toFixed(2)})`;
+                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1.18 + intensidadRelativa * 0.35).toFixed(2)}) brightness(${(1 + intensidadRelativa * 0.2).toFixed(2)})`;
                         } else {
-                            el.style.fill = baseColor;
                             el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1 + intensidadRelativa * 0.4).toFixed(2)}) brightness(${(0.95 + intensidadRelativa * 0.18).toFixed(2)})`;
                         }
                         const formattedValue = deltaMode
@@ -880,6 +903,14 @@ if (!$viewerHasDelta) {
                 if (baseColor) {
                     part.dataset.baseColor = baseColor;
                 }
+                part.querySelectorAll(shapeSelector).forEach(shape => {
+                    if (!shape.dataset.baseColor) {
+                        const shapeColor = shape.getAttribute('fill') || extractInlineFill(shape.getAttribute('style'));
+                        if (shapeColor) {
+                            shape.dataset.baseColor = shapeColor;
+                        }
+                    }
+                });
                 part.addEventListener('mouseenter', event => showTooltip(part, event));
                 part.addEventListener('mousemove', event => updateTooltip(part, event));
                 part.addEventListener('mouseleave', hideTooltip);
