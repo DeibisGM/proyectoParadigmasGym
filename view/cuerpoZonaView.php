@@ -105,7 +105,7 @@ $allCuerpoZonas = $esAdminOInstructor ?
                                         <?php endif; ?>
                                     </td>
                                     <td data-label="Imágenes">
-                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+                                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: center;">
                                             <?php
                                             $imagenes = $imageManager->getImagesByIds($current->getImagenesIds());
                                             if (empty($imagenes)) {

@@ -86,8 +86,8 @@ $clienteId = (int) $_SESSION['usuario_id'];
                     </div>
                     <div class="analytics-card analytics-card--delta" data-summary-card="diff">
                         <div class="analytics-card-header">
-                            <h4>Diferencia (B - A)</h4>
-                            <p data-summary-range="diff" class="analytics-card-range">Selecciona periodos</p>
+                            <h4>Diferencia</h4>
+                            <p data-summary-range="diff" class="analytics-card-range">Periodo B vs. Periodo A</p>
                         </div>
                         <ul class="analytics-card-metrics">
                             <li><span>Rutinas</span><span data-summary-value="diff-rutinas">0</span></li>
@@ -223,11 +223,14 @@ $clienteId = (int) $_SESSION['usuario_id'];
         }
 
         function calcularDiferencia(datasetA, datasetB) {
+            const inicioAbsoluto = datasetA.fechaInicio < datasetB.fechaInicio ? datasetA.fechaInicio : datasetB.fechaInicio;
+            const finAbsoluto = datasetA.fechaFin > datasetB.fechaFin ? datasetA.fechaFin : datasetB.fechaFin;
+
             const diff = {
-                label: 'Diferencia B - A',
+                label: 'Diferencia (B vs A)',
                 mode: 'delta',
-                fechaInicio: datasetA.fechaInicio,
-                fechaFin: datasetB.fechaFin,
+                fechaInicio: inicioAbsoluto,
+                fechaFin: finAbsoluto,
                 rutinas: `A: ${datasetA.rutinas} | B: ${datasetB.rutinas}`,
                 metricas: {},
                 porcentajes: {},
@@ -274,15 +277,21 @@ $clienteId = (int) $_SESSION['usuario_id'];
             }
         }
 
+        function formatDisplayDate(isoDate) {
+            if (!isoDate) return '';
+            const [year, month, day] = isoDate.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
         function actualizarTarjetaResumen(clave, dataset) {
             const card = document.querySelector(`[data-summary-card="${clave}"]`);
             if (!card || !dataset) {
                 return;
             }
             const rangeEl = card.querySelector(`[data-summary-range="${clave}"]`);
-            if (rangeEl) {
+            if (rangeEl && clave !== 'diff') {
                 rangeEl.textContent = dataset.fechaInicio && dataset.fechaFin
-                    ? `${dataset.fechaInicio} → ${dataset.fechaFin}`
+                    ? `${formatDisplayDate(dataset.fechaInicio)} → ${formatDisplayDate(dataset.fechaFin)}`
                     : '-';
             }
             metricKeys.forEach(metricKey => {

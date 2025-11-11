@@ -6,7 +6,8 @@ if (!isset($_SESSION['usuario_id']) || $_SESSION['tipo_usuario'] !== 'cliente') 
 }
 include_once '../business/rutinaBusiness.php';
 $rutinaBusiness = new RutinaBusiness();
-$misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id']);
+$rutinasSugeridas = $rutinaBusiness->obtenerRutinasSugeridasConEjercicios($_SESSION['usuario_id']);
+$rutinasCompletadas = $rutinaBusiness->obtenerRutinasCompletadasConEjercicios($_SESSION['usuario_id']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -81,9 +82,46 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
             </section>
 
             <section>
-                <h3><i class="ph ph-list-checks"></i> Historial de Rutinas</h3>
-                <?php if (empty($misRutinas)): ?>
-                    <p>No tienes rutinas registradas.</p>
+                <h3><i class="ph ph-star"></i> Rutinas Sugeridas</h3>
+                <?php if (empty($rutinasSugeridas)): ?>
+                    <p>No tienes rutinas sugeridas por un instructor.</p>
+                <?php else: ?>
+                    <div class="menu-grid-2-cols">
+                        <?php foreach ($rutinasSugeridas as $rutina): ?>
+                            <details class="rutina-card">
+                                <summary><h4>Sugerencia del <?php echo date('d/m/Y', strtotime($rutina['tbrutinafecha'])); ?></h4></summary>
+                                <p><?php echo !empty($rutina['tbrutinaobservacion']) ? htmlspecialchars($rutina['tbrutinaobservacion']) : 'Sin observaciones.'; ?></p>
+                                <ul>
+                                    <?php foreach ($rutina['ejercicios'] as $ej): ?>
+                                        <li>
+                                            <strong><?php echo htmlspecialchars($ej['nombreEjercicio']); ?>:</strong>
+                                            <?php
+                                            $detalles = [];
+                                            if ($ej['tbrutinaejercicioseries']) $detalles[] = $ej['tbrutinaejercicioseries'] . ' series';
+                                            if ($ej['tbrutinaejerciciorepeticiones']) $detalles[] = $ej['tbrutinaejerciciorepeticiones'] . ' reps';
+                                            if ($ej['tbrutinaejerciciopeso'] !== null && $ej['tbrutinaejerciciopeso'] != '') $detalles[] = $ej['tbrutinaejerciciopeso'] . ' kg';
+                                            if ($ej['tbrutinaejerciciotiempo_seg']) $detalles[] = $ej['tbrutinaejerciciotiempo_seg'] . ' seg';
+                                            if ($ej['tbrutinaejerciciodescanso_seg']) $detalles[] = 'desc. ' . $ej['tbrutinaejerciciodescanso_seg'] . ' seg';
+                                            echo implode(' &times; ', $detalles);
+                                            ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                                <div class="rutina-card-actions">
+                                    <button class="btn-realizar-rutina" data-rutina-id="<?php echo $rutina['tbrutinaid']; ?>">
+                                        <i class="ph ph-play"></i> Realizar Rutina
+                                    </button>
+                                </div>
+                            </details>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </section>
+
+            <section>
+                <h3><i class="ph ph-list-checks"></i> Historial de Rutinas Completadas</h3>
+                <?php if (empty($rutinasCompletadas)): ?>
+                    <p>No tienes rutinas completadas.</p>
                 <?php else: ?>
                     <div class="table-wrapper">
                         <table class="table-clients">
@@ -96,36 +134,36 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach ($misRutinas as $rutina): ?>
+                                <?php foreach ($rutinasCompletadas as $rutina): ?>
                                     <tr>
                                         <td data-label="Fecha">
-                                            <?php echo date('d/m/Y', strtotime($rutina->getFecha())); ?>
+                                            <?php echo date('d/m/Y', strtotime($rutina['tbrutinafecha'])); ?>
                                         </td>
                                         <td data-label="Observaciones">
-                                            <?php echo !empty($rutina->getObservacion()) ? htmlspecialchars($rutina->getObservacion()) : '-'; ?>
+                                            <?php echo !empty($rutina['tbrutinaobservacion']) ? htmlspecialchars($rutina['tbrutinaobservacion']) : '-'; ?>
                                         </td>
                                         <td data-label="Ejercicios">
                                             <ul style="padding-left: 1rem; margin: 0;">
-                                                <?php foreach ($rutina->getEjercicios() as $ej): ?>
+                                                <?php foreach ($rutina['ejercicios'] as $ej): ?>
                                                     <li>
                                                         <strong>
-                                                            <?php echo htmlspecialchars($ej->getNombreEjercicio()); ?>:
+                                                            <?php echo htmlspecialchars($ej['nombreEjercicio']); ?>:
                                                         </strong>
                                                         <?php
                                                         $detalles = [];
-                                                        if ($ej->getSeries())
-                                                            $detalles[] = $ej->getSeries() . ' series';
-                                                        if ($ej->getRepeticiones())
-                                                            $detalles[] = $ej->getRepeticiones() . ' reps';
-                                                        if ($ej->getPeso() !== null && $ej->getPeso() != '')
-                                                            $detalles[] = $ej->getPeso() . ' kg';
-                                                        if ($ej->getTiempo())
-                                                            $detalles[] = $ej->getTiempo() . ' seg';
-                                                        if ($ej->getDescanso())
-                                                            $detalles[] = 'desc. ' . $ej->getDescanso() . ' seg';
+                                                        if ($ej['tbrutinaejercicioseries'])
+                                                            $detalles[] = $ej['tbrutinaejercicioseries'] . ' series';
+                                                        if ($ej['tbrutinaejerciciorepeticiones'])
+                                                            $detalles[] = $ej['tbrutinaejerciciorepeticiones'] . ' reps';
+                                                        if ($ej['tbrutinaejerciciopeso'] !== null && $ej['tbrutinaejerciciopeso'] != '')
+                                                            $detalles[] = $ej['tbrutinaejerciciopeso'] . ' kg';
+                                                        if ($ej['tbrutinaejerciciotiempo_seg'])
+                                                            $detalles[] = $ej['tbrutinaejerciciotiempo_seg'] . ' seg';
+                                                        if ($ej['tbrutinaejerciciodescanso_seg'])
+                                                            $detalles[] = 'desc. ' . $ej['tbrutinaejerciciodescanso_seg'] . ' seg';
                                                         echo implode(' &times; ', $detalles);
-                                                        if (!empty($ej->getComentario()))
-                                                            echo ' - <em>' . htmlspecialchars($ej->getComentario()) . '</em>';
+                                                        if (!empty($ej['tbrutinaejerciciocomentario']))
+                                                            echo ' - <em>' . htmlspecialchars($ej['tbrutinaejerciciocomentario']) . '</em>';
                                                         ?>
                                                     </li>
                                                 <?php endforeach; ?>
@@ -136,7 +174,7 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
                                                 onsubmit="return confirm('¿Eliminar esta rutina?');" style="margin: 0;">
                                                 <input type="hidden" name="delete_rutina" value="1">
                                                 <input type="hidden" name="rutina_id"
-                                                    value="<?php echo $rutina->getId(); ?>">
+                                                    value="<?php echo $rutina['tbrutinaid']; ?>">
                                                 <button type="submit" class="btn-row btn-danger">
                                                     <i class="ph ph-trash"></i>
                                                 </button>
@@ -151,17 +189,107 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
             </section>
         </main>
     </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const realizarButtons = document.querySelectorAll('.btn-realizar-rutina');
+            const rutinasSugeridas = <?php echo json_encode($rutinasSugeridas); ?>;
+
+            const formPrincipal = document.getElementById('form-rutina-principal');
+            const listaAgregados = document.getElementById('lista-ejercicios-agregados');
+            const fechaRutinaInput = document.getElementById('fecha_rutina');
+            const observacionRutinaInput = document.getElementById('observacion_rutina');
+            let ejercicioCounter = 0;
+
+            realizarButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const rutinaId = this.dataset.rutinaId;
+                    const rutina = rutinasSugeridas.find(r => r.tbrutinaid == rutinaId);
+
+                    if (rutina) {
+                        // Clear existing exercises from the form
+                        listaAgregados.innerHTML = '';
+                        const existingHiddenInputs = formPrincipal.querySelectorAll('div[id^="hidden-inputs-"]');
+                        existingHiddenInputs.forEach(div => div.remove());
+                        ejercicioCounter = 0;
+
+                        // Set date and observation
+                        fechaRutinaInput.value = new Date().toISOString().split('T')[0];
+                        observacionRutinaInput.value = "Basado en la sugerencia del " + new Date(rutina.tbrutinafecha).toLocaleDateString() + ".\n" + rutina.tbrutinaobservacion;
+
+                        // Add exercises to the form
+                        rutina.ejercicios.forEach(ej => {
+                            let displayHtml = `<strong>${ej.nombreEjercicio}:</strong> `;
+                            let hiddenInputs = `<input type="hidden" name="ejercicios[${ejercicioCounter}][tipo]" value="${ej.tbrutinaejerciciotipo}"><input type="hidden" name="ejercicios[${ejercicioCounter}][id]" value="${ej.tbejercicioid}">`;
+                            let detalles = [];
+
+                            if (ej.tbrutinaejercicioseries) {
+                                detalles.push(`${ej.tbrutinaejercicioseries} series`);
+                                hiddenInputs += `<input type="hidden" name="ejercicios[${ejercicioCounter}][series]" value="${ej.tbrutinaejercicioseries}">`;
+                            }
+                            if (ej.tbrutinaejerciciorepeticiones) {
+                                detalles.push(`${ej.tbrutinaejerciciorepeticiones} reps`);
+                                hiddenInputs += `<input type="hidden" name="ejercicios[${ejercicioCounter}][repeticiones]" value="${ej.tbrutinaejerciciorepeticiones}">`;
+                            }
+                            if (ej.tbrutinaejerciciopeso) {
+                                detalles.push(`${ej.tbrutinaejerciciopeso} kg`);
+                                hiddenInputs += `<input type="hidden" name="ejercicios[${ejercicioCounter}][peso]" value="${ej.tbrutinaejerciciopeso}">`;
+                            }
+                            if (ej.tbrutinaejerciciotiempo_seg) {
+                                detalles.push(`${ej.tbrutinaejerciciotiempo_seg} seg`);
+                                hiddenInputs += `<input type="hidden" name="ejercicios[${ejercicioCounter}][tiempo]" value="${ej.tbrutinaejerciciotiempo_seg}">`;
+                            }
+                            if (ej.tbrutinaejerciciodescanso_seg) {
+                                detalles.push(`desc. ${ej.tbrutinaejerciciodescanso_seg} seg`);
+                                hiddenInputs += `<input type="hidden" name="ejercicios[${ejercicioCounter}][descanso]" value="${ej.tbrutinaejerciciodescanso_seg}">`;
+                            }
+                            if (ej.tbrutinaejerciciocomentario) {
+                                hiddenInputs += `<input type="hidden" name="ejercicios[${ejercicioCounter}][comentario]" value="${ej.tbrutinaejerciciocomentario}">`;
+                            }
+
+                            displayHtml += detalles.join(' &times; ');
+                            if (ej.tbrutinaejerciciocomentario) displayHtml += ` - <em>(${ej.tbrutinaejerciciocomentario})</em>`;
+
+                            const div = document.createElement('div');
+                            div.id = `ejercicio-item-${ejercicioCounter}`;
+                            div.innerHTML = displayHtml;
+                            const btnEliminar = document.createElement('button');
+                            btnEliminar.type = 'button';
+                            btnEliminar.innerHTML = '<i class="ph ph-x"></i>';
+                            btnEliminar.className = 'btn-row btn-danger';
+                            const currentCounter = ejercicioCounter;
+                            btnEliminar.onclick = function () {
+                                document.getElementById(`ejercicio-item-${currentCounter}`).remove();
+                                document.getElementById(`hidden-inputs-${currentCounter}`).remove();
+                                if (listaAgregados.children.length === 0) {
+                                    listaAgregados.innerHTML = '<p style="color: var(--color-text-muted);">Aún no has añadido ejercicios.</p>';
+                                }
+                            };
+                            div.appendChild(btnEliminar);
+
+                            const hiddenDiv = document.createElement('div');
+                            hiddenDiv.id = `hidden-inputs-${ejercicioCounter}`;
+                            hiddenDiv.innerHTML = hiddenInputs;
+
+                            listaAgregados.appendChild(div);
+                            formPrincipal.appendChild(hiddenDiv);
+
+                            ejercicioCounter++;
+                        });
+
+                        // Scroll to the form
+                        formPrincipal.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
             const tipoSelect = document.getElementById('tipo-ejercicio');
             const ejercicioSelectContainer = document.getElementById('container-ejercicio-select');
             const ejercicioSelect = document.getElementById('ejercicio-select');
             const camposContainer = document.getElementById('campos-ejercicio');
             const btnAgregar = document.getElementById('btn-agregar-ejercicio');
-            const listaAgregados = document.getElementById('lista-ejercicios-agregados');
-            const formPrincipal = document.getElementById('form-rutina-principal');
-            let ejercicioCounter = 0;
-
+            
             tipoSelect.addEventListener('change', function () {
                 const tipo = this.value;
                 ejercicioSelect.innerHTML = '<option value="">Cargando...</option>';
@@ -295,5 +423,4 @@ $misRutinas = $rutinaBusiness->obtenerRutinasConEjercicios($_SESSION['usuario_id
         });
     </script>
 </body>
-
 </html>

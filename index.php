@@ -43,7 +43,6 @@ if ($tipoUsuario == 'cliente') {
     <main>
         <?php if ($tipoUsuario == 'admin'): ?>
             <section class="menu-section">
-                <h3><i class="ph-fill ph-squares-four"></i>Gestión General</h3>
                 <div class="menu-grid">
                     <a href='view/instructorView.php'><button><i class="ph-fill ph-users-three"></i>Instructores</button></a>
                     <a href='view/clienteView.php'><button><i class="ph-fill ph-users"></i>Clientes</button></a>
@@ -126,7 +125,7 @@ if ($tipoUsuario == 'cliente') {
                     <a href='view/progresoComparativaView.php'><button><i class="ph-fill ph-chart-line-up"></i>Comparar progreso</button></a>
                     <a href='view/horarioPersonalView.php'><button><i class="ph-fill ph-user-plus"></i>Instructor Personal</button></a>
                     <a href='view/horarioLibreView.php'><button><i class="ph-fill ph-barbell"></i>Uso Libre</button></a>
-                    <a href='view/ejercicioEquilibrioView.php'><button><i class="ph-fill ph-balance"></i>Ejercicios de Equilibrio</button></a>
+
                     <a href='view/instructorHorarioView.php'><button><i class="ph-fill ph-calendar"></i>Horarios de Instructores</button></a>
                     <a href='view/instructorClienteView.php'><button><i class="ph-fill ph-chalkboard-teacher"></i>Ver Instructores</button></a>
                     <a href='view/cuerpoZonaView.php'><button><i class="ph-fill ph-person-simple-run"></i>Zonas del Cuerpo</button></a>

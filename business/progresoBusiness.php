@@ -4,6 +4,7 @@ include_once __DIR__ . '/../data/ejercicioSubzonaData.php';
 include_once __DIR__ . '/../data/cuerpoZonaData.php';
 
 class ProgresoBusiness {
+    private const ZONA_TRABAJADA_THRESHOLD = 5;
     private $rutinaData;
     private $ejercicioSubzonaData;
     private $cuerpoZonaData;
@@ -197,11 +198,10 @@ class ProgresoBusiness {
         $resultado['label'] = 'Cobertura seleccionada';
         $resultado['mode'] = 'intensity';
 
-        $porcentajes = $resultado['porcentajes'];
+        $zonasStats = $resultado['zonas'];
         $zonasActivas = $this->cuerpoZonaData->getActiveTBCuerpoZona();
 
-        $trabajadas = [];
-        $faltantes = [];
+        $resumenZonas = [];
 
         foreach ($zonasActivas as $zona) {
             $subzonasRaw = $this->cuerpoZonaData->getCuerpoZonaSubZonaId($zona->getIdCuerpoZona());
@@ -212,39 +212,41 @@ class ProgresoBusiness {
             }
             $svgIds = array_values(array_unique($svgIds));
 
-            $porcentajeZona = 0;
+            $ejercicioCount = 0;
             foreach ($svgIds as $svgId) {
-                $porcentajeZona += $porcentajes[$svgId] ?? 0;
+                $ejercicioCount += $zonasStats[$svgId]['instancias'] ?? 0;
             }
-            $porcentajeZona = round(min($porcentajeZona, 100), 2);
+            $ejercicioCount = round($ejercicioCount);
+
+            $categoria = 'Pendiente';
+            if ($ejercicioCount > 0) {
+                if ($ejercicioCount <= 2) {
+                    $categoria = 'Bajo';
+                } elseif ($ejercicioCount <= 4) {
+                    $categoria = 'Medio';
+                } else {
+                    $categoria = 'Alto';
+                }
+            }
 
             $registro = [
                 'id' => $zona->getIdCuerpoZona(),
                 'nombre' => $zona->getNombreCuerpoZona(),
-                'porcentaje' => $porcentajeZona,
+                'score' => $ejercicioCount,
+                'categoria' => $categoria,
                 'componentes' => $svgIds
             ];
 
-            if ($porcentajeZona > 0) {
-                $trabajadas[] = $registro;
-            } else {
-                $faltantes[] = $registro;
-            }
+            $resumenZonas[] = $registro;
         }
 
-        usort($trabajadas, function ($a, $b) {
-            return $b['porcentaje'] <=> $a['porcentaje'];
-        });
-        usort($faltantes, function ($a, $b) {
-            return strcmp($a['nombre'], $b['nombre']);
+        usort($resumenZonas, function ($a, $b) {
+            return $b['score'] <=> $a['score'];
         });
 
         return [
             'dataset' => $resultado,
-            'resumenZonas' => [
-                'trabajadas' => $trabajadas,
-                'faltantes' => $faltantes
-            ]
+            'resumenZonas' => $resumenZonas
         ];
     }
 
@@ -378,17 +380,24 @@ class ProgresoBusiness {
             $totalVolumenReferencia = 1;
         }
 
-        $porcentajes = [];
+        $porcentajesCrudos = [];
         foreach ($svgStats as $zonaId => $stats) {
             $porcentaje = ($stats['valor'] / $totalVolumenReferencia) * 100;
-            $porcentajes[$zonaId] = $porcentaje;
-            $svgStats[$zonaId]['porcentaje'] = $porcentaje;
+            $porcentajesCrudos[$zonaId] = $porcentaje;
             $svgStats[$zonaId]['valor'] = round($stats['valor'], 2);
             $svgStats[$zonaId]['series'] = round($stats['series'], 2);
             $svgStats[$zonaId]['repeticiones'] = round($stats['repeticiones'], 2);
             $svgStats[$zonaId]['peso'] = round($stats['peso'], 2);
             $svgStats[$zonaId]['tiempo'] = round($stats['tiempo'], 2);
             $svgStats[$zonaId]['instancias'] = round($stats['instancias'], 2);
+        }
+
+        $porcentajes = $this->normalizarPorcentajes($porcentajesCrudos, 1);
+
+        foreach ($porcentajes as $zonaId => $porcentaje) {
+            if (isset($svgStats[$zonaId])) {
+                $svgStats[$zonaId]['porcentaje'] = $porcentaje;
+            }
         }
 
         $resultado['totalInstancias'] = (int) round(array_sum(array_column($svgStats, 'instancias')));
@@ -463,6 +472,63 @@ class ProgresoBusiness {
             'tiempo' => $totalTiempo,
             'volumen' => $volumen
         ];
+    }
+
+    private function normalizarPorcentajes(array $valores, int $precision = 1): array {
+        $valoresFiltrados = array_filter($valores, static function ($valor) {
+            return is_numeric($valor) && $valor > 0;
+        });
+
+        if (empty($valoresFiltrados)) {
+            return array_fill_keys(array_keys($valores), 0.0);
+        }
+
+        $suma = array_sum($valoresFiltrados);
+        if ($suma <= 0) {
+            return array_fill_keys(array_keys($valores), 0.0);
+        }
+
+        $factor = 10 ** max($precision, 0);
+        $porcentajes = [];
+        $residuos = [];
+
+        foreach ($valores as $clave => $valor) {
+            $bruto = max((float) $valor, 0.0);
+            $proporcion = ($bruto / $suma) * 100;
+            $escalado = $proporcion * $factor;
+            $entero = floor($escalado + 1e-9);
+            $porcentajes[$clave] = $entero / $factor;
+            $residuos[$clave] = $escalado - $entero;
+        }
+
+        $objetivo = (int) round(100 * $factor);
+        $actual = (int) round(array_sum($porcentajes) * $factor);
+        $diferencia = $objetivo - $actual;
+
+        if ($diferencia !== 0) {
+            $orden = array_keys($residuos);
+            usort($orden, function ($a, $b) use ($residuos, $diferencia) {
+                if ($diferencia > 0) {
+                    return $residuos[$b] <=> $residuos[$a];
+                }
+                return $residuos[$a] <=> $residuos[$b];
+            });
+
+            $paso = $diferencia > 0 ? 1 : -1;
+            $diferencia = abs($diferencia);
+            $totalElementos = max(count($orden), 1);
+
+            for ($i = 0; $i < $diferencia; $i++) {
+                $indice = $orden[$i % $totalElementos];
+                $porcentajes[$indice] = ($porcentajes[$indice] * $factor + $paso) / $factor;
+            }
+        }
+
+        foreach ($porcentajes as $clave => $valor) {
+            $porcentajes[$clave] = round($valor, $precision);
+        }
+
+        return $porcentajes;
     }
 
     private function resolveSvgTargets($subzonaId) {

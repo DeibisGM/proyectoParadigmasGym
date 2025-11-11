@@ -37,16 +37,49 @@ class RutinaBusiness
 
     public function obtenerRutinasConEjercicios($clienteId)
     {
-        $rutinas = $this->rutinaData->getRutinasPorCliente($clienteId);
+        return $this->obtenerRutinasCompletadasConEjercicios($clienteId);
+    }
+
+    public function obtenerRutinasSugeridasConEjercicios($clienteId)
+    {
+        $rutinas = $this->rutinaData->getRutinasSugeridasPorCliente($clienteId);
+        return $this->_obtenerRutinasConEjercicios($rutinas);
+    }
+
+    public function obtenerRutinasCompletadasConEjercicios($clienteId)
+    {
+        $rutinas = $this->rutinaData->getRutinasCompletadasPorCliente($clienteId);
+        return $this->_obtenerRutinasConEjercicios($rutinas);
+    }
+
+    private function _obtenerRutinasConEjercicios($rutinas)
+    {
+        $rutinasArray = [];
         foreach ($rutinas as $rutina) {
             $ejercicios = $this->rutinaData->getEjerciciosPorRutinaId($rutina->getId());
+            $ejerciciosArray = [];
             foreach ($ejercicios as $ejercicio) {
                 $nombre = $this->obtenerNombreEjercicio($ejercicio->getTipo(), $ejercicio->getEjercicioId());
-                $ejercicio->setNombreEjercicio($nombre);
+                $ejerciciosArray[] = [
+                    'nombreEjercicio' => $nombre,
+                    'tbejercicioid' => $ejercicio->getEjercicioId(),
+                    'tbrutinaejerciciotipo' => $ejercicio->getTipo(),
+                    'tbrutinaejercicioseries' => $ejercicio->getSeries(),
+                    'tbrutinaejerciciorepeticiones' => $ejercicio->getRepeticiones(),
+                    'tbrutinaejerciciopeso' => $ejercicio->getPeso(),
+                    'tbrutinaejerciciotiempo_seg' => $ejercicio->getTiempo(),
+                    'tbrutinaejerciciodescanso_seg' => $ejercicio->getDescanso(),
+                    'tbrutinaejerciciocomentario' => $ejercicio->getComentario(),
+                ];
             }
-            $rutina->setEjercicios($ejercicios);
+            $rutinasArray[] = [
+                'tbrutinaid' => $rutina->getId(),
+                'tbrutinafecha' => $rutina->getFecha(),
+                'tbrutinaobservacion' => $rutina->getObservacion(),
+                'ejercicios' => $ejerciciosArray,
+            ];
         }
-        return $rutinas;
+        return $rutinasArray;
     }
 
     private function obtenerNombreEjercicio($tipo, $id)

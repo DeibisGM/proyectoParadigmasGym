@@ -24,7 +24,18 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_ejercicios_por_tipo') {
     exit();
 }
 
-if (isset($_POST['create_rutina'])) {
+if (isset($_GET['action']) && $_GET['action'] === 'get_sugerencias_cliente') {
+    if (isset($_GET['cliente_id'])) {
+        include_once '../business/rutinaBusiness.php';
+        $rutinaBusiness = new RutinaBusiness();
+        $sugerencias = $rutinaBusiness->obtenerRutinasSugeridasConEjercicios($_GET['cliente_id']);
+        header('Content-Type: application/json');
+        echo json_encode($sugerencias);
+        exit();
+    }
+}
+
+if (isset($_POST['create_rutina']) || isset($_POST['sugerir_rutina'])) {
     $clienteId = ($tipoUsuario === 'cliente')
         ? (int) $_SESSION['usuario_id']
         : (int) ($_POST['cliente_id'] ?? 0);
@@ -41,7 +52,8 @@ if (isset($_POST['create_rutina'])) {
     $observacion = $_POST['observacion_rutina'];
     $ejerciciosData = $_POST['ejercicios'] ?? [];
 
-    $rutina = new Rutina(0, $clienteId, $fecha, $observacion);
+    $tipoRutina = ($tipoUsuario === 'cliente') ? 'completada' : 'sugerida';
+    $rutina = new Rutina(0, $clienteId, $fecha, $observacion, $tipoRutina);
     $ejercicios = [];
 
     foreach ($ejerciciosData as $ejData) {
@@ -78,6 +90,37 @@ if (isset($_POST['delete_rutina'])) {
     } else {
         header('Location: ../view/rutinaView.php?error=db_error');
     }
+    exit();
+}
+
+if (isset($_POST['completar_rutina'])) {
+    $clienteId = (int) $_SESSION['usuario_id'];
+    $fecha = $_POST['fecha_rutina'];
+    $observacion = $_POST['observacion_rutina'];
+    $ejerciciosData = $_POST['ejercicios'] ?? [];
+
+    $rutina = new Rutina(0, $clienteId, $fecha, $observacion, 'completada');
+    $ejercicios = [];
+
+    foreach ($ejerciciosData as $ejData) {
+        $ejercicio = new RutinaEjercicio(
+            0, 0,
+            $ejData['tipo'],
+            $ejData['id'],
+            $ejData['series'] ?? null,
+            $ejData['repeticiones'] ?? null,
+            $ejData['peso'] ?? null,
+            $ejData['tiempo'] ?? null,
+            $ejData['descanso'] ?? null,
+            $ejData['comentario'] ?? ''
+        );
+        $ejercicios[] = $ejercicio;
+    }
+    $rutina->setEjercicios($ejercicios);
+
+    $success = $rutinaBusiness->crearRutinaCompleta($rutina);
+
+    header('Location: ../view/rutinaView.php?' . ($success ? 'success=completed' : 'error=db_error'));
     exit();
 }
 ?>
