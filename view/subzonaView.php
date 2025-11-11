@@ -165,7 +165,7 @@ if (!$esAdminOInstructor) {
                                     </td>
                                     <td data-label="Imágenes">
                                         <div
-                                            style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+                                            style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; justify-content: center;">
                                             <?php
                                             $imagenes = $imageManager->getImagesByIds($parte->getSubzonaimaenid());
                                             if (empty($imagenes)) {

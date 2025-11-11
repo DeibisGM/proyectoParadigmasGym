@@ -28,7 +28,7 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
         <header>
             <a href="../index.php" class="back-button"><i class="ph ph-arrow-left"></i></a>
             <h2>Seguimiento integral de clientes</h2>
-            <p class="page-subtitle">Visualiza las zonas trabajadas por tus clientes y diseña nuevas rutinas equilibradas.</p>
+
         </header>
 
         <main class="analytics-layout">
@@ -46,33 +46,16 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="fecha-inicio">Fecha inicio</label>
-                        <input type="date" id="fecha-inicio" value="<?php echo $fechaInicioDefault; ?>">
-                    </div>
-                    <div class="form-group">
-                        <label for="fecha-fin">Fecha fin</label>
-                        <input type="date" id="fecha-fin" value="<?php echo $fechaFinDefault; ?>">
-                    </div>
-                </div>
-                <div class="analytics-actions">
-                    <button id="btn-analizar" class="btn-primary">
-                        <i class="ph ph-activity"></i> Analizar cobertura
-                    </button>
-                </div>
+
                 <div id="seguimiento-alert" class="analytics-alert" hidden></div>
             </section>
 
-            <section class="analytics-panel">
+            <section class="analytics-panel" id="resultado-cobertura" style="display: none;">
                 <h3><i class="ph ph-compass"></i> Resultado de cobertura corporal</h3>
                 <div class="coverage-summary">
                     <div>
-                        <h4>Zonas trabajadas</h4>
-                        <ul id="zonas-trabajadas" class="coverage-list"></ul>
-                    </div>
-                    <div>
-                        <h4>Zonas pendientes</h4>
-                        <ul id="zonas-faltantes" class="coverage-list"></ul>
+                        <h4>Resumen de Zonas</h4>
+                        <ul id="resumen-zonas" class="coverage-list"></ul>
                     </div>
                 </div>
                 <script>
@@ -80,29 +63,32 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                 </script>
                 <?php
                 $viewerId = 'seguimiento-body-viewer';
-                $viewerPeriodButtons = [
-                    ['key' => 'cobertura', 'label' => 'Cobertura']
-                ];
+                $viewerPeriodButtons = [];
                 $viewerDefaultPeriod = 'cobertura';
                 include __DIR__ . '/body_viewer.php';
                 ?>
             </section>
 
-            <section class="analytics-panel">
-                <h3><i class="ph ph-note-pencil"></i> Crear rutina personalizada</h3>
+            <section class="analytics-panel" id="sugerencias-anteriores" style="display: none;">
+                <h3><i class="ph ph-list-checks"></i> Sugerencias Anteriores</h3>
+                <div id="lista-sugerencias"></div>
+            </section>
+
+            <section class="analytics-panel" id="crear-rutina" style="display: none;">
+                <h3><i class="ph ph-note-pencil"></i> Sugerir Nueva Rutina</h3>
                 <p class="text-muted">Diseña una rutina basada en las zonas que requieren atención. El cliente verá esta rutina en su panel personal.</p>
                 <form action="../action/rutinaAction.php" method="POST" id="form-planificador">
-                    <input type="hidden" name="create_rutina" value="1">
+                    <input type="hidden" name="sugerir_rutina" value="1">
                     <input type="hidden" name="cliente_id" id="rutina-cliente-id" value="">
                     <div class="form-grid-container">
                         <div class="form-group">
-                            <label for="fecha-rutina">Fecha</label>
+                            <label for="fecha-rutina">Fecha de Sugerencia</label>
                             <input type="date" id="fecha-rutina" name="fecha_rutina" value="<?php echo $fechaFinDefault; ?>" required>
                         </div>
-                        <div class="form-group">
-                            <label for="observacion-rutina">Observaciones generales</label>
-                            <textarea id="observacion-rutina" name="observacion_rutina" placeholder="Notas importantes o indicaciones especiales"></textarea>
-                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="observacion-rutina" style="margin-top: 1.5rem;">Observaciones generales</label>
+                        <textarea id="observacion-rutina" name="observacion_rutina" placeholder="Notas importantes o indicaciones especiales" style="margin-bottom: 1.5rem;"></textarea>
                     </div>
 
                     <div class="planner-block">
@@ -119,12 +105,12 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                                 </select>
                             </div>
                             <div class="form-group" id="container-ejercicio-select" style="display:none;">
-                                <label for="ejercicio-select">Ejercicio</label>
+                                <label for="ejercicio-select" style="margin-bottom: 0.5rem;">Ejercicio</label>
                                 <select id="ejercicio-select"></select>
                             </div>
                         </div>
                         <div id="campos-ejercicio" class="planner-fields"></div>
-                        <button type="button" id="btn-agregar-ejercicio" class="btn-secondary">
+                        <button type="button" id="btn-agregar-ejercicio" class="btn-secondary" style="margin-top: 1rem;">
                             <i class="ph ph-plus"></i> Agregar a la rutina
                         </button>
                     </div>
@@ -137,7 +123,7 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                     </div>
 
                     <button type="submit" class="btn-primary">
-                        <i class="ph ph-floppy-disk"></i> Guardar rutina para el cliente
+                        <i class="ph ph-floppy-disk"></i> Sugerir Rutina al Cliente
                     </button>
                 </form>
             </section>
@@ -145,29 +131,87 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
     </div>
 
     <script>
+        document.getElementById('fecha-rutina').addEventListener('click', function() {
+            try {
+                this.showPicker();
+            } catch (error) {
+                console.error("showPicker() is not supported by this browser.");
+            }
+        });
+
         const clienteSelect = document.getElementById('cliente-select');
-        const fechaInicioInput = document.getElementById('fecha-inicio');
-        const fechaFinInput = document.getElementById('fecha-fin');
-        const btnAnalizar = document.getElementById('btn-analizar');
         const alertSeguimiento = document.getElementById('seguimiento-alert');
-        const zonasTrabajadasList = document.getElementById('zonas-trabajadas');
-        const zonasFaltantesList = document.getElementById('zonas-faltantes');
+        const resumenZonasList = document.getElementById('resumen-zonas');
         const rutinaClienteInput = document.getElementById('rutina-cliente-id');
         const formPlanificador = document.getElementById('form-planificador');
+        const resultadoCoberturaSection = document.getElementById('resultado-cobertura');
+        const crearRutinaSection = document.getElementById('crear-rutina');
+        const sugerenciasAnterioresSection = document.getElementById('sugerencias-anteriores');
+        const listaSugerencias = document.getElementById('lista-sugerencias');
 
-        function formatPercentage(value, decimals = 1) {
-            const numeric = Number(value);
-            if (!Number.isFinite(numeric)) {
-                return '0%';
+        async function cargarSugerencias() {
+            const clienteId = clienteSelect.value;
+            if (!clienteId) {
+                sugerenciasAnterioresSection.style.display = 'none';
+                return;
             }
-            const factor = 10 ** Math.max(decimals, 0);
-            const rounded = Math.round(Math.max(numeric, 0) * factor) / factor;
-            const formatted = rounded
-                .toFixed(decimals)
-                .replace(/(\.\d*?[1-9])0+$/g, '$1')
-                .replace(/\.0+$/g, '')
-                .replace(/\.$/g, '');
-            return `${formatted}%`;
+
+            try {
+                const params = new URLSearchParams({
+                    action: 'get_sugerencias_cliente',
+                    cliente_id: clienteId
+                });
+                const response = await fetch(`../action/rutinaAction.php?${params.toString()}`);
+                const data = await response.json();
+
+                listaSugerencias.innerHTML = '';
+                if (data.length > 0) {
+                    const table = document.createElement('table');
+                    table.className = 'table-clients';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Observaciones</th>
+                                <th>Ejercicios</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    `;
+                    const tbody = table.querySelector('tbody');
+                    data.forEach(rutina => {
+                        const tr = document.createElement('tr');
+                        let ejerciciosHtml = '<ul style="padding-left: 1rem; margin: 0;">';
+                        rutina.ejercicios.forEach(ej => {
+                            ejerciciosHtml += `<li><strong>${ej.nombreEjercicio}</strong></li>`;
+                        });
+                        ejerciciosHtml += '</ul>';
+
+                        tr.innerHTML = `
+                            <td data-label="Fecha">${new Date(rutina.tbrutinafecha).toLocaleDateString()}</td>
+                            <td data-label="Observaciones">${rutina.tbrutinaobservacion || '-'}</td>
+                            <td data-label="Ejercicios">${ejerciciosHtml}</td>
+                            <td data-label="Acciones" class="actions">
+                                <form action="../action/rutinaAction.php" method="POST" onsubmit="return confirm('¿Eliminar esta sugerencia?');" style="margin: 0;">
+                                    <input type="hidden" name="delete_rutina" value="1">
+                                    <input type="hidden" name="rutina_id" value="${rutina.tbrutinaid}">
+                                    <button type="submit" class="btn-row btn-danger"><i class="ph ph-trash"></i></button>
+                                </form>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    listaSugerencias.appendChild(table);
+                    sugerenciasAnterioresSection.style.display = 'block';
+                } else {
+                    sugerenciasAnterioresSection.style.display = 'none';
+                }
+            } catch (error) {
+                console.error(error);
+                setAlert('Ocurrió un error al cargar las sugerencias.', 'error');
+            }
         }
 
         function setAlert(message, type = 'info') {
@@ -184,8 +228,7 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
         }
 
         function resetCoverageLists() {
-            zonasTrabajadasList.innerHTML = '<li class="text-muted">Sin datos</li>';
-            zonasFaltantesList.innerHTML = '<li class="text-muted">Sin datos</li>';
+            resumenZonasList.innerHTML = '<li class="text-muted">Sin datos</li>';
         }
 
         function renderZonaList(container, zonas, emptyMessage) {
@@ -200,10 +243,12 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
             }
             zonas.forEach(zona => {
                 const item = document.createElement('li');
+                item.className = 'coverage-list-item';
+                item.classList.add(`is-categoria-${zona.categoria.toLowerCase()}`);
                 const nombre = document.createElement('span');
                 nombre.textContent = zona.nombre;
                 const valor = document.createElement('span');
-                valor.textContent = formatPercentage(zona.porcentaje, 1);
+                valor.textContent = `${zona.score} ejercicios (${zona.categoria})`;
                 item.appendChild(nombre);
                 item.appendChild(valor);
                 container.appendChild(item);
@@ -214,17 +259,20 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
             clearAlert();
             const clienteId = clienteSelect.value;
             if (!clienteId) {
-                setAlert('Selecciona un cliente para analizar la cobertura.', 'warning');
+                resultadoCoberturaSection.style.display = 'none';
+                crearRutinaSection.style.display = 'none';
+                sugerenciasAnterioresSection.style.display = 'none';
                 return;
             }
             rutinaClienteInput.value = clienteId;
 
-            const inicio = fechaInicioInput.value;
-            const fin = fechaFinInput.value;
-            if (!inicio || !fin) {
-                setAlert('Selecciona un rango de fechas válido.', 'warning');
-                return;
-            }
+            const finDate = new Date();
+            const inicioDate = new Date();
+            inicioDate.setDate(finDate.getDate() - 30);
+
+            const formatDate = (date) => date.toISOString().split('T')[0];
+            const inicio = formatDate(inicioDate);
+            const fin = formatDate(finDate);
 
             try {
                 const params = new URLSearchParams({
@@ -235,14 +283,17 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                 });
                 const response = await fetch(`../action/progresoAction.php?${params.toString()}`);
                 const data = await response.json();
+
+                resultadoCoberturaSection.style.display = 'block';
+                crearRutinaSection.style.display = 'block';
+
                 if (!data.dataset) {
                     setAlert('No se pudieron recuperar los datos del cliente.', 'error');
                     resetCoverageLists();
                     return;
                 }
 
-                renderZonaList(zonasTrabajadasList, data.resumenZonas?.trabajadas || [], 'Sin registros en el rango seleccionado');
-                renderZonaList(zonasFaltantesList, data.resumenZonas?.faltantes || [], 'Todas las zonas tienen actividad');
+                renderZonaList(resumenZonasList, data.resumenZonas || [], 'Sin registros en el rango seleccionado');
 
                 if (window.bodyViewer) {
                     window.bodyViewer.setDataset({
@@ -254,12 +305,11 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                 setAlert('Ocurrió un error al analizar la cobertura. Intenta nuevamente.', 'error');
                 resetCoverageLists();
             }
+            
+            cargarSugerencias();
         }
 
-        btnAnalizar.addEventListener('click', cargarCobertura);
-        clienteSelect.addEventListener('change', () => {
-            rutinaClienteInput.value = clienteSelect.value || '';
-        });
+        clienteSelect.addEventListener('change', cargarCobertura);
 
         // Inicializar estado visual del planificador de rutinas
         (function inicializarPlanificador() {
@@ -307,15 +357,15 @@ $fechaFinDefault = $fechaHoy->format('Y-m-d');
                     fieldsHtml += `
                         <div class="form-group"><label>Series:</label><input type="number" id="temp-series" min="1"></div>
                         <div class="form-group"><label>Repeticiones:</label><input type="number" id="temp-repeticiones" min="1"></div>
-                        <div class="form-group"><label>Tiempo (seg):</label><input type="number" id="temp-tiempo" min="0"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Tiempo (seg):</label><input type="number" id="temp-tiempo" min="0"></div>
                     `;
                 } else {
                     fieldsHtml += `
-                        <div class="form-group"><label>Series:</label><input type="number" id="temp-series" min="1"></div>
-                        <div class="form-group"><label>Tiempo (seg):</label><input type="number" id="temp-tiempo" min="0"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Series:</label><input type="number" id="temp-series" min="1"></div>
+                        <div class="form-group" style="grid-column: span 2;"><label>Tiempo (seg):</label><input type="number" id="temp-tiempo" min="0"></div>
                     `;
                 }
-                fieldsHtml += '<div class="form-group"><label>Comentario:</label><textarea id="temp-comentario" rows="2" placeholder="Notas para este ejercicio"></textarea></div>';
+                fieldsHtml += '<div class="form-group" style="grid-column: 1 / -1;"><label>Comentario:</label><textarea id="temp-comentario" rows="2" placeholder="Notas para este ejercicio"></textarea></div>';
                 fieldsHtml += '</div>';
                 camposContainer.innerHTML = fieldsHtml;
             });

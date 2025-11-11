@@ -4,6 +4,7 @@ include_once __DIR__ . '/../data/ejercicioSubzonaData.php';
 include_once __DIR__ . '/../data/cuerpoZonaData.php';
 
 class ProgresoBusiness {
+    private const ZONA_TRABAJADA_THRESHOLD = 5;
     private $rutinaData;
     private $ejercicioSubzonaData;
     private $cuerpoZonaData;
@@ -197,11 +198,10 @@ class ProgresoBusiness {
         $resultado['label'] = 'Cobertura seleccionada';
         $resultado['mode'] = 'intensity';
 
-        $porcentajes = $resultado['porcentajes'];
+        $zonasStats = $resultado['zonas'];
         $zonasActivas = $this->cuerpoZonaData->getActiveTBCuerpoZona();
 
-        $trabajadas = [];
-        $faltantes = [];
+        $resumenZonas = [];
 
         foreach ($zonasActivas as $zona) {
             $subzonasRaw = $this->cuerpoZonaData->getCuerpoZonaSubZonaId($zona->getIdCuerpoZona());
@@ -212,39 +212,41 @@ class ProgresoBusiness {
             }
             $svgIds = array_values(array_unique($svgIds));
 
-            $porcentajeZona = 0;
+            $ejercicioCount = 0;
             foreach ($svgIds as $svgId) {
-                $porcentajeZona += $porcentajes[$svgId] ?? 0;
+                $ejercicioCount += $zonasStats[$svgId]['instancias'] ?? 0;
             }
-            $porcentajeZona = round(min($porcentajeZona, 100), 2);
+            $ejercicioCount = round($ejercicioCount);
+
+            $categoria = 'Pendiente';
+            if ($ejercicioCount > 0) {
+                if ($ejercicioCount <= 2) {
+                    $categoria = 'Bajo';
+                } elseif ($ejercicioCount <= 4) {
+                    $categoria = 'Medio';
+                } else {
+                    $categoria = 'Alto';
+                }
+            }
 
             $registro = [
                 'id' => $zona->getIdCuerpoZona(),
                 'nombre' => $zona->getNombreCuerpoZona(),
-                'porcentaje' => $porcentajeZona,
+                'score' => $ejercicioCount,
+                'categoria' => $categoria,
                 'componentes' => $svgIds
             ];
 
-            if ($porcentajeZona > 0) {
-                $trabajadas[] = $registro;
-            } else {
-                $faltantes[] = $registro;
-            }
+            $resumenZonas[] = $registro;
         }
 
-        usort($trabajadas, function ($a, $b) {
-            return $b['porcentaje'] <=> $a['porcentaje'];
-        });
-        usort($faltantes, function ($a, $b) {
-            return strcmp($a['nombre'], $b['nombre']);
+        usort($resumenZonas, function ($a, $b) {
+            return $b['score'] <=> $a['score'];
         });
 
         return [
             'dataset' => $resultado,
-            'resumenZonas' => [
-                'trabajadas' => $trabajadas,
-                'faltantes' => $faltantes
-            ]
+            'resumenZonas' => $resumenZonas
         ];
     }
 

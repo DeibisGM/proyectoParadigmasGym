@@ -9,12 +9,13 @@ class RutinaData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $query = "INSERT INTO tbrutina (tbclienteid, tbrutinafecha, tbrutinaobservacion) VALUES (?, ?, ?)";
+        $query = "INSERT INTO tbrutina (tbclienteid, tbrutinafecha, tbrutinaobservacion, tbrutinatipo) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $query);
         $clienteId = $rutina->getClienteId();
         $fecha = $rutina->getFecha();
         $observacion = $rutina->getObservacion();
-        mysqli_stmt_bind_param($stmt, "iss", $clienteId, $fecha, $observacion);
+        $tipo = $rutina->getTipo();
+        mysqli_stmt_bind_param($stmt, "isss", $clienteId, $fecha, $observacion, $tipo);
         $result = mysqli_stmt_execute($stmt);
         $id = mysqli_insert_id($conn);
         mysqli_close($conn);
@@ -53,7 +54,34 @@ class RutinaData extends Data
         $result = mysqli_stmt_get_result($stmt);
         $rutinas = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $rutinas[] = new Rutina($row['tbrutinaid'], $row['tbclienteid'], $row['tbrutinafecha'], $row['tbrutinaobservacion']);
+            $rutinas[] = new Rutina($row['tbrutinaid'], $row['tbclienteid'], $row['tbrutinafecha'], $row['tbrutinaobservacion'], $row['tbrutinatipo']);
+        }
+        mysqli_close($conn);
+        return $rutinas;
+    }
+
+    public function getRutinasSugeridasPorCliente($clienteId)
+    {
+        return $this->getRutinasPorClienteYTipo($clienteId, 'sugerida');
+    }
+
+    public function getRutinasCompletadasPorCliente($clienteId)
+    {
+        return $this->getRutinasPorClienteYTipo($clienteId, 'completada');
+    }
+
+    private function getRutinasPorClienteYTipo($clienteId, $tipo)
+    {
+        $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
+        $conn->set_charset('utf8');
+        $query = "SELECT * FROM tbrutina WHERE tbclienteid = ? AND tbrutinatipo = ? ORDER BY tbrutinafecha DESC";
+        $stmt = mysqli_prepare($conn, $query);
+        mysqli_stmt_bind_param($stmt, "is", $clienteId, $tipo);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $rutinas = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $rutinas[] = new Rutina($row['tbrutinaid'], $row['tbclienteid'], $row['tbrutinafecha'], $row['tbrutinaobservacion'], $row['tbrutinatipo']);
         }
         mysqli_close($conn);
         return $rutinas;
@@ -106,14 +134,14 @@ class RutinaData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $query = "SELECT * FROM tbrutina WHERE tbclienteid = ? AND tbrutinafecha BETWEEN ? AND ? ORDER BY tbrutinafecha DESC";
+        $query = "SELECT * FROM tbrutina WHERE tbclienteid = ? AND tbrutinafecha BETWEEN ? AND ? AND tbrutinatipo = 'completada' ORDER BY tbrutinafecha DESC";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "iss", $clienteId, $fechaInicio, $fechaFin);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $rutinas = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $rutinas[] = new Rutina($row['tbrutinaid'], $row['tbclienteid'], $row['tbrutinafecha'], $row['tbrutinaobservacion']);
+            $rutinas[] = new Rutina($row['tbrutinaid'], $row['tbclienteid'], $row['tbrutinafecha'], $row['tbrutinaobservacion'], $row['tbrutinatipo']);
         }
         mysqli_close($conn);
         return $rutinas;
@@ -123,7 +151,7 @@ class RutinaData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $query = "SELECT MAX(tbrutinafecha) AS ultima_fecha FROM tbrutina WHERE tbclienteid = ?";
+        $query = "SELECT MAX(tbrutinafecha) AS ultima_fecha FROM tbrutina WHERE tbclienteid = ? AND tbrutinatipo = 'completada'";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "i", $clienteId);
         mysqli_stmt_execute($stmt);
@@ -141,7 +169,7 @@ class RutinaData extends Data
     {
         $conn = mysqli_connect($this->server, $this->user, $this->password, $this->db, $this->port);
         $conn->set_charset('utf8');
-        $query = "SELECT MIN(tbrutinafecha) AS primera_fecha FROM tbrutina WHERE tbclienteid = ?";
+        $query = "SELECT MIN(tbrutinafecha) AS primera_fecha FROM tbrutina WHERE tbclienteid = ? AND tbrutinatipo = 'completada'";
         $stmt = mysqli_prepare($conn, $query);
         mysqli_stmt_bind_param($stmt, "i", $clienteId);
         mysqli_stmt_execute($stmt);

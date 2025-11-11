@@ -40,10 +40,12 @@ if (isset($_SESSION['usuario_id']) && isset($_SESSION['tipo_usuario'])) {
                     <label for="correo"><i class="ph-fill ph-envelope"></i>Correo electrónico</label>
                     <input type="email" id="correo" name="correo" placeholder="ejemplo@correo.com" required>
                 </div>
-                <div class="form-group password-group">
+                <div class="form-group">
                     <label for="contrasena"><i class="ph-fill ph-key"></i>Contraseña</label>
-                    <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required>
-                    <i class="ph ph-eye" id="togglePassword"></i>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required>
+                        <i class="ph ph-eye" id="togglePassword"></i>
+                    </div>
                 </div>
                 <div class="form-group">
                     <button type="submit" name="login" class="btn-primary"><i class="ph-fill ph-sign-in"></i>Iniciar Sesión</button>
