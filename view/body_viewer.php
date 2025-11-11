@@ -182,8 +182,8 @@ if (!$viewerHasDelta) {
         }
 
         const rootStyles = getComputedStyle(document.documentElement);
-        const colorSuccess = (rootStyles.getPropertyValue('--color-success') || '#3CCB73').trim() || '#3CCB73';
-        const colorError = (rootStyles.getPropertyValue('--color-error') || '#FF5A5F').trim() || '#FF5A5F';
+        const colorSuccess = (rootStyles.getPropertyValue('--color-success') || '#0A6847').trim() || '#0A6847'; // Vibrant Green
+        const colorError = (rootStyles.getPropertyValue('--color-error') || '#FF1744').trim() || '#FF1744'; // Vibrant Red
         const colorNeutral = (rootStyles.getPropertyValue('--color-body-neutral') || '#9CA3AF').trim() || '#9CA3AF';
         const inactiveFill = (rootStyles.getPropertyValue('--color-muscle-inactive') || '#3a3a3a').trim() || '#3a3a3a';
         const defaultStrokeColor = (rootStyles.getPropertyValue('--color-body-stroke')
@@ -430,11 +430,9 @@ if (!$viewerHasDelta) {
             const baseHsl = colorStringToHsl(sourceColor) || defaultHighlightHsl;
 
             if (overrideColor) {
-                const saturation = clamp(baseHsl.s * (0.9 + ratio * 0.25), 58, 100);
-                const lightness = clamp(38 + ratio * 34, 42, 85);
-                const fill = hslToCss(baseHsl.h, saturation, lightness);
-                const glowLightness = clamp(lightness + 14, 48, 94);
-                const glow = hslToCssAlpha(baseHsl.h, saturation, glowLightness, clamp(0.45 + ratio * 0.4, 0.45, 0.92));
+                const fill = overrideColor;
+                const glowLightness = clamp(baseHsl.l + 5, 40, 80);
+                const glow = hslToCssAlpha(baseHsl.h, baseHsl.s, glowLightness, clamp(0.3 + ratio * 0.3, 0.3, 0.6));
                 const swatch = storedBase || fallbackBase;
                 return { fill, glow, swatch, base: fallbackBase };
             }
@@ -511,8 +509,18 @@ if (!$viewerHasDelta) {
             const pageX = event.pageX || (event.clientX + window.scrollX);
             const pageY = event.pageY || (event.clientY + window.scrollY);
 
-            tooltip.style.left = `${pageX + offsetX}px`;
-            tooltip.style.top = `${pageY + offsetY}px`;
+            const containerRect = viewerRoot.getBoundingClientRect();
+            const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            const containerLeft = containerRect.left + scrollLeft;
+            const containerTop = containerRect.top + scrollTop;
+
+            const tooltipX = pageX - containerLeft + offsetX;
+            const tooltipY = pageY - containerTop + offsetY;
+
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.top = `${tooltipY}px`;
         }
 
         function hideTooltip() {
@@ -849,6 +857,22 @@ if (!$viewerHasDelta) {
             const porcentajes = dataset.porcentajes || {};
             const mode = dataset.mode || dataset.modo || 'intensity';
             const deltaMode = mode === 'delta';
+
+            const bodyFront = viewerContainer.querySelector('#body_front');
+            const bodyBack = viewerContainer.querySelector('#body_back');
+
+            if (deltaMode) {
+                if (bodyFront) applyStylesToGroup(bodyFront, { fill: '#3f3f46' });
+                if (bodyBack) applyStylesToGroup(bodyBack, { fill: '#3f3f46' });
+            } else {
+                if (bodyFront && bodyFront.dataset.baseColor) {
+                    applyStylesToGroup(bodyFront, { fill: bodyFront.dataset.baseColor });
+                }
+                if (bodyBack && bodyBack.dataset.baseColor) {
+                    applyStylesToGroup(bodyBack, { fill: bodyBack.dataset.baseColor });
+                }
+            }
+
             const valores = Object.values(porcentajes).map(value => Number(value) || 0);
             const maxPorcentaje = valores.length
                 ? Math.max(...valores.map(value => deltaMode ? Math.abs(value) : value))
@@ -856,6 +880,21 @@ if (!$viewerHasDelta) {
 
             hideTooltip();
             resetBodyParts();
+
+            if (deltaMode) {
+                bodyParts.forEach(part => {
+                    if (!porcentajes.hasOwnProperty(part.id)) {
+                        applyStylesToGroup(part, {
+                            fill: '#27272a',
+                            stroke: '#52525b',
+                            strokeWidth: '1',
+                            strokeDasharray: '2 4'
+                        });
+                        part.style.opacity = '1';
+                        part.style.filter = 'none';
+                    }
+                });
+            }
 
             if (maxPorcentaje > 0) {
                 Object.entries(porcentajes).forEach(([parteId, porcentaje]) => {
@@ -889,20 +928,20 @@ if (!$viewerHasDelta) {
                             el.dataset.trend = trend;
                             const strokeStyles = {};
                             if (trend === 'positive') {
-                                strokeStyles.stroke = colorSuccess;
-                                strokeStyles.strokeWidth = '3';
+                                strokeStyles.stroke = '#442a0c';
+                                strokeStyles.strokeWidth = '2';
                                 strokeStyles.strokeDasharray = '';
-                                strokeStyles.strokeOpacity = '0.85';
+                                strokeStyles.strokeOpacity = '1';
                             } else if (trend === 'negative') {
-                                strokeStyles.stroke = colorError;
-                                strokeStyles.strokeWidth = '3';
+                                strokeStyles.stroke = '#442a0c';
+                                strokeStyles.strokeWidth = '2';
                                 strokeStyles.strokeDasharray = '10 6';
-                                strokeStyles.strokeOpacity = '0.9';
+                                strokeStyles.strokeOpacity = '1';
                             } else {
-                                strokeStyles.stroke = colorNeutral;
-                                strokeStyles.strokeWidth = '2.5';
+                                strokeStyles.stroke = '#442a0c';
+                                strokeStyles.strokeWidth = '2';
                                 strokeStyles.strokeDasharray = '6 6';
-                                strokeStyles.strokeOpacity = '0.75';
+                                strokeStyles.strokeOpacity = '1';
                             }
                             applyStylesToGroup(el, {
                                 fill: palette.fill,
@@ -921,11 +960,11 @@ if (!$viewerHasDelta) {
                             restoreStrokeAttributes(el);
                         }
                         const opacityValue = deltaMode
-                            ? Math.min(1, 0.72 + intensidadRelativa * 0.28)
+                            ? Math.min(1, 0.4 + intensidadRelativa * 0.6)
                             : Math.min(0.95, 0.38 + intensidadRelativa * 0.5);
                         el.style.opacity = opacityValue.toFixed(2);
                         if (deltaMode) {
-                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1.18 + intensidadRelativa * 0.35).toFixed(2)}) brightness(${(1 + intensidadRelativa * 0.2).toFixed(2)})`;
+                            el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1.0 + intensidadRelativa * 0.2).toFixed(2)})`;
                         } else {
                             el.style.filter = `drop-shadow(0 0 ${glowRadius}px ${palette.glow}) saturate(${(1 + intensidadRelativa * 0.4).toFixed(2)}) brightness(${(0.95 + intensidadRelativa * 0.18).toFixed(2)})`;
                         }
@@ -1013,15 +1052,50 @@ if (!$viewerHasDelta) {
                 });
                 restoreStrokeAttributes(part);
             });
+
+            const bodyFront = viewerContainer.querySelector('#body_front');
+            if (bodyFront) {
+                const baseColor = resolveBaseColor(bodyFront);
+                if (baseColor) {
+                    bodyFront.dataset.baseColor = baseColor;
+                }
+            }
+            const bodyBack = viewerContainer.querySelector('#body_back');
+            if (bodyBack) {
+                const baseColor = resolveBaseColor(bodyBack);
+                if (baseColor) {
+                    bodyBack.dataset.baseColor = baseColor;
+                }
+            }
         }
 
         prepareBodyParts();
+
+        function applyPartHover(part) {
+            if (!part || !part.classList.contains('active')) return;
+            if (!part.hasAttribute('data-original-filter')) {
+                part.setAttribute('data-original-filter', part.style.filter || '');
+            }
+            part.style.filter = (part.getAttribute('data-original-filter') || '') + ' brightness(1.4)';
+        }
+
+        function clearPartHover(part) {
+            if (!part || !part.hasAttribute('data-original-filter')) return;
+            part.style.filter = part.getAttribute('data-original-filter');
+            part.removeAttribute('data-original-filter');
+        }
 
         function handlePointerOver(event) {
             const targetPart = event.target.closest('.body-part');
             if (!targetPart || !viewerContainer.contains(targetPart)) {
                 return;
             }
+            const currentlyHovered = viewerContainer.querySelector('[data-original-filter]');
+            if (currentlyHovered && currentlyHovered !== targetPart) {
+                clearPartHover(currentlyHovered);
+            }
+
+            applyPartHover(targetPart);
             showTooltip(targetPart, event);
         }
 
@@ -1033,6 +1107,10 @@ if (!$viewerHasDelta) {
             const part = targetPart || activeTooltipPart;
             if (!part || !viewerContainer.contains(part)) {
                 hideTooltip();
+                const currentlyHovered = viewerContainer.querySelector('[data-original-filter]');
+                if (currentlyHovered) {
+                    clearPartHover(currentlyHovered);
+                }
                 return;
             }
             updateTooltip(part, event);
@@ -1045,12 +1123,19 @@ if (!$viewerHasDelta) {
             const currentPart = event.target.closest('.body-part');
             if (!currentPart) {
                 hideTooltip();
+                const currentlyHovered = viewerContainer.querySelector('[data-original-filter]');
+                if (currentlyHovered) {
+                    clearPartHover(currentlyHovered);
+                }
                 return;
             }
             const relatedElement = event.relatedTarget;
             if (relatedElement && currentPart.contains(relatedElement)) {
                 return;
             }
+
+            clearPartHover(currentPart);
+
             const nextPart = relatedElement ? relatedElement.closest('.body-part') : null;
             if (nextPart && viewerContainer.contains(nextPart)) {
                 return;
@@ -1061,8 +1146,20 @@ if (!$viewerHasDelta) {
         viewerContainer.addEventListener('pointerover', handlePointerOver);
         viewerContainer.addEventListener('pointermove', handlePointerMove);
         viewerContainer.addEventListener('pointerout', handlePointerOut);
-        viewerContainer.addEventListener('pointerleave', hideTooltip);
-        viewerContainer.addEventListener('pointercancel', hideTooltip);
+        viewerContainer.addEventListener('pointerleave', () => {
+            hideTooltip();
+            const currentlyHovered = viewerContainer.querySelector('[data-original-filter]');
+            if (currentlyHovered) {
+                clearPartHover(currentlyHovered);
+            }
+        });
+        viewerContainer.addEventListener('pointercancel', () => {
+            hideTooltip();
+            const currentlyHovered = viewerContainer.querySelector('[data-original-filter]');
+            if (currentlyHovered) {
+                clearPartHover(currentlyHovered);
+            }
+        });
 
         filterButtons.forEach(button => {
             button.addEventListener('click', () => {
